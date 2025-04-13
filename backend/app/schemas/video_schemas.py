@@ -2,8 +2,9 @@
 Video-related schemas for the AI Growth Operator API.
 """
 
-from typing import List, Dict, Any, Optional
-from pydantic import BaseModel
+from typing import List, Dict, Any, Optional, Union
+from pydantic import BaseModel, AnyHttpUrl, Field
+
 
 class VideoPromptRequest(BaseModel):
     """Request model for video prompt generation"""
