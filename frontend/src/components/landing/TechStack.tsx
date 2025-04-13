@@ -7,12 +7,14 @@ type TechItem = {
   name: string;
   description: string;
   icon: React.ReactNode;
+  color: string;
 };
 
 const techStack: TechItem[] = [
   {
     name: "Python",
     description: "Core backend language used for AI processing, data handling, and system automation.",
+    color: "bg-blue-500",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
         <path d="M12 0C5.9 0 6.2 2.7 6.2 2.7V5.5H12.1V6.1H3.9C3.9 6.1 0 5.7 0 12C0 18.3 3.4 18 3.4 18H5.4V15C5.4 15 5.3 11.6 8.9 11.6H14.9C14.9 11.6 18 11.7 18 8.8V3.6C18 3.6 18.5 0 12 0ZM8.8 1.9C9.3 1.9 9.7 2.3 9.7 2.8C9.7 3.3 9.3 3.7 8.8 3.7C8.3 3.7 7.9 3.3 7.9 2.8C7.9 2.3 8.3 1.9 8.8 1.9ZM24 11.9C24 5.6 20.6 5.9 20.6 5.9H18.6V9C18.6 9 18.7 12.4 15.1 12.4H9.1C9.1 12.4 6 12.3 6 15.2V20.4C6 20.4 5.5 24 12 24C18.1 24 17.8 21.3 17.8 21.3V18.5H12V17.9H20.1C20.1 17.9 24 18.3 24 11.9ZM15.2 22.1C14.7 22.1 14.3 21.7 14.3 21.2C14.3 20.7 14.7 20.3 15.2 20.3C15.7 20.3 16.1 20.7 16.1 21.2C16.1 21.7 15.7 22.1 15.2 22.1Z" fill="#3776AB"/>
@@ -22,6 +24,7 @@ const techStack: TechItem[] = [
   {
     name: "Luma AI",
     description: "Advanced AI video generation platform that creates high-quality videos from text prompts.",
+    color: "bg-gray-800",
     icon: (
       <svg viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="w-10 h-10">
         <rect width="24" height="24" rx="12" fill="#000000"/>
@@ -33,6 +36,7 @@ const techStack: TechItem[] = [
   {
     name: "Next.js",
     description: "React framework for building server-side rendered and static web applications.",
+    color: "bg-black",
     icon: (
       <svg className="w-10 h-10" viewBox="0 0 180 180" fill="none" xmlns="http://www.w3.org/2000/svg">
         <mask id="mask0_408_139" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="180" height="180">
@@ -59,6 +63,7 @@ const techStack: TechItem[] = [
   {
     name: "TypeScript",
     description: "Strongly typed programming language that builds on JavaScript for safer code.",
+    color: "bg-blue-600",
     icon: (
       <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" fill="#3178C6"/>
@@ -70,6 +75,7 @@ const techStack: TechItem[] = [
   {
     name: "TailwindCSS",
     description: "Utility-first CSS framework for rapid UI development with responsive design.",
+    color: "bg-blue-900",
     icon: (
       <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" fill="#0F172A"/>
@@ -80,6 +86,7 @@ const techStack: TechItem[] = [
   {
     name: "Framer Motion",
     description: "Production-ready motion library for React that makes animations and interactions easy.",
+    color: "bg-blue-600",
     icon: (
       <svg className="w-10 h-10" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <rect width="24" height="24" rx="2" fill="#0055FF"/>
@@ -92,78 +99,117 @@ const techStack: TechItem[] = [
 
 export function TechStack() {
   return (
-    <section id="technology" className="py-20 bg-black text-white relative overflow-hidden">
-      {/* Background grid pattern */}
-      <div className="absolute inset-0 bg-[url('/grid.svg')] bg-center opacity-5"></div>
+    <section id="technology" className="py-32 bg-[#030712] text-white relative overflow-hidden">
+      {/* Background elements */}
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-repeat opacity-[0.015]"></div>
+        <div className="absolute bottom-0 left-0 w-full h-2/3 bg-gradient-to-t from-black/20 to-transparent"></div>
+      </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+          <div className="inline-block py-1 px-3 mb-3 rounded-full bg-amber-500/10 border border-amber-500/20 text-amber-400 text-sm font-medium">
+            Powerful Stack
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
             Technology Stack
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Powered by cutting-edge technologies to deliver high-performance, scalable solutions.
+          <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
+            Built with cutting-edge technologies to deliver high-performance, scalable marketing automation
           </p>
         </motion.div>
 
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-8 max-w-5xl mx-auto">
-          {techStack.map((tech, index) => (
-            <Dialog key={tech.name}>
-              <DialogTrigger asChild>
-                <motion.div
-                  initial={{ opacity: 0, y: 20 }}
-                  whileInView={{ opacity: 1, y: 0 }}
-                  viewport={{ once: true }}
-                  transition={{ delay: index * 0.1, duration: 0.5 }}
-                  whileHover={{ y: -5, transition: { duration: 0.2 } }}
-                  className="flex flex-col items-center cursor-pointer group"
-                >
-                  <div className="relative p-2 rounded-xl bg-gray-900/50 border border-gray-800 group-hover:border-blue-500/50 transition-all duration-300 mb-3 w-20 h-20 flex items-center justify-center">
-                    <motion.div
-                      animate={{ rotate: [0, 5, 0, -5, 0] }}
-                      transition={{ duration: 5, repeat: Infinity, ease: "easeInOut" }}
-                    >
-                      {tech.icon}
-                    </motion.div>
-                    <div className="absolute -bottom-1 -right-1 w-3 h-3 rounded-full bg-blue-500 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></div>
-                  </div>
-                  <span className="text-sm font-medium text-gray-200 group-hover:text-white transition-colors">
-                    {tech.name}
-                  </span>
-                </motion.div>
-              </DialogTrigger>
-              <DialogContent className="bg-gray-900 border border-gray-800">
-                <DialogHeader>
-                  <DialogTitle className="text-white flex items-center gap-2">
-                    <span>{tech.icon}</span>
-                    <span>{tech.name}</span>
-                  </DialogTitle>
-                  <DialogDescription className="text-gray-300 pt-2">
-                    {tech.description}
-                  </DialogDescription>
-                </DialogHeader>
-              </DialogContent>
-            </Dialog>
-          ))}
+        {/* Tech Cards Grid */}
+        <div className="max-w-6xl mx-auto">
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4 md:gap-6">
+            {techStack.map((tech, index) => (
+              <Dialog key={tech.name}>
+                <DialogTrigger asChild>
+                  <motion.div
+                    initial={{ opacity: 0, y: 20 }}
+                    whileInView={{ opacity: 1, y: 0 }}
+                    viewport={{ once: true }}
+                    transition={{ delay: index * 0.1, duration: 0.4 }}
+                    whileHover={{ 
+                      y: -8,
+                      transition: { duration: 0.2, ease: "easeOut" } 
+                    }}
+                    className="flex flex-col items-center cursor-pointer group"
+                  >
+                    {/* Tech icon card */}
+                    <div className="relative mb-4">
+                      {/* Glow effect on hover */}
+                      <div className="absolute -inset-2 rounded-3xl opacity-0 group-hover:opacity-100 bg-gradient-to-r from-red-500/20 to-amber-500/20 blur-xl transition-opacity duration-500"></div>
+                      
+                      {/* Card container */}
+                      <div className="relative h-28 w-28 bg-white/[0.07] backdrop-blur-sm border border-white/10 rounded-2xl flex items-center justify-center overflow-hidden">
+                        {/* Background pattern */}
+                        <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:8px_8px]"></div>
+                        
+                        {/* Icon with animation */}
+                        <motion.div
+                          animate={{ 
+                            scale: [1, 1.05, 1],
+                          }}
+                          transition={{ 
+                            duration: 3, 
+                            repeat: Infinity,
+                            repeatType: "reverse",
+                            ease: "easeInOut" 
+                          }}
+                          className="relative z-10 p-2"
+                        >
+                          {tech.icon}
+                        </motion.div>
+                        
+                        {/* Bottom indicator */}
+                        <div className="absolute bottom-0 inset-x-0 h-1 bg-gradient-to-r from-red-500 to-amber-500 transform translate-y-1 group-hover:translate-y-0 transition-transform duration-300"></div>
+                      </div>
+                    </div>
+                    <span className="text-sm font-medium text-white/80 group-hover:text-white transition-all duration-300">
+                      {tech.name}
+                    </span>
+                  </motion.div>
+                </DialogTrigger>
+                <DialogContent className="bg-[#0f1015] border border-white/10 backdrop-blur-xl">
+                  <DialogHeader>
+                    <DialogTitle className="flex items-center gap-4 text-xl">
+                      <div className={`w-12 h-12 ${tech.color} rounded-xl flex items-center justify-center p-2`}>
+                        {tech.icon}
+                      </div>
+                      <span className="text-white">{tech.name}</span>
+                    </DialogTitle>
+                    <DialogDescription className="text-zinc-400 pt-4 text-base">
+                      {tech.description}
+                    </DialogDescription>
+                  </DialogHeader>
+                </DialogContent>
+              </Dialog>
+            ))}
+          </div>
         </div>
         
+        {/* Bottom section */}
         <motion.div
-          initial={{ opacity: 0 }}
-          whileInView={{ opacity: 1 }}
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.6, duration: 1 }}
-          className="mt-16 text-center"
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="mt-24 text-center"
         >
-          <div className="w-full h-px bg-gradient-to-r from-transparent via-blue-500/50 to-transparent my-10"></div>
-          <p className="text-gray-400 text-sm">
-            Our platform is constantly evolving to incorporate the latest advancements in AI and machine learning.
-          </p>
+          <div className="h-px w-full max-w-md mx-auto bg-gradient-to-r from-transparent via-white/20 to-transparent mb-12"></div>
+          <div className="inline-block px-8 py-4 bg-white/5 backdrop-blur-sm border border-white/10 rounded-2xl">
+            <p className="text-zinc-400">
+              We're constantly evolving our stack to incorporate the latest advancements in 
+              <span className="text-white font-medium ml-1">AI and machine learning</span>
+            </p>
+          </div>
         </motion.div>
       </div>
     </section>
