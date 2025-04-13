@@ -12,3 +12,12 @@ class IdeaRequest(BaseModel):
     industry: Optional[str] = None
     tone: Optional[str] = None
     additional_context: Optional[str] = None
+
+class IdeaResponse(BaseModel):
+    """Response model for idea generation"""
+    headline: str
+    tagline: str
+    value_proposition: str
+    key_messages: List[str]
+    full_response: str
+
