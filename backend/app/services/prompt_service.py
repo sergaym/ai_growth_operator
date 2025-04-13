@@ -1,5 +1,6 @@
 """
-Utility functions for handling prompts.
+Prompt service for the AI Growth Operator.
+This module provides functionality for enhancing and formatting prompts for content generation.
 """
 
 from typing import List, Dict, Any, Optional

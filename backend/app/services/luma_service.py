@@ -1,17 +1,15 @@
+"""
+Luma AI service integration for the AI Growth Operator.
+This module provides all interactions with the Luma AI API for video generation.
+"""
+
 import os
 import time
 import requests
 from lumaai import LumaAI
 from typing import Dict, Optional, Any
 
-from ..config.env import (
-    LUMAAI_API_KEY,
-    DEFAULT_VIDEO_DURATION,
-    DEFAULT_RESOLUTION,
-    DEFAULT_MODEL,
-    ENABLE_LOOP,
-    VIDEO_OUTPUT_DIR
-)
+from app.core.config import settings
 
 class LumaVideoGenerator:
     """
@@ -25,7 +23,7 @@ class LumaVideoGenerator:
         Args:
             api_key: Optional API key. If not provided, will use the one from environment variables.
         """
-        self.api_key = api_key or LUMAAI_API_KEY
+        self.api_key = api_key or settings.LUMAAI_API_KEY
         if not self.api_key:
             raise ValueError("Luma AI API key is required. Set it in the .env file or pass it to the constructor.")
         
@@ -34,10 +32,10 @@ class LumaVideoGenerator:
     def generate_video_from_text(
         self,
         prompt: str,
-        model: str = DEFAULT_MODEL,
-        resolution: str = DEFAULT_RESOLUTION,
-        duration: str = DEFAULT_VIDEO_DURATION,
-        loop: bool = ENABLE_LOOP,
+        model: str = settings.LUMA_DEFAULT_MODEL,
+        resolution: str = settings.LUMA_DEFAULT_RESOLUTION,
+        duration: str = settings.LUMA_DEFAULT_VIDEO_DURATION,
+        loop: bool = settings.LUMA_ENABLE_LOOP,
         aspect_ratio: Optional[str] = None,
         save_video: bool = True,
         output_filename: Optional[str] = None
@@ -47,9 +45,9 @@ class LumaVideoGenerator:
         
         Args:
             prompt: Text description of the video to generate
-            model: AI model to use (default: ray-2)
-            resolution: Video resolution (default: 720p)
-            duration: Video duration (default: 5s)
+            model: AI model to use (default from settings)
+            resolution: Video resolution (default from settings)
+            duration: Video duration (default from settings)
             loop: Whether to create a looping video
             aspect_ratio: Aspect ratio (e.g., "16:9", "4:3", "1:1")
             save_video: Whether to save the video to disk
@@ -101,7 +99,7 @@ class LumaVideoGenerator:
                 filename_base = "".join(c if c.isalnum() or c == '_' else '_' for c in filename_base)
                 output_filename = f"{filename_base}_{generation.id}.mp4"
             
-            output_path = os.path.join(VIDEO_OUTPUT_DIR, output_filename)
+            output_path = os.path.join(settings.VIDEO_OUTPUT_DIR, output_filename)
             self._download_video(video_url, output_path)
             
             # Add the local file path to the generation info
@@ -113,8 +111,8 @@ class LumaVideoGenerator:
         self,
         prompt: str,
         image_url: str,
-        model: str = DEFAULT_MODEL,
-        loop: bool = ENABLE_LOOP,
+        model: str = settings.LUMA_DEFAULT_MODEL,
+        loop: bool = settings.LUMA_ENABLE_LOOP,
         save_video: bool = True,
         output_filename: Optional[str] = None
     ) -> Dict[str, Any]:
@@ -175,7 +173,7 @@ class LumaVideoGenerator:
                 filename_base = "".join(c if c.isalnum() or c == '_' else '_' for c in filename_base)
                 output_filename = f"{filename_base}_{generation.id}.mp4"
             
-            output_path = os.path.join(VIDEO_OUTPUT_DIR, output_filename)
+            output_path = os.path.join(settings.VIDEO_OUTPUT_DIR, output_filename)
             self._download_video(video_url, output_path)
             
             # Add the local file path to the generation info

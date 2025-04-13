@@ -28,83 +28,10 @@ The **AI Growth Operator** is a sophisticated AI agent that automates and optimi
 - **Multi-Platform Integration**: Seamless connection with all major advertising platforms
 - **Adaptive Learning**: Continuously improves based on campaign performance
 - **Dynamic Content Generation**: Creates new ad variants based on performance data
-- **AI Video Generation**: Creates professional-quality videos from text prompts
-- **Budget Optimization**: Automatically adjusts spending to maximize ROI
-
-## 🏗️ Project Structure
-
-```
-ai-ugc/
-├── frontend/                  # Next.js frontend application
-│   ├── src/
-│   │   ├── app/               # Next.js app router structure
-│   │   │   └── page.tsx       # Main landing page
-│   │   ├── components/
-│   │   │   ├── landing/       # Landing page components
-│   │   │   │   ├── Hero.tsx       # Hero section component
-│   │   │   │   ├── Features.tsx   # Key features section
-│   │   │   │   ├── Workflow.tsx   # Workflow explainer section
-│   │   │   │   ├── Demo.tsx       # Interactive demo section
-│   │   │   │   ├── TechStack.tsx  # Technology showcase
-│   │   │   │   └── Footer.tsx     # Footer component
-│   │   │   └── ui/            # Reusable UI components
-│   │   └── lib/               # Utility functions and helpers
-│   ├── public/                # Static assets
-│   └── package.json           # Frontend dependencies
-│
-├── backend/                   # Python backend services
-│   ├── video_generator/       # Video generation module
-│   │   ├── __init__.py
-│   │   └── luma_generator.py  # Luma AI integration
-│   ├── utils/                 # Utility functions
-│   ├── config/                # Configuration files
-│   ├── playground.py          # Interactive testing script
-│   └── requirements.txt       # Python dependencies
-│
-└── README.md                  # Project documentation
-```
 
 ## 🚀 Getting Started
 
-### Frontend
-
-1. Navigate to the frontend directory:
-   ```
-   cd frontend
-   ```
-
-2. Install dependencies:
-   ```
-   npm install
-   ```
-
-3. Start the development server:
-   ```
-   npm run dev
-   ```
-
-### Backend
-
-1. Navigate to the backend directory:
-   ```
-   cd backend
-   ```
-
-2. Set up the Python virtual environment:
-   ```
-   python -m venv venv
-   source venv/bin/activate  # On Windows: venv\Scripts\activate
-   pip install -r requirements.txt
-   ```
-
-3. Configure your API key:
-   - Create a `.env` file in the backend directory
-   - Add your Luma AI API key: `LUMAAI_API_KEY=your_api_key_here`
-
-4. Run the playground script:
-   ```
-   python playground.py
-   ```
+*Coming soon...*
 
 ## 🔗 Related Resources
 
@@ -114,32 +41,66 @@ ai-ugc/
 
 This project is licensed under the MIT License - see the LICENSE file for details.
 
-# AI Growth Operator - Video Generation Backend
+# AI Growth Operator - Backend API
 
-This module provides a backend implementation for the "AI Growth Operator" platform's video generation capabilities.
+This module provides the backend API implementation for the "AI Growth Operator" platform, including the marketing campaign ideation and video generation capabilities.
 
 ## Features
 
-- Generate videos from text prompts
+- Generate marketing campaign ideas based on initial concepts
+- Create video generation prompts from marketing ideas
 - Support for different video styles and camera motions
-- Automatic prompt enhancement
-- Multiple resolution and duration options
-- Supports looping videos
-- Local video storage
+- RESTful API with proper documentation
+- Docker containerization for easy deployment
 
 ## Technology Stack
 
 - **Python**: Core programming language
+- **FastAPI**: Modern, high-performance web framework
+- **OpenAI API**: Used for text generation
 - **Luma AI API**: Used for video generation
-- **Python-dotenv**: For environment variable management
-- **Requests**: For HTTP operations
+- **Pydantic**: Data validation and settings management
+- **Uvicorn**: ASGI server
+- **Docker**: Containerization
+
+## Project Structure
+
+```
+backend/
+├── app/                    # Main application package
+│   ├── api/                # API package with versioning
+│   │   ├── __init__.py     # Main API router
+│   │   └── v1/             # API version 1
+│   │       ├── api.py      # Version 1 router
+│   │       ├── __init__.py # V1 package init
+│   │       └── endpoints/  # V1 endpoints
+│   │           ├── marketing.py  # Marketing endpoints
+│   │           ├── video.py      # Video endpoints
+│   │           └── styles.py     # Styles endpoints
+│   ├── core/               # Core configuration
+│   │   ├── config.py       # Application settings
+│   │   └── __init__.py     # Package initialization
+│   ├── models/             # Data models and schemas
+│   │   └── schemas.py      # Pydantic models for request/response
+│   ├── services/           # External service integrations
+│   │   ├── openai_service.py   # OpenAI API integration
+│   │   ├── luma_service.py     # Luma AI video generation
+│   │   └── prompt_service.py   # Prompt enhancement utilities
+│   └── main.py             # Application initialization
+├── utils/                  # General utility functions
+├── requirements.txt        # Python dependencies
+├── Dockerfile              # Docker configuration
+├── entrypoint.sh           # Docker entrypoint script
+└── run.py                  # Development server runner
+```
 
 ## Getting Started
 
 ### Prerequisites
 
 - Python 3.8+
-- Luma AI API key (get one from [Luma AI](https://lumalabs.ai/dream-machine/api/keys))
+- OpenAI API key
+- Luma AI API key (optional, for video generation)
 
 ### Setup
 
@@ -157,27 +118,55 @@ This module provides a backend implementation for the "AI Growth Operator" platf
    pip install -r requirements.txt
    ```
 
-3. Configure your API key:
-   - Create a `.env` file in the project root
-   - Add your Luma AI API key: `LUMAAI_API_KEY=your_api_key_here`
+3. Configure your API keys:
+   - Create a `.env` file in the backend directory
+   - Add your API keys:
+     ```
+     OPENAI_API_KEY=your_openai_api_key_here
+     LUMAAI_API_KEY=your_lumaai_api_key_here
+     ```
 
-### Usage
+### Running the API (Development)
 
-Run the playground script to test video generation:
+Run the development server:
 
 ```
-python playground.py
+python run.py
 ```
 
-Follow the interactive prompts to:
-1. Enter a base prompt
-2. Select a video style
-3. Choose a camera motion
-4. Add any additional details
-5. Set video parameters (duration, resolution, looping)
+The API will be available at http://localhost:8000
 
-The generated video will be saved to the `output/videos` directory.
+### Running with Docker
 
+Build and run the Docker container:
+
+```
+# Build the container
+docker build -t ai-growth-operator-api .
+
+# Run the container
+docker run -p 80:80 -e OPENAI_API_KEY=your_key_here -e LUMAAI_API_KEY=your_key_here ai-growth-operator-api
+```
+
+The API will be available at http://localhost:80
+
+### API Documentation
+
+Once the server is running, you can access the interactive API documentation at:
+- Swagger UI: http://localhost:8000/docs (development) or http://localhost/docs (Docker)
+- ReDoc: http://localhost:8000/redoc (development) or http://localhost/redoc (Docker)
+
+### API Versioning
+
+The API follows a strict versioning scheme to ensure backward compatibility:
+
+- Base endpoint: `/api`
+- Versioned endpoints: `/api/v1/...` 
+- Example endpoints:
+  - `/api/v1/marketing/idea` - Generate marketing ideas (v1)
+  - `/api/marketing/idea` - Legacy endpoint (for backward compatibility)
+
+The versioning structure makes it easy to add new API versions (v2, v3) while maintaining backward compatibility. When implementing breaking changes, create a new version folder under `app/api/` with its own endpoints.
 
 ## Future Enhancements
 

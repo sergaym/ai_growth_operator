@@ -1,3 +1,8 @@
-lumaai==1.7.2
+lumaai==1.7.3
 python-dotenv==1.1.0
-requests==2.32.3 
+requests==2.32.3
+openai==1.73.0
+fastapi==0.115.12
+uvicorn==0.34.0
+pydantic==2.11.3
+pydantic-settings==2.4.0 
