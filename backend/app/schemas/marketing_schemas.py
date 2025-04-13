@@ -1,12 +1,12 @@
 """
-Marketing-related schemas for the AI Growth Operator API.
+Idea generation schemas for the AI Growth Operator API.
 """
 
 from typing import List, Dict, Any, Optional
 from pydantic import BaseModel
 
 class MarketingIdeaRequest(BaseModel):
-    """Request model for marketing idea generation"""
+    """Request model for idea generation"""
     initial_idea: str
     target_audience: str
     industry: Optional[str] = None
@@ -14,7 +14,7 @@ class MarketingIdeaRequest(BaseModel):
     additional_context: Optional[str] = None
 
 class MarketingIdeaResponse(BaseModel):
-    """Response model for marketing idea generation"""
+    """Response model for idea generation"""
     headline: str
     tagline: str
     value_proposition: str
