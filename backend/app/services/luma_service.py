@@ -119,3 +119,37 @@ def generate_video(
     except Exception as e:
         raise Exception(f"Error in Luma AI generation: {str(e)}")
 
+def generate_video_with_references(
+    prompt: str,
+    media_references: List[Dict[str, Any]],
+    settings: Dict[str, Any]
+) -> Dict[str, Any]:
+    """
+    Generate a video using specific media references (images/videos) as style or content guides.
+    
+    Args:
+        prompt: The detailed prompt describing the video to generate
+        media_references: List of reference media (images or videos)
+        settings: Dictionary of video generation settings
+        
+    Returns:
+        Dictionary containing the video generation details
+    """
+    # Extract settings
+    visual_style = settings.get("visual_style")
+    duration = settings.get("duration", "30 seconds")
+    aspect_ratio = settings.get("aspect_ratio", "16:9")
+    music_type = settings.get("music_type")
+    include_text_overlays = settings.get("include_text_overlays", True)
+    
+    # Use the main generate_video function with the media references
+    return generate_video(
+        prompt=prompt,
+        visual_style=visual_style,
+        duration=duration,
+        aspect_ratio=aspect_ratio,
+        music_type=music_type,
+        include_text_overlays=include_text_overlays,
+        media_references=media_references
+    )
+
