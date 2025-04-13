@@ -20,7 +20,7 @@ client = OpenAI(
    base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
 )
 
-def generate_marketing_idea(
+def generate_idea(
     initial_idea: str,
     target_audience: str,
     industry: str = None,
@@ -28,29 +28,29 @@ def generate_marketing_idea(
     additional_context: str = None
 ) -> Dict[str, Any]:
     """
-    Generate a marketing campaign idea based on initial input.
+    Generate a creative idea based on initial input.
     
     Args:
-        initial_idea: The core concept or product to market
+        initial_idea: The core concept or product to develop
         target_audience: Description of the target audience
         industry: The industry or sector (optional)
-        tone: Desired tone for the campaign (optional)
+        tone: Desired tone for the content (optional)
         additional_context: Any other relevant information (optional)
         
     Returns:
-        Dictionary containing the generated marketing campaign ideas
+        Dictionary containing the generated ideas
     """
     # Build the system prompt
     system_prompt = """
-    You are an expert marketing campaign strategist. Your task is to develop
-    compelling marketing campaign ideas based on initial concepts.
+    You are an expert creative strategist. Your task is to develop
+    compelling ideas based on initial concepts.
     
     Follow these steps:
     1. Analyze the initial idea and target audience
     2. Consider the industry context and appropriate tone
-    3. Create a refined marketing angle that will resonate with the audience
+    3. Create a refined angle that will resonate with the audience
     4. Provide a clear value proposition
-    5. Suggest a campaign headline and tagline
+    5. Suggest a headline and tagline
     6. Outline key messaging points
     """
     
@@ -88,6 +88,9 @@ def generate_marketing_idea(
     sections = parse_response(content)
     
     return sections
+
+# For backward compatibility
+generate_marketing_idea = generate_idea
 
 def generate_video_prompt(
     marketing_idea: Dict[str, Any],
