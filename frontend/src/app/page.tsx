@@ -8,8 +8,14 @@ import { Footer } from "@/components/landing/Footer";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-black text-white overflow-x-hidden">
-      <main>
+    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden">
+      <main className="relative">
+        {/* Global background elements */}
+        <div className="fixed inset-0 z-[-1] pointer-events-none">
+          <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay"></div>
+          <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-black to-transparent"></div>
+        </div>
+        
         <Hero />
         <Features />
         <Workflow />
