@@ -5,7 +5,7 @@ Marketing endpoints for v1 of the AI Growth Operator API
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
-from app.models.schemas import (
+from app.schemas import (
     MarketingIdeaRequest, 
     MarketingIdeaResponse,
     RefineIdeaRequest,
