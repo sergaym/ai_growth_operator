@@ -9,6 +9,8 @@ from .idea_schemas import (
     IdeaResponse,
     RefineIdeaRequest,
     RefineIdeaResponse,
+    LanguageAdaptRequest,
+    LanguageAdaptResponse,
 )
 
 # Marketing schemas (legacy, for backward compatibility)
@@ -21,6 +23,9 @@ from .marketing_schemas import (
 from .video_schemas import (
     VideoPromptRequest,
     VideoPromptResponse,
+    VideoGenerationSettings,
+    GenerateVideoFromIdeaRequest,
+    VideoGenerationResponse,
 )
 
 # Styles schemas
