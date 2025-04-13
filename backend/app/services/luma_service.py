@@ -242,3 +242,25 @@ def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[st
         "message": f"Video generation timed out after {timeout} seconds"
     }
 
+def _parse_duration_to_seconds(duration: str) -> int:
+    """
+    Parse a duration string like "30 seconds" or "1 minute" to seconds.
+    
+    Args:
+        duration: Duration string
+        
+    Returns:
+        Duration in seconds
+    """
+    duration = duration.lower().strip()
+    
+    if "second" in duration:
+        seconds = duration.split("second")[0].strip()
+        return int(seconds)
+    elif "minute" in duration:
+        minutes = duration.split("minute")[0].strip()
+        return int(minutes) * 60
+    else:
+        # Default to 30 seconds if format is unrecognized
+        return 30
+
