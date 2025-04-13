@@ -264,3 +264,41 @@ def _parse_duration_to_seconds(duration: str) -> int:
         # Default to 30 seconds if format is unrecognized
         return 30
 
+def _format_duration_for_sdk(duration: str) -> str:
+    """
+    Format duration string to the format expected by the Luma SDK.
+    
+    Args:
+        duration: Duration string (e.g., "30 seconds", "1 minute")
+        
+    Returns:
+        Formatted duration (e.g., "5s", "9s")
+    """
+    # Luma SDK currently only supports specific durations
+    # Based on the error message, it seems to accept values like "5s" and "9s"
+    VALID_DURATIONS = ["5s", "9s"]
+    
+    duration = duration.lower().strip()
+    
+    # Try to extract a numeric value and unit
+    if "second" in duration:
+        seconds = duration.split("second")[0].strip()
+        formatted = f"{seconds}s"
+    elif "minute" in duration:
+        minutes = duration.split("minute")[0].strip()
+        # Convert minutes to seconds
+        formatted = f"{int(minutes) * 60}s"
+    else:
+        # Default if format is unrecognized
+        formatted = "5s"
+    
+    # Check if the formatted duration is valid, otherwise use the closest valid duration
+    if formatted in VALID_DURATIONS:
+        return formatted
+    
+    # If not a valid duration, default to the closest available option
+    seconds = int(formatted.rstrip('s'))
+    if seconds <= 5:
+        return "5s"
+    else:
+        return "9s"
