@@ -162,3 +162,20 @@ export function Demo() {
             )}
           </motion.div>
         </div>
+        
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          whileInView={{ opacity: 1, y: 0 }}
+          viewport={{ once: true }}
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="mt-16 text-center"
+        >
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Our AI video generator uses Luma AI technology to create stunning videos from text prompts.
+            This is just one example of how the AI Growth Operator can help you create engaging content for your campaigns.
+          </p>
+        </motion.div>
+      </div>
+    </section>
+  );
+} 
