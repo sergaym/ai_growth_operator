@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
 from app.models.schemas import VideoPromptRequest, VideoPromptResponse
-from utils.openai_utils import generate_video_prompt
+from app.services.openai_service import generate_video_prompt
 
 # Create router
 router = APIRouter()
