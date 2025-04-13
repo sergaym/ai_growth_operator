@@ -153,3 +153,47 @@ def generate_video_with_references(
         media_references=media_references
     )
 
+def check_video_status(generation_id: str) -> Dict[str, Any]:
+    """
+    Check the status of a video generation job.
+    
+    Args:
+        generation_id: The unique ID of the generation job
+        
+    Returns:
+        Dictionary containing the latest status
+    """
+    client = get_luma_client()
+    
+    try:
+        # Get the generation status
+        generation = client.generations.get(id=generation_id)
+        
+        # Determine the status and extract relevant information
+        if generation.state == "completed":
+            result = {
+                "status": "completed",
+                "video_url": generation.assets.video,
+                "thumbnail_url": getattr(generation.assets, "thumbnail", None),
+                "generation_id": generation_id,
+                "duration": getattr(generation, "duration", "Unknown"),
+                "prompt_used": generation.prompt
+            }
+        elif generation.state == "failed":
+            result = {
+                "status": "failed",
+                "generation_id": generation_id,
+                "error": getattr(generation, "failure_reason", "Unknown error")
+            }
+        else:
+            result = {
+                "status": "processing",
+                "generation_id": generation_id,
+                "estimated_completion_time": _estimate_completion_time(30)  # Default estimate
+            }
+        
+        return result
+        
+    except Exception as e:
+        raise Exception(f"Error checking video status: {str(e)}")
+
