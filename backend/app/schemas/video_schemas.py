@@ -25,3 +25,8 @@ class VideoGenerationSettings(BaseModel):
     music_type: Optional[str] = None  # Type of background music
     include_text_overlays: Optional[bool] = True  # Whether to include text overlays
 
+class GenerateVideoFromIdeaRequest(BaseModel):
+    """Request model for generating a video directly from an idea"""
+    idea: Dict[str, Any]  # The idea response from idea generation endpoint
+    video_settings: VideoGenerationSettings
+    
