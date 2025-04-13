@@ -33,3 +33,16 @@ async def create_marketing_idea(request: MarketingIdeaRequest) -> Dict[str, Any]
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating marketing idea: {str(e)}")
 
+@router.post("/refine", response_model=RefineIdeaResponse)
+async def refine_marketing_idea(request: RefineIdeaRequest) -> Dict[str, str]:
+    """
+    Refine an initial idea based on the target audience
+    """
+    try:
+        result = refine_idea(
+            prompt_idea=request.prompt_idea,
+            target_audience=request.target_audience
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error refining idea: {str(e)}") 
