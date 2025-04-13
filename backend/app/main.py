@@ -3,39 +3,33 @@ AI Growth Operator - Main Application File
 This is the main entry point for the API service.
 """
 
-import os
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from dotenv import load_dotenv
 
-# Import routers
-from app.endpoints.marketing import router as marketing_router
-from app.endpoints.video import router as video_router
-from app.endpoints.styles import router as styles_router
+# Import configuration
+from app.core.config import settings
 
-# Load environment variables
-load_dotenv()
+# Import API router
+from app.api import api_router
 
 # Create FastAPI app
 app = FastAPI(
-    title="AI Growth Operator API",
-    description="Backend API for AI-powered marketing campaign generation",
-    version="1.0.0"
+    title=settings.PROJECT_NAME,
+    description=settings.PROJECT_DESCRIPTION,
+    version=settings.PROJECT_VERSION,
 )
 
 # Add CORS middleware to allow requests from frontend
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # In production, replace with your frontend domain
+    allow_origins=settings.BACKEND_CORS_ORIGINS,
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
 
-# Include routers
-app.include_router(marketing_router, prefix="/api/marketing", tags=["Marketing"])
-app.include_router(video_router, prefix="/api/video", tags=["Video"])
-app.include_router(styles_router, prefix="/api/styles", tags=["Styles"])
+# Include API router
+app.include_router(api_router, prefix=settings.API_V1_STR)
 
 # Root endpoint
 @app.get("/", tags=["Status"])
@@ -44,8 +38,8 @@ async def root():
     Root endpoint providing API information
     """
     return {
-        "message": "AI Growth Operator API",
-        "version": "1.0.0",
+        "message": settings.PROJECT_NAME,
+        "version": settings.PROJECT_VERSION,
         "status": "running"
     }
 
