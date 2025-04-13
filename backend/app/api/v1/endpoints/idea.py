@@ -62,15 +62,57 @@ async def generate_idea_endpoint(request: IdeaRequest) -> Dict[str, Any]:
         raise HTTPException(status_code=500, detail=f"Error generating idea: {str(e)}")
 
 @router.post("/refine", response_model=RefineIdeaResponse)
-async def refine_idea_endpoint(request: RefineIdeaRequest) -> Dict[str, str]:
+async def refine_idea_endpoint(request: RefineIdeaRequest) -> Dict[str, Any]:
     """
     Refine an initial idea based on the target audience
+    
+    This endpoint can also adapt the refined idea to a different language and cultural style
+    if language_settings are provided.
     """
     try:
+        # Refine the idea in English first
         result = refine_idea(
             prompt_idea=request.prompt_idea,
             target_audience=request.target_audience
         )
+        
+        # If language settings are provided, adapt the refined idea to the target language
+        if request.language_settings:
+            # Store the original English refined idea
+            original_refined_idea = result["refined_idea"]
+            original_rationale = result["rationale"]
+            
+            # Convert the refinement result to a format suitable for adaptation
+            idea_for_adaptation = {
+                "headline": original_refined_idea,
+                "tagline": "",
+                "value_proposition": original_rationale,
+                "key_messages": []
+            }
+            
+            # Adapt the idea to the target language
+            adapted_result = adapt_language(
+                idea=idea_for_adaptation,
+                target_language=request.language_settings.target_language,
+                cultural_style=request.language_settings.cultural_style,
+                preserve_keywords=request.language_settings.preserve_keywords,
+                tone_adjustment=request.language_settings.tone_adjustment
+            )
+            
+            # Create a new response that combines the original and adapted content
+            result = {
+                "refined_idea": adapted_result["headline"],
+                "rationale": adapted_result["value_proposition"],
+                "language": adapted_result["language"],
+                "cultural_notes": adapted_result.get("cultural_notes"),
+                "original_refined_idea": original_refined_idea,
+                "original_rationale": original_rationale
+            }
+            
+            if "style" in adapted_result:
+                result["cultural_style"] = adapted_result["style"]
+        
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error refining idea: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error refining idea: {str(e)}")
+
