@@ -9,6 +9,8 @@ from .idea_schemas import (
     IdeaResponse,
     RefineIdeaRequest,
     RefineIdeaResponse,
+    LanguageAdaptRequest,
+    LanguageAdaptResponse,
 )
 
 # Marketing schemas (legacy, for backward compatibility)
