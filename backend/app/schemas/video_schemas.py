@@ -5,6 +5,13 @@ Video-related schemas for the AI Growth Operator API.
 from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, AnyHttpUrl, Field
 
+class MediaReference(BaseModel):
+    """Reference media for video generation"""
+    url: AnyHttpUrl
+    type: str = Field(..., description="Type of media: 'image' or 'video'")
+    weight: Optional[float] = Field(1.0, description="Influence weight of this reference (0.1-2.0)")
+    description: Optional[str] = None
+
 
 class VideoPromptRequest(BaseModel):
     """Request model for video prompt generation"""
