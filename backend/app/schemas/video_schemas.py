@@ -14,4 +14,14 @@ class VideoPromptRequest(BaseModel):
 
 class VideoPromptResponse(BaseModel):
     """Response model for video prompt generation"""
-    prompt: str 
+    prompt: str
+
+class VideoGenerationSettings(BaseModel):
+    """Settings for video generation"""
+    visual_style: Optional[str] = None  # Visual style (e.g., "cinematic", "3d_animation")
+    duration: Optional[str] = "30 seconds"  # Target duration
+    aspect_ratio: Optional[str] = "16:9"  # Aspect ratio of the video
+    references: Optional[List[str]] = None  # Reference URLs or descriptions
+    music_type: Optional[str] = None  # Type of background music
+    include_text_overlays: Optional[bool] = True  # Whether to include text overlays
+
