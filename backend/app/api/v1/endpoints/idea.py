@@ -9,9 +9,11 @@ from app.schemas import (
     IdeaRequest, 
     IdeaResponse,
     RefineIdeaRequest,
-    RefineIdeaResponse
+    RefineIdeaResponse,
+    LanguageAdaptRequest,
+    LanguageAdaptResponse
 )
-from app.services.openai_service import generate_idea, refine_idea
+from app.services.openai_service import generate_idea, refine_idea, adapt_language
 
 # Create router
 router = APIRouter()
