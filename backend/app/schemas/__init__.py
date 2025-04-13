@@ -26,6 +26,8 @@ from .video_schemas import (
     VideoGenerationSettings,
     GenerateVideoFromIdeaRequest,
     VideoGenerationResponse,
+    MediaReference,
+    GenerateVideoWithReferencesRequest,
 )
 
 # Styles schemas
