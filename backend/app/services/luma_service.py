@@ -302,3 +302,26 @@ def _format_duration_for_sdk(duration: str) -> str:
         return "5s"
     else:
         return "9s"
+
+def _estimate_completion_time(duration_seconds: int) -> str:
+    """
+    Estimate completion time based on video duration.
+    
+    Args:
+        duration_seconds: Video duration in seconds
+        
+    Returns:
+        Estimated completion time as a string
+    """
+    # Simple estimation: base time (60s) plus 2x the video duration
+    estimated_seconds = 60 + (duration_seconds * 2)
+    
+    if estimated_seconds < 60:
+        return f"about {estimated_seconds} seconds"
+    elif estimated_seconds < 3600:
+        minutes = estimated_seconds // 60
+        return f"about {minutes} minutes"
+    else:
+        hours = estimated_seconds // 3600
+        minutes = (estimated_seconds % 3600) // 60
+        return f"about {hours} hours and {minutes} minutes" 
