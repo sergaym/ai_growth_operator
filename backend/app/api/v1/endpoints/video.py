@@ -5,7 +5,7 @@ Video endpoints for v1 of the AI Growth Operator API
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
-from app.models.schemas import VideoPromptRequest, VideoPromptResponse
+from app.schemas import VideoPromptRequest, VideoPromptResponse
 from app.services.openai_service import generate_video_prompt
 
 # Create router
