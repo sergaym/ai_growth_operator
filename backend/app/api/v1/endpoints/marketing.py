@@ -5,8 +5,13 @@ Marketing endpoints for v1 of the AI Growth Operator API
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
-from app.models.schemas import MarketingIdeaRequest, MarketingIdeaResponse
-from app.services.openai_service import generate_marketing_idea
+from app.models.schemas import (
+    MarketingIdeaRequest, 
+    MarketingIdeaResponse,
+    RefineIdeaRequest,
+    RefineIdeaResponse
+)
+from app.services.openai_service import generate_marketing_idea, refine_idea
 
 # Create router
 router = APIRouter()
