@@ -169,6 +169,10 @@ def check_video_status(generation_id: str) -> Dict[str, Any]:
         # Get the generation status
         generation = client.generations.get(id=generation_id)
         
+        # Get prompt safely (may not be available in all states)
+        # For processing videos, the API may not return the prompt
+        prompt = getattr(generation, "prompt", None)
+        
         # Determine the status and extract relevant information
         if generation.state == "completed":
             result = {
@@ -177,19 +181,24 @@ def check_video_status(generation_id: str) -> Dict[str, Any]:
                 "thumbnail_url": getattr(generation.assets, "thumbnail", None),
                 "generation_id": generation_id,
                 "duration": getattr(generation, "duration", "Unknown"),
-                "prompt_used": generation.prompt
+                "prompt_used": prompt or "Prompt not available"
             }
         elif generation.state == "failed":
             result = {
                 "status": "failed",
                 "generation_id": generation_id,
-                "error": getattr(generation, "failure_reason", "Unknown error")
+                "error": getattr(generation, "failure_reason", "Unknown error"),
+                "prompt_used": prompt or "Unknown prompt",
+                "duration": "0 seconds"  # Default duration for failed generations
             }
         else:
+            # For processing videos, we need to handle missing attributes
             result = {
                 "status": "processing",
                 "generation_id": generation_id,
-                "estimated_completion_time": _estimate_completion_time(30)  # Default estimate
+                "estimated_completion_time": _estimate_completion_time(30),  # Default estimate
+                "prompt_used": prompt or "Processing prompt",
+                "duration": getattr(generation, "duration", "Processing")  # Include duration even when processing
             }
         
         return result
