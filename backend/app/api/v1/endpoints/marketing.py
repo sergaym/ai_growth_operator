@@ -6,7 +6,7 @@ from fastapi import APIRouter, HTTPException
 from typing import Dict, Any
 
 from app.models.schemas import MarketingIdeaRequest, MarketingIdeaResponse
-from utils.openai_utils import generate_marketing_idea
+from app.services.openai_service import generate_marketing_idea
 
 # Create router
 router = APIRouter()
