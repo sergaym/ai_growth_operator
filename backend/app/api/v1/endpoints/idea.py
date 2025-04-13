@@ -3,7 +3,7 @@ Idea generation endpoints for v1 of the AI Growth Operator API
 """
 
 from fastapi import APIRouter, HTTPException
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 from app.schemas import (
     IdeaRequest, 
