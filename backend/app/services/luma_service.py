@@ -21,3 +21,12 @@ load_dotenv()
 LUMA_API_KEY = os.getenv("LUMAAI_API_KEY")
 LUMA_POLLING_INTERVAL = 10  # seconds
 
+# Initialize the Luma AI client
+def get_luma_client():
+    """Get a configured Luma AI client instance"""
+    api_key = LUMA_API_KEY or settings.LUMAAI_API_KEY
+    if not api_key:
+        raise ValueError("Luma AI API key not found. Please set LUMAAI_API_KEY in your environment.")
+    
+    return LumaAI(auth_token=api_key)
+
