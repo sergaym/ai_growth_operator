@@ -30,3 +30,12 @@ class GenerateVideoFromIdeaRequest(BaseModel):
     idea: Dict[str, Any]  # The idea response from idea generation endpoint
     video_settings: VideoGenerationSettings
     
+class VideoGenerationResponse(BaseModel):
+    """Response model for video generation"""
+    video_url: str  # URL to the generated video
+    prompt_used: str  # The prompt used to generate the video
+    duration: str  # Actual duration of the generated video
+    thumbnail_url: Optional[str] = None  # URL to the video thumbnail
+    generation_id: str  # Unique ID for the generation job
+    status: str  # Status of the video generation (e.g., "completed", "processing")
+    estimated_completion_time: Optional[str] = None  # Estimated completion time if processing 
