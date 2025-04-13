@@ -3,12 +3,18 @@ Schema package for the AI Growth Operator API.
 This module re-exports all schemas for backward compatibility.
 """
 
-# Marketing schemas
+# Idea generation schemas
+from .idea_schemas import (
+    IdeaRequest,
+    IdeaResponse,
+    RefineIdeaRequest,
+    RefineIdeaResponse,
+)
+
+# Marketing schemas (legacy, for backward compatibility)
 from .marketing_schemas import (
     MarketingIdeaRequest,
     MarketingIdeaResponse,
-    RefineIdeaRequest,
-    RefineIdeaResponse,
 )
 
 # Video schemas
