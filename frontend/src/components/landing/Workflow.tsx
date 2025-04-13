@@ -7,6 +7,7 @@ type WorkflowStep = {
   title: string;
   description: string;
   icon: React.ReactNode;
+  color: string;
 };
 
 const workflowSteps: WorkflowStep[] = [
@@ -14,6 +15,7 @@ const workflowSteps: WorkflowStep[] = [
     number: 1,
     title: "Ideation",
     description: "Takes your initial idea or value proposition and analyzes its potential.",
+    color: "from-red-500 to-amber-500",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M9.5 14.5L9.5 19.5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -29,6 +31,7 @@ const workflowSteps: WorkflowStep[] = [
     number: 2,
     title: "Content Creation",
     description: "Automatically generates ad creatives including texts, images, and videos.",
+    color: "from-amber-500 to-amber-600",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M15 7L18 10L15 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -41,6 +44,7 @@ const workflowSteps: WorkflowStep[] = [
     number: 3,
     title: "Campaign Launch",
     description: "Connects to ad platforms, defines target audiences, and deploys campaigns.",
+    color: "from-blue-500 to-blue-600",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M22 2L11 13" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -52,6 +56,7 @@ const workflowSteps: WorkflowStep[] = [
     number: 4,
     title: "Continuous Optimization",
     description: "Monitors performance, creates new content, and optimizes budget allocation.",
+    color: "from-red-500 to-red-600",
     icon: (
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
         <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -66,74 +71,98 @@ const workflowSteps: WorkflowStep[] = [
 
 export function Workflow() {
   return (
-    <section id="workflow" className="py-24 bg-gradient-to-b from-black to-blue-950 text-white relative overflow-hidden">
+    <section id="workflow" className="py-32 bg-[#030712] text-white relative overflow-hidden">
       {/* Background decorative elements */}
-      <div className="absolute inset-0 opacity-10">
-        <div className="absolute top-0 left-0 w-full h-full bg-[radial-gradient(circle_at_top_right,#4f46e5,transparent_50%)]"></div>
-        <div className="absolute bottom-0 right-0 w-full h-full bg-[radial-gradient(circle_at_bottom_left,#7e22ce,transparent_50%)]"></div>
+      <div className="absolute inset-0">
+        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#f33_5%,transparent_50%)] opacity-[0.07]"></div>
+        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-repeat opacity-[0.015]"></div>
       </div>
       
-      <div className="container mx-auto px-4 relative z-10">
+      <div className="container max-w-7xl mx-auto px-6 relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
           transition={{ duration: 0.5 }}
-          className="text-center mb-16"
+          className="text-center mb-20"
         >
-          <h2 className="text-3xl md:text-4xl font-bold mb-4 inline-block bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-purple-400">
+          <div className="inline-block py-1 px-3 mb-3 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-sm font-medium">
+            Step-by-Step Process
+          </div>
+          <h2 className="text-4xl md:text-5xl font-bold mb-6 tracking-tight">
             How It Works
           </h2>
-          <p className="text-lg text-gray-300 max-w-2xl mx-auto">
-            Our AI Growth Operator follows a streamlined workflow to take your idea from concept to successful campaign.
+          <p className="text-lg text-zinc-400 max-w-2xl mx-auto">
+            Our AI Growth Operator follows a streamlined workflow to take your idea from concept to successful campaign
           </p>
         </motion.div>
 
-        <div className="max-w-5xl mx-auto">
+        <div className="max-w-5xl mx-auto space-y-16 lg:space-y-24">
           {workflowSteps.map((step, index) => (
             <motion.div
               key={step.number}
               initial={{ opacity: 0, y: 20 }}
               whileInView={{ opacity: 1, y: 0 }}
               viewport={{ once: true }}
-              transition={{ delay: index * 0.2, duration: 0.5 }}
-              className="flex flex-col md:flex-row items-start md:items-center gap-6 mb-16 relative"
+              transition={{ delay: index * 0.15, duration: 0.5 }}
+              className="relative"
             >
               {/* Connecting line between steps */}
               {index < workflowSteps.length - 1 && (
-                <div className="absolute left-[39px] top-[70px] bottom-[-70px] w-0.5 bg-gradient-to-b from-blue-500 to-purple-500 hidden md:block"></div>
+                <div className="absolute left-[60px] top-[100px] bottom-[-110px] w-0.5 bg-gradient-to-b from-white/20 via-white/10 to-transparent hidden md:block"></div>
               )}
               
-              {/* Step number */}
-              <div className="flex-shrink-0 rounded-full w-20 h-20 flex items-center justify-center bg-gradient-to-br from-blue-600 to-purple-600 shadow-lg shadow-blue-500/20 z-10">
-                <span className="text-2xl font-bold">{step.number}</span>
-              </div>
-              
-              {/* Step content */}
-              <div className="md:ml-6 flex-1">
-                <div className="flex items-center mb-2">
-                  <div className="mr-3 text-blue-400">
-                    {step.icon}
+              <div className="flex flex-col md:flex-row items-start gap-8 md:gap-12">
+                {/* Step number and icon combo */}
+                <div className="relative flex-shrink-0 z-20">
+                  <div className="w-32 h-32 rounded-2xl bg-white/[0.07] backdrop-blur-sm border border-white/10 shadow-xl flex items-center justify-center relative overflow-hidden">
+                    {/* Background grid pattern like Revolut cards */}
+                    <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff08_1px,transparent_1px),linear-gradient(to_bottom,#ffffff08_1px,transparent_1px)] bg-[size:8px_8px]"></div>
+                    
+                    {/* Step number */}
+                    <div className="relative flex flex-col items-center">
+                      <div className={`w-14 h-14 rounded-xl bg-gradient-to-br ${step.color} flex items-center justify-center mb-1`}>
+                        <span className="text-2xl font-bold">{step.number}</span>
+                      </div>
+                      <div className="text-xs text-white/60 uppercase tracking-wider font-medium">Step {step.number}</div>
+                    </div>
+                    
+                    {/* Decorative elements */}
+                    <div className="absolute top-2 right-2 w-4 h-4 rounded-full bg-white/5"></div>
+                    <div className="absolute bottom-2 left-2 w-3 h-3 rounded-full bg-white/5"></div>
                   </div>
-                  <h3 className="text-xl font-bold">{step.title}</h3>
                 </div>
-                <p className="text-gray-300">{step.description}</p>
+                
+                {/* Step content */}
+                <div className="md:py-4 flex-1">
+                  <div className="flex items-center mb-4">
+                    <div className={`mr-4 p-2 rounded-lg bg-gradient-to-br ${step.color} text-white`}>
+                      {step.icon}
+                    </div>
+                    <h3 className="text-2xl font-bold tracking-tight">{step.title}</h3>
+                  </div>
+                  <p className="text-zinc-400 text-lg">{step.description}</p>
+                  
+                  {/* Additional information cards - for desktop only */}
+                  <div className="hidden lg:block mt-6">
+                    <div className="relative">
+                      <div className="absolute -inset-1 bg-gradient-to-r from-white/5 to-white/0 rounded-2xl blur-sm"></div>
+                      <div className="relative bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-xl p-4">
+                        <div className="flex gap-2 items-center mb-1">
+                          <div className="w-4 h-4 rounded-full bg-gradient-to-br from-amber-400 to-red-500"></div>
+                          <span className="text-sm font-medium text-white/80">Pro Tip</span>
+                        </div>
+                        <p className="text-sm text-zinc-500">
+                          {index === 0 && "Be specific about your target audience and value proposition for better results."}
+                          {index === 1 && "Let AI generate multiple creative variations to test different messaging approaches."}
+                          {index === 2 && "Start with smaller budgets to test performance before scaling up campaigns."}
+                          {index === 3 && "Set clear KPIs and let the AI optimize toward your most important metrics."}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
-              
-              {/* Decorative gradient sphere */}
-              <motion.div
-                animate={{
-                  scale: [1, 1.05, 1],
-                  opacity: [0.7, 1, 0.7],
-                }}
-                transition={{
-                  duration: 3,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute hidden lg:block right-0 w-40 h-40 rounded-full bg-gradient-to-br from-blue-500/10 to-purple-500/10 blur-xl"
-                style={{ right: `-${index * 20}px`, top: `${index * 10}px` }}
-              />
             </motion.div>
           ))}
         </div>
@@ -143,18 +172,23 @@ export function Workflow() {
           initial={{ opacity: 0, y: 20 }}
           whileInView={{ opacity: 1, y: 0 }}
           viewport={{ once: true }}
-          transition={{ delay: 0.8, duration: 0.5 }}
-          className="text-center mt-16"
+          transition={{ delay: 0.5, duration: 0.5 }}
+          className="text-center mt-24"
         >
-          <div className="inline-block py-1 px-3 mb-4 text-sm font-medium rounded-full bg-blue-500/20 border border-blue-500/30 text-blue-300">
-            Ready to get started?
+          <div className="inline-block max-w-3xl mx-auto px-8 py-6 bg-gradient-to-r from-red-500/10 via-amber-500/10 to-red-500/10 backdrop-blur-sm border border-white/10 rounded-2xl relative overflow-hidden">
+            {/* Background grid pattern */}
+            <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:20px_20px]"></div>
+            
+            <h3 className="text-2xl font-bold mb-4 relative">
+              Ready to automate your marketing?
+            </h3>
+            <p className="text-zinc-400 mb-6 relative">
+              Experience the power of AI-driven growth with our intelligent marketing agent
+            </p>
+            <button className="px-8 py-4 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white font-medium transition-all text-lg shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
+              Start Your First Campaign
+            </button>
           </div>
-          <h3 className="text-2xl font-bold mb-6">
-            Experience the power of AI-driven growth today
-          </h3>
-          <button className="px-8 py-3 rounded-full bg-gradient-to-r from-blue-600 to-purple-600 hover:from-blue-700 hover:to-purple-700 text-white font-medium transition-all shadow-lg shadow-blue-600/20">
-            Start Your First Campaign
-          </button>
         </motion.div>
       </div>
     </section>
