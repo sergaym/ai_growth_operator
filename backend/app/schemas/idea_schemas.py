@@ -21,3 +21,7 @@ class IdeaResponse(BaseModel):
     key_messages: List[str]
     full_response: str
 
+class RefineIdeaRequest(BaseModel):
+    """Request model for refining an initial idea"""
+    prompt_idea: str
+    target_audience: str
