@@ -13,6 +13,16 @@ class MarketingIdeaRequest(BaseModel):
     tone: Optional[str] = None
     additional_context: Optional[str] = None
 
+class RefineIdeaRequest(BaseModel):
+    """Request model for refining an initial idea"""
+    prompt_idea: str
+    target_audience: str
+    
+class RefineIdeaResponse(BaseModel):
+    """Response model for idea refinement"""
+    refined_idea: str
+    rationale: str
+
 class VideoPromptRequest(BaseModel):
     """Request model for video prompt generation"""
     marketing_idea: Dict[str, Any]
