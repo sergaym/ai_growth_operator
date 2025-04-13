@@ -116,3 +116,25 @@ async def refine_idea_endpoint(request: RefineIdeaRequest) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error refining idea: {str(e)}")
 
+@router.post("/adapt-language", response_model=LanguageAdaptResponse)
+async def adapt_language_endpoint(request: LanguageAdaptRequest) -> Dict[str, Any]:
+    """
+    Adapt an idea to a different language and cultural style
+    
+    This endpoint takes a previously generated idea and adapts it to a specified language
+    and optional cultural style (e.g., "Spanish with Mexican cultural style").
+    
+    Note: For a more streamlined experience, you can now provide language_settings directly 
+    in the /generate and /refine endpoints.
+    """
+    try:
+        result = adapt_language(
+            idea=request.idea,
+            target_language=request.target_language,
+            cultural_style=request.cultural_style,
+            preserve_keywords=request.preserve_keywords,
+            tone_adjustment=request.tone_adjustment
+        )
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adapting idea to language: {str(e)}") 
