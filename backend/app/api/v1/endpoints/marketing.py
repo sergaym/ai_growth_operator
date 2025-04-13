@@ -1,5 +1,5 @@
 """
-Marketing endpoints for the AI Growth Operator API
+Marketing endpoints for v1 of the AI Growth Operator API
 """
 
 from fastapi import APIRouter, HTTPException
