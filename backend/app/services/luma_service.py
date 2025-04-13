@@ -197,3 +197,48 @@ def check_video_status(generation_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise Exception(f"Error checking video status: {str(e)}")
 
+def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[str, Any]:
+    """
+    Poll the video generation status until completion or timeout.
+    
+    Args:
+        generation_id: The unique ID of the generation job
+        timeout: Maximum time to wait in seconds (default: 300s / 5min)
+        
+    Returns:
+        Dictionary containing the completed video details
+    """
+    client = get_luma_client()
+    
+    start_time = time.time()
+    
+    while time.time() - start_time < timeout:
+        # Get the generation status
+        generation = client.generations.get(id=generation_id)
+        
+        if generation.state == "completed":
+            return {
+                "status": "completed",
+                "video_url": generation.assets.video,
+                "thumbnail_url": getattr(generation.assets, "thumbnail", None),
+                "generation_id": generation_id,
+                "duration": getattr(generation, "duration", "Unknown"),
+                "prompt_used": generation.prompt
+            }
+        elif generation.state == "failed":
+            return {
+                "status": "failed",
+                "generation_id": generation_id,
+                "error": getattr(generation, "failure_reason", "Unknown error")
+            }
+        
+        # Wait before polling again
+        time.sleep(LUMA_POLLING_INTERVAL)
+    
+    # If we reach here, we've timed out
+    return {
+        "status": "timeout",
+        "generation_id": generation_id,
+        "message": f"Video generation timed out after {timeout} seconds"
+    }
+
