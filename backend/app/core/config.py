@@ -11,6 +11,7 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     """Application settings."""
     
+    # API Configuration
     API_V1_STR: str = "/api"
     PROJECT_NAME: str = "AI Growth Operator API"
     PROJECT_VERSION: str = "1.0.0"
@@ -28,12 +29,25 @@ class Settings(BaseSettings):
             return v
         raise ValueError(v)
     
-    # API Keys (defaulting to environment variables)
+    # API Keys
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     LUMAAI_API_KEY: Optional[str] = os.getenv("LUMAAI_API_KEY")
     
-    # Default OpenAI model
+    # OpenAI Settings
     DEFAULT_GPT_MODEL: str = "gpt-4"
+    
+    # Luma AI Settings
+    LUMA_DEFAULT_MODEL: str = "ray-2"
+    LUMA_DEFAULT_RESOLUTION: str = "720p"
+    LUMA_DEFAULT_VIDEO_DURATION: str = "5s"
+    LUMA_ENABLE_LOOP: bool = True
+    VIDEO_OUTPUT_DIR: str = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(__file__))), "output", "videos")
+    
+    # Ensure video output directory exists
+    @validator("VIDEO_OUTPUT_DIR")
+    def ensure_video_dir_exists(cls, v):
+        os.makedirs(v, exist_ok=True)
+        return v
     
     class Config:
         """Pydantic configuration class."""
