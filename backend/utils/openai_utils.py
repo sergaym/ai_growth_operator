@@ -7,12 +7,15 @@ from typing import Dict, List, Any, Optional
 from openai import OpenAI
 from dotenv import load_dotenv
 
+# Import settings
+from app.core.config import settings
+
 # Load environment variables
 load_dotenv()
 
 # Initialize the OpenAI client
 client = OpenAI(
-   api_key=os.getenv("OPENAI_API_KEY"),
+   api_key=settings.OPENAI_API_KEY,
    base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
 )
 
@@ -68,7 +71,7 @@ def generate_marketing_idea(
     
     # Call OpenAI API
     response = client.chat.completions.create(
-        model="gpt-4",
+        model=settings.DEFAULT_GPT_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message}
@@ -139,7 +142,7 @@ def generate_video_prompt(
     
     # Call OpenAI API
     response = client.chat.completions.create(
-        model="gpt-4",
+        model=settings.DEFAULT_GPT_MODEL,
         messages=[
             {"role": "system", "content": system_prompt},
             {"role": "user", "content": user_message}
