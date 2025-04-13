@@ -213,4 +213,69 @@ def parse_response(content: str) -> Dict[str, Any]:
     # Clean up the key messages
     result["key_messages"] = [msg for msg in result["key_messages"] if msg]
     
-    return result 
+    return result
+
+def refine_idea(prompt_idea: str, target_audience: str) -> Dict[str, str]:
+    """
+    Refine an initial idea based on the target audience.
+    
+    Args:
+        prompt_idea: The initial idea to refine
+        target_audience: Description of the target audience
+        
+    Returns:
+        Dictionary containing the refined idea and rationale
+    """
+    # Build the system prompt
+    system_prompt = """
+    You are an expert marketing strategist and idea refiner. Your task is to take an initial idea
+    and refine it to better target a specific audience.
+    
+    Follow these steps:
+    1. Analyze the initial idea and understand its core concept
+    2. Consider the target audience's demographics, interests, and pain points
+    3. Refine the initial idea to make it more relevant and appealing to the target audience
+    4. Provide a clear rationale for your refinements
+    
+    Your response should be concise yet comprehensive.
+    """
+    
+    # Build the user message
+    user_message = f"""
+    Initial Idea: {prompt_idea}
+    
+    Target Audience: {target_audience}
+    """
+    
+    # Call OpenAI API
+    response = client.chat.completions.create(
+        model=settings.DEFAULT_GPT_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ],
+        temperature=0.7,
+        max_tokens=800
+    )
+    
+    # Extract the content
+    content = response.choices[0].message.content
+    
+    # Parse the result - for this simple endpoint, we'll just return the full text
+    # and extract a concise refined idea from the first paragraph
+    paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+    
+    refined_idea = paragraphs[0] if paragraphs else content
+    rationale = "\n\n".join(paragraphs[1:]) if len(paragraphs) > 1 else ""
+    
+    # If the refined idea is very long, it might be the entire response
+    # In that case, take just the first sentence or two
+    if len(refined_idea) > 150 and rationale == "":
+        sentences = refined_idea.split('.')
+        refined_idea = '.'.join(sentences[:2]) + '.'
+        rationale = '.'.join(sentences[2:])
+    
+    return {
+        "refined_idea": refined_idea,
+        "rationale": rationale if rationale else "This refinement better targets the specified audience."
+    } 
