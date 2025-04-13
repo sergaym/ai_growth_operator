@@ -14,6 +14,5 @@ api_router = APIRouter()
 # Include versioned routers
 api_router.include_router(api_v1_router, prefix="/v1")
 
-# For backward compatibility, also include v1 endpoints at root level
-# In a production environment, you might want to disable this eventually
-api_router.include_router(api_v1_router) 
+# Note: We've removed the duplicate inclusion of v1 endpoints at the root level
+# to maintain a clean, versioned API structure. 
