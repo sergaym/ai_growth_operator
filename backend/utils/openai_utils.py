@@ -10,8 +10,11 @@ from dotenv import load_dotenv
 # Load environment variables
 load_dotenv()
 
-# Initialize OpenAI client
-client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+# Initialize the OpenAI client
+client = OpenAI(
+   api_key=os.getenv("OPENAI_API_KEY"),
+   base_url=os.getenv("OPENAI_API_BASE", "https://api.openai.com/v1")
+)
 
 def generate_marketing_idea(
     initial_idea: str,
