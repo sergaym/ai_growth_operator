@@ -281,4 +281,197 @@ def refine_idea(prompt_idea: str, target_audience: str) -> Dict[str, str]:
     return {
         "refined_idea": refined_idea,
         "rationale": rationale if rationale else "This refinement better targets the specified audience."
-    } 
+    }
+
+def adapt_language(
+    idea: Dict[str, Any],
+    target_language: str,
+    cultural_style: str = None,
+    preserve_keywords: List[str] = None,
+    tone_adjustment: str = None,
+) -> Dict[str, Any]:
+    """
+    Adapt an idea to a different language and/or cultural style.
+    
+    Args:
+        idea: The original idea dictionary (from generate_idea or IdeaResponse)
+        target_language: The target language to translate to
+        cultural_style: Specific cultural style within the language (optional)
+        preserve_keywords: List of keywords to preserve in original language (optional)
+        tone_adjustment: Adjustments to the tone for the target culture (optional)
+        
+    Returns:
+        Dictionary containing the adapted idea with cultural notes
+    """
+    # Extract key components from the original idea
+    headline = idea.get("headline", "")
+    tagline = idea.get("tagline", "")
+    value_proposition = idea.get("value_proposition", "")
+    key_messages = idea.get("key_messages", [])
+    
+    # Build the system prompt
+    system_prompt = f"""
+    You are an expert multilingual marketing strategist with deep cultural knowledge. 
+    Your task is to adapt content to {target_language}{' with ' + cultural_style + ' cultural style' if cultural_style else ''}.
+    
+    Follow these steps:
+    1. Analyze the original content in English
+    2. Deeply understand its meaning, emotion, and intent
+    3. Adapt (not just translate) the content to {target_language}
+    4. Ensure the adaptation resonates with {cultural_style if cultural_style else target_language}-speaking audiences
+    5. Preserve the core message while making it culturally appropriate
+    6. Add cultural nuances that would appeal to the target audience
+    
+    Your adaptation should feel natural to native speakers, not like a translation.
+    """
+    
+    # Build the user message
+    user_message = f"""
+    Adapt the following marketing content to {target_language}{' with ' + cultural_style + ' cultural style' if cultural_style else ''}:
+    
+    HEADLINE: {headline}
+    
+    TAGLINE: {tagline}
+    
+    VALUE PROPOSITION: {value_proposition}
+    
+    KEY MESSAGES:
+    {chr(10).join(['- ' + msg for msg in key_messages])}
+    """
+    
+    if preserve_keywords:
+        keywords_text = ", ".join(preserve_keywords)
+        user_message += f"\n\nPRESERVE THESE KEYWORDS IN ORIGINAL LANGUAGE: {keywords_text}"
+    
+    if tone_adjustment:
+        user_message += f"\n\nTONE ADJUSTMENTS: {tone_adjustment}"
+    
+    # Call OpenAI API
+    response = client.chat.completions.create(
+        model=settings.DEFAULT_GPT_MODEL,
+        messages=[
+            {"role": "system", "content": system_prompt},
+            {"role": "user", "content": user_message}
+        ],
+        temperature=0.7,
+        max_tokens=1500
+    )
+    
+    # Extract the content
+    content = response.choices[0].message.content
+    
+    # Parse the response into structured sections using a modified version of parse_response
+    # Initialize result with defaults from the adapted content
+    result = {
+        "headline": "",
+        "tagline": "",
+        "value_proposition": "",
+        "key_messages": [],
+        "language": target_language,
+        "cultural_notes": None
+    }
+    
+    if cultural_style:
+        result["style"] = cultural_style
+    
+    # Parse the response into structured sections
+    sections = {}
+    current_section = None
+    lines = content.lower().split('\n')
+    
+    # First pass: identify all sections and cultural notes
+    for i, line in enumerate(lines):
+        line_lower = line.lower().strip()
+        
+        # Try to extract headline
+        if "headline:" in line_lower:
+            result["headline"] = content.split('\n')[i].split(":", 1)[1].strip()
+        
+        # Try to extract tagline
+        elif "tagline:" in line_lower:
+            result["tagline"] = content.split('\n')[i].split(":", 1)[1].strip()
+        
+        # Try to extract value proposition
+        elif "value proposition:" in line_lower:
+            result["value_proposition"] = content.split('\n')[i].split(":", 1)[1].strip()
+        
+        # Try to extract cultural notes
+        elif "cultural note" in line_lower or "cultural adaptation" in line_lower:
+            notes_index = i
+            notes = []
+            j = i
+            # Gather all lines that appear to be part of the cultural notes
+            while j < len(content.split('\n')) and not any(marker in content.split('\n')[j].lower() for marker in ["headline:", "tagline:", "value proposition:", "key message"]):
+                if content.split('\n')[j].strip():
+                    notes.append(content.split('\n')[j].strip())
+                j += 1
+            
+            # Join all the notes, removing the "Cultural Notes:" prefix if present
+            notes_text = '\n'.join(notes)
+            if ":" in notes_text and notes_text.lower().startswith(("cultural note", "cultural adaptation")):
+                notes_text = notes_text.split(":", 1)[1].strip()
+            
+            result["cultural_notes"] = notes_text
+        
+        # Try to extract key messages
+        elif "key message" in line_lower or "key point" in line_lower:
+            # Gather all lines that appear to be key messages
+            messages = []
+            j = i
+            while j < len(content.split('\n')):
+                current_line = content.split('\n')[j].strip()
+                if current_line and (current_line.startswith("-") or current_line.startswith("•") or (j > i and current_line and not any(marker in current_line.lower() for marker in ["headline:", "tagline:", "value proposition:", "cultural note"]))):
+                    # Clean up the message (remove leading dash or bullet)
+                    message = current_line
+                    if message.startswith(("-", "•", "*")):
+                        message = message[1:].strip()
+                    messages.append(message)
+                
+                # Stop if we hit another section
+                if j > i and any(marker in current_line.lower() for marker in ["headline:", "tagline:", "value proposition:", "cultural note"]):
+                    break
+                
+                j += 1
+            
+            result["key_messages"] = messages
+    
+    # If we couldn't extract structured data, make a best effort attempt
+    if not result["headline"] and len(content.split('\n')) > 0:
+        for line in content.split('\n'):
+            if line.strip() and len(line.strip()) < 100:  # Reasonable headline length
+                result["headline"] = line.strip()
+                break
+    
+    # Ensure we have at least something in each field
+    if not result["headline"]:
+        result["headline"] = headline  # Use original if not found
+    
+    if not result["tagline"]:
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if line.strip() and i > 0 and i < 5 and line != result["headline"]:
+                result["tagline"] = line.strip()
+                break
+    
+    if not result["value_proposition"]:
+        lines = content.split('\n')
+        for i, line in enumerate(lines):
+            if line.strip() and line not in [result["headline"], result["tagline"]] and len(line) > 20:
+                result["value_proposition"] = line.strip()
+                break
+    
+    # Clean up the key messages
+    result["key_messages"] = [msg for msg in result["key_messages"] if msg and msg not in [result["headline"], result["tagline"], result["value_proposition"]]]
+    
+    # If no key messages found, extract from paragraphs
+    if not result["key_messages"]:
+        paragraphs = [p.strip() for p in content.split('\n\n') if p.strip()]
+        for p in paragraphs:
+            if p and p not in [result["headline"], result["tagline"], result["value_proposition"]]:
+                # Split long paragraphs into sentences
+                sentences = p.split('.')
+                for s in sentences:
+                    if s.strip() and len(s.strip()) > 10:
+                        result["key_messages"].append(s.strip())
+    
+    return result 
