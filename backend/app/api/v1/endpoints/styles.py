@@ -5,7 +5,7 @@ Styles endpoints for v1 of the AI Growth Operator API
 from fastapi import APIRouter
 
 from app.models.schemas import StylesResponse
-from utils.prompt_utils import get_available_styles
+from app.services.prompt_service import get_available_styles
 
 # Create router
 router = APIRouter()
