@@ -31,4 +31,5 @@ async def create_marketing_idea(request: MarketingIdeaRequest) -> Dict[str, Any]
         )
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error generating marketing idea: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error generating marketing idea: {str(e)}")
+
