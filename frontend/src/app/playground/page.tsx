@@ -32,9 +32,9 @@ type AdCampaign = {
 
 export default function Playground() {
   // State for tabs and content
-  const [activeTab, setActiveTab] = useState<"video" | "campaigns">("video");
+  const [activeTab, setActiveTab] = useState<"video" | "avatarVideo" | "campaigns">("avatarVideo");
   
-  // Mock data for videos
+  // Mock data for videos (kept for compatibility)
   const [videoGenerations, setVideoGenerations] = useState<VideoGeneration[]>([
     {
       id: "vid-1",
