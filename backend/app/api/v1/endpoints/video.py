@@ -184,3 +184,39 @@ async def list_heygen_voices() -> List[Dict[str, Any]]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing Heygen voices: {str(e)}")
 
+@router.post("/heygen/generate-avatar-video", response_model=HeygenVideoResponse)
+async def generate_heygen_avatar_video(
+    request: HeygenGenerateAvatarVideoRequest,
+    background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
+    """
+    Generate an avatar video using Heygen API
+    
+    This endpoint creates an avatar video with the specified avatar, voice, and script.
+    The video generation is asynchronous, and the response includes a video ID
+    that can be used to check the status of the generation.
+    """
+    try:
+        # Generate the avatar video
+        result = heygen_service.generate_avatar_video(
+            prompt=request.prompt,
+            avatar_id=request.avatar_id,
+            voice_id=request.voice_id,
+            background_color=request.background_color,
+            width=request.width,
+            height=request.height,
+            voice_speed=request.voice_speed,
+            voice_pitch=request.voice_pitch,
+            avatar_style=request.avatar_style
+        )
+        
+        # Start a background task to wait for video completion
+        background_tasks.add_task(
+            heygen_service.wait_for_video_completion,
+            video_id=result["video_id"]
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating Heygen avatar video: {str(e)}")
+
