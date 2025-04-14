@@ -33,6 +33,10 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     LUMAAI_API_KEY: Optional[str] = os.getenv("LUMAAI_API_KEY")
     RUNWAY_API_KEY: Optional[str] = os.getenv("RUNWAY_API_KEY")
+    HEYGEN_API_KEY: Optional[str] = os.getenv("HEYGEN_API_KEY")
+    
+    # Database Configuration
+    DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
     
     # OpenAI Settings
     DEFAULT_GPT_MODEL: str = "gpt-4"
