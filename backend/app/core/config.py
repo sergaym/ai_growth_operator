@@ -32,6 +32,7 @@ class Settings(BaseSettings):
     # API Keys
     OPENAI_API_KEY: Optional[str] = os.getenv("OPENAI_API_KEY")
     LUMAAI_API_KEY: Optional[str] = os.getenv("LUMAAI_API_KEY")
+    RUNWAY_API_KEY: Optional[str] = os.getenv("RUNWAY_API_KEY")
     
     # OpenAI Settings
     DEFAULT_GPT_MODEL: str = "gpt-4"
