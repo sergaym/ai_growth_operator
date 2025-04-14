@@ -179,3 +179,37 @@ class HeygenService:
         except requests.RequestException as e:
             logger.error(f"Error checking video status: {str(e)}")
             raise Exception(f"Failed to check video status: {str(e)}")
+    
+    def wait_for_video_completion(self, video_id: str, timeout: int = 300, interval: int = 5) -> Dict[str, Any]:
+        """
+        Wait for a video to complete processing.
+        
+        Args:
+            video_id: The ID of the video to wait for
+            timeout: Maximum time to wait in seconds (default: 300)
+            interval: How often to check status in seconds (default: 5)
+            
+        Returns:
+            Dict containing the completed video information
+        """
+        start_time = time.time()
+        
+        while True:
+            elapsed = time.time() - start_time
+            if elapsed > timeout:
+                raise TimeoutError(f"Video generation timed out after {timeout} seconds")
+            
+            status = self.check_video_status(video_id)
+            
+            if status["status"] == "completed":
+                return status
+            elif status["status"] == "failed":
+                error_msg = status.get("error", {}).get("message", "Unknown error")
+                raise Exception(f"Video generation failed: {error_msg}")
+            
+            # Wait before checking again
+            time.sleep(interval)
+
+
+# Create a singleton instance of the service
+heygen_service = HeygenService() 
