@@ -1,7 +1,10 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { motion } from "framer-motion";
 import Link from "next/link";
+import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
+import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
+import { TrackedVideoGeneration } from "@/types/heygen";
 
 // These types would eventually come from your API responses
 type VideoGeneration = {
