@@ -26,3 +26,16 @@ class HeygenService:
             "Content-Type": "application/json"
         }
     
+    def list_avatars(self) -> List[Dict[str, Any]]:
+        """Get a list of available avatars from Heygen API."""
+        url = f"{self.base_url}/v2/avatars"
+        
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {}).get("avatars", [])
+        except requests.RequestException as e:
+            logger.error(f"Error listing avatars: {str(e)}")
+            raise Exception(f"Failed to list avatars: {str(e)}")
+    
