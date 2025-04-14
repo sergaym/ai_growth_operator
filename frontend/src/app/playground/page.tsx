@@ -105,10 +105,25 @@ export default function Playground() {
     },
   ]);
   
-  // State for new video generation
+  // Original state for video generation
   const [newVideoPrompt, setNewVideoPrompt] = useState("");
   const [isGenerating, setIsGenerating] = useState(false);
   
+  // Handler for adding a new avatar video
+  const handleAvatarVideoGenerated = (videoGeneration: TrackedVideoGeneration) => {
+    setAvatarVideos(prev => [videoGeneration, ...prev]);
+  };
+  
+  // Handler for updating an existing avatar video
+  const handleAvatarVideoUpdated = (updatedGeneration: TrackedVideoGeneration) => {
+    setAvatarVideos(prev => 
+      prev.map(video => 
+        video.id === updatedGeneration.id ? updatedGeneration : video
+      )
+    );
+  };
+  
+  // Original handler for video generation
   const handleVideoGeneration = (e: React.FormEvent) => {
     e.preventDefault();
     
