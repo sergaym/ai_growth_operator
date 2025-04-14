@@ -51,7 +51,29 @@ export default function Playground() {
     },
   ]);
   
-  // Mock data for campaigns
+  // State for HeyGen avatar videos
+  const [avatarVideos, setAvatarVideos] = useState<TrackedVideoGeneration[]>([]);
+  
+  // Restore avatar videos from localStorage on component mount
+  useEffect(() => {
+    const savedVideos = localStorage.getItem('avatarVideos');
+    if (savedVideos) {
+      try {
+        setAvatarVideos(JSON.parse(savedVideos));
+      } catch (e) {
+        console.error('Failed to parse saved avatar videos', e);
+      }
+    }
+  }, []);
+  
+  // Save avatar videos to localStorage when they change
+  useEffect(() => {
+    if (avatarVideos.length > 0) {
+      localStorage.setItem('avatarVideos', JSON.stringify(avatarVideos));
+    }
+  }, [avatarVideos]);
+  
+  // State for campaigns (kept from original)
   const [campaigns, setCampaigns] = useState<AdCampaign[]>([
     {
       id: "camp-1",
