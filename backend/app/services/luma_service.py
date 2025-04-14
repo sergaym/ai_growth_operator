@@ -225,9 +225,6 @@ def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[st
         # Get the generation status
         generation = client.generations.get(id=generation_id)
         
-        # Get prompt safely (may not be available in all states)
-        prompt = getattr(generation, "prompt", None)
-        
         if generation.state == "completed":
             return {
                 "status": "completed",
@@ -235,15 +232,13 @@ def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[st
                 "thumbnail_url": getattr(generation.assets, "thumbnail", None),
                 "generation_id": generation_id,
                 "duration": getattr(generation, "duration", "Unknown"),
-                "prompt_used": prompt or "Prompt not available"
+                "prompt_used": generation.prompt
             }
         elif generation.state == "failed":
             return {
                 "status": "failed",
                 "generation_id": generation_id,
-                "error": getattr(generation, "failure_reason", "Unknown error"),
-                "prompt_used": prompt or "Unknown prompt",
-                "duration": "0 seconds"  # Default duration for failed generations
+                "error": getattr(generation, "failure_reason", "Unknown error")
             }
         
         # Wait before polling again
@@ -253,9 +248,7 @@ def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[st
     return {
         "status": "timeout",
         "generation_id": generation_id,
-        "message": f"Video generation timed out after {timeout} seconds",
-        "prompt_used": "Timed out before completion",
-        "duration": "Unknown"  # Include duration even when timed out
+        "message": f"Video generation timed out after {timeout} seconds"
     }
 
 def _parse_duration_to_seconds(duration: str) -> int:
