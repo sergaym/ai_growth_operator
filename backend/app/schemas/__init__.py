@@ -28,6 +28,11 @@ from .video_schemas import (
     VideoGenerationResponse,
     MediaReference,
     GenerateVideoWithReferencesRequest,
+    # New Heygen schemas
+    HeygenGenerateAvatarVideoRequest,
+    HeygenAvatarResponse,
+    HeygenVoiceResponse,
+    HeygenVideoResponse,
 )
 
 # Styles schemas
