@@ -3,7 +3,7 @@ Video endpoints for v1 of the AI Growth Operator API
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
-from typing import Dict, Any
+from typing import Dict, Any, List
 
 from app.schemas import (
     VideoPromptRequest, 
@@ -11,7 +11,12 @@ from app.schemas import (
     GenerateVideoFromIdeaRequest,
     VideoGenerationResponse,
     GenerateVideoWithReferencesRequest,
-    MediaReference
+    MediaReference,
+    # New Heygen schemas
+    HeygenGenerateAvatarVideoRequest,
+    HeygenAvatarResponse,
+    HeygenVoiceResponse,
+    HeygenVideoResponse,
 )
 from app.services.openai_service import generate_video_prompt
 from app.services.luma_service import (
