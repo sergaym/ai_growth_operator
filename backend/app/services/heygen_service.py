@@ -132,3 +132,50 @@ class HeygenService:
             logger.error(f"Error generating avatar video: {str(e)}")
             raise Exception(f"Failed to generate avatar video: {str(e)}")
     
+    def check_video_status(self, video_id: str) -> Dict[str, Any]:
+        """
+        Check the status of a video generation.
+        
+        Args:
+            video_id: The ID of the video to check
+            
+        Returns:
+            Dict containing the status and video URL (if complete)
+        """
+        url = f"{self.base_url}/v1/video_status.get"
+        params = {"video_id": video_id}
+        
+        try:
+            response = requests.get(url, headers=self.headers, params=params)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("code") != 100:
+                logger.error(f"Heygen API error: {data.get('message')}")
+                raise Exception(f"Heygen API error: {data.get('message')}")
+            
+            result = {
+                "video_id": video_id,
+                "status": data.get("data", {}).get("status", "unknown")
+            }
+            
+            # Add additional fields if video is completed
+            if result["status"] == "completed":
+                result.update({
+                    "video_url": data.get("data", {}).get("video_url"),
+                    "thumbnail_url": data.get("data", {}).get("thumbnail_url"),
+                    "duration": data.get("data", {}).get("duration")
+                })
+            # Add error details if video failed
+            elif result["status"] == "failed":
+                error_data = data.get("data", {}).get("error", {})
+                result["error"] = {
+                    "code": error_data.get("code"),
+                    "message": error_data.get("message"),
+                    "detail": error_data.get("detail")
+                }
+            
+            return result
+        except requests.RequestException as e:
+            logger.error(f"Error checking video status: {str(e)}")
+            raise Exception(f"Failed to check video status: {str(e)}")
