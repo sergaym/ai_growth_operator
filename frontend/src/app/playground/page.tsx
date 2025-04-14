@@ -213,6 +213,22 @@ export default function Playground() {
         <div className="mb-8 border-b border-white/10">
           <div className="flex space-x-8">
             <button
+              onClick={() => setActiveTab("avatarVideo")}
+              className={`pb-4 relative ${
+                activeTab === "avatarVideo"
+                  ? "text-white font-medium"
+                  : "text-zinc-400 hover:text-zinc-200"
+              }`}
+            >
+              <span>Avatar Video</span>
+              {activeTab === "avatarVideo" && (
+                <motion.div
+                  layoutId="activeTabIndicator"
+                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
+                />
+              )}
+            </button>
+            <button
               onClick={() => setActiveTab("video")}
               className={`pb-4 relative ${
                 activeTab === "video"
