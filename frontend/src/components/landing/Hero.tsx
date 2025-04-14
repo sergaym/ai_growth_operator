@@ -79,17 +79,24 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex flex-col sm:flex-row items-center gap-5 justify-center lg:justify-start"
+              className="flex flex-col sm:flex-row gap-4 mt-8"
             >
-              <Link href="#demo">
-                <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium text-lg transition-all shadow-[0_8px_30px_rgba(239,68,68,0.2)] hover:shadow-[0_8px_20px_rgba(239,68,68,0.4)] hover:translate-y-[-2px]">
-                  Try Demo
-                </button>
+              <Link
+                href="/playground"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] flex items-center justify-center gap-2"
+              >
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M17.13 7.9799L5.5 7.9999C3 7.9999 2 8.9999 2 11.4999V16.9999C2 19.4999 3 20.4999 5.5 20.4999H12.5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M17 13.99V3.99C17 2.89 16.1 1.99 15 1.99H8C6.9 1.99 6 2.89 6 3.99V7.99" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                  <path d="M19.5 13.01L22 13L19.5 22" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+                Try The Playground
               </Link>
-              <Link href="#workflow">
-                <button className="w-full sm:w-auto px-8 py-4 rounded-full bg-white/5 backdrop-blur-sm border border-white/10 text-white font-medium text-lg transition-all hover:bg-white/10 hover:border-white/20">
-                  How It Works
-                </button>
+              <Link
+                href="#features"
+                className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white flex items-center justify-center"
+              >
+                Learn More
               </Link>
             </motion.div>
 
