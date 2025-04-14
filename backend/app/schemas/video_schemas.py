@@ -68,3 +68,11 @@ class HeygenGenerateAvatarVideoRequest(BaseModel):
     voice_pitch: Optional[int] = Field(0, description="Voice pitch, between -50 and 50", ge=-50, le=50)
     avatar_style: Optional[str] = Field("normal", description="Avatar style, one of 'normal', 'circle', 'closeUp'")
 
+class HeygenAvatarResponse(BaseModel):
+    """Response model for avatar information from Heygen"""
+    avatar_id: str
+    avatar_name: str
+    gender: str
+    preview_image_url: Optional[str] = None
+    preview_video_url: Optional[str] = None
+
