@@ -76,3 +76,13 @@ class HeygenAvatarResponse(BaseModel):
     preview_image_url: Optional[str] = None
     preview_video_url: Optional[str] = None
 
+class HeygenVoiceResponse(BaseModel):
+    """Response model for voice information from Heygen"""
+    voice_id: str
+    language: str
+    gender: str
+    name: str
+    preview_audio: Optional[str] = None
+    emotion_support: Optional[bool] = None
+    support_interactive_avatar: Optional[bool] = None
+
