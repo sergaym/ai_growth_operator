@@ -53,3 +53,18 @@ class GenerateVideoWithReferencesRequest(BaseModel):
     prompt: str  # The text prompt describing the video
     media_references: List[MediaReference]  # List of media references (images/videos)
     settings: VideoGenerationSettings  # General video settings 
+
+# New schemas for Heygen avatar videos
+
+class HeygenGenerateAvatarVideoRequest(BaseModel):
+    """Request model for generating an avatar video with Heygen"""
+    prompt: str = Field(..., description="The text for the avatar to speak")
+    avatar_id: str = Field(..., description="The ID of the avatar to use")
+    voice_id: str = Field(..., description="The ID of the voice to use")
+    background_color: Optional[str] = Field("#f6f6fc", description="Background color in hex format")
+    width: Optional[int] = Field(1280, description="Video width in pixels")
+    height: Optional[int] = Field(720, description="Video height in pixels")
+    voice_speed: Optional[float] = Field(1.0, description="Voice speed, between 0.5 and 1.5", ge=0.5, le=1.5)
+    voice_pitch: Optional[int] = Field(0, description="Voice pitch, between -50 and 50", ge=-50, le=50)
+    avatar_style: Optional[str] = Field("normal", description="Avatar style, one of 'normal', 'circle', 'closeUp'")
+
