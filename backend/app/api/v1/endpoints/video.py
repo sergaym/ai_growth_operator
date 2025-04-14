@@ -25,6 +25,8 @@ from app.services.luma_service import (
     wait_for_video_completion,
     generate_video_with_references
 )
+# Import the new Heygen service
+from app.services.heygen_service import heygen_service
 
 # Create router
 router = APIRouter()
