@@ -220,3 +220,15 @@ async def generate_heygen_avatar_video(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating Heygen avatar video: {str(e)}")
 
+@router.get("/heygen/status/{video_id}", response_model=HeygenVideoResponse)
+async def get_heygen_video_status(video_id: str) -> Dict[str, Any]:
+    """
+    Check the status of a Heygen video generation
+    
+    Returns the current status of a Heygen video generation job, including the video URL
+    if the generation is complete.
+    """
+    try:
+        return heygen_service.check_video_status(video_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking Heygen video status: {str(e)}") 
