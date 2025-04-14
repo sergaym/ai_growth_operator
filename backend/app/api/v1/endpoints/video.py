@@ -155,4 +155,20 @@ async def get_video_status(generation_id: str) -> Dict[str, Any]:
         result = check_video_status(generation_id)
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error checking video status: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error checking video status: {str(e)}")
+
+# New Heygen API endpoints
+
+@router.get("/heygen/avatars", response_model=List[HeygenAvatarResponse])
+async def list_heygen_avatars() -> List[Dict[str, Any]]:
+    """
+    Get a list of available avatars from Heygen
+    
+    Returns information about all available avatars including system avatars
+    and your custom avatars.
+    """
+    try:
+        return heygen_service.list_avatars()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing Heygen avatars: {str(e)}")
+
