@@ -39,3 +39,15 @@ class HeygenService:
             logger.error(f"Error listing avatars: {str(e)}")
             raise Exception(f"Failed to list avatars: {str(e)}")
     
+    def list_voices(self) -> List[Dict[str, Any]]:
+        """Get a list of available voices from Heygen API."""
+        url = f"{self.base_url}/v2/voices"
+        
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+            return data.get("data", {}).get("voices", [])
+        except requests.RequestException as e:
+            logger.error(f"Error listing voices: {str(e)}")
+            raise Exception(f"Failed to list voices: {str(e)}")
