@@ -86,3 +86,11 @@ class HeygenVoiceResponse(BaseModel):
     emotion_support: Optional[bool] = None
     support_interactive_avatar: Optional[bool] = None
 
+class HeygenVideoResponse(BaseModel):
+    """Response model for Heygen video generation"""
+    video_id: str
+    status: str = "pending"
+    video_url: Optional[str] = None
+    thumbnail_url: Optional[str] = None
+    duration: Optional[float] = None
+    error: Optional[Dict[str, Any]] = None 
