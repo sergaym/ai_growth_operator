@@ -172,3 +172,15 @@ async def list_heygen_avatars() -> List[Dict[str, Any]]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error listing Heygen avatars: {str(e)}")
 
+@router.get("/heygen/voices", response_model=List[HeygenVoiceResponse])
+async def list_heygen_voices() -> List[Dict[str, Any]]:
+    """
+    Get a list of available voices from Heygen
+    
+    Returns information about all available voices for use with avatar videos.
+    """
+    try:
+        return heygen_service.list_voices()
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error listing Heygen voices: {str(e)}")
+
