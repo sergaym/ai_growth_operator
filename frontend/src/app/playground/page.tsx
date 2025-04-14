@@ -265,7 +265,32 @@ export default function Playground() {
         
         {/* Content based on active tab */}
         <div className="min-h-[calc(100vh-300px)]">
-          {activeTab === "video" ? (
+          {activeTab === "avatarVideo" ? (
+            <div className="space-y-8">
+              {/* Avatar video generation form */}
+              <AvatarVideoForm onVideoGenerated={handleAvatarVideoGenerated} />
+              
+              {/* Avatar video history */}
+              <div>
+                <h3 className="text-xl font-medium mb-4">Your Avatar Videos</h3>
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                  {avatarVideos.map((video) => (
+                    <AvatarVideoCard 
+                      key={video.id} 
+                      generation={video} 
+                      onUpdate={handleAvatarVideoUpdated} 
+                    />
+                  ))}
+                  
+                  {avatarVideos.length === 0 && (
+                    <div className="col-span-2 py-12 text-center text-zinc-400">
+                      No avatar videos yet. Create your first one above!
+                    </div>
+                  )}
+                </div>
+              </div>
+            </div>
+          ) : activeTab === "video" ? (
             <div className="space-y-8">
               {/* Video generation form */}
               <div className="relative">
