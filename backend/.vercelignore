@@ -1,0 +1,37 @@
+# Development and test files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+.env.local
+.env.development.local
+tests/
+test_*.py
+
+# Virtual environments
+venv/
+env/
+ENV/
+
+# IDE files
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Version control
+.git/
+.gitignore
+
+# Local configuration
+.env
+
+# Documentation
+docs/
+*.md
+!README.md
+
+# Docker related
+Dockerfile
+docker-compose.yml 
