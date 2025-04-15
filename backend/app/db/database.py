@@ -38,3 +38,22 @@ if ENABLE_DATABASE:
 
 # Create Base class for declarative models
 Base = declarative_base()
+
+def get_db() -> Generator[Session, None, None]:
+    """
+    Get a database session.
+    
+    Yields:
+        Session: SQLAlchemy session
+    """
+    if not ENABLE_DATABASE:
+        logger.warning("Database operations skipped: No database connection.")
+        return None
+        
+    db = SessionLocal()
+    try:
+        yield db
+    finally:
+        db.close()
+
+
