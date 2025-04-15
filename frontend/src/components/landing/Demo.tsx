@@ -1,6 +1,8 @@
 "use client";
 import React, { useState } from "react";
 import { motion } from "framer-motion";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
 
 type VideoStyle = "cinematic" | "3d-animation" | "realistic" | "stylized";
 type CameraMotion = "slow-zoom" | "orbit" | "fixed" | "pan";
@@ -75,45 +77,33 @@ export function Demo() {
                 
                 <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
                   <div>
-                    <label className="block text-amber-400 mb-2 text-sm font-medium">Video Style</label>
-                    <div className="relative">
-                      <select
-                        value={videoStyle}
-                        onChange={(e) => setVideoStyle(e.target.value as VideoStyle)}
-                        className="w-full appearance-none bg-white/5 text-white border border-white/10 rounded-xl p-4 pr-10 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all"
-                      >
-                        <option value="cinematic">Cinematic</option>
-                        <option value="3d-animation">3D Animation</option>
-                        <option value="realistic">Realistic</option>
-                        <option value="stylized">Stylized</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
+                    <Label className="text-amber-400 mb-2">Video Style</Label>
+                    <Select value={videoStyle} onValueChange={(value) => setVideoStyle(value as VideoStyle)}>
+                      <SelectTrigger className="w-full bg-white/5 text-white border border-white/10 rounded-xl p-4 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all">
+                        <SelectValue placeholder="Select video style" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1c1c1c] border-white/10">
+                        <SelectItem value="cinematic">Cinematic</SelectItem>
+                        <SelectItem value="3d-animation">3D Animation</SelectItem>
+                        <SelectItem value="realistic">Realistic</SelectItem>
+                        <SelectItem value="stylized">Stylized</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                   
                   <div>
-                    <label className="block text-amber-400 mb-2 text-sm font-medium">Camera Motion</label>
-                    <div className="relative">
-                      <select
-                        value={cameraMotion}
-                        onChange={(e) => setCameraMotion(e.target.value as CameraMotion)}
-                        className="w-full appearance-none bg-white/5 text-white border border-white/10 rounded-xl p-4 pr-10 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all"
-                      >
-                        <option value="slow-zoom">Slow Zoom</option>
-                        <option value="orbit">Orbit</option>
-                        <option value="fixed">Fixed</option>
-                        <option value="pan">Pan</option>
-                      </select>
-                      <div className="absolute inset-y-0 right-0 flex items-center pr-4 pointer-events-none">
-                        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-                          <path d="M4 6L8 10L12 6" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                      </div>
-                    </div>
+                    <Label className="text-amber-400 mb-2">Camera Motion</Label>
+                    <Select value={cameraMotion} onValueChange={(value) => setCameraMotion(value as CameraMotion)}>
+                      <SelectTrigger className="w-full bg-white/5 text-white border border-white/10 rounded-xl p-4 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all">
+                        <SelectValue placeholder="Select camera motion" />
+                      </SelectTrigger>
+                      <SelectContent className="bg-[#1c1c1c] border-white/10">
+                        <SelectItem value="slow-zoom">Slow Zoom</SelectItem>
+                        <SelectItem value="orbit">Orbit</SelectItem>
+                        <SelectItem value="fixed">Fixed</SelectItem>
+                        <SelectItem value="pan">Pan</SelectItem>
+                      </SelectContent>
+                    </Select>
                   </div>
                 </div>
                 
