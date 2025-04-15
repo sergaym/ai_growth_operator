@@ -175,3 +175,15 @@ async def train_avatar_group(group_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error training avatar group: {str(e)}")
 
+@router.get("/photo-avatar/group/train/{job_id}", response_model=Dict[str, Any])
+async def check_training_status(job_id: str) -> Dict[str, Any]:
+    """
+    Check the status of avatar group training.
+    
+    Returns the current status of the training job.
+    """
+    try:
+        return heygen_service.check_training_status(job_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking training status: {str(e)}")
+
