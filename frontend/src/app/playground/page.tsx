@@ -185,40 +185,6 @@ export default function Playground() {
       )
     );
   };
-  
-  // Original handler for video generation
-  const handleVideoGeneration = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newVideoPrompt.trim()) return;
-    
-    setIsVideoGenerating(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const newVideo: VideoGeneration = {
-        id: `vid-${Date.now()}`,
-        prompt: newVideoPrompt,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      };
-      
-      setVideoGenerations([newVideo, ...videoGenerations]);
-      setNewVideoPrompt("");
-      setIsVideoGenerating(false);
-      
-      // Simulate video completion after some time
-      setTimeout(() => {
-        setVideoGenerations(prev => 
-          prev.map(video => 
-            video.id === newVideo.id 
-              ? {...video, status: "completed", videoUrl: "/demo-video.mp4"} 
-              : video
-          )
-        );
-      }, 8000);
-    }, 2000);
-  };
 
   return (
     <div className="min-h-screen bg-[#030712] text-white">
