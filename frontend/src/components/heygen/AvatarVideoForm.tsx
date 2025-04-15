@@ -196,44 +196,20 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
               </Select>
             </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="voice-speed" className="text-amber-400">Voice Speed</Label>
-                <Input
-                  id="voice-speed"
-                  type="number"
-                  value={formData.voice_speed || 1.0}
-                  onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
-                  min="0.5"
-                  max="1.5"
-                  step="0.1"
-                  className="bg-white/5 border-white/10 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                />
-              </div>
+            <div className="space-y-2">
+              <Label htmlFor="voice-speed" className="text-blue-600 font-medium">Voice Speed</Label>
+              <Input
+                id="voice-speed"
+                type="number"
+                value={formData.voice_speed || 1.0}
+                onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
+                min="0.5"
+                max="1.5"
+                step="0.1"
+                className="bg-slate-50 border-slate-200 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50"
+              />
             </div>
-          </CardContent>
-          
-          <CardFooter className="flex justify-end pt-2">
-            <Button
-              type="submit"
-              disabled={isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id}
-              className={`bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-500 hover:to-amber-600 text-white ${
-                isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id
-                  ? "opacity-50 cursor-not-allowed"
-                  : "shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-1px]"
-              }`}
-            >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
-              ) : (
-                "Generate Avatar Video"
-              )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+          </div>
+        </CardContent>
   );
 } 
