@@ -58,45 +58,8 @@ export function Header() {
                 <path d="M8 17H16" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
               Playground
-            </Link>
-            <Link 
-              href="#" 
-              className="px-4 py-2 rounded-lg bg-white/[0.07] border border-white/10 hover:bg-white/[0.1] transition-colors text-sm font-medium text-white"
-            >
-              Contact Us
-            </Link>
-            <Link 
-              href="#" 
-              className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-sm font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30"
-            >
-              Get Started
-            </Link>
-          </div>
-
-          {/* Mobile Menu Button */}
-          <button 
-            className="md:hidden z-10 w-10 h-10 flex items-center justify-center bg-white/[0.05] backdrop-blur-sm border border-white/10 rounded-xl"
-            onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-            aria-label="Toggle menu"
-          >
-            <div className="w-6 h-6 flex flex-col items-center justify-center relative">
-              <span 
-                className={`block w-5 h-0.5 bg-white absolute transition-all duration-300 ${
-                  isMobileMenuOpen ? "rotate-45 translate-y-0" : "-translate-y-1.5"
-                }`}
-              ></span>
-              <span 
-                className={`block w-5 h-0.5 bg-white absolute transition-all duration-300 ${
-                  isMobileMenuOpen ? "opacity-0" : "opacity-100"
-                }`}
-              ></span>
-              <span 
-                className={`block w-5 h-0.5 bg-white absolute transition-all duration-300 ${
-                  isMobileMenuOpen ? "-rotate-45 translate-y-0" : "translate-y-1.5"
-                }`}
-              ></span>
-            </div>
-          </button>
+            </Button>
+          </Link>
         </div>
       </div>
 
