@@ -100,3 +100,38 @@ async def generate_video_from_idea(request: GenerateVideoFromIdeaRequest, backgr
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating video: {str(e)}")
 
+@router.post("/generate-with-references", response_model=VideoGenerationResponse)
+async def generate_video_with_references_endpoint(
+    request: GenerateVideoWithReferencesRequest, 
+    background_tasks: BackgroundTasks
+) -> Dict[str, Any]:
+    """
+    Generate a video with specific reference media (images/videos)
+    
+    This endpoint allows you to provide specific images or videos as references
+    for style, composition, or content of the generated video. The generation is
+    asynchronous, and the response includes a generation ID that can be used to
+    check the status.
+    """
+    try:
+        # Convert the media references and settings to dictionaries
+        media_refs = [ref.dict() for ref in request.media_references]
+        settings = request.settings.dict()
+        
+        # Initiate the video generation
+        result = generate_video_with_references(
+            prompt=request.prompt,
+            media_references=media_refs,
+            settings=settings
+        )
+        
+        # Start a background task to wait for video completion
+        background_tasks.add_task(
+            wait_for_video_completion, 
+            generation_id=result["generation_id"]
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating video with references: {str(e)}")
+        
