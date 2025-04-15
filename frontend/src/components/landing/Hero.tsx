@@ -28,19 +28,19 @@ export function Hero() {
         </div>
 
         {/* Main content with split view like ramp.com */}
-        <div className="flex flex-col lg:flex-row items-center justify-between gap-16 pt-4">
+        <div className="flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-16 pt-4">
           {/* Left content - Text and CTA */}
           <motion.div 
             initial={{ opacity: 0, x: -10 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ duration: 0.7 }}
-            className="flex-1 text-center lg:text-left"
+            className="flex-1 text-center lg:text-left max-w-xl mx-auto lg:mx-0"
           >
             <motion.h1 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.2 }}
-              className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-8 leading-[1.1] tracking-tight"
+              className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight"
             >
               <span className="text-white">
                 Automate
@@ -55,7 +55,7 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-lg text-zinc-400 mb-10 max-w-xl mx-auto lg:mx-0"
+              className="text-lg text-zinc-400 mb-10"
             >
               An intelligent AI agent that runs your user acquisition campaigns end-to-end, optimizing in real-time for maximum ROI.
             </motion.p>
@@ -64,11 +64,11 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.6 }}
-              className="flex flex-col sm:flex-row gap-4 mt-8"
+              className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
               <Link
                 href="/playground"
-                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] flex items-center justify-center gap-2"
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] flex items-center justify-center gap-2 w-full sm:w-auto"
               >
                 <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                   <path d="M17.13 7.9799L5.5 7.9999C3 7.9999 2 8.9999 2 11.4999V16.9999C2 19.4999 3 20.4999 5.5 20.4999H12.5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
@@ -79,7 +79,7 @@ export function Hero() {
               </Link>
               <Link
                 href="#features"
-                className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white flex items-center justify-center"
+                className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white flex items-center justify-center w-full sm:w-auto"
               >
                 Learn More
               </Link>
