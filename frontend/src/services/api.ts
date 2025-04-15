@@ -6,22 +6,18 @@ import {
   HeygenVideoGenerationRequest, 
   HeygenVideoResponse 
 } from "@/types/heygen";
-
-// Base URL that we can easily change for production
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
+import { API_BASE_URL, HEYGEN_API } from "@/config/api";
 
 /**
  * Helper function for making API requests
- * @param endpoint - The API endpoint to call (starting with /)
+ * @param url - The complete API URL
  * @param options - Fetch API options
  * @returns The parsed JSON response
  */
 async function fetchFromAPI<T>(
-  endpoint: string, 
+  url: string, 
   options: RequestInit = {}
 ): Promise<T> {
-  const url = `${API_BASE_URL}${endpoint}`;
-  
   const defaultHeaders = {
     'Content-Type': 'application/json',
   };
@@ -40,27 +36,27 @@ async function fetchFromAPI<T>(
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
       const errorMessage = errorData.detail || `API Error: ${response.status} - ${response.statusText}`;
-      console.error(`API error for ${endpoint}:`, errorMessage);
+      console.error(`API error for ${url}:`, errorMessage);
       throw new Error(errorMessage);
     }
     
     const responseData = await response.json();
-    console.log(`API response from ${endpoint}:`, responseData);
+    console.log(`API response from ${url}:`, responseData);
     return responseData;
   } catch (error) {
     // Enhanced error handling for network issues
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
       console.error(`Network error for ${url}:`, error);
-      throw new Error(`Unable to connect to the API at ${API_BASE_URL}. Please ensure the backend server is running.`);
+      throw new Error(`Unable to connect to the API at ${API_BASE_URL}. Please check your internet connection and ensure the API is available.`);
     }
     
     // Handle other fetch errors
     if (error instanceof Error) {
-      console.error(`API request failed for endpoint ${endpoint}:`, error);
+      console.error(`API request failed for URL ${url}:`, error);
       throw error;
     }
     
-    throw new Error(`Unknown error during API request to ${endpoint}`);
+    throw new Error(`Unknown error during API request to ${url}`);
   }
 }
 
@@ -71,7 +67,7 @@ export const heygenAPI = {
   // List available avatars
   listAvatars: async (): Promise<HeygenAvatar[]> => {
     try {
-      return await fetchFromAPI<HeygenAvatar[]>('/v1/video/heygen/avatars');
+      return await fetchFromAPI<HeygenAvatar[]>(HEYGEN_API.AVATARS);
     } catch (error) {
       console.error('Failed to fetch avatars:', error);
       throw error;
@@ -81,7 +77,7 @@ export const heygenAPI = {
   // List available voices
   listVoices: async (): Promise<HeygenVoice[]> => {
     try {
-      return await fetchFromAPI<HeygenVoice[]>('/v1/video/heygen/voices');
+      return await fetchFromAPI<HeygenVoice[]>(HEYGEN_API.VOICES);
     } catch (error) {
       console.error('Failed to fetch voices:', error);
       throw error;
@@ -104,7 +100,7 @@ export const heygenAPI = {
         avatar_style: data.avatar_style || 'normal'
       };
       
-      return await fetchFromAPI<HeygenVideoResponse>('/v1/video/heygen/generate-avatar-video', {
+      return await fetchFromAPI<HeygenVideoResponse>(HEYGEN_API.GENERATE_AVATAR_VIDEO, {
         method: 'POST',
         body: JSON.stringify(requestData),
       });
@@ -117,7 +113,7 @@ export const heygenAPI = {
   // Check video status
   checkVideoStatus: async (videoId: string): Promise<HeygenVideoResponse> => {
     try {
-      return await fetchFromAPI<HeygenVideoResponse>(`/v1/video/heygen/status/${videoId}`);
+      return await fetchFromAPI<HeygenVideoResponse>(HEYGEN_API.VIDEO_STATUS(videoId));
     } catch (error) {
       console.error(`Failed to check status for video ${videoId}:`, error);
       throw error;
