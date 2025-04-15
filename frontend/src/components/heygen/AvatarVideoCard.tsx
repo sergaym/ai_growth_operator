@@ -19,9 +19,10 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
   // Start polling when component mounts if status is not completed or failed
   useEffect(() => {
     if (generation.status !== 'completed' && generation.status !== 'failed' && !isPolling) {
+      console.log(`Starting polling for video ${generation.id} in AvatarVideoCard`);
       startPolling();
     }
-  }, [generation.status, isPolling, startPolling]);
+  }, [generation.status, generation.id, isPolling, startPolling]);
   
   // Update parent when status changes
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
       videoStatus.status !== generation.status ||
       videoStatus.video_url !== generation.videoUrl
     )) {
+      console.log(`Updating video ${generation.id} status to ${videoStatus.status}`);
       onUpdate({
         ...generation,
         status: videoStatus.status,
@@ -55,6 +57,9 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
     }
   };
   
+  // Handle video errors or missing URL for completed videos
+  const hasVideoError = generation.status === 'completed' && !generation.videoUrl;
+  
   return (
     <div className="bg-white border border-slate-200 rounded-xl overflow-hidden shadow-sm hover:shadow-md transition-shadow duration-200">
       <div className="aspect-video relative">
@@ -67,6 +72,7 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
             loop
             muted
             poster={generation.thumbnailUrl}
+            onError={(e) => console.error(`Error loading video ${generation.id}:`, e)}
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-slate-50">
@@ -83,7 +89,14 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
             ) : (
               <div className="text-red-500 text-center p-4">
                 <p className="font-medium">Generation failed</p>
-                {generation.error && <div className="text-sm mt-2 bg-red-50 p-2 rounded-md">{generation.error}</div>}
+                {generation.error && (
+                  <div className="text-sm mt-2 bg-red-50 p-2 rounded-md">{generation.error}</div>
+                )}
+                {hasVideoError && !generation.error && (
+                  <div className="text-sm mt-2 bg-red-50 p-2 rounded-md">
+                    Video URL not available
+                  </div>
+                )}
               </div>
             )}
           </div>
