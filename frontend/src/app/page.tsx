@@ -1,3 +1,4 @@
+"use client";
 import React from "react";
 import { Hero } from "@/components/landing/Hero";
 import { Features } from "@/components/landing/Features";
@@ -6,6 +7,8 @@ import { Demo } from "@/components/landing/Demo";
 import { TechStack } from "@/components/landing/TechStack";
 import { Footer } from "@/components/landing/Footer";
 import { Header } from "@/components/landing/Header";
+import { PageBackground } from "@/components/ui/PageBackground";
+import "./globals.css";
 
 export default function Home() {
   return (
