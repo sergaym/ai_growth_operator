@@ -463,5 +463,43 @@ class HeygenService:
         except requests.RequestException as e:
             logger.error(f"Error adding motion to avatar: {str(e)}")
             raise Exception(f"Failed to add motion to avatar: {str(e)}")
+    
+    def add_sound_effect(
+        self,
+        avatar_id: str,
+        sound_type: str
+    ) -> Dict[str, Any]:
+        """
+        Add sound effect to a photo avatar.
+        
+        Args:
+            avatar_id: The ID of the photo avatar
+            sound_type: Type of sound effect to add
+            
+        Returns:
+            Dict containing the result
+        """
+        url = f"{self.base_url}/v2/photo_avatar/sound_effect"
+        
+        payload = {
+            "avatar_id": avatar_id,
+            "sound_type": sound_type
+        }
+        
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error adding sound effect to avatar: {str(e)}")
+            raise Exception(f"Failed to add sound effect to avatar: {str(e)}")
+
+
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
