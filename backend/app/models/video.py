@@ -36,13 +36,17 @@ class VideoGeneration(Base):
     video_url = Column(String(500), nullable=True)
     preview_url = Column(String(500), nullable=True)
     thumbnail_url = Column(String(500), nullable=True)
-    metadata = Column(JSON, nullable=True)
+    metadata_json = Column(JSON, nullable=True)
     
     # Timestamps
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     completed_at = Column(DateTime, nullable=True)
     
+    # Relationship with avatar videos
+    heygen_avatar_videos = relationship("HeygenAvatarVideo", back_populates="video_generation")
+    
     def __repr__(self):
         """String representation of the video generation."""
-        return f"<VideoGeneration {self.generation_id}: {self.status}>" 
+        return f"<VideoGeneration {self.generation_id}: {self.status}>"
+
