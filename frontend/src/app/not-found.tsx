@@ -49,3 +49,19 @@ export default function NotFound() {
             </Link>
           </div>
           
+          {/* Decorative elements */}
+          <div className="mt-12 flex justify-center space-x-1">
+            {[...Array(5)].map((_, i) => (
+              <div 
+                key={i}
+                className={`w-2 h-2 rounded-full ${
+                  i === 2 ? 'bg-blue-500' : 'bg-slate-300'
+                }`}
+              ></div>
+            ))}
+          </div>
+        </motion.div>
+      </div>
+    </div>
+  );
+} 
