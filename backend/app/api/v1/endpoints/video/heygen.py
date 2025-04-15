@@ -129,3 +129,15 @@ async def generate_photo_avatar(request: HeygenGeneratePhotoAvatarRequest) -> Di
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating photo avatar: {str(e)}")
 
+@router.get("/photo-avatar/status/{generation_id}", response_model=Dict[str, Any])
+async def check_photo_avatar_status(generation_id: str) -> Dict[str, Any]:
+    """
+    Check the status of an avatar photo generation.
+    
+    Returns the current status of the generation, and if completed, includes the image URLs.
+    """
+    try:
+        return heygen_service.check_photo_generation_status(generation_id)
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking photo avatar status: {str(e)}")
+
