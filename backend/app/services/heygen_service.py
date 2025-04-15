@@ -210,6 +210,64 @@ class HeygenService:
             # Wait before checking again
             time.sleep(interval)
 
+    # Photo Avatar Methods
+    
+    def generate_avatar_photos(
+        self,
+        name: str,
+        age: str,
+        gender: str,
+        ethnicity: str,
+        orientation: str = "horizontal",
+        pose: str = "half_body",
+        style: str = "Realistic",
+        appearance: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Generate AI avatar photos based on specified attributes.
+        
+        Args:
+            name: Name for the avatar
+            age: Age group (e.g., "Young Adult", "Adult", "Senior")
+            gender: Gender of avatar (e.g., "Woman", "Man")
+            ethnicity: Ethnicity (e.g., "Asian American", "African American", "European")
+            orientation: Image orientation ("horizontal" or "vertical")
+            pose: Avatar pose ("half_body", "full_body", "head")
+            style: Visual style ("Realistic", "Stylized", etc.)
+            appearance: Detailed prompt describing the avatar's appearance
+            
+        Returns:
+            Dict containing the generation_id for the avatar photos
+        """
+        url = f"{self.base_url}/v2/photo_avatar/photo/generate"
+        
+        payload = {
+            "name": name,
+            "age": age,
+            "gender": gender,
+            "ethnicity": ethnicity,
+            "orientation": orientation,
+            "pose": pose,
+            "style": style,
+            "appearance": appearance
+        }
+        
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return {
+                "generation_id": data.get("data", {}).get("generation_id")
+            }
+        except requests.RequestException as e:
+            logger.error(f"Error generating avatar photos: {str(e)}")
+            raise Exception(f"Failed to generate avatar photos: {str(e)}")
+    
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
