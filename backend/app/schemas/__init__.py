@@ -28,7 +28,7 @@ from .video_schemas import (
     VideoGenerationResponse,
     MediaReference,
     GenerateVideoWithReferencesRequest,
-    # New Heygen schemas
+    # Heygen schemas
     HeygenGenerateAvatarVideoRequest,
     HeygenAvatarResponse,
     HeygenVoiceResponse,
