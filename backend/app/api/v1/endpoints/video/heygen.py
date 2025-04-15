@@ -103,3 +103,29 @@ async def get_heygen_video_status(video_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error checking Heygen video status: {str(e)}")
 
+# Photo Avatar endpoints
+
+@router.post("/photo-avatar/generate", response_model=HeygenPhotoAvatarResponse)
+async def generate_photo_avatar(request: HeygenGeneratePhotoAvatarRequest) -> Dict[str, Any]:
+    """
+    Generate AI avatar photos based on specified attributes.
+    
+    This endpoint creates AI-generated avatar photos with customizable attributes
+    such as age, gender, ethnicity, pose, and appearance.
+    """
+    try:
+        result = heygen_service.generate_avatar_photos(
+            name=request.name,
+            age=request.age,
+            gender=request.gender,
+            ethnicity=request.ethnicity,
+            orientation=request.orientation,
+            pose=request.pose,
+            style=request.style,
+            appearance=request.appearance
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating photo avatar: {str(e)}")
+
