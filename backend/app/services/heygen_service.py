@@ -8,6 +8,9 @@ import time
 import logging
 from typing import Dict, Any, List, Optional
 
+from app.repositories import create_heygen_avatar_video, update_heygen_avatar_video
+from app.models import VideoStatus
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -123,9 +126,31 @@ class HeygenService:
             if data.get("error"):
                 logger.error(f"Heygen API error: {data.get('error')}")
                 raise Exception(f"Heygen API error: {data.get('error')}")
+            
+            video_id = data.get("data", {}).get("video_id")
+            
+            # Use the specialized repository function to store both the video generation
+            # and the avatar-specific details
+            start_time = time.time()
+            video_record = create_heygen_avatar_video(
+                generation_id=video_id,
+                prompt=prompt,
+                avatar_id=avatar_id,
+                voice_id=voice_id,
+                background_color=background_color,
+                width=width,
+                height=height,
+                voice_speed=voice_speed,
+                voice_pitch=voice_pitch,
+                avatar_style=avatar_style,
+                callback_url=callback_url
+            )
+            
+            if not video_record:
+                logger.warning(f"Failed to store Heygen avatar video record for ID {video_id}")
                 
             return {
-                "video_id": data.get("data", {}).get("video_id"),
+                "video_id": video_id,
                 "status": "pending"
             }
         except requests.RequestException as e:
@@ -154,20 +179,54 @@ class HeygenService:
                 logger.error(f"Heygen API error: {data.get('message')}")
                 raise Exception(f"Heygen API error: {data.get('message')}")
             
-            result = {
-                "video_id": video_id,
-                "status": data.get("data", {}).get("status", "unknown")
+            api_status = data.get("data", {}).get("status", "unknown")
+            
+            # Map API status to our VideoStatus enum
+            status_map = {
+                "pending": VideoStatus.as_value(VideoStatus.PROCESSING),
+                "processing": VideoStatus.as_value(VideoStatus.PROCESSING),
+                "completed": VideoStatus.as_value(VideoStatus.COMPLETED),
+                "failed": VideoStatus.as_value(VideoStatus.FAILED)
+            }
+            db_status = status_map.get(api_status, VideoStatus.as_value(VideoStatus.PROCESSING))
+            
+            # Prepare update data
+            update_data = {
+                "status": db_status
             }
             
-            # Add additional fields if video is completed
-            if result["status"] == "completed":
+            # Additional data based on status
+            if api_status == "completed":
+                update_data.update({
+                    "video_url": data.get("data", {}).get("video_url"),
+                    "thumbnail_url": data.get("data", {}).get("thumbnail_url"),
+                    "duration": str(data.get("data", {}).get("duration", 0)) + "s",
+                    "processing_time": time.time() - data.get("data", {}).get("create_time", time.time())
+                })
+            elif api_status == "failed":
+                error_data = data.get("data", {}).get("error", {})
+                update_data["error_details"] = {
+                    "code": error_data.get("code"),
+                    "message": error_data.get("message"),
+                    "detail": error_data.get("detail")
+                }
+            
+            # Update both record types using the specialized repository
+            update_heygen_avatar_video(video_id, **update_data)
+            
+            result = {
+                "video_id": video_id,
+                "status": api_status
+            }
+            
+            # Add additional fields to the result
+            if api_status == "completed":
                 result.update({
                     "video_url": data.get("data", {}).get("video_url"),
                     "thumbnail_url": data.get("data", {}).get("thumbnail_url"),
                     "duration": data.get("data", {}).get("duration")
                 })
-            # Add error details if video failed
-            elif result["status"] == "failed":
+            elif api_status == "failed":
                 error_data = data.get("data", {}).get("error", {})
                 result["error"] = {
                     "code": error_data.get("code"),
@@ -197,6 +256,12 @@ class HeygenService:
         while True:
             elapsed = time.time() - start_time
             if elapsed > timeout:
+                # Update record to failed status with timeout message
+                update_heygen_avatar_video(
+                    video_id, 
+                    status=VideoStatus.as_value(VideoStatus.FAILED), 
+                    error_details={"message": f"Video generation timed out after {timeout} seconds"}
+                )
                 raise TimeoutError(f"Video generation timed out after {timeout} seconds")
             
             status = self.check_video_status(video_id)

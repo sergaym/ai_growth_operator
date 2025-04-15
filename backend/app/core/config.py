@@ -38,6 +38,22 @@ class Settings(BaseSettings):
     # Database Configuration
     DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
     
+    @validator("DATABASE_URL", pre=True)
+    def validate_database_url(cls, v: Optional[str]) -> Optional[str]:
+        """
+        Ensure database URL has the correct dialect name.
+        
+        PostgreSQL URLs may sometimes use 'postgres://' which is not recognized by SQLAlchemy.
+        This validator corrects it to 'postgresql://'
+        """
+        if not v:
+            return v
+        
+        if v.startswith("postgres://"):
+            return v.replace("postgres://", "postgresql://", 1)
+        
+        return v
+    
     # OpenAI Settings
     DEFAULT_GPT_MODEL: str = "gpt-4"
     
