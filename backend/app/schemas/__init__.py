@@ -33,6 +33,14 @@ from .video_schemas import (
     HeygenAvatarResponse,
     HeygenVoiceResponse,
     HeygenVideoResponse,
+    # Photo Avatar schemas
+    HeygenGeneratePhotoAvatarRequest,
+    HeygenPhotoAvatarResponse,
+    HeygenCreateAvatarGroupRequest,
+    HeygenTrainAvatarGroupResponse,
+    HeygenGenerateAvatarLooksRequest,
+    HeygenAddMotionRequest,
+    HeygenAddSoundEffectRequest,
 )
 
 # Styles schemas
