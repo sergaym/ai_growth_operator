@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 interface AvatarVideoFormProps {
   onVideoGenerated: (formData: HeygenVideoGenerationRequest) => Promise<any>;
@@ -24,6 +24,10 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     avatar_style: 'normal',
     voice_speed: 1.0,
   });
+
+  // Form submission state
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [lastAttempt, setLastAttempt] = useState<HeygenVideoGenerationRequest | null>(null);
 
   // Form validation state
   const [validationErrors, setValidationErrors] = useState<{
@@ -55,6 +59,11 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
         ...prev,
         [name]: undefined
       }));
+    }
+
+    // Clear submission error when form changes
+    if (submissionError) {
+      setSubmissionError(null);
     }
   };
 
@@ -94,9 +103,12 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     }
     
     console.log('Avatar form submitted with data:', formData);
+    setSubmissionError(null);
     
     try {
       console.log('Calling onVideoGenerated with:', formData);
+      setLastAttempt(formData);
+      
       // Call the parent function with the form data
       await onVideoGenerated(formData);
       
@@ -104,11 +116,55 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
       setFormData(prev => ({ ...prev, prompt: '' }));
     } catch (error) {
       console.error('Failed to generate video:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error generating video';
+      setSubmissionError(errorMessage);
+    }
+  };
+
+  // Retry last submission
+  const handleRetry = async () => {
+    if (!lastAttempt) return;
+    
+    setSubmissionError(null);
+    
+    try {
+      console.log('Retrying video generation with:', lastAttempt);
+      
+      // Call the parent function with the previous attempt
+      await onVideoGenerated(lastAttempt);
+    } catch (error) {
+      console.error('Failed to generate video during retry:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error generating video';
+      setSubmissionError(errorMessage);
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
+      {/* API Error message */}
+      {submissionError && (
+        <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start">
+          <AlertCircle className="text-[#e03e21] mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-[#e03e21] font-medium text-sm mb-1">Error submitting request</p>
+            <p className="text-[#86372f] text-sm">{submissionError}</p>
+            {lastAttempt && (
+              <Button 
+                type="button"
+                variant="outline"
+                size="sm" 
+                onClick={handleRetry}
+                className="mt-2 border-[#ffc1ba] text-[#e03e21] hover:bg-[#fff1f0] inline-flex items-center"
+                disabled={isGenerating}
+              >
+                <RefreshCw className="mr-1 h-3 w-3" />
+                Retry Request
+              </Button>
+            )}
+          </div>
+        </div>
+      )}
+
       {/* Script textarea */}
       <div className="space-y-2">
         <Label htmlFor="prompt" className="text-[#37352f] font-medium text-sm">Script</Label>
