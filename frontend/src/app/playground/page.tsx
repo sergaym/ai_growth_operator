@@ -32,7 +32,7 @@ type AdCampaign = {
 };
 
 export default function Playground() {
-  // State for tabs and content
+  // State for tabs and content - Fixed to "avatarVideo"
   const [activeTab, setActiveTab] = useState<"video" | "avatarVideo" | "campaigns">("avatarVideo");
   
   // HeyGen API hooks
@@ -71,23 +71,6 @@ export default function Playground() {
   
   // State for error display
   const [apiError, setApiError] = useState<string | null>(null);
-  
-  // Mock data for videos (kept for compatibility)
-  const [videoGenerations, setVideoGenerations] = useState<VideoGeneration[]>([
-    {
-      id: "vid-1",
-      prompt: "A futuristic city with flying cars and neon lights",
-      status: "completed",
-      createdAt: "2024-06-10T14:30:00Z",
-      videoUrl: "/demo-video.mp4",
-    },
-    {
-      id: "vid-2",
-      prompt: "Product showcase for a smart watch with holographic display",
-      status: "pending",
-      createdAt: "2024-06-10T15:45:00Z",
-    },
-  ]);
   
   // State for HeyGen avatar videos
   const [avatarVideos, setAvatarVideos] = useState<TrackedVideoGeneration[]>([]);
