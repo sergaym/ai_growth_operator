@@ -127,3 +127,11 @@ class HeygenGenerateAvatarLooksRequest(BaseModel):
     group_id: str = Field(..., description="ID of the trained avatar group")
     prompt: str = Field(..., description="Text description of the desired look")
     num_images: int = Field(4, description="Number of variations to generate (1-4)", ge=1, le=4)
+
+class HeygenAddMotionRequest(BaseModel):
+    """Request schema for adding motion to an avatar."""
+    motion_type: str = Field(..., description="Type of motion to add ('talking', 'nodding', etc.)")
+
+class HeygenAddSoundEffectRequest(BaseModel):
+    """Request schema for adding sound effects to an avatar."""
+    sound_type: str = Field(..., description="Type of sound effect to add") 
