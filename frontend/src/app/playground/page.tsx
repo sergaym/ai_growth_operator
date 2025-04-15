@@ -196,18 +196,18 @@ export default function Playground() {
       </div>
       
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#030712]/80 backdrop-blur-md border-b border-white/5">
+      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
         <div className="container max-w-7xl mx-auto px-6">
           <div className="h-16 flex items-center justify-between">
             {/* Logo and title */}
             <Link href="/" className="flex items-center gap-3">
               <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-tr from-red-500 to-amber-500"></div>
-                <div className="absolute inset-[2px] bg-[#030712] rounded-md flex items-center justify-center text-white font-bold">
+                <div className="absolute inset-0 rounded-lg bg-gradient-to-tr from-blue-500 to-cyan-400"></div>
+                <div className="absolute inset-[2px] bg-white rounded-md flex items-center justify-center text-blue-600 font-bold">
                   A
                 </div>
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
+              <span className="text-lg font-bold text-slate-800 tracking-tight">
                 AI Growth Operator
               </span>
             </Link>
