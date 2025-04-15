@@ -388,6 +388,44 @@ class HeygenService:
         except requests.RequestException as e:
             logger.error(f"Error checking training status: {str(e)}")
             raise Exception(f"Failed to check training status: {str(e)}")
-
+    
+    def generate_avatar_looks(
+        self,
+        group_id: str,
+        prompt: str,
+        num_images: int = 4
+    ) -> Dict[str, Any]:
+        """
+        Generate new looks for an avatar based on a text prompt.
+        
+        Args:
+            group_id: The ID of the trained avatar group
+            prompt: Text description of the desired look
+            num_images: Number of variations to generate (1-4)
+            
+        Returns:
+            Dict containing the generation ID
+        """
+        url = f"{self.base_url}/v2/photo_avatar/look/generate"
+        
+        payload = {
+            "group_id": group_id,
+            "prompt": prompt,
+            "num_images": num_images
+        }
+        
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error generating avatar looks: {str(e)}")
+            raise Exception(f"Failed to generate avatar looks: {str(e)}")
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
