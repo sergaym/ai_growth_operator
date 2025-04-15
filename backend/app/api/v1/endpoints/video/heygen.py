@@ -7,16 +7,13 @@ from typing import Dict, Any, List, Optional
 
 from app.schemas import (
     # Avatar video schemas
-    HeygenAvatarVideoRequest,
+    HeygenGenerateAvatarVideoRequest,
     HeygenVideoResponse,
-    HeygenVoiceListResponse,
     HeygenAvatarResponse,
     HeygenVoiceResponse,
     # Photo Avatar schemas
-    HeygenPhotoAvatarRequest,
     HeygenGeneratePhotoAvatarRequest,
     HeygenPhotoAvatarResponse,
-    HeygenAvatarGroupRequest,
     HeygenCreateAvatarGroupRequest,
     HeygenTrainAvatarGroupResponse,
     HeygenGenerateAvatarLooksRequest,
@@ -56,7 +53,7 @@ async def list_heygen_voices() -> List[Dict[str, Any]]:
 
 @router.post("/generate-avatar-video", response_model=HeygenVideoResponse)
 async def generate_heygen_avatar_video(
-    request: HeygenAvatarVideoRequest,
+    request: HeygenGenerateAvatarVideoRequest,
     background_tasks: BackgroundTasks
 ) -> Dict[str, Any]:
     """
