@@ -5,44 +5,6 @@ import { motion } from "framer-motion";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
-  
-  const footerLinks = [
-    {
-      title: "Product",
-      links: [
-        { name: "Features", href: "#features" },
-        { name: "Pricing", href: "#" },
-        { name: "Documentation", href: "#" },
-        { name: "API Reference", href: "#" },
-      ],
-    },
-    {
-      title: "Company",
-      links: [
-        { name: "About", href: "#about" },
-        { name: "Blog", href: "#" },
-        { name: "Careers", href: "#" },
-        { name: "Contact", href: "#" },
-      ],
-    },
-    {
-      title: "Resources",
-      links: [
-        { name: "Community", href: "#" },
-        { name: "Partners", href: "#" },
-        { name: "Developers", href: "#" },
-        { name: "Changelog", href: "#" },
-      ],
-    },
-    {
-      title: "Legal",
-      links: [
-        { name: "Privacy", href: "#" },
-        { name: "Terms", href: "#" },
-        { name: "Security", href: "#" },
-      ],
-    },
-  ];
 
   const socialLinks = [
     {
