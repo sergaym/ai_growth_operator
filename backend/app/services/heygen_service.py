@@ -333,6 +333,36 @@ class HeygenService:
             logger.error(f"Error creating avatar group: {str(e)}")
             raise Exception(f"Failed to create avatar group: {str(e)}")
     
+    def train_avatar_group(self, group_id: str) -> Dict[str, Any]:
+        """
+        Train an avatar group to create a model.
+        
+        Args:
+            group_id: The ID of the avatar group to train
+            
+        Returns:
+            Dict containing the training job ID
+        """
+        url = f"{self.base_url}/v2/photo_avatar/group/train"
+        
+        payload = {
+            "group_id": group_id
+        }
+        
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error training avatar group: {str(e)}")
+            raise Exception(f"Failed to train avatar group: {str(e)}")
+    
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
