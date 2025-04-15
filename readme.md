@@ -28,10 +28,28 @@ The **AI Growth Operator** is a sophisticated AI agent that automates and optimi
 - **Multi-Platform Integration**: Seamless connection with all major advertising platforms
 - **Adaptive Learning**: Continuously improves based on campaign performance
 - **Dynamic Content Generation**: Creates new ad variants based on performance data
+- **Interactive Playground**: Experiment with AI capabilities directly in your browser
 
 ## 🚀 Getting Started
 
-*Coming soon...*
+1. Clone the repository:
+   ```
+   git clone <repository-url>
+   cd ai-ugc
+   ```
+
+2. Set up the backend (see Backend API section below)
+
+3. Set up the frontend:
+   ```
+   cd frontend
+   npm install
+   npm run dev
+   ```
+
+4. Visit the application at http://localhost:3000
+
+5. Try the interactive playground at http://localhost:3000/playground
 
 ## 🔗 Related Resources
 
@@ -40,6 +58,73 @@ The **AI Growth Operator** is a sophisticated AI agent that automates and optimi
 ## 📄 License
 
 This project is licensed under the MIT License - see the LICENSE file for details.
+
+# 🎨 AI Growth Operator - Frontend
+
+The frontend provides a modern, responsive user interface for the AI Growth Operator platform, showcasing its capabilities and providing an interactive experience.
+
+## Features
+
+- **Modern Landing Page**: Sleek design inspired by top tech brands
+- **Interactive Demo**: Try out video generation capabilities
+- **Playground Environment**: Experiment with AI capabilities in real-time
+- **Campaign Management Dashboard**: Monitor and optimize marketing campaigns
+- **Responsive Design**: Works seamlessly on desktop and mobile devices
+
+## Technology Stack
+
+- **Next.js**: React framework for server-rendered applications
+- **TypeScript**: Type-safe JavaScript
+- **Tailwind CSS**: Utility-first CSS framework
+- **Framer Motion**: Animation library for React
+- **Radix UI**: Accessible component primitives
+
+## Project Structure
+
+```
+frontend/
+├── public/                # Static assets
+├── src/                   # Source code
+│   ├── app/               # Next.js app directory
+│   │   ├── layout.tsx     # Root layout component
+│   │   ├── page.tsx       # Home page
+│   │   ├── globals.css    # Global styles
+│   │   └── playground/    # Playground feature
+│   │       └── page.tsx   # Playground page component
+│   ├── components/        # React components
+│   │   ├── landing/       # Landing page components
+│   │   │   ├── Hero.tsx           # Hero section
+│   │   │   ├── Features.tsx       # Features section
+│   │   │   ├── Workflow.tsx       # Workflow section
+│   │   │   ├── Demo.tsx           # Interactive demo
+│   │   │   ├── TechStack.tsx      # Technology stack
+│   │   │   ├── Footer.tsx         # Footer section
+│   │   │   └── Header.tsx         # Header with navigation
+│   │   └── ui/            # Reusable UI components
+│   │       ├── button.tsx         # Button component
+│   │       ├── card.tsx           # Card component
+│   │       ├── dialog.tsx         # Dialog component
+│   │       ├── input.tsx          # Input component
+│   │       └── hover-card.tsx     # Hover card component
+│   └── lib/               # Utility functions
+└── package.json           # Project dependencies
+```
+
+## Interactive Playground
+
+The interactive playground allows users to experiment with AI Growth Operator capabilities directly in their browser:
+
+1. **Video Generation**: Create AI-generated videos from text prompts
+   - Select video styles, camera motions, and other parameters
+   - Track generation status and view completed videos
+   - View history of previous generations
+
+2. **Campaign Management**: Experiment with the campaign dashboard
+   - View mock campaign data and performance metrics
+   - Understand how campaigns are tracked and optimized
+   - Explore the visualizations and reporting features
+
+Access the playground at `/playground` when running the application.
 
 # AI Growth Operator - Backend API
 
@@ -336,3 +421,82 @@ This integrated approach allows for a one-step process from idea to localized co
 ## License
 
 MIT License - See LICENSE file for details.
+
+## HeyGen Custom Avatar Creation
+
+The AI Growth Operator now supports creating custom avatars from images using HeyGen's Photo Avatar API. This allows you to generate highly customized and realistic avatars based on text prompts or existing images, which can then be used in video generation.
+
+### Creating Custom Avatars
+
+The process for creating custom avatars involves several steps:
+
+1. **Generate AI Avatar Photos**: Create a set of AI-generated photos with customizable attributes like age, gender, ethnicity, and appearance.
+
+   ```
+   POST /api/v1/video/heygen/photo-avatar/generate
+   ```
+
+   Example request:
+   ```json
+   {
+     "name": "Executive Jane",
+     "age": "Young Adult",
+     "gender": "Woman",
+     "ethnicity": "Asian American",
+     "orientation": "horizontal",
+     "pose": "half_body",
+     "style": "Realistic",
+     "appearance": "A professional female executive in a business suit standing in a modern office environment"
+   }
+   ```
+
+2. **Check Generation Status**: Monitor the photo generation process until completion.
+
+   ```
+   GET /api/v1/video/heygen/photo-avatar/status/{generation_id}
+   ```
+
+3. **Create Avatar Group**: Group the generated photos into an avatar group.
+
+   ```
+   POST /api/v1/video/heygen/photo-avatar/group
+   ```
+
+   Example request:
+   ```json
+   {
+     "name": "Executive Avatar",
+     "image_keys": ["image/4abcd1234/original", "image/5efgh5678/original"],
+     "description": "Professional business executive avatar"
+   }
+   ```
+
+4. **Train Avatar Group**: Train the avatar group to create a model that can generate variations.
+
+   ```
+   POST /api/v1/video/heygen/photo-avatar/group/{group_id}/train
+   ```
+
+5. **Generate New Looks**: Create variations of the avatar with different clothing, backgrounds, or poses.
+
+   ```
+   POST /api/v1/video/heygen/photo-avatar/looks
+   ```
+
+   Example request:
+   ```json
+   {
+     "group_id": "avatar_group_123",
+     "prompt": "The same person in casual attire at a tech conference",
+     "num_images": 4
+   }
+   ```
+
+6. **Add Motion and Sound Effects**: Enhance the avatar with motion and sound effects.
+
+   ```
+   POST /api/v1/video/heygen/photo-avatar/{avatar_id}/motion
+   POST /api/v1/video/heygen/photo-avatar/{avatar_id}/sound-effect
+   ```
+
+Once your custom avatar is created, you can use it in your video generation workflows just like any other HeyGen avatar.
