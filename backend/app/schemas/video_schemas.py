@@ -106,3 +106,13 @@ class HeygenGeneratePhotoAvatarRequest(BaseModel):
     pose: str = Field("half_body", description="Avatar pose ('half_body', 'full_body', 'head')")
     style: str = Field("Realistic", description="Visual style ('Realistic', 'Stylized', etc.)")
     appearance: str = Field(..., description="Detailed prompt describing the avatar's appearance")
+
+class HeygenPhotoAvatarResponse(BaseModel):
+    """Response schema for photo avatar generation."""
+    generation_id: str = Field(..., description="ID of the photo generation job")
+
+class HeygenCreateAvatarGroupRequest(BaseModel):
+    """Request schema for creating an avatar group."""
+    name: str = Field(..., description="Name for the avatar group")
+    image_keys: List[str] = Field(..., description="List of image keys from the generated photos")
+    description: str = Field("", description="Optional description for the avatar group")
