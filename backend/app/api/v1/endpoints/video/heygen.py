@@ -141,3 +141,22 @@ async def check_photo_avatar_status(generation_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error checking photo avatar status: {str(e)}")
 
+@router.post("/photo-avatar/group", response_model=Dict[str, Any])
+async def create_avatar_group(request: HeygenCreateAvatarGroupRequest) -> Dict[str, Any]:
+    """
+    Create an avatar group from generated photos.
+    
+    This endpoint groups photos of the same subject to create an avatar group,
+    which can then be trained to create avatars with different looks.
+    """
+    try:
+        result = heygen_service.create_avatar_group(
+            name=request.name,
+            image_keys=request.image_keys,
+            description=request.description
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error creating avatar group: {str(e)}")
+
