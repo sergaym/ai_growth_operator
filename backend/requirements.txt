@@ -9,4 +9,4 @@ pydantic-settings==2.4.0
 sqlalchemy==2.0.34
 # Add database driver (choose one based on your database)
 psycopg2-binary==2.9.9  # For PostgreSQL
-# alembic==1.13.1  # For database migrations (uncomment if needed) 
+alembic==1.13.1  # For database migrations 
