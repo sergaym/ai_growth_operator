@@ -206,3 +206,21 @@ async def generate_avatar_looks(request: HeygenGenerateAvatarLooksRequest) -> Di
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating avatar looks: {str(e)}")
 
+@router.post("/photo-avatar/{avatar_id}/motion", response_model=Dict[str, Any])
+async def add_motion_to_avatar(avatar_id: str, request: HeygenAddMotionRequest) -> Dict[str, Any]:
+    """
+    Add motion effect to a photo avatar.
+    
+    This endpoint adds animation effects like talking, nodding, or other
+    movements to make the avatar more dynamic.
+    """
+    try:
+        result = heygen_service.add_motion_to_avatar(
+            avatar_id=avatar_id,
+            motion_type=request.motion_type
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding motion to avatar: {str(e)}")
+
