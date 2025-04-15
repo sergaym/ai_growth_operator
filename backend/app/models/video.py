@@ -50,3 +50,46 @@ class VideoGeneration(Base):
         """String representation of the video generation."""
         return f"<VideoGeneration {self.generation_id}: {self.status}>"
 
+
+class HeygenAvatarVideo(Base):
+    """Heygen avatar video model for tracking avatar video generations."""
+    
+    __tablename__ = "heygen_avatar_videos"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    video_generation_id = Column(Integer, ForeignKey("video_generations.id"), nullable=False)
+    
+    # Avatar details
+    avatar_id = Column(String(100), nullable=False, index=True)
+    avatar_name = Column(String(100), nullable=True)
+    avatar_style = Column(String(50), default="normal", nullable=False)
+    
+    # Voice details
+    voice_id = Column(String(100), nullable=False)
+    voice_speed = Column(Float, default=1.0, nullable=False)
+    voice_pitch = Column(Integer, default=0, nullable=False)
+    
+    # Video settings
+    width = Column(Integer, default=1280, nullable=False)
+    height = Column(Integer, default=720, nullable=False)
+    background_color = Column(String(20), default="#f6f6fc", nullable=False)
+    
+    # Performance metrics
+    processing_time = Column(Float, nullable=True)  # Time taken to generate the video in seconds
+    
+    # Additional metadata
+    gender = Column(String(20), nullable=True)
+    language = Column(String(50), nullable=True)
+    callback_url = Column(String(500), nullable=True)
+    error_details = Column(JSON, nullable=True)  # For storing error information if generation fails
+    
+    # Relationship with base video generation
+    video_generation = relationship("VideoGeneration", back_populates="heygen_avatar_videos")
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    def __repr__(self):
+        """String representation of the Heygen avatar video."""
+        return f"<HeygenAvatarVideo {self.id}: {self.avatar_id}>" 
