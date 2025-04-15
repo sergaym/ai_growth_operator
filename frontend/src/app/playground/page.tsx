@@ -272,8 +272,56 @@ export default function Playground() {
           </div>
         </div>
         
-        {/* Content based on active tab */}
+        {/* Content - Only Avatar Video is shown */}
         <div className="min-h-[calc(100vh-300px)]">
+          <div className="space-y-8">
+            {/* Display any API errors */}
+            {apiError && (
+              <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl mb-4">
+                <p className="font-medium">Error: {apiError}</p>
+              </div>
+            )}
+            
+            {/* Avatar video generation form - show form even if API fails */}
+            <div className="relative">
+              <div className="absolute -inset-1 bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-200 rounded-2xl blur-md"></div>
+              <div className="relative bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <h3 className="text-xl font-medium mb-4 text-slate-800">Create Avatar Video</h3>
+                
+                {(loadingAvatars || loadingVoices) ? (
+                  <div className="p-8 text-center">
+                    <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
+                    <p className="text-slate-500">Loading avatars and voices...</p>
+                  </div>
+                ) : (avatarsError || voicesError) ? (
+                  <div>
+                    <div className="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-xl mb-4">
+                      <p className="font-medium">Note: Using demo data because the API connection failed</p>
+                      <p className="text-sm mt-1">{avatarsError || voicesError}</p>
+                      <button 
+                        onClick={handleRetryApiLoad}
+                        className="mt-3 px-4 py-2 bg-amber-100 hover:bg-amber-200 rounded-lg text-sm font-medium transition-colors text-amber-700"
+                      >
+                        Retry API Connection
+                      </button>
+                    </div>
+                    <AvatarVideoForm
+                      onVideoGenerated={handleAvatarVideoGenerated}
+                      avatars={avatars}
+                      voices={voices}
+                      isGenerating={isGenerating}
+                    />
+                  </div>
+                ) : (
+                  <AvatarVideoForm
+                    onVideoGenerated={handleAvatarVideoGenerated}
+                    avatars={avatars}
+                    voices={voices}
+                    isGenerating={isGenerating}
+                  />
+                )}
+              </div>
+            </div>
             
             {/* Avatar video history */}
             <div>
