@@ -224,3 +224,19 @@ async def add_motion_to_avatar(avatar_id: str, request: HeygenAddMotionRequest) 
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error adding motion to avatar: {str(e)}")
 
+@router.post("/photo-avatar/{avatar_id}/sound-effect", response_model=Dict[str, Any])
+async def add_sound_effect(avatar_id: str, request: HeygenAddSoundEffectRequest) -> Dict[str, Any]:
+    """
+    Add sound effect to a photo avatar.
+    
+    This endpoint adds sound effects to enhance the avatar's presence.
+    """
+    try:
+        result = heygen_service.add_sound_effect(
+            avatar_id=avatar_id,
+            sound_type=request.sound_type
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error adding sound effect to avatar: {str(e)}") 
