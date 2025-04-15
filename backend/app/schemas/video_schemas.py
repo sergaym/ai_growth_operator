@@ -122,3 +122,8 @@ class HeygenTrainAvatarGroupResponse(BaseModel):
     job_id: str = Field(..., description="ID of the training job")
     group_id: str = Field(..., description="ID of the avatar group being trained")
 
+class HeygenGenerateAvatarLooksRequest(BaseModel):
+    """Request schema for generating avatar looks."""
+    group_id: str = Field(..., description="ID of the trained avatar group")
+    prompt: str = Field(..., description="Text description of the desired look")
+    num_images: int = Field(4, description="Number of variations to generate (1-4)", ge=1, le=4)
