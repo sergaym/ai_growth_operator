@@ -41,8 +41,8 @@ def create_video_generation(
     Returns:
         The created VideoGeneration object, or None if creation failed
     """
-    # Ensure we're using the string value from the enum
-    status_value = status.value if isinstance(status, VideoStatus) else status
+    # Always use the string value of the status
+    status_value = VideoStatus.as_value(status)
     
     video_gen = VideoGeneration(
         generation_id=generation_id,
@@ -90,13 +90,13 @@ def update_video_generation(
             
         # Update the status if provided
         if "status" in kwargs:
-            # Ensure we're using the string value from the enum
+            # Always use the string value of the status
             status = kwargs.pop("status")
-            status_value = status.value if isinstance(status, VideoStatus) else status
+            status_value = VideoStatus.as_value(status)
             video_gen.status = status_value
             
             # Set completed_at timestamp if status is completed
-            if video_gen.status == VideoStatus.COMPLETED.value and not video_gen.completed_at:
+            if video_gen.status == VideoStatus.as_value(VideoStatus.COMPLETED) and not video_gen.completed_at:
                 video_gen.completed_at = datetime.now()
         
         # Update all other fields
