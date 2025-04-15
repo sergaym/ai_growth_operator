@@ -57,3 +57,36 @@ def get_db() -> Generator[Session, None, None]:
         db.close()
 
 
+def save_to_db(db_object, session=None):
+    """
+    Save an object to the database if database is enabled.
+    
+    Args:
+        db_object: SQLAlchemy model object to save
+        session: Optional session to use (if None, a new session is created)
+        
+    Returns:
+        The saved object, or None if database is disabled
+    """
+    if not ENABLE_DATABASE:
+        logger.info("Database operation skipped: No database connection.")
+        return None
+    
+    close_session = False
+    if session is None:
+        session = SessionLocal()
+        close_session = True
+    
+    try:
+        session.add(db_object)
+        session.commit()
+        session.refresh(db_object)
+        return db_object
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Database error: {str(e)}")
+        return None
+    finally:
+        if close_session:
+            session.close()
+
