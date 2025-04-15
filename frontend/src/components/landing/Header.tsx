@@ -17,15 +17,6 @@ export function Header() {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
-  // Navigation links
-  const navLinks = [
-    { name: "Features", href: "#features" },
-    { name: "How it Works", href: "#workflow" },
-    { name: "Demo", href: "#demo" },
-    { name: "Technology", href: "#technology" },
-    { name: "Playground", href: "/playground" },
-  ];
-
   return (
     <header 
       className={`fixed top-0 left-0 right-0 z-50 transition-all duration-300 ${
