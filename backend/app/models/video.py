@@ -16,6 +16,38 @@ class VideoStatus(str, enum.Enum):
     COMPLETED = "completed"
     FAILED = "failed"
     CANCELLED = "cancelled"
+    
+    @classmethod
+    def as_value(cls, status):
+        """
+        Ensures that a status is always used as its string value.
+        This helps avoid issues with enum serialization in the database.
+        
+        Args:
+            status: Either a VideoStatus enum or a string
+            
+        Returns:
+            The string value of the status
+        """
+        if isinstance(status, cls):
+            return status.value
+        return status
+    
+    @classmethod
+    def from_string(cls, status_str):
+        """
+        Convert a string status to the corresponding enum member.
+        
+        Args:
+            status_str: A string representing a status
+            
+        Returns:
+            The corresponding VideoStatus enum member
+        """
+        for status in cls:
+            if status.value == status_str:
+                return status
+        raise ValueError(f"Invalid status: {status_str}")
 
 
 class VideoGeneration(Base):
@@ -26,7 +58,7 @@ class VideoGeneration(Base):
     id = Column(Integer, primary_key=True, index=True)
     generation_id = Column(String(100), unique=True, index=True, nullable=False)
     prompt = Column(Text, nullable=False)
-    status = Column(Enum(VideoStatus), default=VideoStatus.PROCESSING, nullable=False)
+    status = Column(String(20), default=VideoStatus.PROCESSING.value, nullable=False)
     model = Column(String(50), nullable=False)
     duration = Column(String(20), nullable=False)
     aspect_ratio = Column(String(10), nullable=False)
