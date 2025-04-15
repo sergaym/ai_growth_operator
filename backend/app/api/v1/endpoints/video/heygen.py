@@ -187,3 +187,22 @@ async def check_training_status(job_id: str) -> Dict[str, Any]:
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error checking training status: {str(e)}")
 
+@router.post("/photo-avatar/looks", response_model=Dict[str, Any])
+async def generate_avatar_looks(request: HeygenGenerateAvatarLooksRequest) -> Dict[str, Any]:
+    """
+    Generate new looks for an avatar based on a text prompt.
+    
+    This endpoint creates new variations of an avatar using text prompts to
+    specify different clothing, backgrounds, or poses.
+    """
+    try:
+        result = heygen_service.generate_avatar_looks(
+            group_id=request.group_id,
+            prompt=request.prompt,
+            num_images=request.num_images
+        )
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error generating avatar looks: {str(e)}")
+
