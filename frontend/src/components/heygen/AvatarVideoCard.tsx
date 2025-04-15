@@ -92,29 +92,23 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
       
       <div className="p-4">
         <div className="flex items-center justify-between mb-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            generation.status === "completed" 
-              ? "bg-green-500/20 text-green-400" 
-              : generation.status === "pending" || generation.status === "processing"
-                ? "bg-amber-500/20 text-amber-400"
-                : "bg-red-500/20 text-red-400"
-          }`}>
+          <span className={`px-2.5 py-1 rounded-full text-xs font-medium ${getStatusStyles(generation.status)}`}>
             {generation.status.charAt(0).toUpperCase() + generation.status.slice(1)}
           </span>
-          <span className="text-zinc-500 text-sm">{formattedDate}</span>
+          <span className="text-slate-500 text-sm">{formattedDate}</span>
         </div>
         
-        <p className="text-sm text-white line-clamp-2 mb-2">{generation.prompt}</p>
+        <p className="text-sm text-slate-700 line-clamp-2 mb-2">{generation.prompt}</p>
         
         {(generation.avatarName || generation.voiceName) && (
-          <div className="text-xs text-zinc-400 flex flex-wrap gap-2">
+          <div className="text-xs text-slate-600 flex flex-wrap gap-2">
             {generation.avatarName && (
-              <span className="bg-white/5 px-2 py-1 rounded">
+              <span className="bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
                 Avatar: {generation.avatarName}
               </span>
             )}
             {generation.voiceName && (
-              <span className="bg-white/5 px-2 py-1 rounded">
+              <span className="bg-slate-100 px-2 py-1 rounded-md border border-slate-200">
                 Voice: {generation.voiceName}
               </span>
             )}
@@ -122,7 +116,7 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
         )}
         
         {error && (
-          <div className="mt-2 text-xs text-red-400">
+          <div className="mt-2 text-xs text-red-500 p-2 bg-red-50 rounded-md border border-red-100">
             Error checking status: {error}
           </div>
         )}
