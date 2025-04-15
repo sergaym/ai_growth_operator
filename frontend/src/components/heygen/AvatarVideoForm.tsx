@@ -22,7 +22,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     prompt: '',
     avatar_id: '',
     voice_id: '',
-    background_color: '#030712', // Match our dark theme
+    background_color: '#ffffff', // Updated to white background
     avatar_style: 'normal',
     voice_speed: 1.0,
   });
@@ -76,32 +76,17 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   const hasError = false; // Now controlled by props
 
   return (
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-amber-500/20 to-red-500/20 rounded-2xl blur-md"></div>
-      <Card className="relative border-white/10 bg-white/[0.07] backdrop-blur-md">
-        <form onSubmit={handleSubmit}>
-          <CardHeader>
-            {hasError && (
-              <Alert variant="destructive" className="bg-red-500/10 border-red-500/30 text-red-400">
-                <AlertDescription>
-                  Error occurred while loading resources
-                </AlertDescription>
-              </Alert>
-            )}
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="prompt" className="text-amber-400">Avatar Video Script</Label>
-              <Textarea 
-                id="prompt"
-                value={formData.prompt}
-                onChange={(e) => handleChange('prompt', e.target.value)}
-                placeholder="Write the text you want the avatar to speak..."
-                className="min-h-[100px] bg-white/5 border-white/10 placeholder:text-white/30 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                required
-              />
-            </div>
+    <Card className="border-slate-200 bg-white shadow-sm">
+      <form onSubmit={handleSubmit}>
+        <CardHeader>
+          {hasError && (
+            <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-600">
+              <AlertDescription>
+                Error occurred while loading resources
+              </AlertDescription>
+            </Alert>
+          )}
+        </CardHeader>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               <div className="space-y-2">
