@@ -363,6 +363,31 @@ class HeygenService:
             logger.error(f"Error training avatar group: {str(e)}")
             raise Exception(f"Failed to train avatar group: {str(e)}")
     
+    def check_training_status(self, job_id: str) -> Dict[str, Any]:
+        """
+        Check the status of avatar group training.
+        
+        Args:
+            job_id: The ID of the training job to check
+            
+        Returns:
+            Dict containing the training status
+        """
+        url = f"{self.base_url}/v2/photo_avatar/group/train/{job_id}"
+        
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error checking training status: {str(e)}")
+            raise Exception(f"Failed to check training status: {str(e)}")
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
