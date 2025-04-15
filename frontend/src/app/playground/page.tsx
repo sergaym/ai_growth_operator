@@ -229,65 +229,45 @@ export default function Playground() {
       <main className="container max-w-7xl mx-auto px-6 py-10">
         <div className="mb-8">
           <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
               Playground
             </span>
           </h1>
-          <p className="text-zinc-400">
+          <p className="text-slate-600">
             Experiment with the AI Growth Operator capabilities and see them in action
           </p>
         </div>
         
         {/* Tabs */}
-        <div className="mb-8 border-b border-white/10">
+        <div className="mb-8 border-b border-slate-200">
           <div className="flex space-x-8">
             <button
               onClick={() => setActiveTab("avatarVideo")}
-              className={`pb-4 relative ${
-                activeTab === "avatarVideo"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              className="pb-4 relative text-blue-600 font-medium"
             >
               <span>Avatar Video</span>
-              {activeTab === "avatarVideo" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
+              <motion.div
+                layoutId="activeTabIndicator"
+                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400"
+              />
             </button>
             <button
-              onClick={() => setActiveTab("video")}
-              className={`pb-4 relative ${
-                activeTab === "video"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              disabled
+              className="pb-4 relative text-slate-400 cursor-not-allowed"
             >
               <span>Video Generation</span>
-              {activeTab === "video" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-100 rounded-full text-[10px] flex items-center justify-center text-amber-600 font-medium">
+                !
+              </span>
             </button>
             <button
-              onClick={() => setActiveTab("campaigns")}
-              className={`pb-4 relative ${
-                activeTab === "campaigns"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
+              disabled
+              className="pb-4 relative text-slate-400 cursor-not-allowed"
             >
               <span>Ad Campaigns</span>
-              {activeTab === "campaigns" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
+              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-100 rounded-full text-[10px] flex items-center justify-center text-amber-600 font-medium">
+                !
+              </span>
             </button>
           </div>
         </div>
