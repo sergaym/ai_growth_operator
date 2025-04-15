@@ -90,3 +90,35 @@ def save_to_db(db_object, session=None):
         if close_session:
             session.close()
 
+
+def update_db_object(db_object, session=None):
+    """
+    Update an object in the database if database is enabled.
+    
+    Args:
+        db_object: SQLAlchemy model object to update
+        session: Optional session to use (if None, a new session is created)
+        
+    Returns:
+        The updated object, or None if database is disabled
+    """
+    if not ENABLE_DATABASE:
+        logger.info("Database operation skipped: No database connection.")
+        return None
+    
+    close_session = False
+    if session is None:
+        session = SessionLocal()
+        close_session = True
+    
+    try:
+        session.commit()
+        session.refresh(db_object)
+        return db_object
+    except Exception as e:
+        session.rollback()
+        logger.error(f"Database error: {str(e)}")
+        return None
+    finally:
+        if close_session:
+            session.close() 
