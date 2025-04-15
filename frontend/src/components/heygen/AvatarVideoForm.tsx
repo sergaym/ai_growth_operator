@@ -87,62 +87,75 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
             </Alert>
           )}
         </CardHeader>
+        
+        <CardContent className="space-y-6">
+          <div className="space-y-2">
+            <Label htmlFor="prompt" className="text-blue-600 font-medium">Avatar Video Script</Label>
+            <Textarea 
+              id="prompt"
+              value={formData.prompt}
+              onChange={(e) => handleChange('prompt', e.target.value)}
+              placeholder="Write the text you want the avatar to speak..."
+              className="min-h-[120px] bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50"
+              required
+            />
+          </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="avatar" className="text-amber-400">Avatar</Label>
-                <Select 
-                  value={formData.avatar_id}
-                  onValueChange={(value: string) => handleChange('avatar_id', value)}
-                  disabled={isLoading}
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="avatar" className="text-blue-600 font-medium">Avatar</Label>
+              <Select 
+                value={formData.avatar_id}
+                onValueChange={(value: string) => handleChange('avatar_id', value)}
+                disabled={isLoading}
+              >
+                <SelectTrigger 
+                  id="avatar"
+                  className="w-full bg-slate-50 border-slate-200 focus:ring-blue-500/30 focus:border-blue-500/50"
                 >
-                  <SelectTrigger 
-                    id="avatar"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select avatar" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>Loading avatars...</SelectItem>
-                    ) : (
-                      avatars.map(avatar => (
-                        <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
-                          {avatar.avatar_name} ({avatar.gender})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="voice" className="text-amber-400">Voice</Label>
-                <Select 
-                  value={formData.voice_id}
-                  onValueChange={(value: string) => handleChange('voice_id', value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger 
-                    id="voice"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select voice" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>Loading voices...</SelectItem>
-                    ) : (
-                      voices.map(voice => (
-                        <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                          {voice.name} ({voice.gender}, {voice.language})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SelectValue placeholder="Select avatar" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>Loading avatars...</SelectItem>
+                  ) : (
+                    avatars.map(avatar => (
+                      <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
+                        {avatar.avatar_name} ({avatar.gender})
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
             </div>
+
+            <div className="space-y-2">
+              <Label htmlFor="voice" className="text-blue-600 font-medium">Voice</Label>
+              <Select 
+                value={formData.voice_id}
+                onValueChange={(value: string) => handleChange('voice_id', value)}
+                disabled={isLoading}
+              >
+                <SelectTrigger 
+                  id="voice"
+                  className="w-full bg-slate-50 border-slate-200 focus:ring-blue-500/30 focus:border-blue-500/50"
+                >
+                  <SelectValue placeholder="Select voice" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  {isLoading ? (
+                    <SelectItem value="loading" disabled>Loading voices...</SelectItem>
+                  ) : (
+                    voices.map(voice => (
+                      <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                        {voice.name} ({voice.gender}, {voice.language})
+                      </SelectItem>
+                    ))
+                  )}
+                </SelectContent>
+              </Select>
+            </div>
+          </div>
 
             <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
               <div className="space-y-2">
