@@ -183,12 +183,12 @@ class HeygenService:
             
             # Map API status to our VideoStatus enum
             status_map = {
-                "pending": VideoStatus.PROCESSING.value,
-                "processing": VideoStatus.PROCESSING.value,
-                "completed": VideoStatus.COMPLETED.value,
-                "failed": VideoStatus.FAILED.value
+                "pending": VideoStatus.as_value(VideoStatus.PROCESSING),
+                "processing": VideoStatus.as_value(VideoStatus.PROCESSING),
+                "completed": VideoStatus.as_value(VideoStatus.COMPLETED),
+                "failed": VideoStatus.as_value(VideoStatus.FAILED)
             }
-            db_status = status_map.get(api_status, VideoStatus.PROCESSING.value)
+            db_status = status_map.get(api_status, VideoStatus.as_value(VideoStatus.PROCESSING))
             
             # Prepare update data
             update_data = {
@@ -259,7 +259,7 @@ class HeygenService:
                 # Update record to failed status with timeout message
                 update_heygen_avatar_video(
                     video_id, 
-                    status=VideoStatus.FAILED.value, 
+                    status=VideoStatus.as_value(VideoStatus.FAILED), 
                     error_details={"message": f"Video generation timed out after {timeout} seconds"}
                 )
                 raise TimeoutError(f"Video generation timed out after {timeout} seconds")
