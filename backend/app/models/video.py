@@ -4,7 +4,8 @@ Database models for video generation.
 
 import enum
 from datetime import datetime
-from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, JSON
+from sqlalchemy import Column, Integer, String, Text, DateTime, Enum, JSON, Float, ForeignKey
+from sqlalchemy.orm import relationship
 
 from app.db.database import Base
 
