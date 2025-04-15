@@ -157,44 +157,44 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
             </div>
           </div>
 
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="background-color" className="text-amber-400">Background Color</Label>
-                <div className="flex items-center">
-                  <input
-                    type="color"
-                    value={formData.background_color}
-                    onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="h-10 w-10 rounded border border-white/20 bg-transparent"
-                  />
-                  <Input
-                    id="background-color"
-                    value={formData.background_color}
-                    onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="ml-2 bg-white/5 border-white/10 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                  />
-                </div>
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="background-color" className="text-blue-600 font-medium">Background Color</Label>
+              <div className="flex items-center">
+                <input
+                  type="color"
+                  value={formData.background_color}
+                  onChange={(e) => handleChange('background_color', e.target.value)}
+                  className="h-10 w-10 rounded border border-slate-200 bg-transparent"
+                />
+                <Input
+                  id="background-color"
+                  value={formData.background_color}
+                  onChange={(e) => handleChange('background_color', e.target.value)}
+                  className="ml-2 bg-slate-50 border-slate-200 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50"
+                />
               </div>
+            </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="avatar-style" className="text-amber-400">Avatar Style</Label>
-                <Select 
-                  value={formData.avatar_style}
-                  onValueChange={(value: string) => handleChange('avatar_style', value)}
+            <div className="space-y-2">
+              <Label htmlFor="avatar-style" className="text-blue-600 font-medium">Avatar Style</Label>
+              <Select 
+                value={formData.avatar_style}
+                onValueChange={(value: string) => handleChange('avatar_style', value)}
+              >
+                <SelectTrigger 
+                  id="avatar-style"
+                  className="w-full bg-slate-50 border-slate-200 focus:ring-blue-500/30 focus:border-blue-500/50"
                 >
-                  <SelectTrigger 
-                    id="avatar-style"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="circle">Circle</SelectItem>
-                    <SelectItem value="closeUp">Close Up</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
+                  <SelectValue placeholder="Select style" />
+                </SelectTrigger>
+                <SelectContent className="bg-white border-slate-200">
+                  <SelectItem value="normal">Normal</SelectItem>
+                  <SelectItem value="circle">Circle</SelectItem>
+                  <SelectItem value="closeUp">Close Up</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
 
               <div className="space-y-2">
                 <Label htmlFor="voice-speed" className="text-amber-400">Voice Speed</Label>
