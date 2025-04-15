@@ -93,4 +93,16 @@ class HeygenVideoResponse(BaseModel):
     video_url: Optional[str] = None
     thumbnail_url: Optional[str] = None
     duration: Optional[float] = None
-    error: Optional[Dict[str, Any]] = None 
+    error: Optional[Dict[str, Any]] = None
+
+# Photo Avatar schemas
+class HeygenGeneratePhotoAvatarRequest(BaseModel):
+    """Request schema for generating photo avatar photos."""
+    name: str = Field(..., description="Name for the avatar")
+    age: str = Field(..., description="Age group (e.g., 'Young Adult', 'Adult', 'Senior')")
+    gender: str = Field(..., description="Gender of avatar (e.g., 'Woman', 'Man')")
+    ethnicity: str = Field(..., description="Ethnicity (e.g., 'Asian American', 'African American', 'European')")
+    orientation: str = Field("horizontal", description="Image orientation ('horizontal' or 'vertical')")
+    pose: str = Field("half_body", description="Avatar pose ('half_body', 'full_body', 'head')")
+    style: str = Field("Realistic", description="Visual style ('Realistic', 'Stylized', etc.)")
+    appearance: str = Field(..., description="Detailed prompt describing the avatar's appearance")
