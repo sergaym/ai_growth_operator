@@ -187,12 +187,12 @@ export default function Playground() {
   };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white">
-      {/* Global background elements */}
+    <div className="min-h-screen bg-[#f8f9fa] text-[#2d3748]">
+      {/* Custom background for light theme */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#f33_5%,transparent_40%)] opacity-10"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-black to-transparent"></div>
+        <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay"></div>
+        <div className="absolute inset-0 bg-gradient-radial from-blue-50 via-transparent to-transparent opacity-60"></div>
+        <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-blue-50/50 to-transparent"></div>
       </div>
       
       {/* Header */}
