@@ -160,3 +160,18 @@ async def create_avatar_group(request: HeygenCreateAvatarGroupRequest) -> Dict[s
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error creating avatar group: {str(e)}")
 
+@router.post("/photo-avatar/group/{group_id}/train", response_model=HeygenTrainAvatarGroupResponse)
+async def train_avatar_group(group_id: str) -> Dict[str, Any]:
+    """
+    Train an avatar group to create a model.
+    
+    This begins the training process for an avatar group, which is necessary
+    before generating new looks for the avatar.
+    """
+    try:
+        result = heygen_service.train_avatar_group(group_id)
+        
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error training avatar group: {str(e)}")
+
