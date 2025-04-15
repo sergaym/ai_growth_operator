@@ -1,1 +1,15 @@
 backend/.env
+backend/app/__pycache__/__init__.cpython-311.pyc
+backend/app/models/__pycache__/__init__.cpython-311.pyc
+backend/app/models/__pycache__/video_generation.cpython-311.pyc
+backend/migrations/README
+backend/migrations/script.py.mako
+backend/migrations/__pycache__/env.cpython-311.pyc
+backend/migrations/versions/__pycache__/1b6b7041c180_create_video_generation_table.cpython-311.pyc
+backend/app/core/__pycache__/__init__.cpython-311.pyc
+backend/app/core/__pycache__/config.cpython-311.pyc
+backend/app/db/__pycache__/__init__.cpython-311.pyc
+backend/app/db/__pycache__/database.cpython-311.pyc
+backend/app/models/__pycache__/video.cpython-311.pyc
+backend/migrations/versions/__pycache__/2a9c6b3e7245_update_video_schema.cpython-311.pyc
+backend/migrations/versions/__pycache__/52f2d2f5402b_review_and_fix.cpython-311.pyc
