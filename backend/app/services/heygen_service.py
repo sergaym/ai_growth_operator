@@ -268,6 +268,32 @@ class HeygenService:
             logger.error(f"Error generating avatar photos: {str(e)}")
             raise Exception(f"Failed to generate avatar photos: {str(e)}")
     
+    def check_photo_generation_status(self, generation_id: str) -> Dict[str, Any]:
+        """
+        Check the status of avatar photo generation.
+        
+        Args:
+            generation_id: The ID of the photo generation to check
+            
+        Returns:
+            Dict containing the status and image URLs (if completed)
+        """
+        url = f"{self.base_url}/v2/photo_avatar/generation/{generation_id}"
+        
+        try:
+            response = requests.get(url, headers=self.headers)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error checking photo generation status: {str(e)}")
+            raise Exception(f"Failed to check photo generation status: {str(e)}")
+    
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
