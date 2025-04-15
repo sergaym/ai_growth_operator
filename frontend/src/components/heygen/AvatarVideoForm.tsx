@@ -5,7 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
+import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Alert, AlertDescription } from "@/components/ui/alert";
 import { Loader2 } from "lucide-react";
 
@@ -27,6 +27,13 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     voice_speed: 1.0,
   });
 
+  // Form validation state
+  const [validationErrors, setValidationErrors] = useState<{
+    prompt?: string;
+    avatar_id?: string;
+    voice_id?: string;
+  }>({});
+
   // Set default avatar and voice when loaded
   useEffect(() => {
     if (avatars.length > 0 && !formData.avatar_id) {
@@ -43,22 +50,52 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   // Handle form changes
   const handleChange = (name: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear validation error when field is updated
+    if (validationErrors[name as keyof typeof validationErrors]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+  };
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const errors: {
+      prompt?: string;
+      avatar_id?: string;
+      voice_id?: string;
+    } = {};
+    
+    if (!formData.prompt.trim()) {
+      errors.prompt = "Please enter a script for the avatar to speak";
+    } else if (formData.prompt.length < 10) {
+      errors.prompt = "Script should be at least 10 characters";
+    }
+    
+    if (!formData.avatar_id) {
+      errors.avatar_id = "Please select an avatar";
+    }
+    
+    if (!formData.voice_id) {
+      errors.voice_id = "Please select a voice";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Avatar form submitted with data:', formData);
-    
-    if (!formData.prompt || !formData.avatar_id || !formData.voice_id) {
-      console.error('Missing required fields:', { 
-        hasPrompt: !!formData.prompt, 
-        hasAvatarId: !!formData.avatar_id, 
-        hasVoiceId: !!formData.voice_id 
-      });
+    if (!validateForm()) {
+      console.error('Form validation failed:', validationErrors);
       return;
     }
+    
+    console.log('Avatar form submitted with data:', formData);
     
     try {
       console.log('Calling onVideoGenerated with:', formData);
@@ -72,20 +109,11 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     }
   };
 
-  const isLoading = false; // Now controlled by props
-  const hasError = false; // Now controlled by props
-
   return (
     <Card className="border-slate-200 bg-white shadow-sm">
       <form onSubmit={handleSubmit}>
         <CardHeader>
-          {hasError && (
-            <Alert variant="destructive" className="bg-red-50 border-red-200 text-red-600">
-              <AlertDescription>
-                Error occurred while loading resources
-              </AlertDescription>
-            </Alert>
-          )}
+          <CardTitle className="text-xl font-semibold text-slate-800">Create Avatar Video</CardTitle>
         </CardHeader>
         
         <CardContent className="space-y-6">
@@ -99,6 +127,9 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
               className="min-h-[120px] bg-slate-50 border-slate-200 text-slate-800 placeholder:text-slate-400 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50"
               required
             />
+            {validationErrors.prompt && (
+              <div className="text-sm text-red-500 mt-1">{validationErrors.prompt}</div>
+            )}
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
@@ -107,7 +138,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
               <Select 
                 value={formData.avatar_id}
                 onValueChange={(value: string) => handleChange('avatar_id', value)}
-                disabled={isLoading}
+                disabled={isGenerating || avatars.length === 0}
               >
                 <SelectTrigger 
                   id="avatar"
@@ -116,8 +147,8 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                   <SelectValue placeholder="Select avatar" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200">
-                  {isLoading ? (
-                    <SelectItem value="loading" disabled>Loading avatars...</SelectItem>
+                  {avatars.length === 0 ? (
+                    <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
                   ) : (
                     avatars.map(avatar => (
                       <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
@@ -127,6 +158,9 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                   )}
                 </SelectContent>
               </Select>
+              {validationErrors.avatar_id && (
+                <div className="text-sm text-red-500 mt-1">{validationErrors.avatar_id}</div>
+              )}
             </div>
 
             <div className="space-y-2">
@@ -134,7 +168,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
               <Select 
                 value={formData.voice_id}
                 onValueChange={(value: string) => handleChange('voice_id', value)}
-                disabled={isLoading}
+                disabled={isGenerating || voices.length === 0}
               >
                 <SelectTrigger 
                   id="voice"
@@ -143,8 +177,8 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                   <SelectValue placeholder="Select voice" />
                 </SelectTrigger>
                 <SelectContent className="bg-white border-slate-200">
-                  {isLoading ? (
-                    <SelectItem value="loading" disabled>Loading voices...</SelectItem>
+                  {voices.length === 0 ? (
+                    <SelectItem value="no-voices" disabled>No voices available</SelectItem>
                   ) : (
                     voices.map(voice => (
                       <SelectItem key={voice.voice_id} value={voice.voice_id}>
@@ -154,6 +188,9 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                   )}
                 </SelectContent>
               </Select>
+              {validationErrors.voice_id && (
+                <div className="text-sm text-red-500 mt-1">{validationErrors.voice_id}</div>
+              )}
             </div>
           </div>
 
@@ -165,7 +202,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                   type="color"
                   value={formData.background_color}
                   onChange={(e) => handleChange('background_color', e.target.value)}
-                  className="h-10 w-10 rounded border border-slate-200 bg-transparent"
+                  className="h-10 w-10 rounded border border-slate-200 bg-transparent cursor-pointer"
                 />
                 <Input
                   id="background-color"
@@ -181,6 +218,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
               <Select 
                 value={formData.avatar_style}
                 onValueChange={(value: string) => handleChange('avatar_style', value)}
+                disabled={isGenerating}
               >
                 <SelectTrigger 
                   id="avatar-style"
@@ -207,6 +245,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
                 max="1.5"
                 step="0.1"
                 className="bg-slate-50 border-slate-200 focus-visible:ring-blue-500/30 focus-visible:border-blue-500/50"
+                disabled={isGenerating}
               />
             </div>
           </div>
