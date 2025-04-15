@@ -1,0 +1,21 @@
+{
+  "version": 2,
+  "builds": [
+    {
+      "src": "app/main.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "app/main.py"
+    }
+  ],
+  "env": {
+    "APP_MODULE": "app.main:app",
+    "PYTHONPATH": "."
+  },
+  "installCommand": "pip install -r requirements.txt",
+  "devCommand": "uvicorn app.main:app --host 0.0.0.0 --port $PORT"
+} 
