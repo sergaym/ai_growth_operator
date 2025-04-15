@@ -69,7 +69,7 @@ def create_heygen_avatar_video(
         video_gen = create_video_generation(
             generation_id=generation_id,
             prompt=prompt,
-            status=VideoStatus.PROCESSING.value,
+            status=VideoStatus.as_value(VideoStatus.PROCESSING),
             model=f"heygen_avatar",
             duration="variable",  # Will be updated when completed
             aspect_ratio=aspect_ratio,
