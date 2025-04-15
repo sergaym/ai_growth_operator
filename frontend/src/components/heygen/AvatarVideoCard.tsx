@@ -19,9 +19,10 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
   // Start polling when component mounts if status is not completed or failed
   useEffect(() => {
     if (generation.status !== 'completed' && generation.status !== 'failed' && !isPolling) {
+      console.log(`Starting polling for video ${generation.id} in AvatarVideoCard`);
       startPolling();
     }
-  }, [generation.status, isPolling, startPolling]);
+  }, [generation.status, generation.id, isPolling, startPolling]);
   
   // Update parent when status changes
   useEffect(() => {
@@ -29,6 +30,7 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
       videoStatus.status !== generation.status ||
       videoStatus.video_url !== generation.videoUrl
     )) {
+      console.log(`Updating video ${generation.id} status to ${videoStatus.status}`);
       onUpdate({
         ...generation,
         status: videoStatus.status,
@@ -40,76 +42,93 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
   }, [videoStatus, generation, onUpdate]);
 
   // Format for display
-  const formattedDate = new Date(generation.createdAt).toLocaleTimeString();
+  const formattedDate = new Date(generation.createdAt).toLocaleString('en-US', {
+    month: 'short',
+    day: 'numeric',
+    hour: 'numeric',
+    minute: '2-digit'
+  });
+  
+  // Helper function to get the correct status styles
+  const getStatusStyles = (status: string) => {
+    switch(status) {
+      case 'completed':
+        return 'bg-[#e8f5e9] text-[#28a745] border border-[#c8e6c9]';
+      case 'pending':
+      case 'processing':
+        return 'bg-[#e3f2fd] text-[#0d6efd] border border-[#bbdefb]';
+      default:
+        return 'bg-[#ffebee] text-[#dc3545] border border-[#ffcdd2]';
+    }
+  };
+  
+  // Handle video errors or missing URL for completed videos
+  const hasVideoError = generation.status === 'completed' && !generation.videoUrl;
   
   return (
-    <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
-      <div className="aspect-video relative">
+    <div className="w-full">
+      <div className="aspect-video relative mb-3 overflow-hidden rounded-md border border-[#e6e6e6]">
         {generation.status === "completed" && generation.videoUrl ? (
           <video
             src={generation.videoUrl}
             className="absolute inset-0 w-full h-full object-cover"
             controls
-            autoPlay
-            loop
-            muted
             poster={generation.thumbnailUrl}
+            onError={(e) => console.error(`Error loading video ${generation.id}:`, e)}
           />
         ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
+          <div className="absolute inset-0 flex items-center justify-center bg-[#f9f9f9]">
             {generation.status === "pending" || generation.status === "processing" ? (
               <div className="flex flex-col items-center">
-                <svg className="animate-spin h-10 w-10 text-amber-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                </svg>
-                <span className="text-sm text-white/80">
+                <div className="animate-spin h-8 w-8 border-2 border-[#e6e6e6] border-t-[#37352f] rounded-full mb-3"></div>
+                <span className="text-sm text-[#6b7280]">
                   {generation.status === "pending" ? "Starting..." : "Processing..."}
                 </span>
               </div>
             ) : (
-              <div className="text-red-400 text-center p-4">
-                Generation failed
-                {generation.error && <div className="text-sm mt-2">{generation.error}</div>}
+              <div className="text-[#e03e21] text-center p-4">
+                <p className="font-medium">Generation failed</p>
+                {generation.error && (
+                  <div className="text-sm mt-2 bg-[#ffebee] p-2 rounded-md border border-[#ffcdd2]">{generation.error}</div>
+                )}
+                {hasVideoError && !generation.error && (
+                  <div className="text-sm mt-2 bg-[#ffebee] p-2 rounded-md border border-[#ffcdd2]">
+                    Video URL not available
+                  </div>
+                )}
               </div>
             )}
           </div>
         )}
       </div>
       
-      <div className="p-4">
+      <div className="px-1 py-1">
         <div className="flex items-center justify-between mb-2">
-          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-            generation.status === "completed" 
-              ? "bg-green-500/20 text-green-400" 
-              : generation.status === "pending" || generation.status === "processing"
-                ? "bg-amber-500/20 text-amber-400"
-                : "bg-red-500/20 text-red-400"
-          }`}>
+          <span className={`px-2 py-0.5 rounded-md text-xs font-medium ${getStatusStyles(generation.status)}`}>
             {generation.status.charAt(0).toUpperCase() + generation.status.slice(1)}
           </span>
-          <span className="text-zinc-500 text-sm">{formattedDate}</span>
+          <span className="text-[#9c9c9c] text-xs">{formattedDate}</span>
         </div>
         
-        <p className="text-sm text-white line-clamp-2 mb-2">{generation.prompt}</p>
+        <p className="text-sm text-[#37352f] line-clamp-2 mb-3">{generation.prompt}</p>
         
         {(generation.avatarName || generation.voiceName) && (
-          <div className="text-xs text-zinc-400 flex flex-wrap gap-2">
+          <div className="text-xs text-[#6b7280] flex flex-wrap gap-1.5">
             {generation.avatarName && (
-              <span className="bg-white/5 px-2 py-1 rounded">
-                Avatar: {generation.avatarName}
+              <span className="bg-[#f1f1f1] px-1.5 py-0.5 rounded-sm">
+                {generation.avatarName}
               </span>
             )}
             {generation.voiceName && (
-              <span className="bg-white/5 px-2 py-1 rounded">
-                Voice: {generation.voiceName}
+              <span className="bg-[#f1f1f1] px-1.5 py-0.5 rounded-sm">
+                {generation.voiceName}
               </span>
             )}
           </div>
         )}
         
         {error && (
-          <div className="mt-2 text-xs text-red-400">
+          <div className="mt-2 text-xs text-[#e03e21] p-2 bg-[#ffebee] rounded-md border border-[#ffcdd2]">
             Error checking status: {error}
           </div>
         )}

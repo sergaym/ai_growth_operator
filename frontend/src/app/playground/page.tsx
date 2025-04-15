@@ -6,6 +6,8 @@ import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
 import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
 import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration } from "@/hooks/useHeygenApi";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/Logo";
 
 // These types would eventually come from your API responses
 type VideoGeneration = {
@@ -32,9 +34,6 @@ type AdCampaign = {
 };
 
 export default function Playground() {
-  // State for tabs and content
-  const [activeTab, setActiveTab] = useState<"video" | "avatarVideo" | "campaigns">("avatarVideo");
-  
   // HeyGen API hooks
   const { avatars: fetchedAvatars, loading: loadingAvatars, error: avatarsError, refetch: refetchAvatars } = useHeygenAvatars();
   const { voices: fetchedVoices, loading: loadingVoices, error: voicesError, refetch: refetchVoices } = useHeygenVoices();
@@ -72,23 +71,6 @@ export default function Playground() {
   // State for error display
   const [apiError, setApiError] = useState<string | null>(null);
   
-  // Mock data for videos (kept for compatibility)
-  const [videoGenerations, setVideoGenerations] = useState<VideoGeneration[]>([
-    {
-      id: "vid-1",
-      prompt: "A futuristic city with flying cars and neon lights",
-      status: "completed",
-      createdAt: "2024-06-10T14:30:00Z",
-      videoUrl: "/demo-video.mp4",
-    },
-    {
-      id: "vid-2",
-      prompt: "Product showcase for a smart watch with holographic display",
-      status: "pending",
-      createdAt: "2024-06-10T15:45:00Z",
-    },
-  ]);
-  
   // State for HeyGen avatar videos
   const [avatarVideos, setAvatarVideos] = useState<TrackedVideoGeneration[]>([]);
   
@@ -110,42 +92,6 @@ export default function Playground() {
       localStorage.setItem('avatarVideos', JSON.stringify(avatarVideos));
     }
   }, [avatarVideos]);
-  
-  // State for campaigns (kept from original)
-  const [campaigns, setCampaigns] = useState<AdCampaign[]>([
-    {
-      id: "camp-1",
-      name: "Summer Collection Launch",
-      status: "active",
-      platform: "facebook",
-      budget: 1500,
-      metrics: {
-        impressions: 45000,
-        clicks: 1200,
-        ctr: 2.67,
-        conversions: 85,
-        cpa: 17.65,
-      },
-    },
-    {
-      id: "camp-2",
-      name: "Product Retargeting",
-      status: "paused",
-      platform: "google",
-      budget: 800,
-      metrics: {
-        impressions: 28000,
-        clicks: 850,
-        ctr: 3.04,
-        conversions: 42,
-        cpa: 19.05,
-      },
-    },
-  ]);
-  
-  // Original state for video generation
-  const [newVideoPrompt, setNewVideoPrompt] = useState("");
-  const [isVideoGenerating, setIsVideoGenerating] = useState(false);
   
   // Function to retry loading the API resources
   const handleRetryApiLoad = () => {
@@ -238,483 +184,140 @@ export default function Playground() {
       )
     );
   };
-  
-  // Original handler for video generation
-  const handleVideoGeneration = (e: React.FormEvent) => {
-    e.preventDefault();
-    
-    if (!newVideoPrompt.trim()) return;
-    
-    setIsVideoGenerating(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      const newVideo: VideoGeneration = {
-        id: `vid-${Date.now()}`,
-        prompt: newVideoPrompt,
-        status: "pending",
-        createdAt: new Date().toISOString(),
-      };
-      
-      setVideoGenerations([newVideo, ...videoGenerations]);
-      setNewVideoPrompt("");
-      setIsVideoGenerating(false);
-      
-      // Simulate video completion after some time
-      setTimeout(() => {
-        setVideoGenerations(prev => 
-          prev.map(video => 
-            video.id === newVideo.id 
-              ? {...video, status: "completed", videoUrl: "/demo-video.mp4"} 
-              : video
-          )
-        );
-      }, 8000);
-    }, 2000);
-  };
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white">
-      {/* Global background elements */}
+    <div className="min-h-screen bg-[#ffffff] text-[#37352f]">
+      {/* Simple minimal background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-[url('/noise.png')] opacity-[0.02] mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-[radial-gradient(circle_at_top_right,#f33_5%,transparent_40%)] opacity-10"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-black to-transparent"></div>
+        <div className="absolute inset-0 bg-[#ffffff] opacity-100"></div>
+        <div className="absolute inset-0 bg-[url('/subtle-dots.png')] opacity-[0.015]"></div>
       </div>
       
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-[#030712]/80 backdrop-blur-md border-b border-white/5">
-        <div className="container max-w-7xl mx-auto px-6">
-          <div className="h-16 flex items-center justify-between">
-            {/* Logo and title */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-tr from-red-500 to-amber-500"></div>
-                <div className="absolute inset-[2px] bg-[#030712] rounded-md flex items-center justify-center text-white font-bold">
-                  A
-                </div>
+      {/* Header - Notion-style */}
+      <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
+        <div className="container max-w-4xl mx-auto px-5 md:px-8">
+          <div className="flex items-center justify-between">
+            {/* Logo and back button in one element */}
+            <div className="flex items-center gap-3">
+              <Link href="/" className="p-2 hover:bg-[#f1f1f1] rounded-md transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+              
+              <div className="h-5 w-px bg-[#e6e6e6]"></div>
+              
+              <div className="flex items-center gap-2">
+                <Logo size="sm" showText={false} />
+                <span className="text-[15px] font-medium text-[#37352f]">
+                  Playground
+                </span>
               </div>
-              <span className="text-lg font-bold text-white tracking-tight">
-                AI Growth Operator
-              </span>
-            </Link>
-            
-            {/* Navigation back to home */}
-            <Link 
-              href="/" 
-              className="px-4 py-2 rounded-lg bg-white/[0.07] border border-white/10 hover:bg-white/[0.1] transition-colors text-sm font-medium text-white flex items-center gap-2"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 12H19M5 12L11 18M5 12L11 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back to Home
-            </Link>
+            </div>
           </div>
         </div>
       </header>
       
-      <main className="container max-w-7xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            <span className="bg-gradient-to-r from-red-400 to-amber-400 bg-clip-text text-transparent">
-              Playground
-            </span>
+      <main className="container max-w-4xl mx-auto px-5 md:px-8 py-10">
+        {/* Notion-style page title */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold mb-2 text-[#37352f]">
+            Avatar Video Generator
           </h1>
-          <p className="text-zinc-400">
-            Experiment with the AI Growth Operator capabilities and see them in action
+          <p className="text-[#6b7280] text-lg">
+            Create custom AI videos with virtual avatars and realistic voices
           </p>
         </div>
         
-        {/* Tabs */}
-        <div className="mb-8 border-b border-white/10">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab("avatarVideo")}
-              className={`pb-4 relative ${
-                activeTab === "avatarVideo"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <span>Avatar Video</span>
-              {activeTab === "avatarVideo" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("video")}
-              className={`pb-4 relative ${
-                activeTab === "video"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <span>Video Generation</span>
-              {activeTab === "video" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
-            </button>
-            <button
-              onClick={() => setActiveTab("campaigns")}
-              className={`pb-4 relative ${
-                activeTab === "campaigns"
-                  ? "text-white font-medium"
-                  : "text-zinc-400 hover:text-zinc-200"
-              }`}
-            >
-              <span>Ad Campaigns</span>
-              {activeTab === "campaigns" && (
-                <motion.div
-                  layoutId="activeTabIndicator"
-                  className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-red-500 to-amber-500"
-                />
-              )}
-            </button>
+        {/* Display any API errors */}
+        {apiError && (
+          <div className="mb-8 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
+            <p className="font-medium">Error: {apiError}</p>
           </div>
-        </div>
+        )}
         
-        {/* Content based on active tab */}
-        <div className="min-h-[calc(100vh-300px)]">
-          {activeTab === "avatarVideo" ? (
-            <div className="space-y-8">
-              {/* Display any API errors */}
-              {apiError && (
-                <div className="bg-red-500/10 border border-red-500/30 text-red-400 p-4 rounded-xl mb-4">
-                  <p className="font-medium">Error: {apiError}</p>
+        {/* Content with Notion-style cards */}
+        <div className="space-y-12">
+          {/* Avatar video generation form */}
+          <div className="bg-white border border-[#e6e6e6] rounded-lg shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#e6e6e6] flex items-center justify-between">
+              <h2 className="text-lg font-medium text-[#37352f]">Create New Video</h2>
+              
+              {/* Loading or retry buttons */}
+              {(loadingAvatars || loadingVoices) ? (
+                <div className="flex items-center text-[#6b7280] text-sm">
+                  <div className="animate-spin h-4 w-4 border-2 border-[#e6e6e6] border-t-[#37352f] rounded-full mr-2"></div>
+                  Loading...
                 </div>
+              ) : (avatarsError || voicesError) ? (
+                <Button 
+                  variant="outline" 
+                  onClick={handleRetryApiLoad}
+                  className="text-sm text-[#6b7280] border-[#e6e6e6]"
+                >
+                  Retry API Connection
+                </Button>
+              ) : null}
+            </div>
+            
+            <div className="p-6">
+              {(loadingAvatars || loadingVoices) ? (
+                <div className="py-12 text-center">
+                  <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
+                  <p className="text-[#6b7280]">Loading avatars and voices...</p>
+                </div>
+              ) : (avatarsError || voicesError) ? (
+                <div>
+                  <div className="mb-6 p-4 bg-[#fffaeb] border border-[#ffefc6] rounded-md text-[#92400e]">
+                    <p className="font-medium">Note: Using demo data because the API connection failed</p>
+                    <p className="text-sm mt-1 text-[#b54708]">{avatarsError || voicesError}</p>
+                  </div>
+                  <AvatarVideoForm
+                    onVideoGenerated={handleAvatarVideoGenerated}
+                    avatars={avatars}
+                    voices={voices}
+                    isGenerating={isGenerating}
+                  />
+                </div>
+              ) : (
+                <AvatarVideoForm
+                  onVideoGenerated={handleAvatarVideoGenerated}
+                  avatars={avatars}
+                  voices={voices}
+                  isGenerating={isGenerating}
+                />
               )}
-              
-              {/* Avatar video generation form - show form even if API fails */}
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-amber-500/20 to-red-500/20 rounded-2xl blur-md"></div>
-                <div className="relative bg-white/[0.07] backdrop-blur-md border border-white/10 rounded-xl p-6">
-                  <h3 className="text-xl font-medium mb-4">Create Avatar Video</h3>
-                  
-                  {(loadingAvatars || loadingVoices) ? (
-                    <div className="p-8 text-center">
-                      <div className="animate-spin h-10 w-10 border-4 border-red-500/30 border-t-red-500 rounded-full mx-auto mb-4"></div>
-                      <p className="text-zinc-400">Loading avatars and voices...</p>
-                    </div>
-                  ) : (avatarsError || voicesError) ? (
-                    <div>
-                      <div className="bg-amber-500/10 border border-amber-500/30 text-amber-400 p-4 rounded-xl mb-4">
-                        <p className="font-medium">Note: Using demo data because the API connection failed</p>
-                        <p className="text-sm mt-1">{avatarsError || voicesError}</p>
-                        <button 
-                          onClick={handleRetryApiLoad}
-                          className="mt-3 px-4 py-2 bg-amber-500/20 hover:bg-amber-500/30 rounded-lg text-sm font-medium transition-colors"
-                        >
-                          Retry API Connection
-                        </button>
-                      </div>
-                      <AvatarVideoForm
-                        onVideoGenerated={handleAvatarVideoGenerated}
-                        avatars={avatars}
-                        voices={voices}
-                        isGenerating={isGenerating}
-                      />
-                    </div>
-                  ) : (
-                    <AvatarVideoForm
-                      onVideoGenerated={handleAvatarVideoGenerated}
-                      avatars={avatars}
-                      voices={voices}
-                      isGenerating={isGenerating}
-                    />
-                  )}
-                </div>
+            </div>
+          </div>
+          
+          {/* Avatar video history */}
+          <div className="mt-12">
+            <h2 className="text-xl font-medium mb-5 text-[#37352f] flex items-center">
+              <span>Your Videos</span>
+              {avatarVideos.length > 0 && (
+                <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
+                  {avatarVideos.length}
+                </span>
+              )}
+            </h2>
+            
+            {avatarVideos.length === 0 ? (
+              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
+                <p className="text-[#6b7280]">No videos created yet. Get started by creating your first video above.</p>
               </div>
-              
-              {/* Avatar video history */}
-              <div>
-                <h3 className="text-xl font-medium mb-4">Your Avatar Videos</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {avatarVideos.map((video) => (
+            ) : (
+              <div className="space-y-4">
+                {avatarVideos.map((video) => (
+                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
                     <AvatarVideoCard 
-                      key={video.id} 
                       generation={video} 
                       onUpdate={handleAvatarVideoUpdated} 
                     />
-                  ))}
-                  
-                  {avatarVideos.length === 0 && (
-                    <div className="col-span-2 py-12 text-center text-zinc-400">
-                      No avatar videos yet. Create your first one above!
-                    </div>
-                  )}
-                </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ) : activeTab === "video" ? (
-            <div className="space-y-8">
-              {/* Video generation form */}
-              <div className="relative">
-                <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-amber-500/20 to-red-500/20 rounded-2xl blur-md"></div>
-                <div className="relative bg-white/[0.07] backdrop-blur-md border border-white/10 rounded-2xl overflow-hidden">
-                  <form onSubmit={handleVideoGeneration} className="p-6">
-                    <div className="mb-6">
-                      <label className="block text-amber-400 mb-2 text-sm font-medium">Video Prompt</label>
-                      <textarea
-                        value={newVideoPrompt}
-                        onChange={(e) => setNewVideoPrompt(e.target.value)}
-                        className="w-full bg-white/5 text-white border border-white/10 rounded-xl p-4 focus:border-red-500/50 focus:ring-1 focus:ring-red-500/30 transition-all min-h-[100px] placeholder:text-white/30"
-                        placeholder="Describe the video you want to generate..."
-                        required
-                      />
-                    </div>
-                    
-                    <div className="flex justify-end">
-                      <button
-                        type="submit"
-                        disabled={isVideoGenerating || !newVideoPrompt.trim()}
-                        className={`px-6 py-3 rounded-xl text-base font-medium transition-all ${
-                          isVideoGenerating || !newVideoPrompt.trim()
-                            ? "bg-zinc-700/50 cursor-not-allowed text-white/50"
-                            : "bg-gradient-to-r from-red-500 to-amber-500 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-1px]"
-                        }`}
-                      >
-                        {isVideoGenerating ? (
-                          <div className="flex items-center">
-                            <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                              <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                              <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                            </svg>
-                            Generating...
-                          </div>
-                        ) : (
-                          "Generate Video"
-                        )}
-                      </button>
-                    </div>
-                  </form>
-                </div>
-              </div>
-              
-              {/* Video history */}
-              <div>
-                <h3 className="text-xl font-medium mb-4">Your Generations</h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                  {videoGenerations.map((video) => (
-                    <div 
-                      key={video.id} 
-                      className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden"
-                    >
-                      <div className="aspect-video relative">
-                        {video.status === "completed" && video.videoUrl ? (
-                          <video
-                            src={video.videoUrl}
-                            className="absolute inset-0 w-full h-full object-cover"
-                            autoPlay
-                            loop
-                            muted
-                          />
-                        ) : (
-                          <div className="absolute inset-0 flex items-center justify-center bg-black/30">
-                            {video.status === "pending" ? (
-                              <div className="flex flex-col items-center">
-                                <svg className="animate-spin h-10 w-10 text-amber-500 mb-3" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
-                                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
-                                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
-                                </svg>
-                                <span className="text-sm text-white/80">Processing...</span>
-                              </div>
-                            ) : (
-                              <div className="text-red-400">Generation failed</div>
-                            )}
-                          </div>
-                        )}
-                      </div>
-                      <div className="p-4">
-                        <div className="flex items-center justify-between mb-2">
-                          <span className={`px-2 py-1 rounded-full text-xs font-medium ${
-                            video.status === "completed" 
-                              ? "bg-green-500/20 text-green-400" 
-                              : video.status === "pending" 
-                                ? "bg-amber-500/20 text-amber-400"
-                                : "bg-red-500/20 text-red-400"
-                          }`}>
-                            {video.status.charAt(0).toUpperCase() + video.status.slice(1)}
-                          </span>
-                          <span className="text-zinc-500 text-sm">
-                            {new Date(video.createdAt).toLocaleTimeString()}
-                          </span>
-                        </div>
-                        <p className="text-sm text-white line-clamp-2">{video.prompt}</p>
-                      </div>
-                    </div>
-                  ))}
-                  
-                  {videoGenerations.length === 0 && (
-                    <div className="col-span-2 py-12 text-center text-zinc-400">
-                      No video generations yet. Create your first one above!
-                    </div>
-                  )}
-                </div>
-              </div>
-            </div>
-          ) : (
-            <div className="space-y-8">
-              {/* Campaigns dashboard */}
-              <div className="flex justify-between items-center">
-                <h3 className="text-xl font-medium">Active Campaigns</h3>
-                <button className="px-4 py-2 rounded-lg bg-gradient-to-r from-red-500 to-amber-500 text-white text-sm font-medium shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-1px] transition-all flex items-center gap-2">
-                  <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                    <path d="M12 5V19M5 12H19" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                  </svg>
-                  New Campaign
-                </button>
-              </div>
-              
-              <div className="overflow-hidden rounded-xl border border-white/10">
-                <table className="w-full">
-                  <thead>
-                    <tr className="bg-white/[0.03]">
-                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-300">Campaign Name</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-300">Platform</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-300">Budget</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-300">Status</th>
-                      <th className="text-left py-3 px-4 text-sm font-medium text-zinc-300">Performance</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-white/5">
-                    {campaigns.map((campaign) => (
-                      <tr key={campaign.id} className="hover:bg-white/[0.02] transition-colors">
-                        <td className="py-4 px-4">
-                          <div className="font-medium">{campaign.name}</div>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center">
-                            {campaign.platform === "facebook" ? (
-                              <span className="flex items-center gap-2 text-blue-400">
-                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/>
-                                </svg>
-                                Facebook
-                              </span>
-                            ) : campaign.platform === "google" ? (
-                              <span className="flex items-center gap-2 text-red-400">
-                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M22.5 12.5c0-5.523-4.477-10-10-10s-10 4.477-10 10c0 4.991 3.657 9.128 8.438 9.878v-6.987h-2.54V12.5h2.54V9.844c0-2.506 1.492-3.89 3.777-3.89 1.094 0 2.238.195 2.238.195v2.46h-1.26c-1.243 0-1.63.771-1.63 1.562V12.5h2.773l-.443 2.89h-2.33v6.988C18.843 21.628 22.5 17.49 22.5 12.5z"/>
-                                </svg>
-                                Google
-                              </span>
-                            ) : (
-                              <span className="flex items-center gap-2 text-teal-400">
-                                <svg className="w-4 h-4" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-                                  <path d="M12.53.02C13.84 0 15.14.01 16.44.02c.13 1.73.83 3.22 1.88 4.31A6.4 6.4 0 0 0 21.95 6v6.53h-4.13v-6.53a11.56 11.56 0 0 1-10.64.02v6.52H3.05V6a6.4 6.4 0 0 0 3.63-1.67A6.45 6.45 0 0 0 8.56.02c1.31-.01 2.61.01 3.91 0M0 15.5h24V24H0z"/>
-                                </svg>
-                                TikTok
-                              </span>
-                            )}
-                          </div>
-                        </td>
-                        <td className="py-4 px-4">${campaign.budget.toLocaleString()}</td>
-                        <td className="py-4 px-4">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            campaign.status === "active" 
-                              ? "bg-green-500/20 text-green-400" 
-                              : campaign.status === "paused" 
-                                ? "bg-amber-500/20 text-amber-400"
-                                : "bg-blue-500/20 text-blue-400"
-                          }`}>
-                            {campaign.status.charAt(0).toUpperCase() + campaign.status.slice(1)}
-                          </span>
-                        </td>
-                        <td className="py-4 px-4">
-                          <div className="flex items-center gap-4">
-                            <div className="flex-1 h-1 bg-white/10 rounded-full overflow-hidden">
-                              <div 
-                                className="h-full bg-gradient-to-r from-red-500 to-amber-500 rounded-full"
-                                style={{ 
-                                  width: `${Math.min(campaign.metrics.ctr * 10, 100)}%` 
-                                }}
-                              ></div>
-                            </div>
-                            <span className="text-sm font-medium">
-                              {campaign.metrics.ctr}% CTR
-                            </span>
-                          </div>
-                        </td>
-                      </tr>
-                    ))}
-                    
-                    {campaigns.length === 0 && (
-                      <tr>
-                        <td colSpan={5} className="py-12 text-center text-zinc-400">
-                          No campaigns yet. Create your first campaign to get started!
-                        </td>
-                      </tr>
-                    )}
-                  </tbody>
-                </table>
-              </div>
-              
-              {/* Campaign stats */}
-              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
-                {campaigns.length > 0 && (
-                  <>
-                    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6">
-                      <div className="text-sm text-zinc-400 mb-1">Total Impressions</div>
-                      <div className="text-2xl font-bold">
-                        {campaigns.reduce((sum, camp) => sum + camp.metrics.impressions, 0).toLocaleString()}
-                      </div>
-                      <div className="text-xs text-green-400 mt-2 flex items-center">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
-                          <path d="M18 15L12 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        12.3% from last week
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6">
-                      <div className="text-sm text-zinc-400 mb-1">Total Clicks</div>
-                      <div className="text-2xl font-bold">
-                        {campaigns.reduce((sum, camp) => sum + camp.metrics.clicks, 0).toLocaleString()}
-                      </div>
-                      <div className="text-xs text-green-400 mt-2 flex items-center">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
-                          <path d="M18 15L12 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        8.7% from last week
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6">
-                      <div className="text-sm text-zinc-400 mb-1">Avg. CTR</div>
-                      <div className="text-2xl font-bold">
-                        {(campaigns.reduce((sum, camp) => sum + camp.metrics.ctr, 0) / campaigns.length).toFixed(2)}%
-                      </div>
-                      <div className="text-xs text-green-400 mt-2 flex items-center">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
-                          <path d="M18 15L12 9L6 15" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        2.1% from last week
-                      </div>
-                    </div>
-                    
-                    <div className="bg-white/[0.03] border border-white/10 rounded-xl p-6">
-                      <div className="text-sm text-zinc-400 mb-1">Total Budget</div>
-                      <div className="text-2xl font-bold">
-                        ${campaigns.reduce((sum, camp) => sum + camp.budget, 0).toLocaleString()}
-                      </div>
-                      <div className="text-xs text-amber-400 mt-2 flex items-center">
-                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" className="mr-1">
-                          <path d="M18 9L12 15L6 9" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        </svg>
-                        5.3% from last week
-                      </div>
-                    </div>
-                  </>
-                )}
-              </div>
-            </div>
-          )}
+            )}
+          </div>
         </div>
       </main>
     </div>

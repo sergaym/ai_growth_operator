@@ -5,9 +5,7 @@ import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardFooter, CardHeader } from "@/components/ui/card";
-import { Alert, AlertDescription } from "@/components/ui/alert";
-import { Loader2 } from "lucide-react";
+import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 
 interface AvatarVideoFormProps {
   onVideoGenerated: (formData: HeygenVideoGenerationRequest) => Promise<any>;
@@ -22,10 +20,21 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     prompt: '',
     avatar_id: '',
     voice_id: '',
-    background_color: '#030712', // Match our dark theme
+    background_color: '#ffffff', // Updated to white background
     avatar_style: 'normal',
     voice_speed: 1.0,
   });
+
+  // Form submission state
+  const [submissionError, setSubmissionError] = useState<string | null>(null);
+  const [lastAttempt, setLastAttempt] = useState<HeygenVideoGenerationRequest | null>(null);
+
+  // Form validation state
+  const [validationErrors, setValidationErrors] = useState<{
+    prompt?: string;
+    avatar_id?: string;
+    voice_id?: string;
+  }>({});
 
   // Set default avatar and voice when loaded
   useEffect(() => {
@@ -43,25 +52,63 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   // Handle form changes
   const handleChange = (name: string, value: string | number) => {
     setFormData(prev => ({ ...prev, [name]: value }));
+    
+    // Clear validation error when field is updated
+    if (validationErrors[name as keyof typeof validationErrors]) {
+      setValidationErrors(prev => ({
+        ...prev,
+        [name]: undefined
+      }));
+    }
+
+    // Clear submission error when form changes
+    if (submissionError) {
+      setSubmissionError(null);
+    }
+  };
+
+  // Validate form
+  const validateForm = (): boolean => {
+    const errors: {
+      prompt?: string;
+      avatar_id?: string;
+      voice_id?: string;
+    } = {};
+    
+    if (!formData.prompt.trim()) {
+      errors.prompt = "Please enter a script for the avatar to speak";
+    } else if (formData.prompt.length < 10) {
+      errors.prompt = "Script should be at least 10 characters";
+    }
+    
+    if (!formData.avatar_id) {
+      errors.avatar_id = "Please select an avatar";
+    }
+    
+    if (!formData.voice_id) {
+      errors.voice_id = "Please select a voice";
+    }
+    
+    setValidationErrors(errors);
+    return Object.keys(errors).length === 0;
   };
 
   // Handle form submission
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    console.log('Avatar form submitted with data:', formData);
-    
-    if (!formData.prompt || !formData.avatar_id || !formData.voice_id) {
-      console.error('Missing required fields:', { 
-        hasPrompt: !!formData.prompt, 
-        hasAvatarId: !!formData.avatar_id, 
-        hasVoiceId: !!formData.voice_id 
-      });
+    if (!validateForm()) {
+      console.error('Form validation failed:', validationErrors);
       return;
     }
     
+    console.log('Avatar form submitted with data:', formData);
+    setSubmissionError(null);
+    
     try {
       console.log('Calling onVideoGenerated with:', formData);
+      setLastAttempt(formData);
+      
       // Call the parent function with the form data
       await onVideoGenerated(formData);
       
@@ -69,173 +116,207 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
       setFormData(prev => ({ ...prev, prompt: '' }));
     } catch (error) {
       console.error('Failed to generate video:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error generating video';
+      setSubmissionError(errorMessage);
     }
   };
 
-  const isLoading = false; // Now controlled by props
-  const hasError = false; // Now controlled by props
+  // Retry last submission
+  const handleRetry = async () => {
+    if (!lastAttempt) return;
+    
+    setSubmissionError(null);
+    
+    try {
+      console.log('Retrying video generation with:', lastAttempt);
+      
+      // Call the parent function with the previous attempt
+      await onVideoGenerated(lastAttempt);
+    } catch (error) {
+      console.error('Failed to generate video during retry:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error generating video';
+      setSubmissionError(errorMessage);
+    }
+  };
 
   return (
-    <div className="relative">
-      <div className="absolute -inset-1 bg-gradient-to-r from-red-500/20 via-amber-500/20 to-red-500/20 rounded-2xl blur-md"></div>
-      <Card className="relative border-white/10 bg-white/[0.07] backdrop-blur-md">
-        <form onSubmit={handleSubmit}>
-          <CardHeader>
-            {hasError && (
-              <Alert variant="destructive" className="bg-red-500/10 border-red-500/30 text-red-400">
-                <AlertDescription>
-                  Error occurred while loading resources
-                </AlertDescription>
-              </Alert>
+    <form onSubmit={handleSubmit} className="space-y-6">
+      {/* API Error message */}
+      {submissionError && (
+        <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start">
+          <AlertCircle className="text-[#e03e21] mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
+          <div className="flex-1">
+            <p className="text-[#e03e21] font-medium text-sm mb-1">Error submitting request</p>
+            <p className="text-[#86372f] text-sm">{submissionError}</p>
+            {lastAttempt && (
+              <Button 
+                type="button"
+                variant="outline"
+                size="sm" 
+                onClick={handleRetry}
+                className="mt-2 border-[#ffc1ba] text-[#e03e21] hover:bg-[#fff1f0] inline-flex items-center"
+                disabled={isGenerating}
+              >
+                <RefreshCw className="mr-1 h-3 w-3" />
+                Retry Request
+              </Button>
             )}
-          </CardHeader>
-          
-          <CardContent className="space-y-6">
-            <div className="space-y-2">
-              <Label htmlFor="prompt" className="text-amber-400">Avatar Video Script</Label>
-              <Textarea 
-                id="prompt"
-                value={formData.prompt}
-                onChange={(e) => handleChange('prompt', e.target.value)}
-                placeholder="Write the text you want the avatar to speak..."
-                className="min-h-[100px] bg-white/5 border-white/10 placeholder:text-white/30 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                required
-              />
-            </div>
+          </div>
+        </div>
+      )}
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="avatar" className="text-amber-400">Avatar</Label>
-                <Select 
-                  value={formData.avatar_id}
-                  onValueChange={(value: string) => handleChange('avatar_id', value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger 
-                    id="avatar"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select avatar" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>Loading avatars...</SelectItem>
-                    ) : (
-                      avatars.map(avatar => (
-                        <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
-                          {avatar.avatar_name} ({avatar.gender})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
+      {/* Script textarea */}
+      <div className="space-y-2">
+        <Label htmlFor="prompt" className="text-[#37352f] font-medium text-sm">Script</Label>
+        <Textarea 
+          id="prompt"
+          value={formData.prompt}
+          onChange={(e) => handleChange('prompt', e.target.value)}
+          placeholder="Write what you want the avatar to say..."
+          className="min-h-[120px] bg-white border-[#e6e6e6] rounded-md text-[#37352f] placeholder:text-[#9c9c9c] focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+          required
+        />
+        {validationErrors.prompt && (
+          <div className="text-sm text-[#e03e21] mt-1">{validationErrors.prompt}</div>
+        )}
+      </div>
 
-              <div className="space-y-2">
-                <Label htmlFor="voice" className="text-amber-400">Voice</Label>
-                <Select 
-                  value={formData.voice_id}
-                  onValueChange={(value: string) => handleChange('voice_id', value)}
-                  disabled={isLoading}
-                >
-                  <SelectTrigger 
-                    id="voice"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select voice" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    {isLoading ? (
-                      <SelectItem value="loading" disabled>Loading voices...</SelectItem>
-                    ) : (
-                      voices.map(voice => (
-                        <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                          {voice.name} ({voice.gender}, {voice.language})
-                        </SelectItem>
-                      ))
-                    )}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-              <div className="space-y-2">
-                <Label htmlFor="background-color" className="text-amber-400">Background Color</Label>
-                <div className="flex items-center">
-                  <input
-                    type="color"
-                    value={formData.background_color}
-                    onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="h-10 w-10 rounded border border-white/20 bg-transparent"
-                  />
-                  <Input
-                    id="background-color"
-                    value={formData.background_color}
-                    onChange={(e) => handleChange('background_color', e.target.value)}
-                    className="ml-2 bg-white/5 border-white/10 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                  />
-                </div>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="avatar-style" className="text-amber-400">Avatar Style</Label>
-                <Select 
-                  value={formData.avatar_style}
-                  onValueChange={(value: string) => handleChange('avatar_style', value)}
-                >
-                  <SelectTrigger 
-                    id="avatar-style"
-                    className="w-full bg-white/5 border-white/10 focus:ring-red-500/30 focus:border-red-500/50"
-                  >
-                    <SelectValue placeholder="Select style" />
-                  </SelectTrigger>
-                  <SelectContent className="bg-[#1c1c1c] border-white/10">
-                    <SelectItem value="normal">Normal</SelectItem>
-                    <SelectItem value="circle">Circle</SelectItem>
-                    <SelectItem value="closeUp">Close Up</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              <div className="space-y-2">
-                <Label htmlFor="voice-speed" className="text-amber-400">Voice Speed</Label>
-                <Input
-                  id="voice-speed"
-                  type="number"
-                  value={formData.voice_speed || 1.0}
-                  onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
-                  min="0.5"
-                  max="1.5"
-                  step="0.1"
-                  className="bg-white/5 border-white/10 focus-visible:ring-red-500/30 focus-visible:border-red-500/50"
-                />
-              </div>
-            </div>
-          </CardContent>
-          
-          <CardFooter className="flex justify-end pt-2">
-            <Button
-              type="submit"
-              disabled={isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id}
-              className={`bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-500 hover:to-amber-600 text-white ${
-                isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id
-                  ? "opacity-50 cursor-not-allowed"
-                  : "shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-1px]"
-              }`}
+      {/* Avatar and Voice selection */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
+        <div className="space-y-2">
+          <Label htmlFor="avatar" className="text-[#37352f] font-medium text-sm">Avatar</Label>
+          <Select 
+            value={formData.avatar_id}
+            onValueChange={(value: string) => handleChange('avatar_id', value)}
+            disabled={isGenerating || avatars.length === 0}
+          >
+            <SelectTrigger 
+              id="avatar"
+              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
             >
-              {isGenerating ? (
-                <>
-                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-                  Generating...
-                </>
+              <SelectValue placeholder="Select avatar" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
+              {avatars.length === 0 ? (
+                <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
               ) : (
-                "Generate Avatar Video"
+                avatars.map(avatar => (
+                  <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
+                    {avatar.avatar_name} ({avatar.gender})
+                  </SelectItem>
+                ))
               )}
-            </Button>
-          </CardFooter>
-        </form>
-      </Card>
-    </div>
+            </SelectContent>
+          </Select>
+          {validationErrors.avatar_id && (
+            <div className="text-sm text-[#e03e21] mt-1">{validationErrors.avatar_id}</div>
+          )}
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="voice" className="text-[#37352f] font-medium text-sm">Voice</Label>
+          <Select 
+            value={formData.voice_id}
+            onValueChange={(value: string) => handleChange('voice_id', value)}
+            disabled={isGenerating || voices.length === 0}
+          >
+            <SelectTrigger 
+              id="voice"
+              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+            >
+              <SelectValue placeholder="Select voice" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
+              {voices.length === 0 ? (
+                <SelectItem value="no-voices" disabled>No voices available</SelectItem>
+              ) : (
+                voices.map(voice => (
+                  <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                    {voice.name} ({voice.gender}, {voice.language})
+                  </SelectItem>
+                ))
+              )}
+            </SelectContent>
+          </Select>
+          {validationErrors.voice_id && (
+            <div className="text-sm text-[#e03e21] mt-1">{validationErrors.voice_id}</div>
+          )}
+        </div>
+      </div>
+
+      {/* Additional options */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        <div className="space-y-2">
+          <Label htmlFor="background-color" className="text-[#37352f] font-medium text-sm">Background Color</Label>
+          <div className="flex items-center">
+            <input
+              type="color"
+              value={formData.background_color}
+              onChange={(e) => handleChange('background_color', e.target.value)}
+              className="h-8 w-8 rounded border border-[#e6e6e6] bg-transparent cursor-pointer"
+            />
+            <Input
+              id="background-color"
+              value={formData.background_color}
+              onChange={(e) => handleChange('background_color', e.target.value)}
+              className="ml-2 bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+            />
+          </div>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="avatar-style" className="text-[#37352f] font-medium text-sm">Avatar Style</Label>
+          <Select 
+            value={formData.avatar_style}
+            onValueChange={(value: string) => handleChange('avatar_style', value)}
+            disabled={isGenerating}
+          >
+            <SelectTrigger 
+              id="avatar-style"
+              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+            >
+              <SelectValue placeholder="Select style" />
+            </SelectTrigger>
+            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
+              <SelectItem value="normal">Normal</SelectItem>
+              <SelectItem value="circle">Circle</SelectItem>
+              <SelectItem value="closeUp">Close Up</SelectItem>
+            </SelectContent>
+          </Select>
+        </div>
+
+        <div className="space-y-2">
+          <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
+          <Input
+            id="voice-speed"
+            type="number"
+            value={formData.voice_speed || 1.0}
+            onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
+            min="0.5"
+            max="1.5"
+            step="0.1"
+            className="bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+            disabled={isGenerating}
+          />
+        </div>
+      </div>
+
+      <div className="pt-4 border-t border-[#f0f0f0]">
+        <Button
+          type="submit"
+          disabled={isGenerating}
+          className="bg-[#2d3748] hover:bg-[#1a202c] text-white rounded-md font-medium px-4 py-2 h-10"
+        >
+          {isGenerating ? (
+            <>
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+              Generating...
+            </>
+          ) : (
+            "Generate Video"
+          )}
+        </Button>
+      </div>
+    </form>
   );
 } 
