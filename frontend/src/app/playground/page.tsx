@@ -6,6 +6,8 @@ import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
 import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
 import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration } from "@/hooks/useHeygenApi";
+import { Button } from "@/components/ui/button";
+import { Logo } from "@/components/ui/Logo";
 
 // These types would eventually come from your API responses
 type VideoGeneration = {
@@ -32,9 +34,6 @@ type AdCampaign = {
 };
 
 export default function Playground() {
-  // State for tabs and content - Fixed to "avatarVideo"
-  const [activeTab, setActiveTab] = useState<"video" | "avatarVideo" | "campaigns">("avatarVideo");
-  
   // HeyGen API hooks
   const { avatars: fetchedAvatars, loading: loadingAvatars, error: avatarsError, refetch: refetchAvatars } = useHeygenAvatars();
   const { voices: fetchedVoices, loading: loadingVoices, error: voicesError, refetch: refetchVoices } = useHeygenVoices();
@@ -187,161 +186,137 @@ export default function Playground() {
   };
 
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-[#2d3748]">
-      {/* Custom background for light theme */}
+    <div className="min-h-screen bg-[#ffffff] text-[#37352f]">
+      {/* Simple minimal background */}
       <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-radial from-blue-50 via-transparent to-transparent opacity-60"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-blue-50/50 to-transparent"></div>
+        <div className="absolute inset-0 bg-[#ffffff] opacity-100"></div>
+        <div className="absolute inset-0 bg-[url('/subtle-dots.png')] opacity-[0.015]"></div>
       </div>
       
-      {/* Header */}
-      <header className="sticky top-0 z-40 bg-white/90 backdrop-blur-md border-b border-slate-200/50 shadow-sm">
-        <div className="container max-w-7xl mx-auto px-6">
-          <div className="h-16 flex items-center justify-between">
-            {/* Logo and title */}
-            <Link href="/" className="flex items-center gap-3">
-              <div className="relative w-8 h-8">
-                <div className="absolute inset-0 rounded-lg bg-gradient-to-tr from-blue-500 to-cyan-400"></div>
-                <div className="absolute inset-[2px] bg-white rounded-md flex items-center justify-center text-blue-600 font-bold">
-                  A
-                </div>
+      {/* Header - Notion-style */}
+      <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
+        <div className="container max-w-4xl mx-auto px-5 md:px-8">
+          <div className="flex items-center justify-between">
+            {/* Logo and back button in one element */}
+            <div className="flex items-center gap-3">
+              <Link href="/" className="p-2 hover:bg-[#f1f1f1] rounded-md transition-colors">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                </svg>
+              </Link>
+              
+              <div className="h-5 w-px bg-[#e6e6e6]"></div>
+              
+              <div className="flex items-center gap-2">
+                <Logo size="sm" showText={false} />
+                <span className="text-[15px] font-medium text-[#37352f]">
+                  Playground
+                </span>
               </div>
-              <span className="text-lg font-bold text-slate-800 tracking-tight">
-                AI Growth Operator
-              </span>
-            </Link>
-            
-            {/* Navigation back to home */}
-            <Link 
-              href="/" 
-              className="px-4 py-2 rounded-lg bg-slate-100 border border-slate-200 hover:bg-slate-200 transition-colors text-sm font-medium text-slate-700 flex items-center gap-2"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M5 12H19M5 12L11 18M5 12L11 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Back to Home
-            </Link>
+            </div>
           </div>
         </div>
       </header>
       
-      <main className="container max-w-7xl mx-auto px-6 py-10">
-        <div className="mb-8">
-          <h1 className="text-3xl md:text-4xl font-bold mb-3 tracking-tight">
-            <span className="bg-gradient-to-r from-blue-600 to-cyan-500 bg-clip-text text-transparent">
-              Playground
-            </span>
+      <main className="container max-w-4xl mx-auto px-5 md:px-8 py-10">
+        {/* Notion-style page title */}
+        <div className="mb-12">
+          <h1 className="text-4xl font-bold mb-2 text-[#37352f]">
+            Avatar Video Generator
           </h1>
-          <p className="text-slate-600">
-            Experiment with the AI Growth Operator capabilities and see them in action
+          <p className="text-[#6b7280] text-lg">
+            Create custom AI videos with virtual avatars and realistic voices
           </p>
         </div>
         
-        {/* Tabs */}
-        <div className="mb-8 border-b border-slate-200">
-          <div className="flex space-x-8">
-            <button
-              onClick={() => setActiveTab("avatarVideo")}
-              className="pb-4 relative text-blue-600 font-medium"
-            >
-              <span>Avatar Video</span>
-              <motion.div
-                layoutId="activeTabIndicator"
-                className="absolute bottom-0 left-0 right-0 h-0.5 bg-gradient-to-r from-blue-500 to-cyan-400"
-              />
-            </button>
-            <button
-              disabled
-              className="pb-4 relative text-slate-400 cursor-not-allowed"
-            >
-              <span>Video Generation</span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-100 rounded-full text-[10px] flex items-center justify-center text-amber-600 font-medium">
-                !
-              </span>
-            </button>
-            <button
-              disabled
-              className="pb-4 relative text-slate-400 cursor-not-allowed"
-            >
-              <span>Ad Campaigns</span>
-              <span className="absolute -top-1 -right-1 w-4 h-4 bg-amber-100 rounded-full text-[10px] flex items-center justify-center text-amber-600 font-medium">
-                !
-              </span>
-            </button>
+        {/* Display any API errors */}
+        {apiError && (
+          <div className="mb-8 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
+            <p className="font-medium">Error: {apiError}</p>
           </div>
-        </div>
+        )}
         
-        {/* Content - Only Avatar Video is shown */}
-        <div className="min-h-[calc(100vh-300px)]">
-          <div className="space-y-8">
-            {/* Display any API errors */}
-            {apiError && (
-              <div className="bg-red-50 border border-red-200 text-red-600 p-4 rounded-xl mb-4">
-                <p className="font-medium">Error: {apiError}</p>
-              </div>
-            )}
+        {/* Content with Notion-style cards */}
+        <div className="space-y-12">
+          {/* Avatar video generation form */}
+          <div className="bg-white border border-[#e6e6e6] rounded-lg shadow-sm overflow-hidden">
+            <div className="px-6 py-5 border-b border-[#e6e6e6] flex items-center justify-between">
+              <h2 className="text-lg font-medium text-[#37352f]">Create New Video</h2>
+              
+              {/* Loading or retry buttons */}
+              {(loadingAvatars || loadingVoices) ? (
+                <div className="flex items-center text-[#6b7280] text-sm">
+                  <div className="animate-spin h-4 w-4 border-2 border-[#e6e6e6] border-t-[#37352f] rounded-full mr-2"></div>
+                  Loading...
+                </div>
+              ) : (avatarsError || voicesError) ? (
+                <Button 
+                  variant="outline" 
+                  onClick={handleRetryApiLoad}
+                  className="text-sm text-[#6b7280] border-[#e6e6e6]"
+                >
+                  Retry API Connection
+                </Button>
+              ) : null}
+            </div>
             
-            {/* Avatar video generation form - show form even if API fails */}
-            <div className="relative">
-              <div className="absolute -inset-1 bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-200 rounded-2xl blur-md"></div>
-              <div className="relative bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h3 className="text-xl font-medium mb-4 text-slate-800">Create Avatar Video</h3>
-                
-                {(loadingAvatars || loadingVoices) ? (
-                  <div className="p-8 text-center">
-                    <div className="animate-spin h-10 w-10 border-4 border-blue-200 border-t-blue-600 rounded-full mx-auto mb-4"></div>
-                    <p className="text-slate-500">Loading avatars and voices...</p>
+            <div className="p-6">
+              {(loadingAvatars || loadingVoices) ? (
+                <div className="py-12 text-center">
+                  <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
+                  <p className="text-[#6b7280]">Loading avatars and voices...</p>
+                </div>
+              ) : (avatarsError || voicesError) ? (
+                <div>
+                  <div className="mb-6 p-4 bg-[#fffaeb] border border-[#ffefc6] rounded-md text-[#92400e]">
+                    <p className="font-medium">Note: Using demo data because the API connection failed</p>
+                    <p className="text-sm mt-1 text-[#b54708]">{avatarsError || voicesError}</p>
                   </div>
-                ) : (avatarsError || voicesError) ? (
-                  <div>
-                    <div className="bg-amber-50 border border-amber-200 text-amber-700 p-4 rounded-xl mb-4">
-                      <p className="font-medium">Note: Using demo data because the API connection failed</p>
-                      <p className="text-sm mt-1">{avatarsError || voicesError}</p>
-                      <button 
-                        onClick={handleRetryApiLoad}
-                        className="mt-3 px-4 py-2 bg-amber-100 hover:bg-amber-200 rounded-lg text-sm font-medium transition-colors text-amber-700"
-                      >
-                        Retry API Connection
-                      </button>
-                    </div>
-                    <AvatarVideoForm
-                      onVideoGenerated={handleAvatarVideoGenerated}
-                      avatars={avatars}
-                      voices={voices}
-                      isGenerating={isGenerating}
-                    />
-                  </div>
-                ) : (
                   <AvatarVideoForm
                     onVideoGenerated={handleAvatarVideoGenerated}
                     avatars={avatars}
                     voices={voices}
                     isGenerating={isGenerating}
                   />
-                )}
-              </div>
+                </div>
+              ) : (
+                <AvatarVideoForm
+                  onVideoGenerated={handleAvatarVideoGenerated}
+                  avatars={avatars}
+                  voices={voices}
+                  isGenerating={isGenerating}
+                />
+              )}
             </div>
+          </div>
+          
+          {/* Avatar video history */}
+          <div className="mt-12">
+            <h2 className="text-xl font-medium mb-5 text-[#37352f] flex items-center">
+              <span>Your Videos</span>
+              {avatarVideos.length > 0 && (
+                <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
+                  {avatarVideos.length}
+                </span>
+              )}
+            </h2>
             
-            {/* Avatar video history */}
-            <div>
-              <h3 className="text-xl font-medium mb-4 text-slate-800">Your Avatar Videos</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                {avatarVideos.map((video) => (
-                  <AvatarVideoCard 
-                    key={video.id} 
-                    generation={video} 
-                    onUpdate={handleAvatarVideoUpdated} 
-                  />
-                ))}
-                
-                {avatarVideos.length === 0 && (
-                  <div className="col-span-2 py-12 text-center text-slate-500 bg-white border border-slate-200 rounded-xl">
-                    No avatar videos yet. Create your first one above!
-                  </div>
-                )}
+            {avatarVideos.length === 0 ? (
+              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
+                <p className="text-[#6b7280]">No videos created yet. Get started by creating your first video above.</p>
               </div>
-            </div>
+            ) : (
+              <div className="space-y-4">
+                {avatarVideos.map((video) => (
+                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+                    <AvatarVideoCard 
+                      generation={video} 
+                      onUpdate={handleAvatarVideoUpdated} 
+                    />
+                  </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>
