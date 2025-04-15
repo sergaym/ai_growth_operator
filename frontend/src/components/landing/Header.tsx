@@ -2,6 +2,7 @@
 import React, { useState, useEffect } from "react";
 import Link from "next/link";
 import { motion, AnimatePresence } from "framer-motion";
+import { Logo } from "@/components/ui/Logo";
 
 export function Header() {
   const [isScrolled, setIsScrolled] = useState(false);
@@ -37,16 +38,8 @@ export function Header() {
       <div className="container max-w-7xl mx-auto px-6">
         <div className="flex items-center justify-between">
           {/* Logo */}
-          <Link href="/" className="flex items-center gap-3 z-10">
-            <div className="relative w-9 h-9">
-              <div className="absolute inset-0 rounded-lg bg-gradient-to-tr from-red-500 to-amber-500"></div>
-              <div className="absolute inset-[2.5px] bg-[#030712] rounded-md flex items-center justify-center text-white font-bold">
-                A
-              </div>
-            </div>
-            <span className="text-xl font-bold text-white tracking-tight">
-              AI Growth Operator
-            </span>
+          <Link href="/" className="z-10">
+            <Logo size={isScrolled ? "sm" : "md"} showText={true} />
           </Link>
 
           {/* Desktop Navigation */}
