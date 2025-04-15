@@ -116,3 +116,9 @@ class HeygenCreateAvatarGroupRequest(BaseModel):
     name: str = Field(..., description="Name for the avatar group")
     image_keys: List[str] = Field(..., description="List of image keys from the generated photos")
     description: str = Field("", description="Optional description for the avatar group")
+
+class HeygenTrainAvatarGroupResponse(BaseModel):
+    """Response schema for training an avatar group."""
+    job_id: str = Field(..., description="ID of the training job")
+    group_id: str = Field(..., description="ID of the avatar group being trained")
+
