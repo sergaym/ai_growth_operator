@@ -2,6 +2,7 @@
 import React from "react";
 import Link from "next/link";
 import { motion } from "framer-motion";
+import { Logo } from "@/components/ui/Logo";
 
 export function Footer() {
   const currentYear = new Date().getFullYear();
@@ -46,86 +47,6 @@ export function Footer() {
       </div>
       
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
-        {/* Top logo section */}
-        <div className="grid grid-cols-1 md:grid-cols-4 lg:grid-cols-5 gap-10 md:gap-8 lg:gap-12 mb-20">
-          <div className="col-span-1 md:col-span-1 lg:col-span-1">
-            <div className="relative mb-8">
-              {/* Logo container with glassmorphism */}
-              <div className="inline-flex items-center gap-3 p-3 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-2xl">
-                <div className="relative w-10 h-10">
-                  <motion.div 
-                    className="absolute inset-0 rounded-xl bg-gradient-to-tr from-red-500 to-amber-500"
-                    animate={{ 
-                      rotate: [0, 360],
-                    }}
-                    transition={{ 
-                      duration: 20, 
-                      repeat: Infinity,
-                      repeatType: "loop",
-                      ease: "linear"
-                    }}
-                  />
-                  <div className="absolute inset-[3px] bg-[#030712] rounded-lg flex items-center justify-center text-white font-bold">
-                    A
-                  </div>
-                </div>
-                <span className="text-xl font-bold tracking-tight">
-                  AI Growth Operator
-                </span>
-              </div>
-            </div>
-            <p className="text-zinc-400 text-base mb-8 max-w-xs">
-              Revolutionizing digital marketing with AI-powered campaign management and optimization.
-            </p>
-            
-            {/* Social links */}
-            <div className="flex space-x-5">
-              {socialLinks.map((item) => (
-                <a
-                  key={item.name}
-                  href={item.href}
-                  className="text-zinc-400 hover:text-white transition-colors w-10 h-10 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center group"
-                >
-                  <span className="sr-only">{item.name}</span>
-                  <motion.div
-                    whileHover={{ 
-                      scale: 1.2,
-                      transition: { duration: 0.2 } 
-                    }}
-                    className="text-zinc-400 group-hover:text-amber-400"
-                  >
-                    {item.icon}
-                  </motion.div>
-                </a>
-              ))}
-            </div>
-          </div>
-          
-          {/* Footer links sections */}
-          <div className="col-span-1 md:col-span-3 lg:col-span-4">
-            <div className="grid grid-cols-2 md:grid-cols-4 gap-8">
-              {footerLinks.map((group) => (
-                <div key={group.title}>
-                  <h3 className="text-sm font-semibold uppercase tracking-wider text-amber-400 mb-6">
-                    {group.title}
-                  </h3>
-                  <ul className="space-y-4">
-                    {group.links.map((link) => (
-                      <li key={link.name}>
-                        <Link
-                          href={link.href}
-                          className="text-zinc-400 hover:text-white transition-colors inline-block text-base"
-                        >
-                          {link.name}
-                        </Link>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
         
         {/* Newsletter section */}
         <motion.div
@@ -166,9 +87,31 @@ export function Footer() {
         
         {/* Bottom section with copyright */}
         <div className="border-t border-white/5 pt-8 flex flex-col md:flex-row justify-between items-center">
-          <p className="text-zinc-500 text-sm mb-4 md:mb-0">
+        <p className="text-zinc-500 text-sm mt-4">
             &copy; {currentYear} AI Growth Operator. All rights reserved.
           </p>
+          {/* Social links */}
+          <div className="flex space-x-5 mb-6">
+            {socialLinks.map((item) => (
+              <a
+                key={item.name}
+                href={item.href}
+                className="text-zinc-400 hover:text-white transition-colors w-10 h-10 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-xl flex items-center justify-center group"
+              >
+                <span className="sr-only">{item.name}</span>
+                <motion.div
+                  whileHover={{ 
+                    scale: 1.2,
+                    transition: { duration: 0.2 } 
+                  }}
+                  className="text-zinc-400 group-hover:text-amber-400"
+                >
+                  {item.icon}
+                </motion.div>
+              </a>
+            ))}
+          </div>
+
           <div className="flex items-center gap-6">
             <Link href="#" className="text-zinc-500 hover:text-white text-sm transition-colors">
               Privacy Policy
