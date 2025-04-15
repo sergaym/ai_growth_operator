@@ -10,7 +10,12 @@ import {
 // Base URL that we can easily change for production
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:8000/api";
 
-// Helper function for making API requests
+/**
+ * Helper function for making API requests
+ * @param endpoint - The API endpoint to call (starting with /)
+ * @param options - Fetch API options
+ * @returns The parsed JSON response
+ */
 async function fetchFromAPI<T>(
   endpoint: string, 
   options: RequestInit = {}
@@ -22,6 +27,8 @@ async function fetchFromAPI<T>(
   };
   
   try {
+    console.log(`Calling API: ${url}`, options);
+    
     const response = await fetch(url, {
       ...options,
       headers: {
@@ -32,13 +39,18 @@ async function fetchFromAPI<T>(
   
     if (!response.ok) {
       const errorData = await response.json().catch(() => ({}));
-      throw new Error(errorData.detail || `API Error: ${response.status} - ${response.statusText}`);
+      const errorMessage = errorData.detail || `API Error: ${response.status} - ${response.statusText}`;
+      console.error(`API error for ${endpoint}:`, errorMessage);
+      throw new Error(errorMessage);
     }
-  
-    return response.json();
+    
+    const responseData = await response.json();
+    console.log(`API response from ${endpoint}:`, responseData);
+    return responseData;
   } catch (error) {
     // Enhanced error handling for network issues
     if (error instanceof TypeError && error.message.includes('Failed to fetch')) {
+      console.error(`Network error for ${url}:`, error);
       throw new Error(`Unable to connect to the API at ${API_BASE_URL}. Please ensure the backend server is running.`);
     }
     
@@ -52,7 +64,9 @@ async function fetchFromAPI<T>(
   }
 }
 
-// HeyGen API functions
+/**
+ * HeyGen API client for interacting with the HeyGen avatar video generation services
+ */
 export const heygenAPI = {
   // List available avatars
   listAvatars: async (): Promise<HeygenAvatar[]> => {
@@ -77,9 +91,22 @@ export const heygenAPI = {
   // Generate avatar video
   generateVideo: async (data: HeygenVideoGenerationRequest): Promise<HeygenVideoResponse> => {
     try {
+      // Make sure we're sending all the expected parameters from the backend
+      const requestData = {
+        prompt: data.prompt,
+        avatar_id: data.avatar_id,
+        voice_id: data.voice_id,
+        background_color: data.background_color || '#ffffff',
+        width: data.width || 1280,
+        height: data.height || 720,
+        voice_speed: data.voice_speed || 1.0,
+        voice_pitch: data.voice_pitch || 0,
+        avatar_style: data.avatar_style || 'normal'
+      };
+      
       return await fetchFromAPI<HeygenVideoResponse>('/v1/video/heygen/generate-avatar-video', {
         method: 'POST',
-        body: JSON.stringify(data),
+        body: JSON.stringify(requestData),
       });
     } catch (error) {
       console.error('Failed to generate video:', error);
