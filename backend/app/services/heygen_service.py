@@ -294,6 +294,45 @@ class HeygenService:
             logger.error(f"Error checking photo generation status: {str(e)}")
             raise Exception(f"Failed to check photo generation status: {str(e)}")
     
+    def create_avatar_group(
+        self,
+        name: str,
+        image_keys: List[str],
+        description: str = ""
+    ) -> Dict[str, Any]:
+        """
+        Create an avatar group from generated photos.
+        
+        Args:
+            name: Name for the avatar group
+            image_keys: List of image keys from the generated photos
+            description: Optional description for the avatar group
+            
+        Returns:
+            Dict containing the group ID and other info
+        """
+        url = f"{self.base_url}/v2/photo_avatar/group"
+        
+        payload = {
+            "name": name,
+            "image_key_list": image_keys,
+            "description": description
+        }
+        
+        try:
+            response = requests.post(url, headers=self.headers, json=payload)
+            response.raise_for_status()
+            data = response.json()
+            
+            if data.get("error"):
+                logger.error(f"Heygen API error: {data.get('error')}")
+                raise Exception(f"Heygen API error: {data.get('error')}")
+                
+            return data.get("data", {})
+        except requests.RequestException as e:
+            logger.error(f"Error creating avatar group: {str(e)}")
+            raise Exception(f"Failed to create avatar group: {str(e)}")
+    
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 
