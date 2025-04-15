@@ -211,5 +211,28 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
             </div>
           </div>
         </CardContent>
+        
+        <CardFooter className="flex justify-end pt-2">
+          <Button
+            type="submit"
+            disabled={isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id}
+            className={`bg-gradient-to-r from-blue-500 to-cyan-500 hover:from-blue-600 hover:to-cyan-600 text-white ${
+              isGenerating || !formData.prompt || !formData.avatar_id || !formData.voice_id
+                ? "opacity-50 cursor-not-allowed"
+                : "shadow-md shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-1px]"
+            }`}
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Avatar Video"
+            )}
+          </Button>
+        </CardFooter>
+      </form>
+    </Card>
   );
 } 
