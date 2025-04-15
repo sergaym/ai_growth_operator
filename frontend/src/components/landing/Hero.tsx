@@ -5,31 +5,16 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="relative pt-24 pb-32 overflow-hidden bg-[#030712]">
+    <section className="relative pt-16 md:pt-24 pb-24 md:pb-32 overflow-hidden">
       {/* Background effects - subtle dot pattern with vibrant accent spheres */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-blue-600/10 via-purple-600/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
         <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
-        <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-repeat opacity-[0.015] mix-blend-luminosity"></div>
       </div>
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
-        {/* Subtle floating bubble elements - mimicking amie.so style */}
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.5 }}
-          className="absolute top-20 -right-20 w-64 h-64 rounded-full bg-gradient-to-br from-pink-500/5 to-blue-500/5 filter blur-xl"
-        ></motion.div>
-        <motion.div
-          initial={{ opacity: 0 }}
-          animate={{ opacity: 1 }}
-          transition={{ duration: 0.8, delay: 0.8 }}
-          className="absolute bottom-20 -left-10 w-40 h-40 rounded-full bg-gradient-to-tr from-amber-400/5 to-red-500/5 filter blur-xl"
-        ></motion.div>
-
         {/* Top badge - inspired by Revolut badging */}
-        <div className="text-center mb-12">
+        <div className="text-center mb-10 md:mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
