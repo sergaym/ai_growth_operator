@@ -42,6 +42,19 @@ export default function AvatarVideoCard({ generation, onUpdate }: AvatarVideoCar
   // Format for display
   const formattedDate = new Date(generation.createdAt).toLocaleTimeString();
   
+  // Helper function to get the correct status styles
+  const getStatusStyles = (status: string) => {
+    switch(status) {
+      case 'completed':
+        return 'bg-green-100 text-green-600 border border-green-200';
+      case 'pending':
+      case 'processing':
+        return 'bg-blue-100 text-blue-600 border border-blue-200';
+      default:
+        return 'bg-red-100 text-red-600 border border-red-200';
+    }
+  };
+  
   return (
     <div className="bg-white/[0.03] border border-white/10 rounded-xl overflow-hidden">
       <div className="aspect-video relative">
