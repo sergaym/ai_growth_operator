@@ -135,3 +135,16 @@ async def generate_video_with_references_endpoint(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error generating video with references: {str(e)}")
         
+@router.get("/status/{generation_id}", response_model=VideoGenerationResponse)
+async def get_video_status(generation_id: str) -> Dict[str, Any]:
+    """
+    Check the status of a video generation
+    
+    Returns the current status of a video generation job, including the video URL
+    if the generation is complete.
+    """
+    try:
+        result = check_video_status(generation_id)
+        return result
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error checking video status: {str(e)}") 
