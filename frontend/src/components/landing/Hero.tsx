@@ -84,38 +84,9 @@ export function Hero() {
                 Learn More
               </Link>
             </motion.div>
-
-            {/* Floating stats card - inspired by amie.so floating elements */}
-            <motion.div
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 1 }}
-              className="absolute -bottom-20 left-[10%] lg:bottom-0 lg:right-10 max-w-[18rem] hidden md:block"
-            >
-              <div className="bg-white/[0.07] backdrop-blur-lg rounded-2xl p-4 border border-white/10 text-left shadow-[0_10px_40px_rgba(0,0,0,0.15)]">
-                <div className="flex items-center gap-4">
-                  <div className="flex-shrink-0">
-                    <div className="w-14 h-14 rounded-xl bg-gradient-to-br from-amber-400 to-red-500 flex items-center justify-center shadow-lg shadow-red-500/20">
-                      <svg width="28" height="28" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M6 15C7.65685 15 9 13.6569 9 12C9 10.3431 7.65685 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C16.3431 16 15 17.3431 15 19C15 20.6569 16.3431 22 18 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M8.59 13.51L15.42 17.49" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M15.41 6.51L8.59 10.49" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                      </svg>
-                    </div>
-                  </div>
-                  <div>
-                    <div className="text-sm text-zinc-400">Average Improvement</div>
-                    <div className="text-2xl font-bold text-white tracking-tight">37% <span className="text-green-400 text-base ml-1">↑</span></div>
-                    <div className="text-xs text-zinc-500">ROAS across all channels</div>
-                  </div>
-                </div>
-              </div>
-            </motion.div>
           </motion.div>
           
-          {/* Right content - Video Showcase with glossy effects like icon.me */}
+          {/* Right content - Video Showcase with glossy effects */}
           <motion.div 
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
