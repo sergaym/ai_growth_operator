@@ -94,42 +94,6 @@ export default function Playground() {
     }
   }, [avatarVideos]);
   
-  // State for campaigns (kept from original)
-  const [campaigns, setCampaigns] = useState<AdCampaign[]>([
-    {
-      id: "camp-1",
-      name: "Summer Collection Launch",
-      status: "active",
-      platform: "facebook",
-      budget: 1500,
-      metrics: {
-        impressions: 45000,
-        clicks: 1200,
-        ctr: 2.67,
-        conversions: 85,
-        cpa: 17.65,
-      },
-    },
-    {
-      id: "camp-2",
-      name: "Product Retargeting",
-      status: "paused",
-      platform: "google",
-      budget: 800,
-      metrics: {
-        impressions: 28000,
-        clicks: 850,
-        ctr: 3.04,
-        conversions: 42,
-        cpa: 19.05,
-      },
-    },
-  ]);
-  
-  // Original state for video generation
-  const [newVideoPrompt, setNewVideoPrompt] = useState("");
-  const [isVideoGenerating, setIsVideoGenerating] = useState(false);
-  
   // Function to retry loading the API resources
   const handleRetryApiLoad = () => {
     refetchAvatars();
