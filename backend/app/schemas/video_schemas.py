@@ -4,6 +4,7 @@ Video-related schemas for the AI Growth Operator API.
 
 from typing import List, Dict, Any, Optional, Union
 from pydantic import BaseModel, AnyHttpUrl, Field
+from datetime import datetime
 
 class MediaReference(BaseModel):
     """Reference media for video generation"""
@@ -135,3 +136,22 @@ class HeygenAddMotionRequest(BaseModel):
 class HeygenAddSoundEffectRequest(BaseModel):
     """Request schema for adding sound effects to an avatar."""
     sound_type: str = Field(..., description="Type of sound effect to add") 
+
+class HeygenAvatarVideoResponse(BaseModel):
+    """Response model for Heygen avatar video records from the database."""
+    id: int = Field(..., description="Database ID of the avatar video record")
+    generation_id: str = Field(..., description="Unique generation ID from Heygen")
+    status: str = Field(..., description="Status of the video generation")
+    prompt: str = Field(..., description="Text prompt used for the video")
+    avatar_id: str = Field(..., description="ID of the avatar used")
+    avatar_name: Optional[str] = Field(None, description="Name of the avatar")
+    avatar_style: str = Field(..., description="Style of the avatar presentation")
+    voice_id: str = Field(..., description="ID of the voice used")
+    voice_speed: float = Field(..., description="Speed of the voice used")
+    voice_pitch: int = Field(..., description="Pitch of the voice used")
+    video_url: Optional[str] = Field(None, description="URL to the generated video")
+    thumbnail_url: Optional[str] = Field(None, description="URL to the video thumbnail")
+    duration: Optional[str] = Field(None, description="Duration of the video")
+    created_at: datetime = Field(..., description="When the generation was created")
+    completed_at: Optional[datetime] = Field(None, description="When the generation was completed")
+    processing_time: Optional[float] = Field(None, description="Time taken to process the video in seconds") 
