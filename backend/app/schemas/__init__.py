@@ -33,6 +33,7 @@ from .video_schemas import (
     HeygenAvatarResponse,
     HeygenVoiceResponse,
     HeygenVideoResponse,
+    HeygenAvatarVideoResponse,
     # Photo Avatar schemas
     HeygenGeneratePhotoAvatarRequest,
     HeygenPhotoAvatarResponse,

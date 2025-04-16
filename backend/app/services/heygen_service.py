@@ -8,7 +8,7 @@ import time
 import logging
 from typing import Dict, Any, List, Optional
 
-from app.repositories import create_heygen_avatar_video, update_heygen_avatar_video
+from app.repositories import create_heygen_avatar_video, update_heygen_avatar_video, get_heygen_avatar_videos
 from app.models import VideoStatus
 
 # Configure logging
@@ -565,6 +565,18 @@ class HeygenService:
             logger.error(f"Error adding sound effect to avatar: {str(e)}")
             raise Exception(f"Failed to add sound effect to avatar: {str(e)}")
 
+    def get_all_avatar_videos(self) -> List[Dict[str, Any]]:
+        """
+        Get all Heygen avatar videos from the database.
+        
+        Returns:
+            List of dictionaries with all Heygen avatar video information
+        """
+        try:
+            return get_heygen_avatar_videos()
+        except Exception as e:
+            logger.error(f"Error retrieving Heygen avatar videos: {str(e)}")
+            raise Exception(f"Failed to retrieve Heygen avatar videos: {str(e)}")
 
 # Create a singleton instance of the service
 heygen_service = HeygenService() 

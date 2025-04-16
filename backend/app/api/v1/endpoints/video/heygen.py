@@ -19,6 +19,7 @@ from app.schemas import (
     HeygenGenerateAvatarLooksRequest,
     HeygenAddMotionRequest,
     HeygenAddSoundEffectRequest,
+    HeygenAvatarVideoResponse,
 )
 
 from app.services.heygen_service import heygen_service
@@ -236,4 +237,21 @@ async def add_sound_effect(avatar_id: str, request: HeygenAddSoundEffectRequest)
         
         return result
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error adding sound effect to avatar: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Error adding sound effect to avatar: {str(e)}")
+
+@router.get("/avatar-videos", response_model=List[HeygenAvatarVideoResponse])
+async def get_all_heygen_avatar_videos() -> List[Dict[str, Any]]:
+    """
+    Get all Heygen avatar videos from the database.
+    
+    This endpoint retrieves all Heygen avatar video records stored in the database,
+    including their generation details, avatar information, and processing status.
+    """
+    try:
+        # Get all HeygenAvatarVideo records from the database using the service
+        avatar_videos = heygen_service.get_all_avatar_videos()
+        
+        # Return the list of records
+        return avatar_videos
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error retrieving Heygen avatar videos: {str(e)}") 
