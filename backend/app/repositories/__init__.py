@@ -16,6 +16,16 @@ from app.repositories.heygen_avatar_repository import (
     get_heygen_avatar_videos
 )
 
+# Define a function to get all Heygen avatar videos
+def get_all_heygen_avatar_videos():
+    """
+    Get all Heygen avatar videos from the database.
+    
+    Returns:
+        List of dictionaries with all Heygen avatar video information
+    """
+    return get_heygen_avatar_videos()
+
 __all__ = [
     # Video generation
     "create_video_generation",
@@ -26,5 +36,6 @@ __all__ = [
     # Heygen avatar videos
     "create_heygen_avatar_video",
     "update_heygen_avatar_video",
-    "get_heygen_avatar_videos"
+    "get_heygen_avatar_videos",
+    "get_all_heygen_avatar_videos"
 ]
