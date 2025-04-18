@@ -163,10 +163,10 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   };
 
   return (
-    <form onSubmit={handleSubmit} className="space-y-6">
+    <form onSubmit={handleSubmit} className="space-y-8">
       {/* API Error message */}
       {submissionError && (
-        <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start">
+        <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start mb-6">
           <AlertCircle className="text-[#e03e21] mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
           <div className="flex-1">
             <p className="text-[#e03e21] font-medium text-sm mb-1">Error submitting request</p>
