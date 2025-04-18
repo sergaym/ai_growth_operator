@@ -4,7 +4,8 @@ import {
   HeygenAvatar, 
   HeygenVoice, 
   HeygenVideoGenerationRequest, 
-  HeygenVideoResponse 
+  HeygenVideoResponse,
+  DatabaseAvatarVideo 
 } from '@/types/heygen';
 
 /**
