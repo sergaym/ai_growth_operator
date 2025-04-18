@@ -188,7 +188,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
         </div>
       )}
 
-      {/* Script textarea */}
+      {/* Script textarea - full width */}
       <div className="space-y-2">
         <Label htmlFor="prompt" className="text-[#37352f] font-medium text-sm">Script</Label>
         <Textarea 
@@ -196,7 +196,7 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
           value={formData.prompt}
           onChange={(e) => handleChange('prompt', e.target.value)}
           placeholder="Write what you want the avatar to say..."
-          className="min-h-[120px] bg-white border-[#e6e6e6] rounded-md text-[#37352f] placeholder:text-[#9c9c9c] focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+          className="min-h-[160px] bg-white border-[#e6e6e6] rounded-md text-[#37352f] placeholder:text-[#9c9c9c] focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
           required
         />
         {validationErrors.prompt && (
@@ -204,68 +204,71 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
         )}
       </div>
 
-      {/* Avatar and Voice selection */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-5">
-        <div className="space-y-2">
-          <Label htmlFor="avatar" className="text-[#37352f] font-medium text-sm">Avatar</Label>
-          <Select 
-            value={formData.avatar_id}
-            onValueChange={(value: string) => handleChange('avatar_id', value)}
-            disabled={isGenerating || avatars.length === 0}
-          >
-            <SelectTrigger 
-              id="avatar"
-              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+      {/* Two column layout for form controls and preview */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start">
+        {/* Left column - Form controls */}
+        <div className="space-y-6">
+          {/* Avatar Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="avatar" className="text-[#37352f] font-medium text-sm">Avatar</Label>
+            <Select 
+              value={formData.avatar_id}
+              onValueChange={(value: string) => handleChange('avatar_id', value)}
+              disabled={isGenerating || avatars.length === 0}
             >
-              <SelectValue placeholder="Select avatar" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
-              {avatars.length === 0 ? (
-                <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
-              ) : (
-                avatars.map(avatar => (
-                  <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
-                    {avatar.avatar_name} ({avatar.gender})
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          {validationErrors.avatar_id && (
-            <div className="text-sm text-[#e03e21] mt-1">{validationErrors.avatar_id}</div>
-          )}
-        </div>
+              <SelectTrigger 
+                id="avatar"
+                className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+              >
+                <SelectValue placeholder="Select avatar" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
+                {avatars.length === 0 ? (
+                  <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
+                ) : (
+                  avatars.map(avatar => (
+                    <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
+                      {avatar.avatar_name} ({avatar.gender})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {validationErrors.avatar_id && (
+              <div className="text-sm text-[#e03e21] mt-1">{validationErrors.avatar_id}</div>
+            )}
+          </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="voice" className="text-[#37352f] font-medium text-sm">Voice</Label>
-          <Select 
-            value={formData.voice_id}
-            onValueChange={(value: string) => handleChange('voice_id', value)}
-            disabled={isGenerating || voices.length === 0}
-          >
-            <SelectTrigger 
-              id="voice"
-              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+          {/* Voice Selection */}
+          <div className="space-y-2">
+            <Label htmlFor="voice" className="text-[#37352f] font-medium text-sm">Voice</Label>
+            <Select 
+              value={formData.voice_id}
+              onValueChange={(value: string) => handleChange('voice_id', value)}
+              disabled={isGenerating || voices.length === 0}
             >
-              <SelectValue placeholder="Select voice" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
-              {voices.length === 0 ? (
-                <SelectItem value="no-voices" disabled>No voices available</SelectItem>
-              ) : (
-                voices.map(voice => (
-                  <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                    {voice.name} ({voice.gender}, {voice.language})
-                  </SelectItem>
-                ))
-              )}
-            </SelectContent>
-          </Select>
-          {validationErrors.voice_id && (
-            <div className="text-sm text-[#e03e21] mt-1">{validationErrors.voice_id}</div>
-          )}
-        </div>
-      </div>
+              <SelectTrigger 
+                id="voice"
+                className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+              >
+                <SelectValue placeholder="Select voice" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
+                {voices.length === 0 ? (
+                  <SelectItem value="no-voices" disabled>No voices available</SelectItem>
+                ) : (
+                  voices.map(voice => (
+                    <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                      {voice.name} ({voice.gender}, {voice.language})
+                    </SelectItem>
+                  ))
+                )}
+              </SelectContent>
+            </Select>
+            {validationErrors.voice_id && (
+              <div className="text-sm text-[#e03e21] mt-1">{validationErrors.voice_id}</div>
+            )}
+          </div>
 
       {/* Additional options */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
