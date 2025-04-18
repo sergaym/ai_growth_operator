@@ -203,4 +203,37 @@ export function useHeygenVideoStatus(videoId: string | null, pollInterval = 5000
     stopPolling,
     isPolling: polling
   };
+}
+
+/**
+ * Hook for fetching all avatar videos from the database
+ * @returns Object containing database videos, loading state, error, and refetch function
+ */
+export function useHeygenDatabaseVideos() {
+  const [videos, setVideos] = useState<DatabaseAvatarVideo[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  const fetchVideos = useCallback(async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      console.log('Fetching avatar videos from database...');
+      const data = await heygenAPI.getAllAvatarVideos();
+      console.log(`Successfully fetched ${data.length} avatar videos from database`);
+      setVideos(data);
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Unknown error';
+      console.error('Failed to fetch avatar videos from database:', errorMessage);
+      setError(errorMessage);
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchVideos();
+  }, [fetchVideos]);
+
+  return { videos, loading, error, refetch: fetchVideos };
 } 
