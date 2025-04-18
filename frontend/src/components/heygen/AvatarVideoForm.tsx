@@ -270,46 +270,46 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
             )}
           </div>
 
-      {/* Additional options */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
-        <div className="space-y-2">
-          <Label htmlFor="background-color" className="text-[#37352f] font-medium text-sm">Background Color</Label>
-          <div className="flex items-center">
-            <input
-              type="color"
-              value={formData.background_color}
-              onChange={(e) => handleChange('background_color', e.target.value)}
-              className="h-8 w-8 rounded border border-[#e6e6e6] bg-transparent cursor-pointer"
-            />
-            <Input
-              id="background-color"
-              value={formData.background_color}
-              onChange={(e) => handleChange('background_color', e.target.value)}
-              className="ml-2 bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
-            />
+          {/* Background Color */}
+          <div className="space-y-2">
+            <Label htmlFor="background-color" className="text-[#37352f] font-medium text-sm">Background Color</Label>
+            <div className="flex items-center">
+              <input
+                type="color"
+                value={formData.background_color}
+                onChange={(e) => handleChange('background_color', e.target.value)}
+                className="h-9 w-9 rounded border border-[#e6e6e6] bg-transparent cursor-pointer"
+              />
+              <Input
+                id="background-color"
+                value={formData.background_color}
+                onChange={(e) => handleChange('background_color', e.target.value)}
+                className="ml-2 bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+              />
+            </div>
           </div>
-        </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="avatar-style" className="text-[#37352f] font-medium text-sm">Avatar Style</Label>
-          <Select 
-            value={formData.avatar_style}
-            onValueChange={(value: string) => handleChange('avatar_style', value)}
-            disabled={isGenerating}
-          >
-            <SelectTrigger 
-              id="avatar-style"
-              className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+          {/* Avatar Style */}
+          <div className="space-y-2">
+            <Label htmlFor="avatar-style" className="text-[#37352f] font-medium text-sm">Avatar Style</Label>
+            <Select 
+              value={formData.avatar_style}
+              onValueChange={(value: string) => handleChange('avatar_style', value)}
+              disabled={isGenerating}
             >
-              <SelectValue placeholder="Select style" />
-            </SelectTrigger>
-            <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
-              <SelectItem value="normal">Normal</SelectItem>
-              <SelectItem value="circle">Circle</SelectItem>
-              <SelectItem value="closeUp">Close Up</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
+              <SelectTrigger 
+                id="avatar-style"
+                className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+              >
+                <SelectValue placeholder="Select style" />
+              </SelectTrigger>
+              <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
+                <SelectItem value="normal">Normal</SelectItem>
+                <SelectItem value="circle">Circle</SelectItem>
+                <SelectItem value="closeUp">Close Up</SelectItem>
+              </SelectContent>
+            </Select>
+          </div>
 
         <div className="space-y-2">
           <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
