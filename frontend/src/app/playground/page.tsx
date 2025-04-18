@@ -1,38 +1,18 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
 import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
 import DatabaseVideoCard from "@/components/heygen/DatabaseVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
 import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration, useHeygenDatabaseVideos } from "@/hooks/useHeygenApi";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/Logo";
+import { AvatarTrainingData } from "@/components/heygen/AvatarCreationForm";
+import AvatarCreationForm from "@/components/heygen/AvatarCreationForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
-// These types would eventually come from your API responses
-type VideoGeneration = {
-  id: string;
-  prompt: string;
-  status: "pending" | "completed" | "failed";
-  createdAt: string;
-  videoUrl?: string;
-};
-
-type AdCampaign = {
-  id: string;
-  name: string;
-  status: "active" | "paused" | "completed";
-  platform: "facebook" | "google" | "tiktok";
-  budget: number;
-  metrics: {
-    impressions: number;
-    clicks: number;
-    ctr: number;
-    conversions: number;
-    cpa: number;
-  };
-};
+// Component imports
+import PlaygroundLayout from "@/components/playground/Layout";
+import CreateVideoSection from "@/components/playground/CreateVideoSection";
+import VideoList from "@/components/playground/VideoList";
 
 export default function Playground() {
   // HeyGen API hooks
@@ -73,8 +53,15 @@ export default function Playground() {
   // State for error display
   const [apiError, setApiError] = useState<string | null>(null);
   
+  // State for active tab
+  const [activeTab, setActiveTab] = useState<string>("video-generation");
+  
   // State for HeyGen avatar videos
   const [avatarVideos, setAvatarVideos] = useState<TrackedVideoGeneration[]>([]);
+  
+  // Add state for avatar creation
+  const [isCreatingAvatar, setIsCreatingAvatar] = useState<boolean>(false);
+  const [avatarCreationError, setAvatarCreationError] = useState<string | null>(null);
   
   // Restore avatar videos from localStorage on component mount
   useEffect(() => {
@@ -187,205 +174,178 @@ export default function Playground() {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#ffffff] text-[#37352f]">
-      {/* Simple minimal background */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-[#ffffff] opacity-100"></div>
-        <div className="absolute inset-0 bg-[url('/subtle-dots.png')] opacity-[0.015]"></div>
+  // Handler for creating a new avatar
+  const handleAvatarCreation = async (data: AvatarTrainingData) => {
+    try {
+      setIsCreatingAvatar(true);
+      setAvatarCreationError(null);
+      
+      // Log the request payload for debugging
+      console.log('Sending avatar creation request:', JSON.stringify(data, null, 2));
+      
+      // Placeholder for API call - in a real implementation, this would call your backend API
+      // const result = await yourAPI.createAvatar(data);
+      
+      // For now, simulate a success response after a delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Mock response
+      const mockResult = {
+        success: true,
+        avatar_id: `custom-${Date.now()}`,
+        avatar_name: data.name,
+        gender: data.gender
+      };
+      
+      // After successful creation, refresh the avatars list
+      refetchAvatars();
+      
+      // Switch to video generation tab after successful avatar creation
+      setActiveTab("video-generation");
+      
+      // Return the result
+      return mockResult;
+    } catch (error) {
+      console.error('Failed to create avatar:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error creating avatar';
+      setAvatarCreationError(errorMessage);
+      throw error;
+    } finally {
+      setIsCreatingAvatar(false);
+    }
+  };
+
+  // Render the local videos (stored in browser)
+  const renderLocalVideos = () => {
+    return avatarVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <AvatarVideoCard 
+          generation={video} 
+          onUpdate={handleAvatarVideoUpdated} 
+        />
       </div>
-      
-      {/* Header - Notion-style */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
-        <div className="container max-w-4xl mx-auto px-5 md:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo and back button in one element */}
-            <div className="flex items-center gap-3">
-              <Link href="/" className="p-2 hover:bg-[#f1f1f1] rounded-md transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-              
-              <div className="h-5 w-px bg-[#e6e6e6]"></div>
-              
-              <div className="flex items-center gap-2">
-                <Logo size="sm" showText={false} />
-                <span className="text-[15px] font-medium text-[#37352f]">
-                  Playground
-                </span>
+    ));
+  };
+
+  // Render the database videos
+  const renderDatabaseVideos = () => {
+    return databaseVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <DatabaseVideoCard video={video} />
+      </div>
+    ));
+  };
+
+  // Render avatars grid
+  const renderAvatarsGrid = () => {
+    if (loadingAvatars) {
+      return (
+        <div className="py-12 text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
+          <p className="text-[#6b7280]">Loading avatars...</p>
+        </div>
+      );
+    }
+    
+    if (avatarsError) {
+      return (
+        <div className="py-6 text-center">
+          <p className="text-[#e03e21]">Failed to load avatars: {avatarsError}</p>
+        </div>
+      );
+    }
+    
+    if (avatars.length === 0) {
+      return (
+        <div className="py-6 text-center">
+          <p className="text-[#6b7280]">No avatars found. Create your first avatar above!</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {avatars.map((avatar) => (
+          <div key={avatar.avatar_id} className="bg-white p-4 border border-[#e6e6e6] rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-xl font-medium text-gray-600">{avatar.avatar_name.charAt(0)}</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-[#37352f]">{avatar.avatar_name}</h3>
+                <p className="text-sm text-gray-500">ID: {avatar.avatar_id}</p>
+                <p className="text-sm text-gray-500">Gender: {avatar.gender}</p>
               </div>
             </div>
           </div>
-        </div>
-      </header>
-      
-      <main className="container max-w-4xl mx-auto px-5 md:px-8 py-10">
-        {/* Notion-style page title */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-2 text-[#37352f]">
-            Avatar Video Generator
-          </h1>
-          <p className="text-[#6b7280] text-lg">
-            Create custom AI videos with virtual avatars and realistic voices
-          </p>
-        </div>
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <PlaygroundLayout
+      title="AI Content Studio"
+      description="Create and manage professional AI-generated videos with virtual avatars"
+      error={apiError}
+    >
+      {/* Tabs Navigation */}
+      <Tabs defaultValue="video-generation" value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="video-generation">Video Generation</TabsTrigger>
+          <TabsTrigger value="your-avatars">Your Avatars</TabsTrigger>
+        </TabsList>
         
-        {/* Display any API errors */}
-        {apiError && (
-          <div className="mb-8 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
-            <p className="font-medium">Error: {apiError}</p>
+        {/* Video Generation Tab */}
+        <TabsContent value="video-generation" className="mt-6">
+          <CreateVideoSection
+            avatars={avatars}
+            voices={voices}
+            loadingAvatars={loadingAvatars}
+            loadingVoices={loadingVoices}
+            avatarsError={avatarsError}
+            voicesError={voicesError}
+            isGenerating={isGenerating}
+            onVideoGenerated={handleAvatarVideoGenerated}
+            onRetryApiLoad={handleRetryApiLoad}
+          />
+          
+          {/* Videos List (only shown in Video Generation tab) */}
+          <div className="mt-8">
+            <VideoList
+              title="Your Videos"
+              count={avatarVideos.length}
+              noItemsMessage="No videos created yet. Get started by creating your first video above."
+              renderItems={renderLocalVideos}
+            />
+            
+            <VideoList
+              title="All Database Videos"
+              count={databaseVideos.length}
+              loading={loadingDatabaseVideos}
+              error={databaseVideosError}
+              noItemsMessage="No videos found in the database."
+              onRefresh={refetchDatabaseVideos}
+              onRetry={refetchDatabaseVideos}
+              showRefreshButton={true}
+              renderItems={renderDatabaseVideos}
+            />
           </div>
-        )}
+        </TabsContent>
         
-        {/* Content with Notion-style cards */}
-        <div className="space-y-12">
-          {/* Avatar video generation form */}
-          <div className="bg-white border border-[#e6e6e6] rounded-lg shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#e6e6e6] flex items-center justify-between">
-              <h2 className="text-lg font-medium text-[#37352f]">Create New Video</h2>
-              
-              {/* Loading or retry buttons */}
-              {(loadingAvatars || loadingVoices) ? (
-                <div className="flex items-center text-[#6b7280] text-sm">
-                  <div className="animate-spin h-4 w-4 border-2 border-[#e6e6e6] border-t-[#37352f] rounded-full mr-2"></div>
-                  Loading...
-                </div>
-              ) : (avatarsError || voicesError) ? (
-                <Button 
-                  variant="outline" 
-                  onClick={handleRetryApiLoad}
-                  className="text-sm text-[#6b7280] border-[#e6e6e6]"
-                >
-                  Retry API Connection
-                </Button>
-              ) : null}
-            </div>
-            
-            <div className="p-6">
-              {(loadingAvatars || loadingVoices) ? (
-                <div className="py-12 text-center">
-                  <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
-                  <p className="text-[#6b7280]">Loading avatars and voices...</p>
-                </div>
-              ) : (avatarsError || voicesError) ? (
-                <div>
-                  <div className="mb-6 p-4 bg-[#fffaeb] border border-[#ffefc6] rounded-md text-[#92400e]">
-                    <p className="font-medium">Note: Using demo data because the API connection failed</p>
-                    <p className="text-sm mt-1 text-[#b54708]">{avatarsError || voicesError}</p>
-                  </div>
-                  <AvatarVideoForm
-                    onVideoGenerated={handleAvatarVideoGenerated}
-                    avatars={avatars}
-                    voices={voices}
-                    isGenerating={isGenerating}
-                  />
-                </div>
-              ) : (
-                <AvatarVideoForm
-                  onVideoGenerated={handleAvatarVideoGenerated}
-                  avatars={avatars}
-                  voices={voices}
-                  isGenerating={isGenerating}
-                />
-              )}
-            </div>
-          </div>
+        {/* Your Avatars Tab */}
+        <TabsContent value="your-avatars" className="mt-6">
+          <AvatarCreationForm
+            onCreateAvatar={handleAvatarCreation}
+            isCreating={isCreatingAvatar}
+          />
           
-          {/* Avatar video history */}
-          <div className="mt-12">
-            <h2 className="text-xl font-medium mb-5 text-[#37352f] flex items-center">
-              <span>Your Videos</span>
-              {avatarVideos.length > 0 && (
-                <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
-                  {avatarVideos.length}
-                </span>
-              )}
-            </h2>
-            
-            {avatarVideos.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <p className="text-[#6b7280]">No videos created yet. Get started by creating your first video above.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {avatarVideos.map((video) => (
-                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <AvatarVideoCard 
-                      generation={video} 
-                      onUpdate={handleAvatarVideoUpdated} 
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-[#37352f] mb-4">Your Available Avatars</h2>
+            {renderAvatarsGrid()}
           </div>
-          
-          {/* Database videos section */}
-          <div className="mt-12">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-medium text-[#37352f] flex items-center">
-                <span>All Database Videos</span>
-                {databaseVideos.length > 0 && (
-                  <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
-                    {databaseVideos.length}
-                  </span>
-                )}
-              </h2>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={refetchDatabaseVideos}
-                className="text-sm text-[#6b7280] border-[#e6e6e6]"
-              >
-                <svg 
-                  className="w-4 h-4 mr-1" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Refresh
-              </Button>
-            </div>
-            
-            {loadingDatabaseVideos ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
-                <p className="text-[#6b7280]">Loading videos from database...</p>
-              </div>
-            ) : databaseVideosError ? (
-              <div className="py-6 text-center border border-dashed border-[#ffcdd2] rounded-lg bg-[#ffebee]">
-                <p className="text-[#d32f2f] mb-2">Error loading database videos</p>
-                <p className="text-[#6b7280] text-sm">{databaseVideosError}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={refetchDatabaseVideos}
-                  className="mt-4 text-sm text-[#d32f2f] border-[#ffcdd2]"
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : databaseVideos.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <p className="text-[#6b7280]">No videos found in the database.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {databaseVideos.map((video) => (
-                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <DatabaseVideoCard video={video} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
+        </TabsContent>
+      </Tabs>
+    </PlaygroundLayout>
   );
 } 
