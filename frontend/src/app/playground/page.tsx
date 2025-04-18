@@ -163,205 +163,66 @@ export default function Playground() {
     );
   };
 
-  return (
-    <div className="min-h-screen bg-[#ffffff] text-[#37352f]">
-      {/* Simple minimal background */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-[#ffffff] opacity-100"></div>
-        <div className="absolute inset-0 bg-[url('/subtle-dots.png')] opacity-[0.015]"></div>
+  // Render the local videos (stored in browser)
+  const renderLocalVideos = () => {
+    return avatarVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <AvatarVideoCard 
+          generation={video} 
+          onUpdate={handleAvatarVideoUpdated} 
+        />
       </div>
+    ));
+  };
+
+  // Render the database videos
+  const renderDatabaseVideos = () => {
+    return databaseVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <DatabaseVideoCard video={video} />
+      </div>
+    ));
+  };
+
+  return (
+    <PlaygroundLayout
+      title="Avatar Video Generator"
+      description="Create custom AI videos with virtual avatars and realistic voices"
+      error={apiError}
+    >
+      {/* Video Creation Section */}
+      <CreateVideoSection
+        avatars={avatars}
+        voices={voices}
+        loadingAvatars={loadingAvatars}
+        loadingVoices={loadingVoices}
+        avatarsError={avatarsError}
+        voicesError={voicesError}
+        isGenerating={isGenerating}
+        onVideoGenerated={handleAvatarVideoGenerated}
+        onRetryApiLoad={handleRetryApiLoad}
+      />
       
-      {/* Header - Notion-style */}
-      <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
-        <div className="container max-w-4xl mx-auto px-5 md:px-8">
-          <div className="flex items-center justify-between">
-            {/* Logo and back button in one element */}
-            <div className="flex items-center gap-3">
-              <Link href="/" className="p-2 hover:bg-[#f1f1f1] rounded-md transition-colors">
-                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
-              </Link>
-              
-              <div className="h-5 w-px bg-[#e6e6e6]"></div>
-              
-              <div className="flex items-center gap-2">
-                <Logo size="sm" showText={false} />
-                <span className="text-[15px] font-medium text-[#37352f]">
-                  Playground
-                </span>
-              </div>
-            </div>
-          </div>
-        </div>
-      </header>
+      {/* Local Videos Section */}
+      <VideoList
+        title="Your Videos"
+        count={avatarVideos.length}
+        noItemsMessage="No videos created yet. Get started by creating your first video above."
+        renderItems={renderLocalVideos}
+      />
       
-      <main className="container max-w-4xl mx-auto px-5 md:px-8 py-10">
-        {/* Notion-style page title */}
-        <div className="mb-12">
-          <h1 className="text-4xl font-bold mb-2 text-[#37352f]">
-            Avatar Video Generator
-          </h1>
-          <p className="text-[#6b7280] text-lg">
-            Create custom AI videos with virtual avatars and realistic voices
-          </p>
-        </div>
-        
-        {/* Display any API errors */}
-        {apiError && (
-          <div className="mb-8 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
-            <p className="font-medium">Error: {apiError}</p>
-          </div>
-        )}
-        
-        {/* Content with Notion-style cards */}
-        <div className="space-y-12">
-          {/* Avatar video generation form */}
-          <div className="bg-white border border-[#e6e6e6] rounded-lg shadow-sm overflow-hidden">
-            <div className="px-6 py-5 border-b border-[#e6e6e6] flex items-center justify-between">
-              <h2 className="text-lg font-medium text-[#37352f]">Create New Video</h2>
-              
-              {/* Loading or retry buttons */}
-              {(loadingAvatars || loadingVoices) ? (
-                <div className="flex items-center text-[#6b7280] text-sm">
-                  <div className="animate-spin h-4 w-4 border-2 border-[#e6e6e6] border-t-[#37352f] rounded-full mr-2"></div>
-                  Loading...
-                </div>
-              ) : (avatarsError || voicesError) ? (
-                <Button 
-                  variant="outline" 
-                  onClick={handleRetryApiLoad}
-                  className="text-sm text-[#6b7280] border-[#e6e6e6]"
-                >
-                  Retry API Connection
-                </Button>
-              ) : null}
-            </div>
-            
-            <div className="p-6">
-              {(loadingAvatars || loadingVoices) ? (
-                <div className="py-12 text-center">
-                  <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
-                  <p className="text-[#6b7280]">Loading avatars and voices...</p>
-                </div>
-              ) : (avatarsError || voicesError) ? (
-                <div>
-                  <div className="mb-6 p-4 bg-[#fffaeb] border border-[#ffefc6] rounded-md text-[#92400e]">
-                    <p className="font-medium">Note: Using demo data because the API connection failed</p>
-                    <p className="text-sm mt-1 text-[#b54708]">{avatarsError || voicesError}</p>
-                  </div>
-                  <AvatarVideoForm
-                    onVideoGenerated={handleAvatarVideoGenerated}
-                    avatars={avatars}
-                    voices={voices}
-                    isGenerating={isGenerating}
-                  />
-                </div>
-              ) : (
-                <AvatarVideoForm
-                  onVideoGenerated={handleAvatarVideoGenerated}
-                  avatars={avatars}
-                  voices={voices}
-                  isGenerating={isGenerating}
-                />
-              )}
-            </div>
-          </div>
-          
-          {/* Avatar video history */}
-          <div className="mt-12">
-            <h2 className="text-xl font-medium mb-5 text-[#37352f] flex items-center">
-              <span>Your Videos</span>
-              {avatarVideos.length > 0 && (
-                <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
-                  {avatarVideos.length}
-                </span>
-              )}
-            </h2>
-            
-            {avatarVideos.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <p className="text-[#6b7280]">No videos created yet. Get started by creating your first video above.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {avatarVideos.map((video) => (
-                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <AvatarVideoCard 
-                      generation={video} 
-                      onUpdate={handleAvatarVideoUpdated} 
-                    />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-          
-          {/* Database videos section */}
-          <div className="mt-12">
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="text-xl font-medium text-[#37352f] flex items-center">
-                <span>All Database Videos</span>
-                {databaseVideos.length > 0 && (
-                  <span className="ml-2 bg-[#f1f1f1] text-[#6b7280] rounded-full px-2 py-0.5 text-xs font-normal">
-                    {databaseVideos.length}
-                  </span>
-                )}
-              </h2>
-              
-              <Button 
-                variant="outline" 
-                size="sm"
-                onClick={refetchDatabaseVideos}
-                className="text-sm text-[#6b7280] border-[#e6e6e6]"
-              >
-                <svg 
-                  className="w-4 h-4 mr-1" 
-                  fill="none" 
-                  stroke="currentColor" 
-                  viewBox="0 0 24 24" 
-                  xmlns="http://www.w3.org/2000/svg"
-                >
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-                </svg>
-                Refresh
-              </Button>
-            </div>
-            
-            {loadingDatabaseVideos ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
-                <p className="text-[#6b7280]">Loading videos from database...</p>
-              </div>
-            ) : databaseVideosError ? (
-              <div className="py-6 text-center border border-dashed border-[#ffcdd2] rounded-lg bg-[#ffebee]">
-                <p className="text-[#d32f2f] mb-2">Error loading database videos</p>
-                <p className="text-[#6b7280] text-sm">{databaseVideosError}</p>
-                <Button 
-                  variant="outline" 
-                  size="sm"
-                  onClick={refetchDatabaseVideos}
-                  className="mt-4 text-sm text-[#d32f2f] border-[#ffcdd2]"
-                >
-                  Try Again
-                </Button>
-              </div>
-            ) : databaseVideos.length === 0 ? (
-              <div className="py-12 text-center border border-dashed border-[#e6e6e6] rounded-lg bg-[#fafafa]">
-                <p className="text-[#6b7280]">No videos found in the database.</p>
-              </div>
-            ) : (
-              <div className="space-y-4">
-                {databaseVideos.map((video) => (
-                  <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
-                    <DatabaseVideoCard video={video} />
-                  </div>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      </main>
-    </div>
+      {/* Database Videos Section */}
+      <VideoList
+        title="All Database Videos"
+        count={databaseVideos.length}
+        loading={loadingDatabaseVideos}
+        error={databaseVideosError}
+        noItemsMessage="No videos found in the database."
+        onRefresh={refetchDatabaseVideos}
+        onRetry={refetchDatabaseVideos}
+        showRefreshButton={true}
+        renderItems={renderDatabaseVideos}
+      />
+    </PlaygroundLayout>
   );
 } 
