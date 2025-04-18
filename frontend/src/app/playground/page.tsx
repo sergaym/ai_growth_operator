@@ -4,6 +4,10 @@ import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
 import DatabaseVideoCard from "@/components/heygen/DatabaseVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
 import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration, useHeygenDatabaseVideos } from "@/hooks/useHeygenApi";
+import { AvatarTrainingData } from "@/components/heygen/AvatarCreationForm";
+import AvatarCreationForm from "@/components/heygen/AvatarCreationForm";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { Card } from "@/components/ui/card";
 
 // Component imports
 import PlaygroundLayout from "@/components/playground/Layout";
@@ -49,8 +53,15 @@ export default function Playground() {
   // State for error display
   const [apiError, setApiError] = useState<string | null>(null);
   
+  // State for active tab
+  const [activeTab, setActiveTab] = useState<string>("video-generation");
+  
   // State for HeyGen avatar videos
   const [avatarVideos, setAvatarVideos] = useState<TrackedVideoGeneration[]>([]);
+  
+  // Add state for avatar creation
+  const [isCreatingAvatar, setIsCreatingAvatar] = useState<boolean>(false);
+  const [avatarCreationError, setAvatarCreationError] = useState<string | null>(null);
   
   // Restore avatar videos from localStorage on component mount
   useEffect(() => {
@@ -163,6 +174,47 @@ export default function Playground() {
     );
   };
 
+  // Handler for creating a new avatar
+  const handleAvatarCreation = async (data: AvatarTrainingData) => {
+    try {
+      setIsCreatingAvatar(true);
+      setAvatarCreationError(null);
+      
+      // Log the request payload for debugging
+      console.log('Sending avatar creation request:', JSON.stringify(data, null, 2));
+      
+      // Placeholder for API call - in a real implementation, this would call your backend API
+      // const result = await yourAPI.createAvatar(data);
+      
+      // For now, simulate a success response after a delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Mock response
+      const mockResult = {
+        success: true,
+        avatar_id: `custom-${Date.now()}`,
+        avatar_name: data.name,
+        gender: data.gender
+      };
+      
+      // After successful creation, refresh the avatars list
+      refetchAvatars();
+      
+      // Switch to video generation tab after successful avatar creation
+      setActiveTab("video-generation");
+      
+      // Return the result
+      return mockResult;
+    } catch (error) {
+      console.error('Failed to create avatar:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error creating avatar';
+      setAvatarCreationError(errorMessage);
+      throw error;
+    } finally {
+      setIsCreatingAvatar(false);
+    }
+  };
+
   // Render the local videos (stored in browser)
   const renderLocalVideos = () => {
     return avatarVideos.map((video) => (
@@ -184,45 +236,116 @@ export default function Playground() {
     ));
   };
 
+  // Render avatars grid
+  const renderAvatarsGrid = () => {
+    if (loadingAvatars) {
+      return (
+        <div className="py-12 text-center">
+          <div className="animate-spin h-10 w-10 border-4 border-[#e6e6e6] border-t-[#37352f] rounded-full mx-auto mb-4"></div>
+          <p className="text-[#6b7280]">Loading avatars...</p>
+        </div>
+      );
+    }
+    
+    if (avatarsError) {
+      return (
+        <div className="py-6 text-center">
+          <p className="text-[#e03e21]">Failed to load avatars: {avatarsError}</p>
+        </div>
+      );
+    }
+    
+    if (avatars.length === 0) {
+      return (
+        <div className="py-6 text-center">
+          <p className="text-[#6b7280]">No avatars found. Create your first avatar above!</p>
+        </div>
+      );
+    }
+    
+    return (
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 mt-6">
+        {avatars.map((avatar) => (
+          <div key={avatar.avatar_id} className="bg-white p-4 border border-[#e6e6e6] rounded-lg shadow-sm hover:shadow-md transition-shadow">
+            <div className="flex items-center space-x-4">
+              <div className="w-16 h-16 rounded-full bg-gray-200 flex items-center justify-center">
+                <span className="text-xl font-medium text-gray-600">{avatar.avatar_name.charAt(0)}</span>
+              </div>
+              <div>
+                <h3 className="font-medium text-[#37352f]">{avatar.avatar_name}</h3>
+                <p className="text-sm text-gray-500">ID: {avatar.avatar_id}</p>
+                <p className="text-sm text-gray-500">Gender: {avatar.gender}</p>
+              </div>
+            </div>
+          </div>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <PlaygroundLayout
       title="AI Content Studio"
       description="Create and manage professional AI-generated videos with virtual avatars"
       error={apiError}
     >
-      {/* Video Creation Section */}
-      <CreateVideoSection
-        avatars={avatars}
-        voices={voices}
-        loadingAvatars={loadingAvatars}
-        loadingVoices={loadingVoices}
-        avatarsError={avatarsError}
-        voicesError={voicesError}
-        isGenerating={isGenerating}
-        onVideoGenerated={handleAvatarVideoGenerated}
-        onRetryApiLoad={handleRetryApiLoad}
-      />
-      
-      {/* Local Videos Section */}
-      <VideoList
-        title="Your Videos"
-        count={avatarVideos.length}
-        noItemsMessage="No videos created yet. Get started by creating your first video above."
-        renderItems={renderLocalVideos}
-      />
-      
-      {/* Database Videos Section */}
-      <VideoList
-        title="All Database Videos"
-        count={databaseVideos.length}
-        loading={loadingDatabaseVideos}
-        error={databaseVideosError}
-        noItemsMessage="No videos found in the database."
-        onRefresh={refetchDatabaseVideos}
-        onRetry={refetchDatabaseVideos}
-        showRefreshButton={true}
-        renderItems={renderDatabaseVideos}
-      />
+      {/* Tabs Navigation */}
+      <Tabs defaultValue="video-generation" value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
+        <TabsList className="grid w-full grid-cols-2">
+          <TabsTrigger value="video-generation">Video Generation</TabsTrigger>
+          <TabsTrigger value="your-avatars">Your Avatars</TabsTrigger>
+        </TabsList>
+        
+        {/* Video Generation Tab */}
+        <TabsContent value="video-generation" className="mt-6">
+          <CreateVideoSection
+            avatars={avatars}
+            voices={voices}
+            loadingAvatars={loadingAvatars}
+            loadingVoices={loadingVoices}
+            avatarsError={avatarsError}
+            voicesError={voicesError}
+            isGenerating={isGenerating}
+            onVideoGenerated={handleAvatarVideoGenerated}
+            onRetryApiLoad={handleRetryApiLoad}
+          />
+          
+          {/* Videos List (only shown in Video Generation tab) */}
+          <div className="mt-8">
+            <VideoList
+              title="Your Videos"
+              count={avatarVideos.length}
+              noItemsMessage="No videos created yet. Get started by creating your first video above."
+              renderItems={renderLocalVideos}
+            />
+            
+            <VideoList
+              title="All Database Videos"
+              count={databaseVideos.length}
+              loading={loadingDatabaseVideos}
+              error={databaseVideosError}
+              noItemsMessage="No videos found in the database."
+              onRefresh={refetchDatabaseVideos}
+              onRetry={refetchDatabaseVideos}
+              showRefreshButton={true}
+              renderItems={renderDatabaseVideos}
+            />
+          </div>
+        </TabsContent>
+        
+        {/* Your Avatars Tab */}
+        <TabsContent value="your-avatars" className="mt-6">
+          <AvatarCreationForm
+            onCreateAvatar={handleAvatarCreation}
+            isCreating={isCreatingAvatar}
+          />
+          
+          <div className="mt-8">
+            <h2 className="text-xl font-semibold text-[#37352f] mb-4">Your Available Avatars</h2>
+            {renderAvatarsGrid()}
+          </div>
+        </TabsContent>
+      </Tabs>
     </PlaygroundLayout>
   );
 } 
