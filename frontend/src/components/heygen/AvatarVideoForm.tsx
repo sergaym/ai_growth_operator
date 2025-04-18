@@ -15,7 +15,12 @@ interface AvatarVideoFormProps {
   isGenerating: boolean;
 }
 
-export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isGenerating }: AvatarVideoFormProps) {
+export default function AvatarVideoForm({ 
+  onVideoGenerated, 
+  avatars, 
+  voices, 
+  isGenerating
+}: AvatarVideoFormProps) {
   // Form state
   const [formData, setFormData] = useState<HeygenVideoGenerationRequest>({
     prompt: '',
@@ -163,203 +168,208 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
-      {/* API Error message */}
-      {submissionError && (
-        <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start">
-          <AlertCircle className="text-[#e03e21] mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
-          <div className="flex-1">
-            <p className="text-[#e03e21] font-medium text-sm mb-1">Error submitting request</p>
-            <p className="text-[#86372f] text-sm">{submissionError}</p>
-            {lastAttempt && (
-              <Button 
-                type="button"
-                variant="outline"
-                size="sm" 
-                onClick={handleRetry}
-                className="mt-2 border-[#ffc1ba] text-[#e03e21] hover:bg-[#fff1f0] inline-flex items-center"
-                disabled={isGenerating}
-              >
-                <RefreshCw className="mr-1 h-3 w-3" />
-                Retry Request
-              </Button>
-            )}
+    <div className="space-y-6">
+      <h2 className="text-lg font-medium text-[#37352f]">Generate Avatar Video</h2>
+    
+      {/* Video Generation Form */}
+      <form onSubmit={handleSubmit} className="flex flex-col space-y-6">
+        {/* API Error message */}
+        {submissionError && (
+          <div className="p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md flex items-start">
+            <AlertCircle className="text-[#e03e21] mr-3 h-5 w-5 mt-0.5 flex-shrink-0" />
+            <div className="flex-1">
+              <p className="text-[#e03e21] font-medium text-sm mb-1">Error submitting request</p>
+              <p className="text-[#86372f] text-sm">{submissionError}</p>
+              {lastAttempt && (
+                <Button 
+                  type="button"
+                  variant="outline"
+                  size="sm" 
+                  onClick={handleRetry}
+                  className="mt-2 border-[#ffc1ba] text-[#e03e21] hover:bg-[#fff1f0] inline-flex items-center"
+                  disabled={isGenerating}
+                >
+                  <RefreshCw className="mr-1 h-3 w-3" />
+                  Retry Request
+                </Button>
+              )}
+            </div>
           </div>
-        </div>
-      )}
-
-      {/* Script textarea - full width */}
-      <div className="space-y-2">
-        <Label htmlFor="prompt" className="text-[#37352f] font-medium text-sm">Script</Label>
-        <Textarea 
-          id="prompt"
-          value={formData.prompt}
-          onChange={(e) => handleChange('prompt', e.target.value)}
-          placeholder="Write what you want the avatar to say..."
-          className="min-h-[120px] bg-white border-[#e6e6e6] rounded-md text-[#37352f] placeholder:text-[#9c9c9c] focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
-          required
-        />
-        {validationErrors.prompt && (
-          <div className="text-sm text-[#e03e21] mt-1">{validationErrors.prompt}</div>
         )}
-      </div>
 
-      {/* Two column layout for form controls and preview */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start flex-grow">
-        {/* Left column - Form controls */}
-        <div className="space-y-5 flex flex-col h-full">
-          <div className="space-y-5 flex-grow">
-            {/* Avatar Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="avatar" className="text-[#37352f] font-medium text-sm">Avatar</Label>
-              <Select 
-                value={formData.avatar_id}
-                onValueChange={(value: string) => handleChange('avatar_id', value)}
-                disabled={isGenerating || avatars.length === 0}
-              >
-                <SelectTrigger 
-                  id="avatar"
-                  className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+        {/* Script textarea - full width */}
+        <div className="space-y-2">
+          <Label htmlFor="prompt" className="text-[#37352f] font-medium text-sm">Script</Label>
+          <Textarea 
+            id="prompt"
+            value={formData.prompt}
+            onChange={(e) => handleChange('prompt', e.target.value)}
+            placeholder="Write what you want the avatar to say..."
+            className="min-h-[120px] bg-white border-[#e6e6e6] rounded-md text-[#37352f] placeholder:text-[#9c9c9c] focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+            required
+          />
+          {validationErrors.prompt && (
+            <div className="text-sm text-[#e03e21] mt-1">{validationErrors.prompt}</div>
+          )}
+        </div>
+
+        {/* Two column layout for form controls and preview */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-8 items-start flex-grow">
+          {/* Left column - Form controls */}
+          <div className="space-y-5 flex flex-col h-full">
+            <div className="space-y-5 flex-grow">
+              {/* Avatar Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="avatar" className="text-[#37352f] font-medium text-sm">Avatar</Label>
+                <Select 
+                  value={formData.avatar_id}
+                  onValueChange={(value: string) => handleChange('avatar_id', value)}
+                  disabled={isGenerating || avatars.length === 0}
                 >
-                  <SelectValue placeholder="Select avatar" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
-                  {avatars.length === 0 ? (
-                    <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
-                  ) : (
-                    avatars.map(avatar => (
-                      <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
-                        {avatar.avatar_name} ({avatar.gender})
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {validationErrors.avatar_id && (
-                <div className="text-sm text-[#e03e21] mt-1">{validationErrors.avatar_id}</div>
-              )}
-            </div>
+                  <SelectTrigger 
+                    id="avatar"
+                    className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+                  >
+                    <SelectValue placeholder="Select avatar" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
+                    {avatars.length === 0 ? (
+                      <SelectItem value="no-avatars" disabled>No avatars available</SelectItem>
+                    ) : (
+                      avatars.map(avatar => (
+                        <SelectItem key={avatar.avatar_id} value={avatar.avatar_id}>
+                          {avatar.avatar_name} ({avatar.gender})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {validationErrors.avatar_id && (
+                  <div className="text-sm text-[#e03e21] mt-1">{validationErrors.avatar_id}</div>
+                )}
+              </div>
 
-            {/* Voice Selection */}
-            <div className="space-y-2">
-              <Label htmlFor="voice" className="text-[#37352f] font-medium text-sm">Voice</Label>
-              <Select 
-                value={formData.voice_id}
-                onValueChange={(value: string) => handleChange('voice_id', value)}
-                disabled={isGenerating || voices.length === 0}
-              >
-                <SelectTrigger 
-                  id="voice"
-                  className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+              {/* Voice Selection */}
+              <div className="space-y-2">
+                <Label htmlFor="voice" className="text-[#37352f] font-medium text-sm">Voice</Label>
+                <Select 
+                  value={formData.voice_id}
+                  onValueChange={(value: string) => handleChange('voice_id', value)}
+                  disabled={isGenerating || voices.length === 0}
                 >
-                  <SelectValue placeholder="Select voice" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
-                  {voices.length === 0 ? (
-                    <SelectItem value="no-voices" disabled>No voices available</SelectItem>
-                  ) : (
-                    voices.map(voice => (
-                      <SelectItem key={voice.voice_id} value={voice.voice_id}>
-                        {voice.name} ({voice.gender}, {voice.language})
-                      </SelectItem>
-                    ))
-                  )}
-                </SelectContent>
-              </Select>
-              {validationErrors.voice_id && (
-                <div className="text-sm text-[#e03e21] mt-1">{validationErrors.voice_id}</div>
-              )}
-            </div>
+                  <SelectTrigger 
+                    id="voice"
+                    className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+                  >
+                    <SelectValue placeholder="Select voice" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#e6e6e6] rounded-md max-h-60">
+                    {voices.length === 0 ? (
+                      <SelectItem value="no-voices" disabled>No voices available</SelectItem>
+                    ) : (
+                      voices.map(voice => (
+                        <SelectItem key={voice.voice_id} value={voice.voice_id}>
+                          {voice.name} ({voice.gender}, {voice.language})
+                        </SelectItem>
+                      ))
+                    )}
+                  </SelectContent>
+                </Select>
+                {validationErrors.voice_id && (
+                  <div className="text-sm text-[#e03e21] mt-1">{validationErrors.voice_id}</div>
+                )}
+              </div>
 
-            {/* Background Color */}
-            <div className="space-y-2">
-              <Label htmlFor="background-color" className="text-[#37352f] font-medium text-sm">Background Color</Label>
-              <div className="flex items-center">
-                <input
-                  type="color"
-                  value={formData.background_color}
-                  onChange={(e) => handleChange('background_color', e.target.value)}
-                  className="h-9 w-9 rounded border border-[#e6e6e6] bg-transparent cursor-pointer"
-                />
+              {/* Background Color */}
+              <div className="space-y-2">
+                <Label htmlFor="background-color" className="text-[#37352f] font-medium text-sm">Background Color</Label>
+                <div className="flex items-center">
+                  <input
+                    type="color"
+                    value={formData.background_color}
+                    onChange={(e) => handleChange('background_color', e.target.value)}
+                    className="h-9 w-9 rounded border border-[#e6e6e6] bg-transparent cursor-pointer"
+                  />
+                  <Input
+                    id="background-color"
+                    value={formData.background_color}
+                    onChange={(e) => handleChange('background_color', e.target.value)}
+                    className="ml-2 bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+                  />
+                </div>
+              </div>
+
+              {/* Avatar Style */}
+              <div className="space-y-2">
+                <Label htmlFor="avatar-style" className="text-[#37352f] font-medium text-sm">Avatar Style</Label>
+                <Select 
+                  value={formData.avatar_style}
+                  onValueChange={(value: string) => handleChange('avatar_style', value)}
+                  disabled={isGenerating}
+                >
+                  <SelectTrigger 
+                    id="avatar-style"
+                    className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
+                  >
+                    <SelectValue placeholder="Select style" />
+                  </SelectTrigger>
+                  <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
+                    <SelectItem value="normal">Normal</SelectItem>
+                    <SelectItem value="circle">Circle</SelectItem>
+                    <SelectItem value="closeUp">Close Up</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+
+              {/* Voice Speed */}
+              <div className="space-y-2">
+                <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
                 <Input
-                  id="background-color"
-                  value={formData.background_color}
-                  onChange={(e) => handleChange('background_color', e.target.value)}
-                  className="ml-2 bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+                  id="voice-speed"
+                  type="number"
+                  value={formData.voice_speed || 1.0}
+                  onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
+                  min="0.5"
+                  max="1.5"
+                  step="0.1"
+                  className="bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+                  disabled={isGenerating}
                 />
               </div>
             </div>
+          </div>
 
-            {/* Avatar Style */}
-            <div className="space-y-2">
-              <Label htmlFor="avatar-style" className="text-[#37352f] font-medium text-sm">Avatar Style</Label>
-              <Select 
-                value={formData.avatar_style}
-                onValueChange={(value: string) => handleChange('avatar_style', value)}
-                disabled={isGenerating}
-              >
-                <SelectTrigger 
-                  id="avatar-style"
-                  className="w-full bg-white border-[#e6e6e6] rounded-md focus:ring-[#e1e1e1] focus:border-[#d1d1d1]"
-                >
-                  <SelectValue placeholder="Select style" />
-                </SelectTrigger>
-                <SelectContent className="bg-white border-[#e6e6e6] rounded-md">
-                  <SelectItem value="normal">Normal</SelectItem>
-                  <SelectItem value="circle">Circle</SelectItem>
-                  <SelectItem value="closeUp">Close Up</SelectItem>
-                </SelectContent>
-              </Select>
+          {/* Right column - Preview */}
+          <div className="h-full">
+            <div className="mb-2">
+              <Label className="text-[#37352f] font-medium text-sm">Preview</Label>
             </div>
-
-            {/* Voice Speed */}
-            <div className="space-y-2">
-              <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
-              <Input
-                id="voice-speed"
-                type="number"
-                value={formData.voice_speed || 1.0}
-                onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
-                min="0.5"
-                max="1.5"
-                step="0.1"
-                className="bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
-                disabled={isGenerating}
-              />
-            </div>
+            <AvatarPreview 
+              selectedAvatar={selectedAvatar} 
+              selectedVoice={selectedVoice}
+              className="h-[465px]"
+            />
           </div>
         </div>
 
-        {/* Right column - Preview */}
-        <div className="h-full">
-          <div className="mb-2">
-            <Label className="text-[#37352f] font-medium text-sm">Preview</Label>
-          </div>
-          <AvatarPreview 
-            selectedAvatar={selectedAvatar} 
-            selectedVoice={selectedVoice}
-            className="h-[465px]"
-          />
+        {/* Footer with Generate Button */}
+        <div className="pt-6 mt-3 border-t border-[#e6e6e6] flex justify-end">
+          <Button
+            type="submit"
+            disabled={isGenerating}
+            className="bg-[#2d3748] hover:bg-[#1a202c] text-white rounded-md font-medium px-6 py-2.5 h-11"
+          >
+            {isGenerating ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                Generating...
+              </>
+            ) : (
+              "Generate Video"
+            )}
+          </Button>
         </div>
-      </div>
-
-      {/* Footer with Generate Button */}
-      <div className="pt-6 mt-3 border-t border-[#e6e6e6] flex justify-end">
-        <Button
-          type="submit"
-          disabled={isGenerating}
-          className="bg-[#2d3748] hover:bg-[#1a202c] text-white rounded-md font-medium px-6 py-2.5 h-11"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate Video"
-          )}
-        </Button>
-      </div>
-    </form>
+      </form>
+    </div>
   );
 } 
