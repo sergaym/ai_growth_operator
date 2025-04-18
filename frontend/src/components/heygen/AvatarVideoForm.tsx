@@ -311,37 +311,54 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
             </Select>
           </div>
 
-        <div className="space-y-2">
-          <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
-          <Input
-            id="voice-speed"
-            type="number"
-            value={formData.voice_speed || 1.0}
-            onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
-            min="0.5"
-            max="1.5"
-            step="0.1"
-            className="bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
-            disabled={isGenerating}
-          />
-        </div>
-      </div>
+          {/* Voice Speed */}
+          <div className="space-y-2">
+            <Label htmlFor="voice-speed" className="text-[#37352f] font-medium text-sm">Voice Speed</Label>
+            <Input
+              id="voice-speed"
+              type="number"
+              value={formData.voice_speed || 1.0}
+              onChange={(e) => handleChange('voice_speed', parseFloat(e.target.value))}
+              min="0.5"
+              max="1.5"
+              step="0.1"
+              className="bg-white border-[#e6e6e6] rounded-md focus-visible:ring-[#e1e1e1] focus-visible:border-[#d1d1d1]"
+              disabled={isGenerating}
+            />
+          </div>
 
-      <div className="pt-4 border-t border-[#f0f0f0]">
-        <Button
-          type="submit"
-          disabled={isGenerating}
-          className="bg-[#2d3748] hover:bg-[#1a202c] text-white rounded-md font-medium px-4 py-2 h-10"
-        >
-          {isGenerating ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              Generating...
-            </>
-          ) : (
-            "Generate Video"
-          )}
-        </Button>
+          {/* Generate Button */}
+          <div className="pt-4">
+            <Button
+              type="submit"
+              disabled={isGenerating}
+              className="bg-[#2d3748] hover:bg-[#1a202c] text-white rounded-md font-medium px-6 py-2.5 h-11 w-full md:w-auto"
+            >
+              {isGenerating ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Generating...
+                </>
+              ) : (
+                "Generate Video"
+              )}
+            </Button>
+          </div>
+        </div>
+
+        {/* Right column - Preview */}
+        <div>
+          <div className="mb-2">
+            <Label className="text-[#37352f] font-medium text-sm">Preview</Label>
+          </div>
+          <div className="h-[560px]">
+            <AvatarPreview 
+              selectedAvatar={selectedAvatar} 
+              selectedVoice={selectedVoice}
+              className="h-full"
+            />
+          </div>
+        </div>
       </div>
     </form>
   );
