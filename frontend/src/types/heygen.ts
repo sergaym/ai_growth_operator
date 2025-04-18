@@ -43,6 +43,26 @@ export interface HeygenVideoResponse {
   };
 }
 
+// Database avatar video response from backend
+export interface DatabaseAvatarVideo {
+  id: number;
+  generation_id: string;
+  status: string;
+  prompt: string;
+  avatar_id: string;
+  avatar_name?: string;
+  avatar_style: string;
+  voice_id: string;
+  voice_speed: number;
+  voice_pitch: number;
+  video_url?: string;
+  thumbnail_url?: string;
+  duration?: string;
+  created_at: string;
+  completed_at?: string;
+  processing_time?: number;
+}
+
 // Frontend tracked video generation
 export interface TrackedVideoGeneration {
   id: string; // This will be the video_id

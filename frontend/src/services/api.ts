@@ -4,7 +4,8 @@ import {
   HeygenAvatar, 
   HeygenVoice, 
   HeygenVideoGenerationRequest, 
-  HeygenVideoResponse 
+  HeygenVideoResponse,
+  DatabaseAvatarVideo
 } from "@/types/heygen";
 import { API_BASE_URL, HEYGEN_API } from "@/config/api";
 
@@ -116,6 +117,16 @@ export const heygenAPI = {
       return await fetchFromAPI<HeygenVideoResponse>(HEYGEN_API.VIDEO_STATUS(videoId));
     } catch (error) {
       console.error(`Failed to check status for video ${videoId}:`, error);
+      throw error;
+    }
+  },
+  
+  // Get all avatar videos from the database
+  getAllAvatarVideos: async (): Promise<DatabaseAvatarVideo[]> => {
+    try {
+      return await fetchFromAPI<DatabaseAvatarVideo[]>(HEYGEN_API.AVATAR_VIDEOS);
+    } catch (error) {
+      console.error('Failed to fetch avatar videos from database:', error);
       throw error;
     }
   }
