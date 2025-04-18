@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
+import AvatarPreview from './AvatarPreview';
 
 interface AvatarVideoFormProps {
   onVideoGenerated: (formData: HeygenVideoGenerationRequest) => Promise<any>;
@@ -35,6 +36,10 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
     avatar_id?: string;
     voice_id?: string;
   }>({});
+
+  // Selected avatar and voice for preview
+  const [selectedAvatar, setSelectedAvatar] = useState<HeygenAvatar | undefined>(undefined);
+  const [selectedVoice, setSelectedVoice] = useState<HeygenVoice | undefined>(undefined);
 
   // Set default avatar and voice when loaded
   useEffect(() => {
