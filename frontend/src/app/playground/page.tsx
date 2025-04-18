@@ -1,38 +1,14 @@
 "use client";
 import React, { useState, useEffect } from "react";
-import { motion } from "framer-motion";
-import Link from "next/link";
-import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
 import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
 import DatabaseVideoCard from "@/components/heygen/DatabaseVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
 import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration, useHeygenDatabaseVideos } from "@/hooks/useHeygenApi";
-import { Button } from "@/components/ui/button";
-import { Logo } from "@/components/ui/Logo";
 
-// These types would eventually come from your API responses
-type VideoGeneration = {
-  id: string;
-  prompt: string;
-  status: "pending" | "completed" | "failed";
-  createdAt: string;
-  videoUrl?: string;
-};
-
-type AdCampaign = {
-  id: string;
-  name: string;
-  status: "active" | "paused" | "completed";
-  platform: "facebook" | "google" | "tiktok";
-  budget: number;
-  metrics: {
-    impressions: number;
-    clicks: number;
-    ctr: number;
-    conversions: number;
-    cpa: number;
-  };
-};
+// Component imports
+import PlaygroundLayout from "@/components/playground/Layout";
+import CreateVideoSection from "@/components/playground/CreateVideoSection";
+import VideoList from "@/components/playground/VideoList";
 
 export default function Playground() {
   // HeyGen API hooks
