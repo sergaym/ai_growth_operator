@@ -7,19 +7,24 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Label } from "@/components/ui/label";
 import { Loader2, AlertCircle, RefreshCw } from "lucide-react";
 import AvatarPreview from './AvatarPreview';
+import { AvatarTrainingData } from './AvatarCreationForm';
 
 interface AvatarVideoFormProps {
   onVideoGenerated: (formData: HeygenVideoGenerationRequest) => Promise<any>;
+  onCreateAvatar?: (data: AvatarTrainingData) => Promise<any>;
   avatars: HeygenAvatar[];
   voices: HeygenVoice[];
   isGenerating: boolean;
+  isCreatingAvatar?: boolean;
 }
 
 export default function AvatarVideoForm({ 
   onVideoGenerated, 
+  onCreateAvatar,
   avatars, 
   voices, 
-  isGenerating
+  isGenerating,
+  isCreatingAvatar = false
 }: AvatarVideoFormProps) {
   // Form state
   const [formData, setFormData] = useState<HeygenVideoGenerationRequest>({
