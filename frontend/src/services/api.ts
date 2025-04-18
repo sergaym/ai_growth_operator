@@ -119,5 +119,15 @@ export const heygenAPI = {
       console.error(`Failed to check status for video ${videoId}:`, error);
       throw error;
     }
+  },
+  
+  // Get all avatar videos from the database
+  getAllAvatarVideos: async (): Promise<DatabaseAvatarVideo[]> => {
+    try {
+      return await fetchFromAPI<DatabaseAvatarVideo[]>(HEYGEN_API.AVATAR_VIDEOS);
+    } catch (error) {
+      console.error('Failed to fetch avatar videos from database:', error);
+      throw error;
+    }
   }
 }; 
