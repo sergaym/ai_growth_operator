@@ -4,8 +4,9 @@ import { motion } from "framer-motion";
 import Link from "next/link";
 import AvatarVideoForm from "@/components/heygen/AvatarVideoForm";
 import AvatarVideoCard from "@/components/heygen/AvatarVideoCard";
+import DatabaseVideoCard from "@/components/heygen/DatabaseVideoCard";
 import { TrackedVideoGeneration, HeygenVideoGenerationRequest } from "@/types/heygen";
-import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration } from "@/hooks/useHeygenApi";
+import { useHeygenAvatars, useHeygenVoices, useHeygenVideoGeneration, useHeygenDatabaseVideos } from "@/hooks/useHeygenApi";
 import { Button } from "@/components/ui/button";
 import { Logo } from "@/components/ui/Logo";
 
