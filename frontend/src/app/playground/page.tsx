@@ -186,8 +186,8 @@ export default function Playground() {
 
   return (
     <PlaygroundLayout
-      title="Avatar Video Generator"
-      description="Create custom AI videos with virtual avatars and realistic voices"
+      title="AI Content Studio"
+      description="Create and manage professional AI-generated videos with virtual avatars"
       error={apiError}
     >
       {/* Video Creation Section */}
