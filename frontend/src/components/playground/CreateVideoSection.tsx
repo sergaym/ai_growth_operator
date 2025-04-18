@@ -2,6 +2,7 @@ import React from 'react';
 import AvatarVideoForm from '@/components/heygen/AvatarVideoForm';
 import { HeygenAvatar, HeygenVoice, HeygenVideoGenerationRequest } from '@/types/heygen';
 import { Button } from '@/components/ui/button';
+import { AvatarTrainingData } from '@/components/heygen/AvatarCreationForm';
 
 interface CreateVideoSectionProps {
   avatars: HeygenAvatar[];
@@ -11,7 +12,9 @@ interface CreateVideoSectionProps {
   avatarsError: string | null;
   voicesError: string | null;
   isGenerating: boolean;
+  isCreatingAvatar?: boolean;
   onVideoGenerated: (formData: HeygenVideoGenerationRequest) => Promise<any>;
+  onCreateAvatar?: (data: AvatarTrainingData) => Promise<any>;
   onRetryApiLoad: () => void;
 }
 
@@ -23,7 +26,9 @@ export default function CreateVideoSection({
   avatarsError,
   voicesError,
   isGenerating,
+  isCreatingAvatar = false,
   onVideoGenerated,
+  onCreateAvatar,
   onRetryApiLoad
 }: CreateVideoSectionProps) {
   return (
@@ -62,17 +67,21 @@ export default function CreateVideoSection({
             </div>
             <AvatarVideoForm
               onVideoGenerated={onVideoGenerated}
+              onCreateAvatar={onCreateAvatar}
               avatars={avatars}
               voices={voices}
               isGenerating={isGenerating}
+              isCreatingAvatar={isCreatingAvatar}
             />
           </div>
         ) : (
           <AvatarVideoForm
             onVideoGenerated={onVideoGenerated}
+            onCreateAvatar={onCreateAvatar}
             avatars={avatars}
             voices={voices}
             isGenerating={isGenerating}
+            isCreatingAvatar={isCreatingAvatar}
           />
         )}
       </div>
