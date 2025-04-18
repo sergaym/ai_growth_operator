@@ -4,7 +4,8 @@ import {
   HeygenAvatar, 
   HeygenVoice, 
   HeygenVideoGenerationRequest, 
-  HeygenVideoResponse 
+  HeygenVideoResponse,
+  DatabaseAvatarVideo
 } from "@/types/heygen";
 import { API_BASE_URL, HEYGEN_API } from "@/config/api";
 
