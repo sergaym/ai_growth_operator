@@ -29,7 +29,10 @@ export const HEYGEN_API = {
   GENERATE_AVATAR_VIDEO: `${API_BASE_URL}/api/v1/video/heygen/generate-avatar-video`,
   
   // Check video status
-  VIDEO_STATUS: (videoId: string) => `${API_BASE_URL}/api/v1/video/heygen/video/${videoId}`,
+  VIDEO_STATUS: (videoId: string) => `${API_BASE_URL}/api/v1/video/heygen/status/${videoId}`,
+  
+  // Get all avatar videos from the database
+  AVATAR_VIDEOS: `${API_BASE_URL}/api/v1/video/heygen/avatar-videos`,
 };
 
 // Other API endpoints can be added here as the application grows
