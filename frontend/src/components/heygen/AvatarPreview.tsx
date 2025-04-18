@@ -9,3 +9,23 @@ interface AvatarPreviewProps {
   selectedVoice: HeygenVoice | undefined;
   className?: string;
 }
+
+export default function AvatarPreview({ selectedAvatar, selectedVoice, className = '' }: AvatarPreviewProps) {
+  const [isPlayingVideo, setIsPlayingVideo] = useState(false);
+  const [isPlayingAudio, setIsPlayingAudio] = useState(false);
+  const [audioElement, setAudioElement] = useState<HTMLAudioElement | null>(null);
+  const [videoElement, setVideoElement] = useState<HTMLVideoElement | null>(null);
+  const [imageError, setImageError] = useState(false);
+
+  // Play or pause the preview video
+  const toggleVideoPreview = () => {
+    if (!videoElement) return;
+    
+    if (isPlayingVideo) {
+      videoElement.pause();
+    } else {
+      videoElement.play();
+    }
+    
+    setIsPlayingVideo(!isPlayingVideo);
+  };
