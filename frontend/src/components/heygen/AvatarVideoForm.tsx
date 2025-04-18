@@ -45,14 +45,32 @@ export default function AvatarVideoForm({ onVideoGenerated, avatars, voices, isG
   useEffect(() => {
     if (avatars.length > 0 && !formData.avatar_id) {
       setFormData(prev => ({ ...prev, avatar_id: avatars[0].avatar_id }));
+      setSelectedAvatar(avatars[0]);
     }
   }, [avatars, formData.avatar_id]);
 
   useEffect(() => {
     if (voices.length > 0 && !formData.voice_id) {
       setFormData(prev => ({ ...prev, voice_id: voices[0].voice_id }));
+      setSelectedVoice(voices[0]);
     }
   }, [voices, formData.voice_id]);
+
+  // Update selected avatar when avatar_id changes
+  useEffect(() => {
+    if (formData.avatar_id) {
+      const avatar = avatars.find(a => a.avatar_id === formData.avatar_id);
+      setSelectedAvatar(avatar);
+    }
+  }, [formData.avatar_id, avatars]);
+
+  // Update selected voice when voice_id changes
+  useEffect(() => {
+    if (formData.voice_id) {
+      const voice = voices.find(v => v.voice_id === formData.voice_id);
+      setSelectedVoice(voice);
+    }
+  }, [formData.voice_id, voices]);
 
   // Handle form changes
   const handleChange = (name: string, value: string | number) => {
