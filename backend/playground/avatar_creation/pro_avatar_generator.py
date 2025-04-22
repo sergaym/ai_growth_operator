@@ -78,3 +78,70 @@ class ProAvatarGenerator:
             print(f"Error generating image: {e}")
             return None
     
+    def _save_image_from_url(self, image_url, filename):
+        """Save an image from a URL to the output directory."""
+        import requests
+        
+        try:
+            response = requests.get(image_url)
+            if response.status_code == 200:
+                file_path = os.path.join(self.output_dir, filename)
+                with open(file_path, 'wb') as f:
+                    f.write(response.content)
+                return file_path
+            else:
+                print(f"Failed to download image: {response.status_code}")
+                return None
+        except Exception as e:
+            print(f"Error saving image: {e}")
+            return None
+    
+    def _analyze_audience(self, audience_description):
+        """
+        Analyze the target audience to create a detailed audience profile.
+        
+        Args:
+            audience_description (str): Description of the target audience
+            
+        Returns:
+            Dict: Detailed audience profile
+        """
+        system_prompt = """
+        You are an expert audience analyst and marketing psychologist. Your task is to analyze a target audience 
+        description and extract key demographic, psychographic, and behavioral characteristics that would be 
+        relevant for creating an avatar that would appeal to this audience.
+        
+        Generate a detailed audience profile in JSON format with the following sections:
+        1. Demographics (age, gender, income level, education, occupation, location)
+        2. Psychographics (values, interests, lifestyle, personality traits)
+        3. Visual preferences (visual style, colors, aesthetics that would appeal to them)
+        4. Media consumption (platforms, content types they prefer)
+        5. Key pain points and aspirations
+        
+        Use the provided description to make educated inferences where explicit information is not provided.
+        """
+        
+        user_prompt = f"""
+        Based on this target audience description, create a detailed audience profile:
+        
+        {audience_description}
+        
+        Please provide the analysis in structured JSON format.
+        """
+        
+        # Get the audience analysis
+        analysis_text = self._call_openai(system_prompt, user_prompt, temperature=0.5)
+        
+        # Try to parse the JSON response
+        try:
+            # Clean up any markdown formatting
+            analysis_text = analysis_text.replace("```json", "").replace("```", "").strip()
+            audience_profile = json.loads(analysis_text)
+            return audience_profile
+        except json.JSONDecodeError:
+            # If parsing fails, extract structured data manually
+            return {
+                "raw_analysis": analysis_text,
+                "error": "Failed to parse structured data"
+            }
+    
