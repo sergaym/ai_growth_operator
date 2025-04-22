@@ -247,3 +247,167 @@ class AdvancedAdGeneratorAgent:
         
         return creative_brief
     
+    def _generate_creative_brief(self):
+        """Generate a professional creative brief based on gathered information."""
+        system_prompt = """
+        You are an expert creative director specializing in creating comprehensive creative briefs.
+        Create a professional creative brief based on all the gathered information.
+        
+        Include sections for Project Overview, Brand Background, Target Audience, Product Details,
+        Competitive Landscape, Campaign Objectives, Tone and Style, and Key Message.
+        """
+        
+        user_prompt = f"""
+        Based on all the information gathered, please create a comprehensive creative brief for this ad campaign.
+        
+        BRAND: {json.dumps(self.creative_brief["brand"], indent=2)}
+        
+        AUDIENCE: {json.dumps(self.creative_brief["audience"], indent=2)}
+        
+        PRODUCT: {json.dumps(self.creative_brief["product"], indent=2)}
+        
+        COMPETITORS: {json.dumps(self.creative_brief["competitors"], indent=2)}
+        
+        OBJECTIVES: {json.dumps(self.creative_brief["objectives"], indent=2)}
+        
+        TONE AND STYLE: {json.dumps(self.creative_brief["tone_and_style"], indent=2)}
+        
+        INDUSTRY: {self.industry}
+        """
+        
+        # Generate the creative brief
+        creative_brief = self._call_openai(system_prompt, user_prompt, temperature=0.7)
+        return creative_brief
+    
+    def generate_ad_variations(self, num_variations=3):
+        """Generate multiple ad script variations based on the creative brief."""
+        if not self.creative_brief["brand"]:
+            print("No information gathered yet. Please run gather_information() first.")
+            return []
+        
+        # Generate a creative brief if not already done
+        creative_brief = self._generate_creative_brief()
+        
+        # Different approaches for variations
+        approaches = [
+            "Create an emotional and narrative-driven ad that tells a compelling story",
+            "Create a direct and benefit-focused ad that clearly communicates value",
+            "Create a problem-solution format ad that highlights pain points and resolution"
+        ]
+        
+        print(f"\nGenerating {num_variations} ad script variations...")
+        
+        system_prompt = """
+        You are an expert copywriter who specializes in creating compelling commercial advertisements.
+        Create a highly effective 1-minute commercial ad script based on the creative brief provided.
+        
+        Your ad must:
+        1. Grab attention in the first 5 seconds
+        2. Clearly communicate the value proposition
+        3. Speak directly to the target audience's needs and pain points
+        4. Highlight the most compelling product benefits
+        5. Include a strong call to action
+        6. Be conversational and natural for voice delivery
+        7. Include any necessary voice directions or sound effect notes
+        """
+        
+        # Generate variations
+        self.ad_variations = []
+        for i in range(min(num_variations, len(approaches))):
+            user_prompt = f"""
+            Based on this creative brief:
+            
+            {creative_brief}
+            
+            {approaches[i]}.
+            The ad should be approximately 1 minute when read aloud.
+            """
+            
+            # Generate the ad variation
+            ad_script = self._call_openai(system_prompt, user_prompt, temperature=0.8)
+            
+            variation = {
+                "id": i + 1,
+                "approach": approaches[i].replace("Create ", ""),
+                "script": ad_script
+            }
+            
+            self.ad_variations.append(variation)
+            
+            # Display the variation
+            print(f"\n=== AD VARIATION {variation['id']}: {variation['approach']} ===\n")
+            print(variation["script"])
+            print("\n=======================\n")
+        
+        return self.ad_variations
+    
+    def select_and_refine_ad(self):
+        """Allow the user to select an ad variation and optionally refine it."""
+        if not self.ad_variations:
+            print("No ad variations generated yet. Please run generate_ad_variations() first.")
+            return ""
+        
+        # Let user select a variation
+        selection = input(f"Select an ad variation (1-{len(self.ad_variations)}): ")
+        try:
+            selection_id = int(selection)
+            if selection_id < 1 or selection_id > len(self.ad_variations):
+                raise ValueError
+        except ValueError:
+            print("Invalid selection. Using variation 1.")
+            selection_id = 1
+        
+        # Find the selected variation
+        for variation in self.ad_variations:
+            if variation["id"] == selection_id:
+                self.selected_variation = variation
+                break
+        else:
+            self.selected_variation = self.ad_variations[0]
+        
+        print(f"\nYou selected Variation {self.selected_variation['id']}: {self.selected_variation['approach']}\n")
+        
+        # Ask if the user wants to refine the ad
+        refine = input("Would you like to refine this ad? (yes/no): ")
+        if refine.lower() in ["yes", "y"]:
+            feedback = input("What specific aspects would you like to improve or change? ")
+            
+            system_prompt = """
+            You are an expert copywriter who specializes in revising commercial advertisements based on feedback.
+            Take the previously generated ad and the user's feedback to create an improved version.
+            Maintain the same 1-minute length constraint and all the qualities of an effective ad.
+            """
+            
+            user_prompt = f"""
+            Here is the original ad script:
+            
+            {self.selected_variation["script"]}
+            
+            Please refine this ad based on the following feedback:
+            
+            {feedback}
+            
+            Provide a revised version that incorporates this feedback while maintaining all the strengths of the original.
+            """
+            
+            # Generate the refined ad
+            print("\nRefining the selected ad script...")
+            refined_ad = self._call_openai(system_prompt, user_prompt, temperature=0.7)
+            
+            print("\n=== REFINED AD SCRIPT ===\n")
+            print(refined_ad)
+            print("\n=======================\n")
+            
+            return refined_ad
+        else:
+            return self.selected_variation["script"]
+
+
+if __name__ == "__main__":
+    # Example usage
+    agent = AdvancedAdGeneratorAgent()
+    
+    # Guide the user through the entire process
+    creative_brief = agent.gather_information()
+    ad_variations = agent.generate_ad_variations(3)
+    final_ad = agent.select_and_refine_ad() 
