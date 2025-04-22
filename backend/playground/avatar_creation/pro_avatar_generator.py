@@ -134,13 +134,13 @@ class RealisticActorGenerator:
         system_prompt = """
         You are an expert audience analyst and marketing psychologist. Your task is to analyze a target audience 
         description and extract key demographic, psychographic, and behavioral characteristics that would be 
-        relevant for creating an avatar that would appeal to this audience.
+        relevant for creating a realistic human actor/model that would appeal to this audience for advertising.
         
         Generate a detailed audience profile in JSON format with the following sections:
-        1. Demographics (age, gender, income level, education, occupation, location)
+        1. Demographics (age range, gender distribution, income level, education, occupation, location)
         2. Psychographics (values, interests, lifestyle, personality traits)
-        3. Visual preferences (visual style, colors, aesthetics that would appeal to them)
-        4. Media consumption (platforms, content types they prefer)
+        3. Visual preferences (visual style, actor types they respond to, aesthetics)
+        4. Representation preferences (would they respond better to someone similar to them or aspirational)
         5. Key pain points and aspirations
         
         Use the provided description to make educated inferences where explicit information is not provided.
@@ -181,20 +181,21 @@ class RealisticActorGenerator:
             Dict: Brand profile
         """
         system_prompt = """
-        You are an expert brand strategist and designer. Your task is to analyze a brand description 
-        and extract key characteristics that would be relevant for creating an avatar that represents this brand.
+        You are an expert brand strategist and casting director. Your task is to analyze a brand description 
+        and extract key characteristics that would be relevant for selecting an actor/model to represent this brand.
         
         Generate a detailed brand profile in JSON format with the following sections:
         1. Brand identity (name, mission, values, personality)
-        2. Visual identity (color palette, typography style, imagery style)
+        2. Visual identity (color palette, visual style, aesthetic)
         3. Tone and voice (how the brand communicates)
-        4. Key differentiators (what makes this brand unique)
+        4. Target market positioning
+        5. Actor/spokesperson qualities that would align with this brand (specific traits, appearance, demeanor)
         
         Use the provided description to make educated inferences where explicit information is not provided.
         """
         
         user_prompt = f"""
-        Based on this brand description, create a detailed brand profile:
+        Based on this brand description, create a detailed brand profile with focus on what type of actor/model would best represent this brand:
         
         {brand_description}
         
