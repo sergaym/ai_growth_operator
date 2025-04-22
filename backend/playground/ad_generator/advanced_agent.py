@@ -35,3 +35,24 @@ class AdvancedAdGeneratorAgent:
         self.ad_variations = []
         self.selected_variation = None
         
+    def _add_to_history(self, role, content):
+        """Add a message to the conversation history."""
+        self.conversation_history.append({"role": role, "content": content})
+        
+    def _call_openai(self, system_prompt, user_prompt, temperature=0.7):
+        """Make a call to the OpenAI API."""
+        messages = [{"role": "system", "content": system_prompt}]
+        messages.extend(self.conversation_history)
+        messages.append({"role": "user", "content": user_prompt})
+        
+        response = openai.chat.completions.create(
+            model=self.model,
+            messages=messages,
+            temperature=temperature
+        )
+        
+        content = response.choices[0].message.content.strip()
+        self._add_to_history("assistant", content)
+        
+        return content
+    
