@@ -192,3 +192,58 @@ class AdvancedAdGeneratorAgent:
         
         return structured_info
     
+    def gather_information(self, initial_company=None, initial_audience=None, initial_product=None):
+        """Conduct a comprehensive information gathering process."""
+        print("\n===== AD GENERATOR PROFESSIONAL DIRECTOR =====")
+        print("This agent will guide you through creating a high-quality commercial ad script.\n")
+        
+        # Get initial information if not provided
+        if not initial_company:
+            initial_company = input("Enter company/brand description: ")
+        if not initial_product:
+            initial_product = input("Enter product/service description: ")
+        if not initial_audience:
+            initial_audience = input("\nEnter target audience description: ")
+            
+        # Identify industry to guide the process
+        print("\nAnalyzing your business to identify the industry...")
+        self.industry = self._identify_industry(initial_company, initial_product)
+        print(f"Identified industry: {self.industry}\n")
+        
+        # Gather detailed information through adaptive interviews
+        self.creative_brief["brand"] = self._conduct_interview("brand", initial_company)
+        self.creative_brief["audience"] = self._conduct_interview("audience", initial_audience)
+        self.creative_brief["product"] = self._conduct_interview("product", initial_product)
+        
+        # Get competitor information
+        print("\n--- Competitor Analysis ---")
+        competitor_info = input("Please describe your main competitors and how you differentiate: ")
+        self.creative_brief["competitors"] = self._extract_structured_data(
+            competitor_info, 
+            {"main_competitors": ["List of competitors"], "differentiation": "Differentiation strategy"}
+        )
+        
+        # Get campaign objectives
+        print("\n--- Campaign Objectives ---")
+        objectives_info = input("What are the primary objectives for this ad campaign? ")
+        self.creative_brief["objectives"] = self._extract_structured_data(
+            objectives_info,
+            {"primary_objective": "Primary objective", "secondary_objectives": ["Secondary objectives"]}
+        )
+        
+        # Get tone and style preferences
+        print("\n--- Tone and Style ---")
+        tone_info = input("What tone and style should the ad have? Any examples you like? ")
+        self.creative_brief["tone_and_style"] = self._extract_structured_data(
+            tone_info,
+            {"tone": "Tone", "style": "Style", "examples": ["Examples"]}
+        )
+        
+        # Generate creative brief
+        creative_brief = self._generate_creative_brief()
+        print("\n=== CREATIVE BRIEF ===\n")
+        print(creative_brief)
+        print("\n=======================\n")
+        
+        return creative_brief
+    
