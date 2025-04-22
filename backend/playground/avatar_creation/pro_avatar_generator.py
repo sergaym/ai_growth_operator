@@ -85,15 +85,15 @@ class RealisticActorGenerator:
         
         return content
     
-    def _generate_image(self, prompt, style="vivid", size="1024x1024"):
+    def _generate_image(self, prompt, size="1024x1024"):
         """Generate an image using OpenAI's DALL-E model."""
         try:
             response = openai.images.generate(
                 model=self.image_model,
                 prompt=prompt,
                 size=size,
-                quality="standard",
-                style=style,
+                quality="hd",  # HD for better photorealism
+                style="natural",  # Natural style for realistic humans
                 n=1
             )
             
