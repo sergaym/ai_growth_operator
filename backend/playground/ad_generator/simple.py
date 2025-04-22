@@ -65,8 +65,14 @@ if __name__ == "__main__":
     print(ad_script)
     print("\n===========================================\n")
 
+"""
+# Example company description
+company_description = "EcoTech Solutions is a sustainable technology company focused on reducing carbon footprints through innovative smart home devices."
 
-# Example usage
-# company_description = "A tech startup that develops innovative AI solutions for businesses"
-# target_audience = "Spanish-speaking from Spain, small business owners who want to improve customer engagement and sales"
-# product_description = "An AI-powered chatbot that can help businesses automate customer support and sales"
+# Example target audience
+target_audience = "Environmentally conscious homeowners aged 30-45 with above-average income who value technology and sustainability."
+
+# Example product description
+product_description = "The EcoSmart Thermostat learns your habits and automatically adjusts temperature settings to minimize energy usage while maintaining comfort, saving users an average of 30% on heating and cooling costs."
+"""    
+
