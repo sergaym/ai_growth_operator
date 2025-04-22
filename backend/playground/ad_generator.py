@@ -8,7 +8,7 @@ load_dotenv()
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-def generate_commercial_ad(company_description, target_audience, product_description):
+def generate_commercial_ad(company_description, target_audience, product_description, model="gpt-4-turbo"):
     """
     Generate a commercial ad script (max 1 minute) based on company description,
     target audience, and product description using OpenAI.
@@ -17,6 +17,7 @@ def generate_commercial_ad(company_description, target_audience, product_descrip
         company_description (str): Description of the company
         target_audience (str): Description of the target audience
         product_description (str): Description of the product being sold
+        model (str): OpenAI model to use for generation, defaults to "gpt-4-turbo"
         
     Returns:
         str: A commercial ad script (max 1 minute)
@@ -37,9 +38,9 @@ def generate_commercial_ad(company_description, target_audience, product_descrip
     Format the response as a complete script ready for recording, with clear voice directions if needed.
     """
     
-    # Generate content using OpenAI's GPT-4
+    # Generate content using OpenAI
     response = openai.chat.completions.create(
-        model="gpt-4-turbo",  # Using GPT-4 for highest quality
+        model=model,
         messages=[
             {"role": "system", "content": "You are an expert copywriter who specializes in creating compelling commercial advertisements."},
             {"role": "user", "content": prompt}
@@ -56,12 +57,13 @@ if __name__ == "__main__":
     company = input("Enter company description: ")
     audience = input("Enter target audience: ")
     product = input("Enter product description: ")
+    model = input("Enter OpenAI model (press Enter for default 'gpt-4-turbo'): ") or "gpt-4-turbo"
     
-    ad_script = generate_commercial_ad(company, audience, product)
+    ad_script = generate_commercial_ad(company, audience, product, model)
     
-    print("\n=== GENERATED COMMERCIAL AD (1 MINUTE) ===\n")
+    print(f"\n=== GENERATED COMMERCIAL AD (1 MINUTE) USING {model} ===\n")
     print(ad_script)
-    print("\n===========================================\n") 
+    print("\n===========================================\n")
 
 
 # Example usage
