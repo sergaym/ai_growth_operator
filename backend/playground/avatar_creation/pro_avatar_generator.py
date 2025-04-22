@@ -12,15 +12,16 @@ load_dotenv()
 # Set up OpenAI API key
 openai.api_key = os.getenv("OPENAI_API_KEY")
 
-class ProAvatarGenerator:
+class RealisticActorGenerator:
     """
-    Professional avatar generator that creates custom avatars based on target audience analysis.
-    Uses audience insights to generate avatars that will resonate with the intended demographic.
+    Realistic human actor generator that creates images of photorealistic humans based on target audience analysis.
+    Uses audience insights to generate actors that will resonate with the intended demographic.
+    Optimized for creating realistic human actors suitable for advertising and marketing campaigns.
     """
     
     def __init__(self, model="gpt-4-turbo", image_model="dall-e-3"):
         """
-        Initialize the ProAvatarGenerator.
+        Initialize the RealisticActorGenerator.
         
         Args:
             model (str): OpenAI text model to use for analysis, defaults to "gpt-4-turbo"
@@ -31,10 +32,34 @@ class ProAvatarGenerator:
         self.conversation_history = []
         self.audience_profile = {}
         self.brand_profile = {}
-        self.avatar_style = {}
-        self.avatar_variations = []
-        self.selected_avatar = None
+        self.actor_profile = {}
+        self.actor_variations = []
+        self.selected_actor = None
         self.output_dir = os.path.join("backend", "playground", "avatar_creation", "output")
+        
+        # Define actor types that appeal to different audiences
+        self.actor_types = {
+            "professional": {
+                "name": "Professional",
+                "description": "Corporate professional with business attire, suitable for B2B services",
+            },
+            "casual": {
+                "name": "Casual/Lifestyle",
+                "description": "Approachable person with casual attire, for lifestyle and consumer products",
+            },
+            "expert": {
+                "name": "Industry Expert",
+                "description": "Authoritative figure with professional appearance specific to an industry",
+            },
+            "aspirational": {
+                "name": "Aspirational",
+                "description": "Successful, attractive person representing an ideal or aspiration",
+            },
+            "relatable": {
+                "name": "Relatable Everyday Person",
+                "description": "Average, down-to-earth person that viewers can easily identify with",
+            }
+        }
         
         # Create output directory if it doesn't exist
         os.makedirs(self.output_dir, exist_ok=True)
