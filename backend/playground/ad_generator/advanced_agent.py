@@ -128,3 +128,67 @@ class AdvancedAdGeneratorAgent:
         questions = self._call_openai(system_prompt, user_prompt)
         return questions
     
+    def _conduct_interview(self, topic, initial_info):
+        """Conduct an adaptive interview on a specific topic."""
+        print(f"\n--- {topic.title()} Information Gathering ---")
+        print(f"Initial description: {initial_info}\n")
+        
+        # Get adaptive questions
+        questions = self._get_adaptive_questions(initial_info, topic)
+        print(f"Follow-up questions:\n{questions}\n")
+        
+        # Get user answers
+        answers = input("Please answer these questions (or type 'next' to move on): ")
+        if answers.lower() == 'next':
+            print("\nMoving on to the next section...\n")
+            answers = "No additional information provided."
+            
+        self._add_to_history("user", f"{topic} information - Initial: {initial_info}, Additional: {answers}")
+        
+        # Define schema based on topic
+        if topic == "brand":
+            schema = {
+                "name": "Brand name",
+                "mission": "Brand mission statement",
+                "values": ["List of brand values"],
+                "unique_selling_proposition": "The USP",
+                "brand_voice": "Brand voice and tone"
+            }
+        elif topic == "audience":
+            schema = {
+                "demographics": {
+                    "age_range": "Age range",
+                    "gender": "Gender distribution",
+                    "income_level": "Income level",
+                    "location": "Geographic location"
+                },
+                "psychographics": {
+                    "values": ["Values"],
+                    "interests": ["Interests"],
+                    "pain_points": ["Pain points"]
+                },
+                "buying_behavior": "Buying behavior"
+            }
+        elif topic == "product":
+            schema = {
+                "name": "Product name",
+                "features": ["Key features"],
+                "benefits": ["Key benefits"],
+                "pricing": "Pricing information",
+                "unique_advantages": ["Unique advantages"]
+            }
+        elif topic == "competitors":
+            schema = {
+                "main_competitors": ["Main competitors"],
+                "differentiation_strategy": "How to differentiate"
+            }
+        else:
+            schema = {"summary": "Summary of information"}
+        
+        # Extract structured information
+        print(f"\nAnalyzing {topic} information...")
+        combined_info = f"{initial_info}\n\n{answers}"
+        structured_info = self._extract_structured_data(combined_info, schema)
+        
+        return structured_info
+    
