@@ -207,4 +207,12 @@ if __name__ == "__main__":
         
         print("\n=== REFINED COMMERCIAL AD (1 MINUTE) ===\n")
         print(refined_ad)
-        print("\n===========================================\n") 
+        print("\n===========================================\n")
+
+"""
+#example usage
+company_description = "EcoTech Solutions is a sustainable technology company focused on reducing carbon footprints through innovative smart home devices."
+target_audience = "Environmentally conscious homeowners aged 30-45 with above-average income who value technology and sustainability."
+product_description = "The EcoSmart Thermostat learns your habits and automatically adjusts temperature settings to minimize energy usage while maintaining comfort, saving users an average of 30% on heating and cooling costs."
+
+"""
