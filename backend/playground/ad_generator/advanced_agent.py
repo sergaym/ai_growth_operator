@@ -56,3 +56,32 @@ class AdvancedAdGeneratorAgent:
         
         return content
     
+    def _extract_structured_data(self, text, schema):
+        """Extract structured data from text based on a provided schema."""
+        system_prompt = """
+        You are an expert data extraction system. Extract structured information from the text according to the provided schema.
+        Return the extracted data as a valid JSON object that matches the schema exactly.
+        """
+        
+        user_prompt = f"""
+        Extract structured data from the following text according to this schema:
+        {json.dumps(schema, indent=2)}
+        
+        TEXT:
+        {text}
+        
+        Return ONLY the JSON object with the extracted information.
+        """
+        
+        json_text = self._call_openai(system_prompt, user_prompt, temperature=0.1)
+        
+        # Clean up any markdown formatting
+        json_text = re.sub(r'^```json\s*', '', json_text)
+        json_text = re.sub(r'\s*```$', '', json_text)
+        
+        try:
+            return json.loads(json_text)
+        except json.JSONDecodeError:
+            # Fallback if the JSON is invalid
+            return {"error": "Failed to extract structured data", "raw_text": text}
+    
