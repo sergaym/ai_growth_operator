@@ -51,3 +51,20 @@ def generate_commercial_ad(company_description, target_audience, product_descrip
     # Extract and return the generated ad
     return response.choices[0].message.content.strip()
 
+if __name__ == "__main__":
+    # Example usage
+    company = input("Enter company description: ")
+    audience = input("Enter target audience: ")
+    product = input("Enter product description: ")
+    
+    ad_script = generate_commercial_ad(company, audience, product)
+    
+    print("\n=== GENERATED COMMERCIAL AD (1 MINUTE) ===\n")
+    print(ad_script)
+    print("\n===========================================\n") 
+
+
+# Example usage
+# company_description = "A tech startup that develops innovative AI solutions for businesses"
+# target_audience = "Spanish-speaking from Spain, small business owners who want to improve customer engagement and sales"
+# product_description = "An AI-powered chatbot that can help businesses automate customer support and sales"
