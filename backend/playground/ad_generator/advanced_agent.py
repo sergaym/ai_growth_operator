@@ -85,3 +85,20 @@ class AdvancedAdGeneratorAgent:
             # Fallback if the JSON is invalid
             return {"error": "Failed to extract structured data", "raw_text": text}
     
+    def _identify_industry(self, company_description, product_description):
+        """Identify the industry based on company and product descriptions."""
+        system_prompt = """
+        You are an expert business analyst. Based on the company and product descriptions,
+        identify the most specific industry category that applies.
+        """
+        
+        user_prompt = f"""
+        Company Description: {company_description}
+        Product Description: {product_description}
+        
+        Based on this information, what industry and subcategory does this company belong to?
+        """
+        
+        industry = self._call_openai(system_prompt, user_prompt, temperature=0.3)
+        return industry
+    
