@@ -102,3 +102,29 @@ class AdvancedAdGeneratorAgent:
         industry = self._call_openai(system_prompt, user_prompt, temperature=0.3)
         return industry
     
+    def _get_adaptive_questions(self, initial_info, topic_type):
+        """Generate adaptive questions based on initial information."""
+        types = {
+            "brand": "brand strategist understanding brand identity",
+            "audience": "market researcher specializing in audience analysis",
+            "product": "product analyst understanding product features and benefits",
+            "competitors": "competitive analyst analyzing market positioning"
+        }
+        
+        system_prompt = f"""
+        You are an expert {types.get(topic_type, 'marketing consultant')}.
+        Based on the initial information, generate 3-5 follow-up questions that would help
+        gather more detailed information for creating an effective advertisement.
+        
+        The questions should be specific and targeted to uncover key insights.
+        """
+        
+        user_prompt = f"""
+        Initial information about {topic_type}: "{initial_info}"
+        
+        What follow-up questions would help gather more detailed information?
+        """
+        
+        questions = self._call_openai(system_prompt, user_prompt)
+        return questions
+    
