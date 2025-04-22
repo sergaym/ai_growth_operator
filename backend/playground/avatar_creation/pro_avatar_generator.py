@@ -145,3 +145,50 @@ class ProAvatarGenerator:
                 "error": "Failed to parse structured data"
             }
     
+    def _analyze_brand(self, brand_description):
+        """
+        Analyze the brand to understand its identity, values, and visual style.
+        
+        Args:
+            brand_description (str): Description of the brand
+            
+        Returns:
+            Dict: Brand profile
+        """
+        system_prompt = """
+        You are an expert brand strategist and designer. Your task is to analyze a brand description 
+        and extract key characteristics that would be relevant for creating an avatar that represents this brand.
+        
+        Generate a detailed brand profile in JSON format with the following sections:
+        1. Brand identity (name, mission, values, personality)
+        2. Visual identity (color palette, typography style, imagery style)
+        3. Tone and voice (how the brand communicates)
+        4. Key differentiators (what makes this brand unique)
+        
+        Use the provided description to make educated inferences where explicit information is not provided.
+        """
+        
+        user_prompt = f"""
+        Based on this brand description, create a detailed brand profile:
+        
+        {brand_description}
+        
+        Please provide the analysis in structured JSON format.
+        """
+        
+        # Get the brand analysis
+        analysis_text = self._call_openai(system_prompt, user_prompt, temperature=0.5)
+        
+        # Try to parse the JSON response
+        try:
+            # Clean up any markdown formatting
+            analysis_text = analysis_text.replace("```json", "").replace("```", "").strip()
+            brand_profile = json.loads(analysis_text)
+            return brand_profile
+        except json.JSONDecodeError:
+            # If parsing fails, extract structured data manually
+            return {
+                "raw_analysis": analysis_text,
+                "error": "Failed to parse structured data"
+            }
+    
