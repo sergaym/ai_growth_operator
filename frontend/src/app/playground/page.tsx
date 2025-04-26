@@ -283,6 +283,17 @@ export default function Playground() {
     );
   };
 
+  // Function to clear all saved videos from localStorage and state
+  const handleClearVideos = () => {
+    // Confirm before clearing all videos
+    if (avatarVideos.length > 0 && window.confirm('Are you sure you want to clear all your saved videos? This action cannot be undone.')) {
+      // Clear from localStorage
+      localStorage.removeItem('avatarVideos');
+      // Clear from state
+      setAvatarVideos([]);
+    }
+  };
+
   return (
     <PlaygroundLayout
       title="AI Content Studio"
@@ -317,6 +328,13 @@ export default function Playground() {
               count={avatarVideos.length}
               noItemsMessage="No videos created yet. Get started by creating your first video above."
               renderItems={renderLocalVideos}
+              actionButton={
+                avatarVideos.length > 0 ? {
+                  label: "Clear All Videos",
+                  onClick: handleClearVideos,
+                  variant: "danger"
+                } : undefined
+              }
             />
             
             <VideoList
