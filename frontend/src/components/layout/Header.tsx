@@ -33,6 +33,22 @@ export default function Header() {
               </span>
             </div>
           </div>
+          
+          {/* Auth actions */}
+          <div>
+            {user.isAuthenticated ? (
+              <button 
+                onClick={handleLogout}
+                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+              >
+                Sign out
+              </button>
+            ) : (
+              <Link href="/login" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+                Sign in
+              </Link>
+            )}
+          </div>
         </div>
       </div>
     </header>
