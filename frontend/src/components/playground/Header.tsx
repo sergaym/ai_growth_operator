@@ -5,22 +5,30 @@ import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
 
 // Separate client component for auth-related UI
-function LogoutButton() {
+function AuthStatusSection() {
   // Import the useAuth hook only on the client
   const { useAuth } = require('@/hooks/useAuth');
-  const { logout } = useAuth();
+  const { user, logout } = useAuth();
   
   const handleLogout = async () => {
     await logout('/');
   };
   
   return (
-    <button 
-      onClick={handleLogout}
-      className="text-sm text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md transition-colors"
-    >
-      Sign out
-    </button>
+    <div className="flex items-center gap-3">
+      {/* User status indicator */}
+      <div className="flex items-center gap-2 text-sm text-gray-600 font-medium">
+        <span className="inline-block w-2 h-2 rounded-full bg-green-500"></span>
+        <span>Authenticated</span>
+      </div>
+      
+      <button 
+        onClick={handleLogout}
+        className="text-sm text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md transition-colors"
+      >
+        Sign out
+      </button>
+    </div>
   );
 }
 
@@ -54,8 +62,8 @@ export default function PlaygroundHeader() {
             </div>
           </div>
           
-          {/* Logout button - only rendered on client side */}
-          {isMounted && <LogoutButton />}
+          {/* Auth status section - only rendered on client side */}
+          {isMounted ? <AuthStatusSection /> : <div className="h-9 w-32"></div>}
         </div>
       </div>
     </header>
