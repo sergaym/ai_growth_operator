@@ -79,3 +79,47 @@ export function useAuth() {
     }
   }, [router]);
 
+  // Logout function
+  const logout = useCallback(async (redirectUrl?: string) => {
+    try {
+      setLoading(true);
+      
+      // Call the logout API
+      const response = await fetch('/api/auth/logout', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (!response.ok) {
+        const data = await response.json();
+        throw new Error(data.message || 'Logout failed');
+      }
+      
+      // Update user state
+      setUser({ isAuthenticated: false });
+      
+      // Redirect if URL provided
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      }
+      
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
+  return {
+    user,
+    loading,
+    error,
+    login,
+    logout,
+  };
+} 
