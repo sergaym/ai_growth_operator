@@ -1,6 +1,12 @@
 import React, { ReactNode } from 'react';
 import { Button } from '@/components/ui/button';
 
+interface ActionButton {
+  label: string;
+  onClick: () => void;
+  variant?: 'default' | 'danger' | 'outline';
+}
+
 interface VideoListProps {
   title: string;
   count: number;
@@ -11,6 +17,7 @@ interface VideoListProps {
   renderItems: () => ReactNode;
   showRefreshButton?: boolean;
   onRetry?: () => void;
+  actionButton?: ActionButton;
 }
 
 export default function VideoList({
@@ -22,7 +29,8 @@ export default function VideoList({
   onRefresh,
   renderItems,
   showRefreshButton = false,
-  onRetry
+  onRetry,
+  actionButton
 }: VideoListProps) {
   return (
     <div className="mt-12">
@@ -36,25 +44,40 @@ export default function VideoList({
           )}
         </h2>
         
-        {showRefreshButton && onRefresh && (
-          <Button 
-            variant="outline" 
-            size="sm"
-            onClick={onRefresh}
-            className="text-sm text-[#6b7280] border-[#e6e6e6]"
-          >
-            <svg 
-              className="w-4 h-4 mr-1" 
-              fill="none" 
-              stroke="currentColor" 
-              viewBox="0 0 24 24" 
-              xmlns="http://www.w3.org/2000/svg"
+        <div className="flex space-x-2">
+          {/* Show action button if provided */}
+          {actionButton && count > 0 && (
+            <Button
+              variant={actionButton.variant === 'danger' ? 'destructive' : (actionButton.variant || 'default')}
+              size="sm"
+              onClick={actionButton.onClick}
+              className="text-sm"
             >
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
-            </svg>
-            Refresh
-          </Button>
-        )}
+              {actionButton.label}
+            </Button>
+          )}
+          
+          {/* Refresh button */}
+          {showRefreshButton && onRefresh && (
+            <Button 
+              variant="outline" 
+              size="sm"
+              onClick={onRefresh}
+              className="text-sm text-[#6b7280] border-[#e6e6e6]"
+            >
+              <svg 
+                className="w-4 h-4 mr-1" 
+                fill="none" 
+                stroke="currentColor" 
+                viewBox="0 0 24 24" 
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" />
+              </svg>
+              Refresh
+            </Button>
+          )}
+        </div>
       </div>
       
       {loading ? (
