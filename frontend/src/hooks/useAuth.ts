@@ -18,7 +18,7 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  // Check if the user is authenticated on mount
+  // Check if the user is authenticated on mount (client side only)
   useEffect(() => {
     const checkAuth = () => {
       try {
@@ -37,7 +37,13 @@ export function useAuth() {
       }
     };
 
-    checkAuth();
+    // Only run in the browser
+    if (typeof window !== 'undefined') {
+      checkAuth();
+    } else {
+      // In SSR, just set loading to false
+      setLoading(false);
+    }
   }, []);
 
   // Login function
