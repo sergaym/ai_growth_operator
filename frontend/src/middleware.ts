@@ -1,6 +1,12 @@
 import { NextResponse } from 'next/server';
 import type { NextRequest } from 'next/server';
 
+// Protected routes that require authentication
+const PROTECTED_ROUTES = [
+  '/playground',
+  '/playground/(.*)' // Protect all routes under playground
+];
+
 export function middleware(request: NextRequest) {
   // You can add custom logic here for analytics if needed
   // This middleware will run on all requests, allowing for tracking
