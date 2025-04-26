@@ -25,10 +25,11 @@ export function middleware(request: NextRequest) {
     
     // If not authenticated, redirect to login
     if (!isAuthenticated) {
-      const loginUrl = new URL('/api/auth/login', request.url);
-      // Add the original URL as a callback parameter
-      loginUrl.searchParams.set('callbackUrl', pathname);
-      return NextResponse.redirect(loginUrl);
+      // Create login URL with callback to current page
+      const url = new URL('/login', request.url);
+      url.searchParams.set('callbackUrl', pathname);
+      
+      return NextResponse.redirect(url);
     }
   }
   
@@ -41,7 +42,6 @@ export const config = {
   matcher: [
     /*
      * Match all request paths except for the ones starting with:
-     * - api (API routes)
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico (favicon file)
