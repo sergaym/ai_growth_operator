@@ -1,0 +1,1759 @@
+{
+	"info": {
+		"_postman_id": "902db208-2118-48f7-a5bb-70c723b4d885",
+		"name": "HeyGen API Copy",
+		"description": "Welcome to the **HeyGen API** Postman Collection. This collection provides a convenient way to interact with the HeyGen API directly from Postman.\n\n**Documentation**: [https://docs.heygen.com](https://docs.heygen.com/)  \n**Guides**: [https://docs.heygen.com/docs<br>](https://docs.heygen.com/docs/quick-start)**API Reference**: [https://docs.heygen.com/reference](https://docs.heygen.com/reference/authentication-1)\n\n## Authorization\n\nTo send requests to the API endpoints, you must use a valid API token. You can get your API token from the [Settings &gt; API ](https://app.heygen.com/settings?nav=API) page in your HeyGen account.\n\n1. In Postman, go to the **Environments** tab on the left panel.\n    \n2. Select the **My HeyGen API Environment** environment provided by HeyGen.\n    \n3. Update the `heygen-api-token` value with your current HeyGen API token.\n    \n4. Ensure **My HeyGen API Environment** is selected as the active environment using the environment selector at the top right corner of Postman.\n    \n\n### 400 response\n\nA 400 error response typically indicates that your request body is corrupted. To avoid this, ensure that your request body is correctly formatted and includes all necessary elements, such as closing parentheses.\n\n### **Need some help?**\n\nIf you need assistance, you can reach out to us through the following channels:\n\n- **Customer Support Chat:** Available in our web interface.\n    \n- **Emails:** api@heygen.com, support@heygen.com\n    \n- **Community Discussions:** Check out our [discussions channel](https://null) – there's a good chance our community has the answer you're looking for.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "25318389"
+	},
+	"item": [
+		{
+			"name": "Avatars and Voices",
+			"item": [
+				{
+					"name": "v2/voices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/voices",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"voices"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/avatars",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/avatars",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"avatars"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/avatar_group",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v2/avatar_group.list?include_public=false",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"avatar_group.list"
+							],
+							"query": [
+								{
+									"key": "include_public",
+									"value": "false"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/avatar_group/<group_id>/avatars",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v2/avatar_group/<group_id>/avatars",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"avatar_group",
+								"<group_id>",
+								"avatars"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Create Avatar Video API",
+			"item": [
+				{
+					"name": "v2/video/generate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setLatestVideoID() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        const video_id = jsonData.data.video_id;",
+									"        pm.environment.set(\"latest_video_id\", video_id);",
+									"    }",
+									"}",
+									"",
+									"setLatestVideoID()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My Title\",\n  \"video_inputs\": [\n    {\n      \"character\": {\n        \"type\": \"avatar\",\n        \"avatar_id\": \"Kristin_public_3_20240108\",\n        \"avatar_style\": \"normal\"\n      },\n      \"voice\": {\n        \"type\": \"text\",\n        \"input_text\": \"Welcome to the new era of video creation with HeyGen! Simply type your script to get started!\",\n        \"voice_id\": \"2f72ee82b83d4b00af16c4771d611752\"\n      }\n    }\n  ],\n  \"test\": true,\n  \"callback_id\": null,\n  \"dimension\": {\n    \"width\": 1280,\n    \"height\": 720\n  },\n  \"aspect_ratio\": null\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/video/generate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"video",
+								"generate"
+							]
+						},
+						"description": "Generated Video: [https://app.heygen.com/share/67cd13935445457eaa99040070bdb545](https://app.heygen.com/share/67cd13935445457eaa99040070bdb545)\n\n<img src=\"https://resource.heygen.ai/video/gifs/67cd13935445457eaa99040070bdb545.gif\" alt=\"\">"
+					},
+					"response": []
+				},
+				{
+					"name": "v1/video.delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/video.delete?video_id=<video_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"video.delete"
+							],
+							"query": [
+								{
+									"key": "video_id",
+									"value": "<video_id>"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/video.webm",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setLatestVideoID() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        const video_id = jsonData.data.video_id;",
+									"        pm.environment.set(\"latest_video_id\", video_id);",
+									"    }",
+									"}",
+									"",
+									"setLatestVideoID()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "content-type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "\n{\n  \"avatar_pose_id\": \"Vanessa-invest-20220722\",\n  \"avatar_style\": \"normal\",\n  \"input_text\": \"This is a WebM video generated by HeyGen API\",\n  \"voice_id\": \"1bd001e7e50f421d891986aad5158bc8\"\n}\n",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.heygen.com/v1/video.webm",
+							"protocol": "https",
+							"host": [
+								"api",
+								"heygen",
+								"com"
+							],
+							"path": [
+								"v1",
+								"video.webm"
+							]
+						},
+						"description": "Generated from cURL: curl --request POST \\\n     --url https://api.heygen.com/v1/video.webm \\\n     --header 'accept: application/json' \\\n     --header 'content-type: application/json' \\\n     --header 'x-api-key: <your-api-key>' \\\n     --data '\n{\n  \"avatar_pose_id\": \"Vanessa-invest-20220722\",\n  \"avatar_style\": \"normal\",\n  \"input_text\": \"This is a WebM video generated by HeyGen API\",\n  \"voice_id\": \"1bd001e7e50f421d891986aad5158bc8\"\n}\n'"
+					},
+					"response": []
+				}
+			],
+			"description": "Create personalized avatar videos with ease using the **HeyGen API**. By selecting an avatar and a voice, you can create engaging videos for various purposes. 🌟\n\n**Guide**: [https://docs.heygen.com/docs/create-video<br>](https://docs.heygen.com/docs/create-video)**Reference**: [https://docs.heygen.com/reference/create-an-avatar-video-v2](https://docs.heygen.com/reference/create-an-avatar-video-v2)"
+		},
+		{
+			"name": "Template Video API",
+			"item": [
+				{
+					"name": "v2/templates",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setLatestVideoID() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        const video_id = jsonData.data.video_id;",
+									"        pm.environment.set(\"latest_video_id\", video_id);",
+									"    }",
+									"}",
+									"",
+									"setLatestVideoID()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/templates",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"templates"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/template/<id>",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/template/<id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"template",
+								"<id>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/template/generate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setLatestVideoID() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        const video_id = jsonData.data.video_id;",
+									"        pm.environment.set(\"latest_video_id\", video_id);",
+									"    }",
+									"}",
+									"",
+									"setLatestVideoID()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"New Video\",\n  \"variables\": {\n    \"first_name\": {\n      \"name\": \"first_name\",\n      \"type\": \"text\",\n      \"properties\": {\n        \"content\": \"John\"\n      }\n    }\n  },\n  \"test\": false,\n  \"caption\": false,\n  \"dimension\": {\n    \"width\": 1280,\n    \"height\": 720\n  }\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/template/<id>/generate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"template",
+								"<id>",
+								"generate"
+							]
+						},
+						"description": "Generated Video: [https://app.heygen.com/videos/7cba9d29d6db46b88471221fdbc4fb75](https://app.heygen.com/videos/7cba9d29d6db46b88471221fdbc4fb75)\n\n<img src=\"https://resource.heygen.ai/video/gifs/7cba9d29d6db46b88471221fdbc4fb75.gif\" alt=\"\">"
+					},
+					"response": []
+				}
+			],
+			"description": "Templates enable you to add and customize existing text, images, videos, audios, voices and avatars, while avatar videos consist only of avatars without these elements. If you plan to use it within a workflow and need richer content, templates are likely a better fit for your use case compared to simple talking avatar videos. 🌟\n\n**Quick Comparison:**\n\n- **Avatar Videos:** Avatar videos are centered around avatars delivering content without any additional elements. They are ideal for straightforward, avatar-focused communication.\n    \n- **Template Videos:** In contrast, template videos offer a wide canvas for creativity. They enable you to customize existing text, images, videos, audios, voices and avatars seamlessly. If you need a richer, more versatile content format for your workflow, templates are the perfect choice.\n    \n\n**Guide**: [https://docs.heygen.com/docs/generate-video-from-template-v2](https://docs.heygen.com/docs/generate-video-from-template-v2)  \n**Reference**: [https://docs.heygen.com/reference/generate-from-template-v2](https://docs.heygen.com/reference/generate-from-template-v2)[](https://docs.heygen.com/reference/create-an-avatar-video-v2)"
+		},
+		{
+			"name": "Video Translate API",
+			"item": [
+				{
+					"name": "v2/video_translate/target_languages",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/video_translate/target_languages",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"video_translate",
+								"target_languages"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/video_translate",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setLatestVideoID() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data) {",
+									"        const video_translate_id = jsonData.data.video_translate_id;",
+									"        pm.environment.set(\"latest_vt_id\", video_translate_id);",
+									"    }",
+									"}",
+									"",
+									"setLatestVideoID()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"title\": \"My Title\",\n  \"video_url\": \"https://static.heygen.ai/heygen/asset/originalnew.mp4\",\n  \"output_language\": \"English - American Accent\",\n  \"translate_audio_only\": false,\n  \"speaker_num\": 1\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/video_translate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"video_translate"
+							]
+						},
+						"description": "Generated Video: [https://app.heygen.com/video-translation/share/dab5a987e6154b0cb7e606c858043fa9](https://app.heygen.com/video-translation/share/dab5a987e6154b0cb7e606c858043fa9)"
+					},
+					"response": []
+				},
+				{
+					"name": "v2/video_translate/<id>",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/video_translate/<id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"video_translate",
+								"<id>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/video_translate/<id> (latest)",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/video_translate/{{latest_vt_id}}",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"video_translate",
+								"{{latest_vt_id}}"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "The [Video Translate](https://labs.heygen.com/video-translate) by HeyGen provides a powerful solution for effortlessly translating videos, integrating natural voice cloning and authentic speaking styles seamlessly. Now, you can harness its capabilities programmatically through the **Video Translate API**!\n\n**Guide**: [https://docs.heygen.com/docs/video-translate-api<br>](https://docs.heygen.com/docs/video-translate-api)**Reference**: [https://docs.heygen.com/reference/video-translate](https://docs.heygen.com/reference/video-translate)"
+		},
+		{
+			"name": "Photo Avatars API",
+			"item": [
+				{
+					"name": "v2/photo_avatar/photo/generate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"name\",\n    \"age\": \"Young Adult\",\n    \"gender\": \"Unspecified\",\n    \"ethnicity\": \"Unspecified\",\n    \"orientation\": \"square\",\n    \"pose\": \"half_body\",\n    \"style\": \"Realistic\",\n    \"appearance\": \"appearance\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/photo/generate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"photo",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/generation/<generation_id>",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/generation/<generation_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"generation",
+								"<generation_id>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/avatar_group/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"name\",\n    \"image_key\": \"image_key\",\n    \"generation_id\": \"generation_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/avatar_group/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"avatar_group",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/avatar_group/add",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"group_id\": \"group_id\",\n    \"image_keys\": [\n        \"image_key\"\n    ],\n    \"name\": \"name\",\n    \"generation_id\": \"generation_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/avatar_group/add",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"avatar_group",
+								"add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/train",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"group_id\": \"group_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/train",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"train"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/train/status/<group_id>",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/train/status/<group_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"train",
+								"status",
+								"<group_id>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/look/generate",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"group_id\": \"group_id\",\n    \"prompt\": \"prompt\",\n    \"orientation\": \"square\",\n    \"pose\": \"half_body\",\n    \"style\": \"Realistic\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/look/generate",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"look",
+								"generate"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/add_motion",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"photo_avatar_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/add_motion",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"add_motion"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/add_sound_effect",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"photo_avatar_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/add_sound_effect",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"add_sound_effect"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/<photo_avatar_id>",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"photo_avatar_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/<photo_avatar_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"<photo_avatar_id>"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v2/photo_avatar/upscale",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"id\": \"photo_avatar_id\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v2/photo_avatar/upscale",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"photo_avatar",
+								"upscale"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Video Management",
+			"item": [
+				{
+					"name": "v1/video.list",
+					"request": {
+						"method": "GET",
+						"header": [],
+						"url": {
+							"raw": "{{baseUrl}}/v1/video.list?limit=10",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"video.list"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "10"
+								}
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Streaming API",
+			"item": [
+				{
+					"name": "streaming.new",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"quality\": \"medium\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.new",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.new"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.start",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\"session_id\":\"f8c1f5bd-edbd-11ee-ac61-06daf6be75b4\",\"sdp\":{\"type\":\"offer\",\"sdp\":\"v=0\\r\\no=- 865306769317114273 1711711067 IN IP4 0.0.0.0\\r\\ns=-\\r\\nt=0 0\\r\\na=fingerprint:sha-256 5B:57:56:56:47:37:A2:76:46:2B:FA:72:6D:61:1D:70:98:8A:4B:8D:BD:E9:54:7E:0E:8D:86:7B:13:BD:5B:B3\\r\\na=extmap-allow-mixed\\r\\na=group:BUNDLE 0 1 2\\r\\nm=video 9 UDP/TLS/RTP/SAVPF 96\\r\\nc=IN IP4 0.0.0.0\\r\\na=setup:actpass\\r\\na=mid:0\\r\\na=ice-ufrag:WGLlXrCpTGFDczaD\\r\\na=ice-pwd:ikkYSSwwcEqeapAGiibnhMltrcdcsDPE\\r\\na=rtcp-mux\\r\\na=rtcp-rsize\\r\\na=rtpmap:96 VP8/90000\\r\\na=ssrc:771866534 cname:pion\\r\\na=ssrc:771866534 msid:pion video\\r\\na=ssrc:771866534 mslabel:pion\\r\\na=ssrc:771866534 label:video\\r\\na=msid:pion video\\r\\na=sendonly\\r\\na=candidate:211536166 1 udp 2130706431 192.168.95.148 58919 typ host\\r\\na=candidate:211536166 2 udp 2130706431 192.168.95.148 58919 typ host\\r\\na=candidate:233762139 1 udp 2130706431 172.17.0.1 39783 typ host\\r\\na=candidate:233762139 2 udp 2130706431 172.17.0.1 39783 typ host\\r\\na=candidate:2409875042 1 udp 1694498815 3.145.204.238 33743 typ srflx raddr 0.0.0.0 rport 33743\\r\\na=candidate:2409875042 2 udp 1694498815 3.145.204.238 33743 typ srflx raddr 0.0.0.0 rport 33743\\r\\na=candidate:2409875042 1 udp 1694498815 3.145.204.238 52509 typ srflx raddr 0.0.0.0 rport 52509\\r\\na=candidate:2409875042 2 udp 1694498815 3.145.204.238 52509 typ srflx raddr 0.0.0.0 rport 52509\\r\\na=candidate:2409875042 1 udp 1694498815 3.145.204.238 48068 typ srflx raddr 0.0.0.0 rport 48068\\r\\na=candidate:2409875042 2 udp 1694498815 3.145.204.238 48068 typ srflx raddr 0.0.0.0 rport 48068\\r\\na=candidate:2409875042 1 udp 1694498815 3.145.204.238 39574 typ srflx raddr 0.0.0.0 rport 39574\\r\\na=candidate:2409875042 2 udp 1694498815 3.145.204.238 39574 typ srflx raddr 0.0.0.0 rport 39574\\r\\na=candidate:2409875042 1 udp 1694498815 3.145.204.238 60127 typ srflx raddr 0.0.0.0 rport 60127\\r\\na=candidate:2409875042 2 udp 1694498815 3.145.204.238 60127 typ srflx raddr 0.0.0.0 rport 60127\\r\\na=candidate:551173388 1 udp 16777215 34.203.251.67 55901 typ relay raddr 0.0.0.0 rport 38018\\r\\na=candidate:551173388 2 udp 16777215 34.203.251.67 55901 typ relay raddr 0.0.0.0 rport 38018\\r\\na=candidate:551173388 1 udp 16777215 34.203.251.67 26906 typ relay raddr 192.168.95.148 rport 37276\\r\\na=candidate:551173388 2 udp 16777215 34.203.251.67 26906 typ relay raddr 192.168.95.148 rport 37276\\r\\na=candidate:551173388 1 udp 16777215 34.203.251.67 48909 typ relay raddr 192.168.95.148 rport 51224\\r\\na=candidate:551173388 2 udp 16777215 34.203.251.67 48909 typ relay raddr 192.168.95.148 rport 51224\\r\\na=end-of-candidates\\r\\nm=audio 9 UDP/TLS/RTP/SAVPF 111\\r\\nc=IN IP4 0.0.0.0\\r\\na=setup:actpass\\r\\na=mid:1\\r\\na=ice-ufrag:WGLlXrCpTGFDczaD\\r\\na=ice-pwd:ikkYSSwwcEqeapAGiibnhMltrcdcsDPE\\r\\na=rtcp-mux\\r\\na=rtcp-rsize\\r\\na=rtpmap:111 opus/48000/2\\r\\na=fmtp:111 minptime=10;useinbandfec=1\\r\\na=ssrc:4043859165 cname:pion\\r\\na=ssrc:4043859165 msid:pion audio\\r\\na=ssrc:4043859165 mslabel:pion\\r\\na=ssrc:4043859165 label:audio\\r\\na=msid:pion audio\\r\\na=sendrecv\\r\\nm=application 9 UDP/DTLS/SCTP webrtc-datachannel\\r\\nc=IN IP4 0.0.0.0\\r\\na=setup:actpass\\r\\na=mid:2\\r\\na=sendrecv\\r\\na=sctp-port:5000\\r\\na=ice-ufrag:WGLlXrCpTGFDczaD\\r\\na=ice-pwd:ikkYSSwwcEqeapAGiibnhMltrcdcsDPE\\r\\n\"}}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.start",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.start"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.ice",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Accept",
+								"value": "application/json"
+							},
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"<SESSION_ID>\",\n  \"candidate\": {\n    \"candidate\": \"<CANDIDATE>\",\n    \"sdpMid\": \"<SDP_MID>\",\n    \"sdpMLineIndex\": \"<SDP_MLINE_INDEX>\",\n    \"usernameFragment\": \"<USERNAME_FRAGMENT>\"\n  }\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "https://api.heygen.com/v1/streaming.ice",
+							"protocol": "https",
+							"host": [
+								"api",
+								"heygen",
+								"com"
+							],
+							"path": [
+								"v1",
+								"streaming.ice"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.task",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"<session_id>\",\n  \"text\": \"Hey, there!\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.task",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.task"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.stop",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"<session_id>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.stop",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.stop"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.interrupt",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"session_id\": \"<session_id>\"\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.interrupt",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.interrupt"
+							]
+						},
+						"description": "This is endpoint is to interrupt a speaking avatar. If the avatar is not speaking, it doesn't do anything."
+					},
+					"response": []
+				},
+				{
+					"name": "streaming.create_token",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "content-type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming.create_token",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming.create_token"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "streaming/avatar.list",
+					"protocolProfileBehavior": {
+						"disableBodyPruning": true
+					},
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": ""
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/streaming/avatar.list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"streaming",
+								"avatar.list"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "> **Use these endpoints in an environment that supports WebRTC, such as web browsers.** \n  \n\nHeyGen's **Streaming API** allows developers to seamlessly integrate dynamic digital avatars into their applications for immersive and interactive user experiences. With this API, you can create _virtual assistants, real-time training simulations,_ and more, with a focus on real-time, low-latency communication between _users_ and _avatars_ with power of WebRTC.\n\n**Guide**: [https://docs.heygen.com/docs/streaming-api<br>](https://docs.heygen.com/docs/streaming-api)**Reference**: [https://docs.heygen.com/reference/new-session](https://docs.heygen.com/reference/new-session)"
+		},
+		{
+			"name": "User",
+			"item": [
+				{
+					"name": "v2/user/remaining_quota",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v2/user/remaining_quota",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v2",
+								"user",
+								"remaining_quota"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/user/me",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/user/me",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"user",
+								"me"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Obtain information about your account.\n\n**Reference**: [https://docs.heygen.com/reference/get-remaining-quota-v2](https://docs.heygen.com/reference/get-remaining-quota-v2)"
+		},
+		{
+			"name": "Brand Voice",
+			"item": [
+				{
+					"name": "v1/brand_voice/list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/brand_voice/list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"brand_voice",
+								"list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/brand_voice/<id> (update)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n    \"name\": \"Brand Voice Name\",\n    \"blacklist\": [\n        \"HeyGen\",\n        \"John Smith\"\n    ],\n    \"whitelist\": [\n        [\n            \"AI\",\n            \"artificial intelligence\"\n        ]\n    ],\n    \"tones\": [\n        \"professional\",\n        \"friendly\"\n    ],\n    \"vocabulary\": [\n        [\n            \"HeyGen\",\n            \"Hey-jen\"\n        ]\n    ],\n    \"tone\": \"communicate with clarity and enthusiasm, avoiding overly technical jargon when possible.\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/brand_voice/<brand_voice_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"brand_voice",
+								"<brand_voice_id>"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "Assets",
+			"item": [
+				{
+					"name": "v1/asset (upload)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "image/jpeg"
+							}
+						],
+						"body": {
+							"mode": "file",
+							"file": {
+								"src": ""
+							}
+						},
+						"url": {
+							"raw": "{{uploadUrl}}/v1/asset",
+							"host": [
+								"{{uploadUrl}}"
+							],
+							"path": [
+								"v1",
+								"asset"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Upload an image or video asset to your account.\n\n**Reference**: [https://docs.heygen.com/reference/upload-asset-1](https://docs.heygen.com/reference/upload-asset-1)"
+		},
+		{
+			"name": "Webhooks",
+			"item": [
+				{
+					"name": "v1/webhook/webhook.list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/webhook/webhook.list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"webhook",
+								"webhook.list"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/webhook/endpoint.add",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"url\": \"<url>\",\n  \"events\": []\n}"
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/webhook/endpoint.add",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"webhook",
+								"endpoint.add"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/webhook/endpoint.delete",
+					"request": {
+						"method": "DELETE",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/webhook/endpoint.delete?endpoint_id=<endpoint_id>",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"webhook",
+								"endpoint.delete"
+							],
+							"query": [
+								{
+									"key": "endpoint_id",
+									"value": "<endpoint_id>"
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "v1/webhook/endpoint.list",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/webhook/endpoint.list",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"webhook",
+								"endpoint.list"
+							]
+						}
+					},
+					"response": []
+				}
+			],
+			"description": "Webhook events are how the **HeyGen** notifies your _endpoints_ when a variety of interactions or events happen, including when avatar video processing _succeeds_ or _fails_. Webhook events are sent by HeyGen as POST requests to your webhook endpoint.\n\n**Guide**: [https://docs.heygen.com/docs/using-heygens-webhook-events<br>](https://docs.heygen.com/docs/using-heygens-webhook-events)**Reference**: [https://docs.heygen.com/reference/add-a-webhook-endpoint](https://docs.heygen.com/reference/add-a-webhook-endpoint)"
+		},
+		{
+			"name": "Folders",
+			"item": [
+				{
+					"name": "/v1/folders",
+					"event": [
+						{
+							"listen": "test",
+							"script": {
+								"exec": [
+									"function setNextPageToken() {",
+									"    const jsonData = pm.response.json();",
+									"    if (jsonData.data && jsonData.data.token) {",
+									"        const token = jsonData.data.token;",
+									"        pm.environment.set(\"next_page_token\", token);",
+									"    }",
+									"}",
+									"",
+									"setNextPageToken()"
+								],
+								"type": "text/javascript",
+								"packages": {}
+							}
+						}
+					],
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/folders",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"folders"
+							],
+							"query": [
+								{
+									"key": "limit",
+									"value": "8",
+									"disabled": true
+								},
+								{
+									"key": "parent_id",
+									"value": "12345",
+									"disabled": true
+								},
+								{
+									"key": "name_filter",
+									"value": "test",
+									"disabled": true
+								},
+								{
+									"key": "is_trash",
+									"value": "true",
+									"disabled": true
+								},
+								{
+									"key": "token",
+									"value": "{{next_page_token}}",
+									"disabled": true
+								}
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/v1/folders/create",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"name\",\n  \"project_type\": \"mixed\",\n  \"parent_id\": \"1234\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/folders/create",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"folders",
+								"create"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/v1/folders/<folder_id> (rename)",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"name\": \"new_name\"\n}",
+							"options": {
+								"raw": {
+									"language": "json"
+								}
+							}
+						},
+						"url": {
+							"raw": "{{baseUrl}}/v1/folders/1234",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"folders",
+								"1234"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/v1/folders/<folder_id>/trash",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/folders/1234/trash",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"folders",
+								"1234",
+								"trash"
+							]
+						}
+					},
+					"response": []
+				},
+				{
+					"name": "/v1/folders/<folder_id>/restore",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "accept",
+								"value": "application/json"
+							}
+						],
+						"url": {
+							"raw": "{{baseUrl}}/v1/folders/1234/restore",
+							"host": [
+								"{{baseUrl}}"
+							],
+							"path": [
+								"v1",
+								"folders",
+								"1234",
+								"restore"
+							]
+						}
+					},
+					"response": []
+				}
+			]
+		},
+		{
+			"name": "v1/video_status.get",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/v1/video_status.get?video_id=<video_id>",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"video_status.get"
+					],
+					"query": [
+						{
+							"key": "video_id",
+							"value": "<video_id>"
+						}
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "v1/video_status.get (latest_video_id)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Accept",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/v1/video_status.get?video_id={{latest_video_id}}",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"v1",
+						"video_status.get"
+					],
+					"query": [
+						{
+							"key": "video_id",
+							"value": "{{latest_video_id}}"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"auth": {
+		"type": "apikey",
+		"apikey": [
+			{
+				"key": "value",
+				"value": "{{heygen-api-token}}",
+				"type": "string"
+			},
+			{
+				"key": "key",
+				"value": "X-Api-Key",
+				"type": "string"
+			}
+		]
+	},
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	]
+}
