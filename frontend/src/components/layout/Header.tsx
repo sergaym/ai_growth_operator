@@ -1,16 +1,45 @@
 "use client";
 
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
-import { useAuth } from '@/hooks/useAuth';
 
-export default function Header() {
+// Create a client-side only header component that uses the auth hook
+function AuthenticatedHeader() {
+  // Only import the auth hook on the client
+  const { useAuth } = require('@/hooks/useAuth');
   const { user, logout } = useAuth();
   
   const handleLogout = async () => {
     await logout('/');
   };
+  
+  return (
+    <div>
+      {user.isAuthenticated ? (
+        <button 
+          onClick={handleLogout}
+          className="text-sm text-gray-600 hover:text-gray-900 font-medium"
+        >
+          Sign out
+        </button>
+      ) : (
+        <Link href="/login" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
+          Sign in
+        </Link>
+      )}
+    </div>
+  );
+}
+
+// The main header component
+export default function Header() {
+  // Only use authentication on the client-side
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
   
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
@@ -34,21 +63,13 @@ export default function Header() {
             </div>
           </div>
           
-          {/* Auth actions */}
-          <div>
-            {user.isAuthenticated ? (
-              <button 
-                onClick={handleLogout}
-                className="text-sm text-gray-600 hover:text-gray-900 font-medium"
-              >
-                Sign out
-              </button>
-            ) : (
-              <Link href="/login" className="text-sm text-blue-600 hover:text-blue-700 font-medium">
-                Sign in
-              </Link>
-            )}
-          </div>
+          {/* Auth actions - only rendered after client-side mount */}
+          {isMounted ? (
+            <AuthenticatedHeader />
+          ) : (
+            /* Empty placeholder to avoid layout shift */
+            <div className="h-6 w-16"></div>
+          )}
         </div>
       </div>
     </header>
