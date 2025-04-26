@@ -9,9 +9,20 @@ function AuthStatusSection() {
   // Import the useAuth hook only on the client
   const { useAuth } = require('@/hooks/useAuth');
   const { user, logout } = useAuth();
+  const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
-    await logout('/');
+    setIsLoggingOut(true);
+    
+    try {
+      await logout('/');
+      // Show success message with toast or alert (in a real app)
+      // We'll just use a simple alert here for demonstration
+      alert('Successfully logged out. Redirecting to home page...');
+    } catch (error) {
+      console.error('Logout failed:', error);
+      setIsLoggingOut(false);
+    }
   };
   
   return (
@@ -24,9 +35,14 @@ function AuthStatusSection() {
       
       <button 
         onClick={handleLogout}
-        className="text-sm text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md transition-colors"
+        disabled={isLoggingOut}
+        className={`text-sm font-medium px-4 py-2 rounded-md transition-colors ${
+          isLoggingOut 
+            ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+            : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
+        }`}
       >
-        Sign out
+        {isLoggingOut ? 'Signing out...' : 'Sign out'}
       </button>
     </div>
   );
