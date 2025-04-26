@@ -12,3 +12,9 @@ interface AuthUser {
   isAuthenticated: boolean;
 }
 
+export function useAuth() {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser>({ isAuthenticated: false });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
