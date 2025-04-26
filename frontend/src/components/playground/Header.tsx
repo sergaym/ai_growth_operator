@@ -1,8 +1,37 @@
-import React from 'react';
+"use client";
+
+import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
 
+// Separate client component for auth-related UI
+function LogoutButton() {
+  // Import the useAuth hook only on the client
+  const { useAuth } = require('@/hooks/useAuth');
+  const { logout } = useAuth();
+  
+  const handleLogout = async () => {
+    await logout('/');
+  };
+  
+  return (
+    <button 
+      onClick={handleLogout}
+      className="text-sm text-gray-600 hover:text-gray-900 font-medium bg-gray-100 hover:bg-gray-200 px-4 py-2 rounded-md transition-colors"
+    >
+      Sign out
+    </button>
+  );
+}
+
 export default function PlaygroundHeader() {
+  // Client-side only rendering for auth components
+  const [isMounted, setIsMounted] = useState(false);
+  
+  useEffect(() => {
+    setIsMounted(true);
+  }, []);
+  
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
       <div className="container max-w-4xl mx-auto px-5 md:px-8">
@@ -24,6 +53,9 @@ export default function PlaygroundHeader() {
               </span>
             </div>
           </div>
+          
+          {/* Logout button - only rendered on client side */}
+          {isMounted && <LogoutButton />}
         </div>
       </div>
     </header>
