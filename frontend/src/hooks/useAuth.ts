@@ -18,3 +18,25 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Check if the user is authenticated on mount
+  useEffect(() => {
+    const checkAuth = () => {
+      try {
+        // Check for auth cookie presence using document.cookie
+        // In a real app, you'd validate the token with your backend
+        const hasAuthCookie = document.cookie
+          .split('; ')
+          .some(cookie => cookie.startsWith('auth-token='));
+        
+        setUser({ isAuthenticated: hasAuthCookie });
+      } catch (err) {
+        console.error('Auth check error:', err);
+        setUser({ isAuthenticated: false });
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+  }, []);
+
