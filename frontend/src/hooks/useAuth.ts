@@ -40,3 +40,42 @@ export function useAuth() {
     checkAuth();
   }, []);
 
+  // Login function
+  const login = useCallback(async (email: string, password: string, callbackUrl?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+      
+      // Call the login API
+      const response = await fetch('/api/auth/login', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ email, password }),
+      });
+      
+      const data: AuthResponse = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(data.message || 'Login failed');
+      }
+      
+      // Update user state
+      setUser({ isAuthenticated: true });
+      
+      // Redirect to the callback URL if provided
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      }
+      
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
