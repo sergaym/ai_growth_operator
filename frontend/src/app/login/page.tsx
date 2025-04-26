@@ -108,12 +108,7 @@ export default function LoginPage() {
               )}
             </button>
           </div>
-          
-          <div className="text-sm text-center">
-            <p className="text-gray-600">
-              Use <span className="font-semibold">user@example.com</span> / <span className="font-semibold">password123</span> to log in
-            </p>
-          </div>
+
         </form>
         
         <div className="text-center mt-4">
