@@ -1,12 +1,43 @@
 "use client";
 
-import React, { useState, FormEvent } from 'react';
-import { useSearchParams } from 'next/navigation';
+import React, { Suspense } from 'react';
 import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
-import { useAuth } from '@/hooks/useAuth';
 
-export default function LoginPage() {
+// Create a loading fallback for the Suspense boundary
+function LoginFormSkeleton() {
+  return (
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
+      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+        <div className="flex flex-col items-center">
+          <Logo size="md" showText={true} />
+          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
+            Sign in to your account
+          </h2>
+          <p className="mt-2 text-center text-sm text-gray-600">
+            Access the playground and other protected areas
+          </p>
+        </div>
+        
+        <div className="animate-pulse">
+          <div className="rounded-md shadow-sm -space-y-px">
+            <div className="h-12 bg-gray-200 rounded-t-md"></div>
+            <div className="h-12 bg-gray-200 rounded-b-md"></div>
+          </div>
+          <div className="mt-6 h-12 bg-blue-200 rounded-md"></div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// Extract the form into a separate client component
+function LoginForm() {
+  // Client-side hooks
+  const { useState } = React;
+  const { useSearchParams } = require('next/navigation');
+  const { useAuth } = require('@/hooks/useAuth');
+  
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/playground';
   
@@ -15,7 +46,7 @@ export default function LoginPage() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
   
-  const handleSubmit = async (e: FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
     // Simple validation
@@ -108,7 +139,12 @@ export default function LoginPage() {
               )}
             </button>
           </div>
-
+          
+          <div className="text-sm text-center">
+            <p className="text-gray-600">
+              Use <span className="font-semibold">user@example.com</span> / <span className="font-semibold">password123</span> to log in
+            </p>
+          </div>
         </form>
         
         <div className="text-center mt-4">
@@ -118,5 +154,14 @@ export default function LoginPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+// Main page component with suspense boundary
+export default function LoginPage() {
+  return (
+    <Suspense fallback={<LoginFormSkeleton />}>
+      <LoginForm />
+    </Suspense>
   );
 } 
