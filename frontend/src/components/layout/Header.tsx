@@ -1,8 +1,17 @@
+"use client";
+
 import React from 'react';
 import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
+import { useAuth } from '@/hooks/useAuth';
 
 export default function Header() {
+  const { user, logout } = useAuth();
+  
+  const handleLogout = async () => {
+    await logout('/');
+  };
+  
   return (
     <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
       <div className="container max-w-4xl mx-auto px-5 md:px-8">
