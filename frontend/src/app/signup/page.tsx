@@ -81,3 +81,6 @@ export default function SignupPage() {
           </motion.div>
         </div>
 
+        {/* Progress Bar */}
+        <SignupProgress currentStep={step} totalSteps={4} />
+        
