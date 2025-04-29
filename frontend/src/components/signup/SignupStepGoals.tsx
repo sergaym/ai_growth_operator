@@ -47,3 +47,17 @@ const monthlyBudgets = [
   { id: '1m-5m', label: '$1M - $5M' },
   { id: '5m+', label: '$5M+' }
 ];
+
+export function SignupStepGoals({ data, onUpdate, onNext, onBack }: SignupStepGoalsProps) {
+  const toggleContentType = (type: string) => {
+    const current = data.contentTypes || [];
+    const updated = current.includes(type)
+      ? current.filter(t => t !== type)
+      : [...current, type];
+    onUpdate({ contentTypes: updated });
+  };
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onNext();
+  };
