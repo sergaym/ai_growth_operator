@@ -1,6 +1,7 @@
 "use client";
 import React from 'react';
 import { motion } from 'framer-motion';
+import { CheckIcon } from 'lucide-react';
 
 interface SignupProgressProps {
   currentStep: number;
@@ -12,7 +13,7 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
     <div className="max-w-2xl mx-auto">
       <div className="relative">
         {/* Background bar */}
-        <div className="h-2 bg-white/10 rounded-full" />
+        <div className="h-1 bg-zinc-800 rounded-full" />
         
         {/* Progress bar */}
         <motion.div
