@@ -73,19 +73,31 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
       </div>
       
       {/* Step labels */}
-      <div className="flex justify-between mt-6 px-2">
-        <div className="text-center flex-1">
-          <span className="text-sm font-medium text-white/60">Profile</span>
-        </div>
-        <div className="text-center flex-1">
-          <span className="text-sm font-medium text-white/60">Company</span>
-        </div>
-        <div className="text-center flex-1">
-          <span className="text-sm font-medium text-white/60">Goals</span>
-        </div>
-        <div className="text-center flex-1">
-          <span className="text-sm font-medium text-white/60">Complete</span>
-        </div>
+      <div className="flex justify-between mt-8 px-1">
+        {['Profile', 'Company', 'Goals', 'Complete'].map((label, index) => {
+          const stepNumber = index + 1;
+          const isCompleted = stepNumber <= currentStep;
+          const isCurrent = stepNumber === currentStep;
+          
+          return (
+            <div key={label} className="text-center flex-1">
+              <motion.span
+                className={`text-sm font-medium
+                  ${isCompleted ? 'text-white' : 'text-zinc-500'}
+                  ${isCurrent ? 'font-semibold' : ''}
+                `}
+                initial={false}
+                animate={{
+                  color: isCompleted ? '#ffffff' : '#71717a',
+                  scale: isCurrent ? 1.05 : 1
+                }}
+                transition={{ duration: 0.2 }}
+              >
+                {label}
+              </motion.span>
+            </div>
+          );
+        })}
       </div>
     </div>
   );
