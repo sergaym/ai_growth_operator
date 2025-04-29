@@ -7,13 +7,9 @@ import { PageBackground } from "@/components/ui/PageBackground";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#f8f9fa] text-[#2d3748] flex items-center justify-center">
-      {/* Background elements */}
-      <div className="fixed inset-0 z-[-1] pointer-events-none">
-        <div className="absolute inset-0 bg-noise opacity-[0.03] mix-blend-overlay"></div>
-        <div className="absolute inset-0 bg-gradient-radial from-blue-50 via-transparent to-transparent opacity-60"></div>
-        <div className="absolute bottom-0 left-0 right-0 h-[150px] bg-gradient-to-t from-blue-50/50 to-transparent"></div>
-      </div>
+    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden">
+      {/* Background component */}
+      <PageBackground />
       
       <div className="container max-w-md mx-auto px-6 py-12 text-center">
         <motion.div
