@@ -48,3 +48,42 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
         </p>
       </motion.div>
 
+      {/* Next Steps */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.6 }}
+        className="bg-white/5 rounded-2xl p-8 space-y-6 backdrop-blur-sm border border-white/10"
+      >
+        <h3 className="text-xl font-semibold text-white">Your next steps:</h3>
+        <div className="grid gap-4 text-left">
+          {[
+            {
+              title: "Complete Your Profile",
+              description: "Add your profile picture and additional details to personalize your experience."
+            },
+            {
+              title: "Create Your First Avatar",
+              description: "Start by creating your first AI avatar to represent your brand."
+            },
+            {
+              title: "Explore Templates",
+              description: "Browse our collection of pre-made templates to kickstart your content creation."
+            }
+          ].map((step, index) => (
+            <div
+              key={index}
+              className="flex items-start gap-4 p-4 rounded-xl bg-white/5 border border-white/10"
+            >
+              <div className="w-8 h-8 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center flex-shrink-0">
+                <span className="text-white font-medium">{index + 1}</span>
+              </div>
+              <div>
+                <h4 className="font-medium text-white">{step.title}</h4>
+                <p className="text-sm text-white/70">{step.description}</p>
+              </div>
+            </div>
+          ))}
+        </div>
+      </motion.div>
+
