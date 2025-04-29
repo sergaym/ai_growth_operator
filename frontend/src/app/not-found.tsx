@@ -19,9 +19,9 @@ export default function NotFound() {
           className="relative"
         >
           {/* Logo */}
-          <div className="mx-auto mb-6 relative w-16 h-16">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-tr from-blue-500 to-cyan-400"></div>
-            <div className="absolute inset-[4px] bg-white rounded-xl flex items-center justify-center text-blue-600 font-bold text-2xl">
+          <div className="mx-auto mb-6 relative w-20 h-20">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500 to-amber-500"></div>
+            <div className="absolute inset-[4px] bg-[#030712] rounded-xl flex items-center justify-center text-white font-bold text-3xl">
               404
             </div>
           </div>
