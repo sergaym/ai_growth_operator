@@ -21,3 +21,12 @@ const companySizes = [
   { id: '51-500', label: '51-500' },
   { id: '500+', label: '500+' }
 ];
+
+const industries = [
+  { id: 'ecommerce', label: 'E-commerce', icon: '🛍️' },
+  { id: 'saas', label: 'SaaS', icon: '💻' },
+  { id: 'agency', label: 'Marketing Agency', icon: '🎯' },
+  { id: 'fintech', label: 'Fintech', icon: '💳' },
+  { id: 'education', label: 'Education', icon: '📚' },
+  { id: 'other', label: 'Other', icon: '✨' }
+];
