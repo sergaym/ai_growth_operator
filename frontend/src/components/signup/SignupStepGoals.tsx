@@ -25,3 +25,12 @@ const goals = [
   { id: 'other', label: 'Other', icon: '✨' }
 ];
 
+const contentTypes = [
+  { id: 'product-demos', label: 'Product Demos', icon: '🎮' },
+  { id: 'testimonials', label: 'Testimonials', icon: '🗣️' },
+  { id: 'educational', label: 'Educational Content', icon: '📚' },
+  { id: 'ads', label: 'Social Ads', icon: '📢' },
+  { id: 'explainers', label: 'Explainer Videos', icon: '🎬' },
+  { id: 'social', label: 'Social Media Content', icon: '📱' }
+];
+
