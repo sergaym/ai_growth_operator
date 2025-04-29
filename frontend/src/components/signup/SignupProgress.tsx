@@ -17,7 +17,7 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
         
         {/* Progress bar */}
         <motion.div
-          className="absolute top-0 left-0 h-2 bg-gradient-to-r from-red-500 to-amber-500 rounded-full"
+          className="absolute top-0 left-0 h-1 bg-gradient-to-r from-red-500 to-amber-500 rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -26,16 +26,14 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
         {/* Step markers */}
         <div className="absolute top-0 left-0 w-full flex justify-between transform -translate-y-1/2">
           {Array.from({ length: totalSteps }).map((_, index) => {
-            const isCompleted = index + 1 <= currentStep;
-            const isCurrent = index + 1 === currentStep;
+            const stepNumber = index + 1;
+            const isCompleted = stepNumber <= currentStep;
+            const isCurrent = stepNumber === currentStep;
             
             return (
               <motion.div
                 key={index}
-                className={`w-8 h-8 rounded-full flex items-center justify-center text-sm font-medium
-                  ${isCompleted ? 'bg-gradient-to-r from-red-500 to-amber-500' : 'bg-white/10'}
-                  ${isCurrent ? 'ring-4 ring-red-500/20' : ''}
-                `}
+                className={`relative ${isCompleted ? 'z-20' : 'z-10'}`}
                 initial={{ scale: 0.8, opacity: 0 }}
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
