@@ -61,3 +61,38 @@ export function SignupStepGoals({ data, onUpdate, onNext, onBack }: SignupStepGo
     e.preventDefault();
     onNext();
   };
+
+  return (
+    <motion.div
+      initial={{ opacity: 0, x: 20 }}
+      animate={{ opacity: 1, x: 0 }}
+      exit={{ opacity: 0, x: -20 }}
+      transition={{ duration: 0.3 }}
+    >
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Primary Goal */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            What's your primary goal with AI-generated content?
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {goals.map((goal) => (
+              <button
+                key={goal.id}
+                type="button"
+                onClick={() => onUpdate({ primaryGoal: goal.id })}
+                className={`flex items-center p-4 rounded-xl border transition-all ${
+                  data.primaryGoal === goal.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-2xl mr-3">{goal.icon}</span>
+                <span className="text-sm font-medium text-white">
+                  {goal.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
