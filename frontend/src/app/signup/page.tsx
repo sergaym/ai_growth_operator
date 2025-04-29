@@ -57,3 +57,27 @@ export default function SignupPage() {
       subtitle: "Review your information and get started"
     }
   ];
+
+  return (
+    <div className="min-h-screen bg-[#030712] text-white overflow-hidden">
+      <PageBackground />
+      
+      <div className="container max-w-6xl mx-auto px-4 py-8 relative z-10">
+        {/* Header */}
+        <div className="text-center mb-12">
+          <Logo size="md" showText={true} />
+          
+          <motion.div 
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="mt-8"
+          >
+            <h1 className="text-3xl font-bold mb-2">
+              {steps[step - 1].title}
+            </h1>
+            <p className="text-zinc-400">
+              {steps[step - 1].subtitle}
+            </p>
+          </motion.div>
+        </div>
+
