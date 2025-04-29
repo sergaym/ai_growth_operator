@@ -38,15 +38,34 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
                 animate={{ scale: 1, opacity: 1 }}
                 transition={{ delay: index * 0.1 }}
               >
-                {isCompleted ? (
-                  <svg className="w-4 h-4 text-white" viewBox="0 0 20 20" fill="currentColor">
-                    <path fillRule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clipRule="evenodd" />
-                  </svg>
-                ) : (
-                  <span className={`${isCompleted ? 'text-white' : 'text-white/60'}`}>
-                    {index + 1}
-                  </span>
-                )}
+                <motion.div
+                  className={`w-10 h-10 rounded-full flex items-center justify-center
+                    ${isCompleted 
+                      ? 'bg-gradient-to-r from-red-500 to-amber-500' 
+                      : 'bg-zinc-800'
+                    }
+                    ${isCurrent 
+                      ? 'ring-4 ring-red-500/20' 
+                      : ''
+                    }
+                  `}
+                  initial={false}
+                  animate={{
+                    scale: isCurrent ? 1.1 : 1,
+                    background: isCompleted 
+                      ? 'linear-gradient(to right, rgb(239, 68, 68), rgb(245, 158, 11))' 
+                      : '#27272a'
+                  }}
+                  transition={{ duration: 0.2 }}
+                >
+                  {isCompleted ? (
+                    <CheckIcon className="w-5 h-5 text-white" />
+                  ) : (
+                    <span className={`text-sm font-semibold ${isCompleted ? 'text-white' : 'text-zinc-500'}`}>
+                      {stepNumber}
+                    </span>
+                  )}
+                </motion.div>
               </motion.div>
             );
           })}
