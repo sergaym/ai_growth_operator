@@ -42,14 +42,6 @@ export default function NotFound() {
                 Return to Home
               </Button>
             </Link>
-            
-            <Link href="/start-playing" className="relative block">
-              <Button 
-                className="w-full border border-white/10 hover:bg-white/[0.1] transition-all text-white"
-              >
-                Start Playing
-              </Button>
-            </Link>
           </div>
           
           {/* Decorative elements */}
