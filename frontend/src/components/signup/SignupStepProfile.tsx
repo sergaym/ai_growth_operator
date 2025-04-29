@@ -68,3 +68,17 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
         </div>
 
         {/* Email field */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2">
+            Work email
+          </label>
+          <input
+            type="email"
+            required
+            value={data.email}
+            onChange={(e) => onUpdate({ email: e.target.value })}
+            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+            placeholder="name@company.com"
+          />
+        </div>
+
