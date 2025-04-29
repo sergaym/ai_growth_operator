@@ -26,7 +26,7 @@ export default function SignupPage() {
     
     // Goals & Usage
     primaryGoal: '',
-    contentTypes: [],
+    contentTypes: [] as string[],
     monthlyVideos: '',
     monthlyBudget: '',
     aiExperience: '',
@@ -117,7 +117,7 @@ export default function SignupPage() {
               <SignupStepComplete
                 key="step4"
                 data={formData}
-                onBack={prevStep}
+                onFinish={nextStep}
               />
             )}
           </AnimatePresence>
