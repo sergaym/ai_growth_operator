@@ -30,17 +30,15 @@ export default function NotFound() {
             Page Not Found
           </h1>
           
-          <p className="text-slate-600 mb-8">
+          <p className="text-zinc-400 mb-8">
             The page you're looking for doesn't exist or has been moved.
           </p>
           
-          <div className="relative">
-            <div className="absolute -inset-1 bg-gradient-to-r from-blue-200 via-cyan-200 to-blue-200 rounded-lg blur-md"></div>
+          <div className="flex flex-col gap-4">
             <Link href="/" className="relative block">
-              <Button className="w-full bg-white border border-slate-200 text-blue-600 hover:bg-slate-50 transition-colors shadow-sm">
-                <svg className="w-5 h-5 mr-2" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                  <path d="M5 12H19M5 12L11 18M5 12L11 6" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                </svg>
+              <Button 
+                className="w-full bg-gradient-to-r from-red-500 to-amber-500 text-white hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
+              >
                 Return to Home
               </Button>
             </Link>
