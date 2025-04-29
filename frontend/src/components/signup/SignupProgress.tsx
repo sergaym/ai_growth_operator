@@ -53,3 +53,22 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
           })}
         </div>
       </div>
+      
+      {/* Step labels */}
+      <div className="flex justify-between mt-6 px-2">
+        <div className="text-center flex-1">
+          <span className="text-sm font-medium text-white/60">Profile</span>
+        </div>
+        <div className="text-center flex-1">
+          <span className="text-sm font-medium text-white/60">Company</span>
+        </div>
+        <div className="text-center flex-1">
+          <span className="text-sm font-medium text-white/60">Goals</span>
+        </div>
+        <div className="text-center flex-1">
+          <span className="text-sm font-medium text-white/60">Complete</span>
+        </div>
+      </div>
+    </div>
+  );
+} 
