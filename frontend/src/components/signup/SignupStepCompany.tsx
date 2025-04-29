@@ -14,3 +14,10 @@ interface SignupStepCompanyProps {
   onNext: () => void;
   onBack: () => void;
 }
+
+const companySizes = [
+  { id: '1-5', label: '1-5' },
+  { id: '6-50', label: '6-50' },
+  { id: '51-500', label: '51-500' },
+  { id: '500+', label: '500+' }
+];
