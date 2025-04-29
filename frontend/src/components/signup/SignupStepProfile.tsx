@@ -110,10 +110,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
 
         {/* Submit button */}
         <div className="flex justify-end">
-          <Button
-            type="submit"
-            className="px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
-          >
+          <Button className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
             Continue
           </Button>
         </div>
