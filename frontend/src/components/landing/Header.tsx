@@ -34,7 +34,7 @@ export function Header() {
 
           {/* Navigation Buttons */}
           <div className="flex items-center gap-4">
-            <Link href="/become-actor">
+            <Link href="/login?callbackUrl=/become-actor">
               <Button 
                 variant="outline" 
                 className="border-white/20 bg-white/[0.05] text-white hover:bg-white/10 hover:text-white"
@@ -42,10 +42,9 @@ export function Header() {
                 Become Our Actor
               </Button>
             </Link>
-            <Link href="/start-playing">
+            <Link href="/login?callbackUrl=/playground">
               <Button 
-                variant="outline" 
-                className="border-white/20 bg-white/[0.05] text-white hover:bg-white/10 hover:text-white"
+                className="bg-gradient-to-r from-red-500 to-amber-500 text-white hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
               >
                 Start Playing
               </Button>
