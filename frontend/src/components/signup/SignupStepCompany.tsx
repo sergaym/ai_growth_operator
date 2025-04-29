@@ -30,3 +30,9 @@ const industries = [
   { id: 'education', label: 'Education', icon: '📚' },
   { id: 'other', label: 'Other', icon: '✨' }
 ];
+
+export function SignupStepCompany({ data, onUpdate, onNext, onBack }: SignupStepCompanyProps) {
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    onNext();
+  };
