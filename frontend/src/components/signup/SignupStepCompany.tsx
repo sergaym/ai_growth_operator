@@ -99,3 +99,29 @@ export function SignupStepCompany({ data, onUpdate, onNext, onBack }: SignupStep
             ))}
           </div>
         </div>
+
+        {/* Industry */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            Industry
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {industries.map((industry) => (
+              <button
+                key={industry.id}
+                type="button"
+                onClick={() => onUpdate({ industry: industry.id })}
+                className={`flex items-center p-4 rounded-xl border transition-all ${
+                  data.industry === industry.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-2xl mr-3">{industry.icon}</span>
+                <span className="text-sm font-medium text-white">
+                  {industry.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
