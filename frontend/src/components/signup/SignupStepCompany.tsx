@@ -44,3 +44,58 @@ export function SignupStepCompany({ data, onUpdate, onNext, onBack }: SignupStep
       exit={{ opacity: 0, x: -20 }}
       transition={{ duration: 0.3 }}
     >
+      <form onSubmit={handleSubmit} className="space-y-8">
+        {/* Company name and website */}
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Company name
+            </label>
+            <input
+              type="text"
+              required
+              value={data.companyName}
+              onChange={(e) => onUpdate({ companyName: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+              placeholder="Enter company name"
+            />
+          </div>
+          <div>
+            <label className="block text-sm font-medium text-white mb-2">
+              Website
+            </label>
+            <input
+              type="url"
+              required
+              value={data.website}
+              onChange={(e) => onUpdate({ website: e.target.value })}
+              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+              placeholder="https://"
+            />
+          </div>
+        </div>
+
+        {/* Company size */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            Company size
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {companySizes.map((size) => (
+              <button
+                key={size.id}
+                type="button"
+                onClick={() => onUpdate({ companySize: size.id })}
+                className={`p-4 rounded-xl border text-center transition-all ${
+                  data.companySize === size.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-sm font-medium text-white">
+                  {size.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
