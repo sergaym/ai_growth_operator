@@ -87,3 +87,19 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
         </div>
       </motion.div>
 
+      {/* Action Button */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.8 }}
+      >
+        <Button
+          onClick={onFinish}
+          className="px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] text-lg"
+        >
+          Go to Dashboard
+        </Button>
+      </motion.div>
+    </motion.div>
+  );
+} 
