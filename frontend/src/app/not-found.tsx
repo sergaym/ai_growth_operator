@@ -55,12 +55,15 @@ export default function NotFound() {
           {/* Decorative elements */}
           <div className="mt-12 flex justify-center space-x-1">
             {[...Array(5)].map((_, i) => (
-              <div 
+              <motion.div 
                 key={i}
+                initial={{ opacity: 0, y: 20 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.5, delay: i * 0.1 }}
                 className={`w-2 h-2 rounded-full ${
-                  i === 2 ? 'bg-blue-500' : 'bg-slate-300'
+                  i === 2 ? 'bg-red-500' : 'bg-zinc-600'
                 }`}
-              ></div>
+              ></motion.div>
             ))}
           </div>
         </motion.div>
