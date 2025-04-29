@@ -121,3 +121,8 @@ export default function SignupPage() {
               />
             )}
           </AnimatePresence>
+        </div>
+      </div>
+    </div>
+  );
+} 
