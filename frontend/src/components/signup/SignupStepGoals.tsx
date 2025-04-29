@@ -147,3 +147,48 @@ export function SignupStepGoals({ data, onUpdate, onNext, onBack }: SignupStepGo
           </div>
         </div>
 
+        {/* Monthly Budget */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            What's your monthly marketing budget?
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {monthlyBudgets.map((budget) => (
+              <button
+                key={budget.id}
+                type="button"
+                onClick={() => onUpdate({ monthlyBudget: budget.id })}
+                className={`p-4 rounded-xl border text-center transition-all ${
+                  data.monthlyBudget === budget.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-sm font-medium text-white">
+                  {budget.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Navigation buttons */}
+        <div className="flex justify-between">
+          <Button
+            type="button"
+            onClick={onBack}
+            className="px-6 py-3 rounded-xl border border-white/10 text-white font-medium hover:bg-white/5 transition-all"
+          >
+            Back
+          </Button>
+          <Button
+            type="submit"
+            className="px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
+          >
+            Continue
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+} 
