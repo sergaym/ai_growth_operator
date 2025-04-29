@@ -34,3 +34,16 @@ const contentTypes = [
   { id: 'social', label: 'Social Media Content', icon: '📱' }
 ];
 
+const monthlyVideos = [
+  { id: '0-20', label: '0-20' },
+  { id: '21-50', label: '21-50' },
+  { id: '51-500', label: '51-500' },
+  { id: '500+', label: '500+' }
+];
+
+const monthlyBudgets = [
+  { id: '0-99', label: '0 - $99K' },
+  { id: '100-1m', label: '$100K - $1M' },
+  { id: '1m-5m', label: '$1M - $5M' },
+  { id: '5m+', label: '$5M+' }
+];
