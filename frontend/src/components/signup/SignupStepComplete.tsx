@@ -32,3 +32,19 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
           <CheckCircle className="w-12 h-12 text-white" />
         </div>
       </motion.div>
+
+      {/* Welcome Message */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ delay: 0.4 }}
+        className="space-y-4"
+      >
+        <h2 className="text-3xl font-bold text-white">
+          Welcome aboard, {data.firstName}!
+        </h2>
+        <p className="text-lg text-white/80">
+          {data.companyName} is now ready to start creating amazing AI-generated content
+        </p>
+      </motion.div>
+
