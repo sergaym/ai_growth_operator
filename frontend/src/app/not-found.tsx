@@ -11,7 +11,7 @@ export default function NotFound() {
       {/* Background component */}
       <PageBackground />
       
-      <div className="container max-w-md mx-auto px-6 py-12 text-center">
+      <div className="container max-w-md mx-auto px-6 py-12 text-center relative z-10">
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
@@ -26,7 +26,7 @@ export default function NotFound() {
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold mb-4 tracking-tight text-slate-800">
+          <h1 className="text-4xl font-bold mb-4 tracking-tight text-white">
             Page Not Found
           </h1>
           
