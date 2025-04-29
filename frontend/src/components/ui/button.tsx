@@ -21,10 +21,20 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
             "bg-secondary text-secondary-foreground hover:bg-secondary/80": variant === "secondary",
             "hover:bg-accent hover:text-accent-foreground": variant === "ghost",
             "text-primary underline-offset-4 hover:underline": variant === "link",
-            "h-10 px-4 py-2": size === "default",
-            "h-9 rounded-md px-3": size === "sm",
-            "h-11 rounded-md px-8": size === "lg",
-            "h-10 w-10": size === "icon",
+            
+            // Custom gradient variants
+            "text-white shadow-lg transform-gpu": variant === "gradient",
+            "border border-white/20 bg-white/[0.05] text-white hover:bg-white/10": variant === "gradient-outline",
+            
+            // Gradient colors
+            "bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 hover:shadow-red-500/20": variant === "gradient" && gradient === "red-amber",
+            "bg-gradient-to-r from-purple-600 to-blue-600 hover:from-purple-700 hover:to-blue-700 hover:shadow-purple-500/20": variant === "gradient" && gradient === "purple-blue",
+            
+            // Sizes with consistent dimensions
+            "h-10 px-4 py-2 min-w-[100px]": size === "default",
+            "h-9 rounded-md px-3 min-w-[90px]": size === "sm",
+            "h-11 rounded-md px-8 min-w-[120px]": size === "lg",
+            "h-10 w-10 p-0": size === "icon",
           },
           className
         )}
