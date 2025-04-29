@@ -39,3 +39,21 @@ export default function SignupPage() {
   const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
+  const steps = [
+    {
+      title: "Tell us about yourself",
+      subtitle: "We'll personalize your experience based on your role and needs"
+    },
+    {
+      title: "Company details",
+      subtitle: "Help us understand your business context"
+    },
+    {
+      title: "Your AI content goals",
+      subtitle: "We'll customize our AI to match your content strategy"
+    },
+    {
+      title: "Almost there!",
+      subtitle: "Review your information and get started"
+    }
+  ];
