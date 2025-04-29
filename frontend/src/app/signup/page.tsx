@@ -84,3 +84,40 @@ export default function SignupPage() {
         {/* Progress Bar */}
         <SignupProgress currentStep={step} totalSteps={4} />
         
+        {/* Form Steps */}
+        <div className="max-w-2xl mx-auto mt-12">
+          <AnimatePresence mode="wait">
+            {step === 1 && (
+              <SignupStepProfile
+                key="step1"
+                data={formData}
+                onUpdate={updateFormData}
+                onNext={nextStep}
+              />
+            )}
+            {step === 2 && (
+              <SignupStepCompany
+                key="step2"
+                data={formData}
+                onUpdate={updateFormData}
+                onNext={nextStep}
+                onBack={prevStep}
+              />
+            )}
+            {step === 3 && (
+              <SignupStepGoals
+                key="step3"
+                data={formData}
+                onUpdate={updateFormData}
+                onNext={nextStep}
+                onBack={prevStep}
+              />
+            )}
+            {step === 4 && (
+              <SignupStepComplete
+                key="step4"
+                data={formData}
+                onBack={prevStep}
+              />
+            )}
+          </AnimatePresence>
