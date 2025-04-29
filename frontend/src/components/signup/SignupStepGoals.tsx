@@ -96,3 +96,29 @@ export function SignupStepGoals({ data, onUpdate, onNext, onBack }: SignupStepGo
           </div>
         </div>
 
+        {/* Content Types */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            What type of content do you plan to create? (Select all that apply)
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {contentTypes.map((type) => (
+              <button
+                key={type.id}
+                type="button"
+                onClick={() => toggleContentType(type.id)}
+                className={`flex items-center p-4 rounded-xl border transition-all ${
+                  data.contentTypes?.includes(type.id)
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-2xl mr-3">{type.icon}</span>
+                <span className="text-sm font-medium text-white">
+                  {type.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
