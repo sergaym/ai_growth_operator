@@ -82,3 +82,42 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
           />
         </div>
 
+        {/* Role selection */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            What best describes your role?
+          </label>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            {roles.map((role) => (
+              <button
+                key={role.id}
+                type="button"
+                onClick={() => onUpdate({ role: role.id })}
+                className={`flex items-center p-4 rounded-xl border transition-all ${
+                  data.role === role.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-2xl mr-3">{role.icon}</span>
+                <span className="text-sm font-medium text-white">
+                  {role.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
+        {/* Submit button */}
+        <div className="flex justify-end">
+          <Button
+            type="submit"
+            className="px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
+          >
+            Continue
+          </Button>
+        </div>
+      </form>
+    </motion.div>
+  );
+} 
