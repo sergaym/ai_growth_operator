@@ -32,21 +32,23 @@ export function Header() {
             <Logo size={isScrolled ? "sm" : "md"} showText={false} />
           </Link>
 
-          {/* Playground Button using Button component */}
-          <Link href="/playground">
-            <Button 
-              variant="outline" 
-              className="border-white/20 bg-white/[0.05] text-white hover:bg-white/10 hover:text-white flex items-center gap-2"
-            >
-              <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                <path d="M21 7V17C21 20 19.5 22 16 22H8C4.5 22 3 20 3 17V7C3 4 4.5 2 8 2H16C19.5 2 21 4 21 7Z" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M14.5 4.5V6.5C14.5 7.6 15.4 8.5 16.5 8.5H18.5" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 13H12" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-                <path d="M8 17H16" stroke="currentColor" strokeWidth="1.5" strokeMiterlimit="10" strokeLinecap="round" strokeLinejoin="round"/>
-              </svg>
-              Playground
-            </Button>
-          </Link>
+          {/* Navigation Buttons */}
+          <div className="flex items-center gap-4">
+            <Link href="/login?callbackUrl=/become-actor" className="w-auto">
+              <Button 
+                className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white"
+              >
+                Become Our Actor
+              </Button>
+            </Link>
+            <Link href="/login?callbackUrl=/playground" className="w-auto">
+              <Button 
+                className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
+              >
+                Start Playing
+              </Button>
+            </Link>
+          </div>
         </div>
       </div>
     </header>
