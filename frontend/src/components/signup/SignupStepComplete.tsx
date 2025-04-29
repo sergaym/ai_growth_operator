@@ -21,3 +21,14 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
       transition={{ duration: 0.5 }}
       className="text-center space-y-8 max-w-2xl mx-auto py-8"
     >
+      {/* Success Icon */}
+      <motion.div
+        initial={{ scale: 0 }}
+        animate={{ scale: 1 }}
+        transition={{ delay: 0.2, type: "spring", stiffness: 200 }}
+        className="flex justify-center"
+      >
+        <div className="w-24 h-24 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center">
+          <CheckCircle className="w-12 h-12 text-white" />
+        </div>
+      </motion.div>
