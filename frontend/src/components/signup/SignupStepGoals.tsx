@@ -15,3 +15,13 @@ interface SignupStepGoalsProps {
   onNext: () => void;
   onBack: () => void;
 }
+
+const goals = [
+  { id: 'brand-awareness', label: 'Brand Awareness', icon: '🎯' },
+  { id: 'lead-generation', label: 'Lead Generation', icon: '🌱' },
+  { id: 'sales', label: 'Sales & Conversion', icon: '💰' },
+  { id: 'engagement', label: 'Community Engagement', icon: '🤝' },
+  { id: 'education', label: 'Product Education', icon: '📚' },
+  { id: 'other', label: 'Other', icon: '✨' }
+];
+
