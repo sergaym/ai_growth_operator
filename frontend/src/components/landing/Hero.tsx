@@ -81,7 +81,7 @@ export function Hero() {
                 href="#features"
                 className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white flex items-center justify-center w-full sm:w-auto"
               >
-                Learn More
+                Become Our Actor
               </Link>
             </motion.div>
           </motion.div>
