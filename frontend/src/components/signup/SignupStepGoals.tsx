@@ -122,3 +122,28 @@ export function SignupStepGoals({ data, onUpdate, onNext, onBack }: SignupStepGo
           </div>
         </div>
 
+        {/* Monthly Videos */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-4">
+            How many videos do you plan to create monthly?
+          </label>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+            {monthlyVideos.map((option) => (
+              <button
+                key={option.id}
+                type="button"
+                onClick={() => onUpdate({ monthlyVideos: option.id })}
+                className={`p-4 rounded-xl border text-center transition-all ${
+                  data.monthlyVideos === option.id
+                    ? 'border-red-500 bg-red-500/10'
+                    : 'border-white/10 bg-white/5 hover:bg-white/10'
+                }`}
+              >
+                <span className="text-sm font-medium text-white">
+                  {option.label}
+                </span>
+              </button>
+            ))}
+          </div>
+        </div>
+
