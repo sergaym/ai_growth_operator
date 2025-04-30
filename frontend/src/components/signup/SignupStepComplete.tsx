@@ -14,6 +14,13 @@ interface SignupStepCompleteProps {
 }
 
 export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) {
+  const router = useRouter();
+
+  const handleContinue = () => {
+    onFinish();
+    router.push('/signup/subscription');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
