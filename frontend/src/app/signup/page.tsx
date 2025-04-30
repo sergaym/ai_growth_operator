@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
 import { Logo } from "@/components/ui/Logo";
@@ -10,7 +10,7 @@ import { SignupStepGoals } from "@/components/signup/SignupStepGoals";
 import { SignupStepComplete } from "@/components/signup/SignupStepComplete";
 import { SignupProgress } from "@/components/signup/SignupProgress";
 
-export default function SignupPage() {
+function SignupPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
@@ -160,5 +160,13 @@ export default function SignupPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function SignupPage() {
+  return (
+    <Suspense fallback={<div className="min-h-screen bg-[#030712] flex items-center justify-center text-white">Loading...</div>}>
+      <SignupPageContent />
+    </Suspense>
   );
 } 
