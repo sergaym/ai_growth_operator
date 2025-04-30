@@ -1,12 +1,17 @@
 "use client";
 import React from "react";
+import { useParams } from "next/navigation";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { GestureChat } from "@/components/chat/GestureChat";
 
-export default function ProjectPage({ params }: { params: { projectId: string } }) {
+export default function ProjectPage() {
+  // Use the useParams hook to get the projectId
+  const params = useParams();
+  const projectId = params.projectId as string;
+
   return (
     <PlaygroundLayout
-      title={`Project ${params.projectId}`}
+      title={`Project ${projectId}`}
       description="Create your video scene"
     >
       <div className="fixed inset-0 top-16 flex flex-col">
