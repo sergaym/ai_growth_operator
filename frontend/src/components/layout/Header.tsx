@@ -3,6 +3,8 @@
 import React, { useState, useEffect } from 'react';
 import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
+import { motion, AnimatePresence } from 'framer-motion';
+import { Menu, X, ChevronRight } from 'lucide-react';
 
 // Create a client-side only header component that uses the auth hook
 function AuthenticatedHeader() {
