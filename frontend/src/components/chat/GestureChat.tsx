@@ -7,10 +7,15 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SendButton } from './SendButton';
+import { Users, UserPlus } from 'lucide-react';
+
+type MessageType = 'gesture' | 'talking';
 
 export function GestureChat() {
   const [inputValue, setInputValue] = useState('');
   const [gesture, setGesture] = useState('');
+  const [messageType, setMessageType] = useState<MessageType>('gesture');
+  const [actor, setActor] = useState('');
 
   const handleSend = () => {
     if (inputValue.trim()) {
