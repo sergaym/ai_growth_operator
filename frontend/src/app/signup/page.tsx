@@ -57,6 +57,23 @@ export default function SignupPage() {
   const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
+  const handleSignupComplete = async () => {
+    try {
+      // Here you would typically make an API call to create the user
+      // For now, we'll simulate success
+      
+      // Get the stored callback URL or default to playground
+      const callbackUrl = sessionStorage.getItem('signupCallbackUrl') || '/playground';
+      sessionStorage.removeItem('signupCallbackUrl'); // Clean up
+      
+      // Redirect to the callback URL
+      router.push(callbackUrl);
+    } catch (error) {
+      console.error('Signup error:', error);
+      // Handle error appropriately
+    }
+  };
+
   const steps = [
     {
       title: "Tell us about yourself",
