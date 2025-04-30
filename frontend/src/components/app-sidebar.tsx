@@ -4,12 +4,8 @@ import * as React from "react"
 import {
   Bot,
   Command,
-  Frame,
   LifeBuoy,
-  Map,
-  PieChart,
   Send,
-  Settings2,
   SquareTerminal,
 } from "lucide-react"
 
