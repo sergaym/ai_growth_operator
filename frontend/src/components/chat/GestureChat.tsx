@@ -21,7 +21,7 @@ export function GestureChat() {
   const handleSend = () => {
     if (inputValue.trim()) {
       // Handle send message here
-      console.log('Sending:', { gesture, message: inputValue });
+      console.log('Sending:', { type: messageType, speechType, gesture, message: inputValue });
       setInputValue('');
     }
   };
@@ -87,6 +87,58 @@ export function GestureChat() {
         </div>
 
         {/* Bottom Actions */}
+        <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100 bg-zinc-50/50">
+          <div className="flex items-center gap-2">
+            {messageType === 'talking' ? (
+              <>
+                <Select value={speechType} onValueChange={(value) => setSpeechType(value as SpeechType)}>
+                  <SelectTrigger className={selectTriggerStyles}>
+                    <SelectValue>
+                      {speechType === 'tts' ? (
+                        <span className="flex items-center gap-1.5">
+                          <Volume2 className="h-4 w-4" />
+                          Text to Speech
+                        </span>
+                      ) : (
+                        <span className="flex items-center gap-1.5">
+                          <Mic className="h-4 w-4" />
+                          Speech to Speech
+                        </span>
+                      )}
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="tts">
+                      <span className="flex items-center gap-1.5">
+                        <Volume2 className="h-4 w-4" />
+                        Text to Speech
+                      </span>
+                    </SelectItem>
+                    <SelectItem value="stt">
+                      <span className="flex items-center gap-1.5">
+                        <Mic className="h-4 w-4" />
+                        Speech to Speech
+                      </span>
+                    </SelectItem>
+                  </SelectContent>
+                </Select>
+                <button 
+                  onClick={handleAddActors}
+                  className={buttonStyles}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Add actors
+                </button>
+              </>
+            ) : (
+              <button 
+                onClick={handleAddActors}
+                className={buttonStyles}
+              >
+                <UserPlus className="h-4 w-4" />
+                Add actors
+              </button>
+            )}
           </div>
         </div>
       </div>
