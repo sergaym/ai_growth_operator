@@ -61,7 +61,7 @@ interface FAQSectionProps {
 }
 
 export function FAQSection({ 
-  title = "Frequently Asked Questions",
+  title = "Preguntas Frecuentes",
   subtitle,
   faqs = defaultFAQs,
   showSupport = true
