@@ -82,23 +82,6 @@ const data = {
       icon: Send,
     },
   ],
-  projects: [
-    {
-      name: "Marketing Videos",
-      url: "/projects/marketing",
-      icon: Frame,
-    },
-    {
-      name: "Sales Demos",
-      url: "/projects/sales",
-      icon: PieChart,
-    },
-    {
-      name: "Training",
-      url: "/projects/training",
-      icon: Map,
-    },
-  ],
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
@@ -122,7 +105,6 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
         <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
