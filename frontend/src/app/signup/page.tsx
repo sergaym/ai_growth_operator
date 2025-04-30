@@ -152,7 +152,8 @@ export default function SignupPage() {
               <SignupStepComplete
                 key="step4"
                 data={formData}
-                onFinish={nextStep}
+                onFinish={handleSignupComplete}
+                onBack={prevStep}
               />
             )}
           </AnimatePresence>
