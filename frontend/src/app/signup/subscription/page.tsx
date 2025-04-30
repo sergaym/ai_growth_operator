@@ -128,3 +128,32 @@ export default function SubscriptionPage() {
           ))}
         </div>
 
+        {/* Trust Section */}
+        <div className="mt-32">
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="text-center mb-12"
+          >
+            <h2 className="text-3xl font-bold mb-4">
+              Already 5000 winnings ads made with Arcads
+            </h2>
+          </motion.div>
+
+          {/* Video Grid */}
+          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
+            {Array.from({ length: 6 }).map((_, i) => (
+              <motion.div
+                key={i}
+                initial={{ opacity: 0, scale: 0.9 }}
+                animate={{ opacity: 1, scale: 1 }}
+                transition={{ delay: i * 0.1 }}
+                className="aspect-[9/16] rounded-xl bg-white/5 overflow-hidden"
+              >
+                {/* This would be replaced with actual video thumbnails */}
+                <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-amber-500/10" />
+              </motion.div>
+            ))}
+          </div>
+        </div>
+
