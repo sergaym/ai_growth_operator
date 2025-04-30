@@ -107,12 +107,15 @@ export default function Header() {
   }, []);
   
   return (
-    <header className="sticky top-0 z-40 bg-white border-b border-[#e6e6e6] py-3">
-      <div className="container max-w-4xl mx-auto px-5 md:px-8">
+    <header className="sticky top-0 z-40 bg-[#030712]/80 backdrop-blur-lg border-b border-white/10">
+      <div className="container max-w-7xl mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           {/* Logo and back button in one element */}
           <div className="flex items-center gap-3">
-            <Link href="/" className="p-2 hover:bg-[#f1f1f1] rounded-md transition-colors">
+            <Link 
+              href="/" 
+              className="p-2 hover:bg-white/5 rounded-lg transition-colors text-white/80 hover:text-white"
+            >
               <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M19 12H5M5 12L12 19M5 12L12 5" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
               </svg>
