@@ -30,3 +30,24 @@ interface FAQSectionProps {
   showSupport?: boolean;
 }
 
+export function FAQSection({ 
+  title = "Frequently Asked Questions",
+  subtitle,
+  faqs = defaultFAQs,
+  showSupport = true
+}: FAQSectionProps) {
+  return (
+    <div className="max-w-3xl mx-auto">
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-12"
+      >
+        <h2 className="text-3xl font-bold mb-4">
+          {title}
+        </h2>
+        {subtitle && (
+          <p className="text-lg text-zinc-400">{subtitle}</p>
+        )}
+      </motion.div>
+
