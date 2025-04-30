@@ -48,18 +48,22 @@ export function GestureChat() {
     <div className="w-full max-w-3xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-zinc-100">
         {/* Top Input Area */}
-        <div className="p-2 space-y-1">
-          {/* Gesture Selector and Input */}
+        <div className="p-3 space-y-2">
+          {/* Message Type Selector */}
           <div className="flex items-center gap-2">
-            <Select value={gesture} onValueChange={setGesture}>
-              <SelectTrigger className="w-[140px] h-8 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-2.5 py-1">
-                <SelectValue placeholder="👋 Gestures" />
+            <Select value={messageType} onValueChange={(value) => setMessageType(value as MessageType)}>
+              <SelectTrigger className={selectTriggerStyles}>
+                <SelectValue>
+                  {messageType === 'gesture' ? (
+                    <span className="flex items-center gap-1.5">👋 Gestures</span>
+                  ) : (
+                    <span className="flex items-center gap-1.5">🗣️ Talking Actors</span>
+                  )}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent>
-                <SelectItem value="wave">👋 Wave</SelectItem>
-                <SelectItem value="clap">👏 Clap</SelectItem>
-                <SelectItem value="point">👉 Point</SelectItem>
-                <SelectItem value="thumbsup">👍 Thumbs Up</SelectItem>
+                <SelectItem value="gesture">👋 Gestures</SelectItem>
+                <SelectItem value="talking">🗣️ Talking Actors</SelectItem>
               </SelectContent>
             </Select>
           </div>
@@ -68,7 +72,9 @@ export function GestureChat() {
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
               onKeyDown={handleKeyDown}
-              placeholder="Describe a gesture, like 'Make the actor celebrate'"
+              placeholder={messageType === 'gesture' 
+                ? "Describe a gesture, like 'Make the actor celebrate'" 
+                : "Write dialogue for the actor to speak"}
               className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
               rows={3}
             />
