@@ -38,36 +38,22 @@ const data = {
       isActive: true,
       items: [
         {
-          title: "Projects",
-          url: "/playground/projects",
-          items: [
-            {
-              title: "Overview",
-              url: "/playground/projects",
-            },
-            {
-              title: "Legacy",
-              url: "/playground/projects/legacy",
-            },
-          ],
+          title: "Overview",
+          url: "/playground",
+        },
+        {
+          title: "Legacy",
+          url: "/playground/legacy",
         },
         {
           title: "History",
           url: "/playground/history",
         },
-        {
-          title: "Starred",
-          url: "/playground/starred",
-        },
-        {
-          title: "Settings",
-          url: "/playground/settings",
-        },
       ],
     },
     {
-      name: "Avatars",
-      url: "/avatars",
+      name: "Company",
+      url: "/company",
       icon: Bot,
     }
   ],
