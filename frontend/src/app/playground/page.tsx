@@ -67,52 +67,31 @@ export default function Playground() {
           </div>
         </Card>
 
-        <TabsContent value="avatar-creation">
-          <Card className="p-6">
-            <AvatarCreationForm
-              onCreateAvatar={handleAvatarCreation}
-              isCreating={isCreatingAvatar}
-            />
-            {avatarCreationError && (
-              <div className="mt-4 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
-                <p className="font-medium">Error: {avatarCreationError}</p>
+        {/* Quick Tips */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Quick Tips</h2>
+          <div className="space-y-3">
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                1
               </div>
-            )}
-          </Card>
-        </TabsContent>
-
-        <TabsContent value="my-videos">
-          <VideoList
-            title="Your Videos"
-            count={avatarVideos.length}
-            noItemsMessage="No videos created yet. Get started by creating your first video above."
-            renderItems={renderLocalVideos}
-            actionButton={
-              avatarVideos.length > 0 ? {
-                label: "Clear All Videos",
-                onClick: handleClearVideos,
-                variant: "danger"
-              } : undefined
-            }
-          />
-          
-          <div className="mt-8">
-            <VideoList
-              title="All Database Videos"
-              count={databaseVideos.length}
-              loading={loadingDatabaseVideos}
-              error={databaseVideosError}
-              noItemsMessage="No videos found in the database."
-              onRefresh={refetchDatabaseVideos}
-              onRetry={refetchDatabaseVideos}
-              showRefreshButton={true}
-              renderItems={renderDatabaseVideos}
-            />
+              <p className="text-sm text-zinc-400">Start with a clear script and storyboard for best results</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                2
+              </div>
+              <p className="text-sm text-zinc-400">Use high-quality voice recordings for better lip sync</p>
+            </div>
+            <div className="flex items-start gap-3">
+              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
+                3
+              </div>
+              <p className="text-sm text-zinc-400">Preview your video before finalizing to ensure quality</p>
+            </div>
           </div>
-        </TabsContent>
-      </Tabs>
-
-      <NextStepsGuide />
+        </Card>
+      </div>
     </PlaygroundLayout>
   );
 } 
