@@ -5,59 +5,67 @@ import PlaygroundLayout from "@/components/playground/Layout";
 
 export default function Playground() {
   return (
+    <PlaygroundLayout
+      title="AI Video Studio"
+      description="Create professional AI-powered videos in minutes."
+    >
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Quick Actions */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
+          <div className="space-y-4">
+            <button className="w-full py-4 px-6 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white rounded-xl font-medium transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
+              Create New Video
+            </button>
+            <button className="w-full py-4 px-6 border border-white/10 hover:bg-white/[0.1] text-white rounded-xl font-medium transition-all">
+              Browse Templates
+            </button>
+          </div>
+        </Card>
+
+        {/* Recent Projects */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Recent Projects</h2>
+          <div className="space-y-4">
+            <div className="p-4 rounded-lg border border-white/10 hover:bg-white/[0.1] transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Marketing Campaign</h3>
+                  <p className="text-sm text-zinc-400">Last edited 2 hours ago</p>
+                </div>
+                <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">
+                  Completed
+                </span>
               </div>
-              <div>
-                <h3 className="font-medium text-[#37352f]">{avatar.avatar_name}</h3>
-                <p className="text-sm text-gray-500">ID: {avatar.avatar_id}</p>
-                <p className="text-sm text-gray-500">Gender: {avatar.gender}</p>
+            </div>
+            <div className="p-4 rounded-lg border border-white/10 hover:bg-white/[0.1] transition-all cursor-pointer">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-medium">Product Demo</h3>
+                  <p className="text-sm text-zinc-400">Last edited 5 hours ago</p>
+                </div>
+                <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">
+                  In Progress
+                </span>
               </div>
             </div>
           </div>
-        ))}
-      </div>
-    );
-  };
+        </Card>
 
-  // Function to clear all saved videos from localStorage and state
-  const handleClearVideos = () => {
-    // Confirm before clearing all videos
-    if (avatarVideos.length > 0 && window.confirm('Are you sure you want to clear all your saved videos? This action cannot be undone.')) {
-      // Clear from localStorage
-      localStorage.removeItem('avatarVideos');
-      // Clear from state
-      setAvatarVideos([]);
-    }
-  };
-
-  return (
-    <PlaygroundLayout
-      title="Welcome to the Playground"
-      description="This is where you'll create amazing AI-powered videos for your brand."
-      error={apiError}
-    >
-      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
-        <TabsList className="mb-8">
-          <TabsTrigger value="video-generation">Video Generation</TabsTrigger>
-          <TabsTrigger value="avatar-creation">Avatar Creation</TabsTrigger>
-          <TabsTrigger value="my-videos">My Videos</TabsTrigger>
-        </TabsList>
-
-        <TabsContent value="video-generation">
-          <Card className="p-6">
-            <CreateVideoSection
-              avatars={avatars}
-              voices={voices}
-              loadingAvatars={loadingAvatars}
-              loadingVoices={loadingVoices}
-              avatarsError={avatarsError}
-              voicesError={voicesError}
-              isGenerating={isGenerating}
-              onVideoGenerated={handleAvatarVideoGenerated}
-              onCreateAvatar={handleAvatarCreation}
-              onRetryApiLoad={handleRetryApiLoad}
-            />
-          </Card>
-        </TabsContent>
+        {/* Statistics */}
+        <Card className="p-6">
+          <h2 className="text-xl font-semibold mb-4">Statistics</h2>
+          <div className="grid grid-cols-2 gap-4">
+            <div className="p-4 rounded-lg border border-white/10">
+              <p className="text-sm text-zinc-400">Total Videos</p>
+              <p className="text-2xl font-semibold mt-1">24</p>
+            </div>
+            <div className="p-4 rounded-lg border border-white/10">
+              <p className="text-sm text-zinc-400">Storage Used</p>
+              <p className="text-2xl font-semibold mt-1">2.4 GB</p>
+            </div>
+          </div>
+        </Card>
 
         <TabsContent value="avatar-creation">
           <Card className="p-6">
