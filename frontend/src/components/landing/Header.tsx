@@ -118,6 +118,12 @@ export function Header() {
           </button>
         </div>
       </div>
+
+      {/* Mobile Menu */}
+      <MobileMenu 
+        isOpen={isMobileMenuOpen} 
+        onClose={() => setIsMobileMenuOpen(false)} 
+      />
     </header>
   );
 } 
