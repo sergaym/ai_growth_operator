@@ -324,6 +324,37 @@ export default function Playground() {
             />
           </Card>
         </TabsContent>
+
+        <TabsContent value="avatar-creation">
+          <Card className="p-6">
+            <AvatarCreationForm
+              onCreateAvatar={handleAvatarCreation}
+              isCreating={isCreatingAvatar}
+            />
+            {avatarCreationError && (
+              <div className="mt-4 p-4 bg-[#ffebe8] border border-[#ffc1ba] rounded-md text-[#e03e21]">
+                <p className="font-medium">Error: {avatarCreationError}</p>
+              </div>
+            )}
+          </Card>
+        </TabsContent>
+
+        <TabsContent value="my-videos">
+          <VideoList
+            title="Your Videos"
+            count={avatarVideos.length}
+            noItemsMessage="No videos created yet. Get started by creating your first video above."
+            renderItems={renderLocalVideos}
+            actionButton={
+              avatarVideos.length > 0 ? {
+                label: "Clear All Videos",
+                onClick: handleClearVideos,
+                variant: "danger"
+              } : undefined
+            }
+          />
+          
+          <div className="mt-8">
             <VideoList
               title="All Database Videos"
               count={databaseVideos.length}
@@ -337,20 +368,9 @@ export default function Playground() {
             />
           </div>
         </TabsContent>
-        
-        {/* Your Avatars Tab */}
-        <TabsContent value="your-avatars" className="mt-6">
-          <AvatarCreationForm
-            onCreateAvatar={handleAvatarCreation}
-            isCreating={isCreatingAvatar}
-          />
-          
-          <div className="mt-8">
-            <h2 className="text-xl font-semibold text-[#37352f] mb-4">Your Available Avatars</h2>
-            {renderAvatarsGrid()}
-          </div>
-        </TabsContent>
       </Tabs>
+
+      <NextStepsGuide />
     </PlaygroundLayout>
   );
 } 
