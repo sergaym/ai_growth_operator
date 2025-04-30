@@ -82,7 +82,7 @@ export function Hero() {
             </motion.div>
           </motion.div>
           
-          {/* Right content - Video Showcase with glossy effects */}
+          {/* Right content - Video Showcase */}
           <motion.div 
             initial={{ opacity: 0, x: 10 }}
             animate={{ opacity: 1, x: 0 }}
@@ -91,7 +91,7 @@ export function Hero() {
           >
             <div className="relative">
               {/* Decorative gradient glow */}
-              <div className="absolute -inset-3 bg-gradient-to-r from-amber-500/30 via-red-500/20 to-blue-500/30 rounded-2xl blur-2xl opacity-30"></div>
+              <div className="absolute -inset-3 bg-gradient-to-r from-amber-500/30 via-red-500/20 to-amber-500/30 rounded-2xl blur-2xl opacity-30"></div>
               
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-black backdrop-blur-sm">
                 {/* Browser-like top bar */}
@@ -101,7 +101,7 @@ export function Hero() {
                     <div className="w-3 h-3 rounded-full bg-amber-500/90"></div>
                     <div className="w-3 h-3 rounded-full bg-green-500/90"></div>
                   </div>
-                  <div className="mx-auto text-xs text-white/60 font-medium">AI Growth Operator</div>
+                  <div className="mx-auto text-xs text-white/60 font-medium">AI Video Generator</div>
                 </div>
                 
                 <div className="relative aspect-[16/9] bg-black rounded-b-2xl overflow-hidden">
@@ -114,7 +114,7 @@ export function Hero() {
                         </svg>
                       </div>
                     </div>
-                    {/* Placeholder image with gradient background instead of referencing a missing image */}
+                    {/* Placeholder image with gradient background */}
                     <div className="w-full h-full bg-gradient-to-br from-gray-900 to-black">
                       <div className="w-full h-full flex items-center justify-center opacity-20">
                         <svg className="w-1/3 h-1/3 text-white/30" fill="currentColor" viewBox="0 0 24 24">
@@ -122,7 +122,7 @@ export function Hero() {
                           <path d="M20 8H22V4C22 3.46957 21.7893 2.96086 21.4142 2.58579C21.0391 2.21071 20.5304 2 20 2H16V4H20V8Z"></path>
                           <path d="M20 20H16V22H20C20.5304 22 21.0391 21.7893 21.4142 21.4142C21.7893 21.0391 22 20.5304 22 20V16H20V20Z"></path>
                           <path d="M4 20H8V22H4C3.46957 22 2.96086 21.7893 2.58579 21.4142C2.21071 21.0391 2 20.5304 2 20V16H4V20Z"></path>
-                          <path d="M12 9C12.7956 9 13.5587 9.31607 14.1213 9.87868C14.6839 10.4413 15 11.2044 15 12C15 12.7956 14.6839 13.5587 14.1213 14.1213C13.5587 14.6839 12.7956 15 12 15C11.2044 15 10.4413 14.6839 9.87868 14.1213C9.31607 13.5587 9 12.7956 9 12C9 11.2044 9.31607 10.4413 9.87868 9.87868C10.4413 9.31607 11.2044 9 12 9Z"></path>
+                          <path d="M12 9C12.7956 9 13.5587 9.31607 14.1213 9.87868C14.6839 10.4413 15 12.2044 15 12C15 12.7956 14.6839 13.5587 14.1213 14.1213C13.5587 14.6839 12.7956 15 12 15C11.2044 15 10.4413 14.6839 9.87868 14.1213C9.31607 13.5587 9 12.7956 9 12C9 11.2044 9.31607 10.4413 9.87868 9.87868C10.4413 9.31607 11.2044 9 12 9Z"></path>
                         </svg>
                       </div>
                     </div>
@@ -130,7 +130,7 @@ export function Hero() {
                 </div>
               </div>
               
-              {/* Stats card - moved outside the video container to overlay at the bottom-right corner */}
+              {/* Stats card */}
               <motion.div
                 initial={{ opacity: 0, y: 10 }}
                 animate={{ opacity: 1, y: 0 }}
@@ -150,8 +150,8 @@ export function Hero() {
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-zinc-400">Average Improvement</div>
-                    <div className="text-xl font-bold text-white tracking-tight">37% <span className="text-green-400 text-sm ml-0.5">↑</span></div>
+                    <div className="text-xs text-zinc-400">Average Creation Time</div>
+                    <div className="text-xl font-bold text-white tracking-tight">5 min <span className="text-green-400 text-sm ml-0.5">↓</span></div>
                   </div>
                 </div>
               </motion.div>
