@@ -48,14 +48,31 @@ export default function PlaygroundLayout({
           </Breadcrumb>
         </header>
 
+        <div className="flex-1 overflow-auto">
+          <div className="container max-w-5xl mx-auto p-6">
+            {error && (
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                <p className="font-medium text-sm">Error: {error}</p>
+              </div>
+            )}
+            
+            <div className="space-y-6">
+              <div>
+                <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+                {description && (
+                  <p className="text-muted-foreground mt-2">
+                    {description}
+                  </p>
+                )}
+              </div>
+              
+              <div className="space-y-8">
+                {children}
+              </div>
+            </div>
           </div>
-        )}
-        
-        {/* Content with Notion-style cards */}
-        <div className="space-y-12">
-          {children}
         </div>
-      </main>
-    </div>
+      </SidebarInset>
+    </SidebarProvider>
   );
 } 
