@@ -7,7 +7,7 @@ import Link from "next/link";
 
 export function Hero() {
   return (
-    <section className="relative pt-24 md:pt-24 pb-24 md:pb-32 overflow-hidden">
+    <section className="relative pt-32 md:pt-36 pb-24 md:pb-32 overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 z-0">
         <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
@@ -16,7 +16,7 @@ export function Hero() {
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
         {/* Top badge */}
-        <div className="text-center mb-2 md:mb-6">
+        <div className="text-center lg:text-left mb-0.5 md:mb-1">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
