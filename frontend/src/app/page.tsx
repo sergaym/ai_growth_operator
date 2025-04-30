@@ -20,10 +20,13 @@ export default function Home() {
       
       <main className="relative">
         <Hero />
+        
+        {/* Demo Section - Temporarily disabled */}
+        {/* <Demo /> */}
+
         {/* Commenting out these components temporarily */}
         {/* <Features /> */}
         {/* <Workflow /> */}
-        {/* <Demo /> */}
         {/* <TechStack /> */}
       </main>
       <Footer />
