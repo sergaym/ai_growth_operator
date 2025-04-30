@@ -33,6 +33,17 @@ export function GestureChat() {
     }
   };
 
+  const handleAddActors = () => {
+    console.log('Adding actors');
+    // Implement actor adding functionality
+  };
+
+  // Shared select styles for consistency
+  const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
+  
+  // Shared button styles with border matching select component
+  const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-zinc-100">
