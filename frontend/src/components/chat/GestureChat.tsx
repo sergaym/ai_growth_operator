@@ -8,9 +8,19 @@ import {
 } from "@/components/ui/select";
 import { SendButton } from './SendButton';
 import { UserPlus, Mic, Volume2 } from 'lucide-react';
+import { ActorSelectDialog } from './ActorSelectDialog';
 
 type MessageType = 'gesture' | 'talking';
 type SpeechType = 'tts' | 'stt';
+
+interface Actor {
+  id: string;
+  name: string;
+  image: string;
+  tags: string[];
+  hd?: boolean;
+  pro?: boolean;
+}
 
 export function GestureChat() {
   const [inputValue, setInputValue] = useState('');
