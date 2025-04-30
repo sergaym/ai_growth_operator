@@ -119,6 +119,7 @@ export function PricingPlans({
             </ul>
 
             <Button
+              onClick={handlePlanSelection}
               className={`w-full py-3 rounded-xl transition-all text-base font-medium
                 ${plan.actionType === 'primary'
                   ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
