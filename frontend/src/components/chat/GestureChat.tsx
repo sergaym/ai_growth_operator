@@ -12,6 +12,21 @@ export function GestureChat() {
   const [inputValue, setInputValue] = useState('');
   const [gesture, setGesture] = useState('');
 
+  const handleSend = () => {
+    if (inputValue.trim()) {
+      // Handle send message here
+      console.log('Sending:', { gesture, message: inputValue });
+      setInputValue('');
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
   return (
     <div className="w-full max-w-3xl mx-auto">
       <div className="bg-white rounded-xl shadow-sm border border-zinc-100">
