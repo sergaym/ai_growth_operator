@@ -16,16 +16,40 @@ export interface FAQItem {
 
 const defaultFAQs: FAQItem[] = [
   {
-    question: "Can I see a demo of the product?",
-    answer: "Yes! Book a demo with our team and we'll show you how Arcads can help your business grow."
+    question: "¿Puedo ver una demo del producto?",
+    answer: "Puedes ver un video de demostración aquí."
   },
   {
-    question: "Do unused credits roll over into the next month?",
-    answer: "Yes. If you haven't reached your credit limit by the end of the billing period, any extra credits will carry over to the next one. However, if you cancel or downgrade your membership all unused credits will be lost."
+    question: "¿Puedo usar los videos creados con fines comerciales?",
+    answer: "Por supuesto. Hemos negociado los derechos para que puedas utilizar los videos generados con fines comerciales."
   },
   {
-    question: "Can I upgrade my account at any time?",
-    answer: "Yes, if you're on the Starter plan, you can easily go to your Subscription settings. However, for Basic or Pro plans, you'll need to get in touch with our support team."
+    question: "¿Los actores de IA otorgan permisos para usar Arcads?",
+    answer: "Sí, todas las versiones de IA de nuestros actores se desarrollan con pleno consentimiento y cooperación. Están completamente informados y compensados por su trabajo. Nos aseguramos de que todos estén de acuerdo antes de usar su imagen en cualquier creación de IA."
+  },
+  {
+    question: "¿Obtengo solo un actor hablando o un video final editado?",
+    answer: "Obtendrás la actuación y el discurso más convincente. Recibes un video en bruto cautivador. Luego puedes transformarlo como quieras con tus propias herramientas de edición. También puedes solicitar una edición en la plataforma."
+  },
+  {
+    question: "¿Cuánto tiempo tarda en generar mis videos con Arcads?",
+    answer: "Alrededor de 2 minutos y 30 segundos."
+  },
+  {
+    question: "¿Funciona en diferentes idiomas?",
+    answer: "Sí, en 35 idiomas incluyendo 🇪🇸 Español (España), 🇲🇽 Español (México), 🇺🇸 Inglés (EE.UU.), 🇬🇧 Inglés (Reino Unido), 🇫🇷 Francés, 🇩🇪 Alemán, 🇮🇹 Italiano, 🇵🇹 Portugués, y muchos más."
+  },
+  {
+    question: "¿Puedo controlar cómo se mueven los actores, cómo hablan y su fondo?",
+    answer: "Hay muchas formas diferentes de controlar los resultados de los videos en Arcads. Todo suena atractivo y natural sin hacer nada. Pero también puedes cambiar la velocidad del habla y la entonación. Puedes elegir entre una variedad de actores de IA con diferentes fondos, emociones y energías en la biblioteca de actores."
+  },
+  {
+    question: "¿Qué sucede si supero el límite mensual de mi plan?",
+    answer: "Los usuarios Starter y Basic no pueden exceder sus límites. Para obtener más créditos inmediatamente, puedes actualizar tu plan. Los usuarios Pro pueden exceder sus límites y se les cobrará por los créditos adicionales utilizados en la factura del próximo mes."
+  },
+  {
+    question: "¿Los créditos no utilizados se transfieren al mes siguiente?",
+    answer: "Sí. Si no has alcanzado tu límite de créditos al final del período de facturación, los créditos adicionales se transferirán al siguiente. Sin embargo, si cancelas o reduces tu membresía, todos los créditos no utilizados se perderán."
   }
 ];
 
