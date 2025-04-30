@@ -15,3 +15,24 @@ import CreateVideoSection from "@/components/playground/CreateVideoSection";
 import VideoList from "@/components/playground/VideoList";
 import { NextStepsGuide } from '@/components/playground/NextStepsGuide';
 
+export default function LegacyPlayground() {
+  // HeyGen API hooks
+  const { avatars: fetchedAvatars, loading: loadingAvatars, error: avatarsError, refetch: refetchAvatars } = useHeygenAvatars();
+  const { voices: fetchedVoices, loading: loadingVoices, error: voicesError, refetch: refetchVoices } = useHeygenVoices();
+  const { generateVideo, loading: isGenerating, error: generationError } = useHeygenVideoGeneration();
+  const { videos: databaseVideos, loading: loadingDatabaseVideos, error: databaseVideosError, refetch: refetchDatabaseVideos } = useHeygenDatabaseVideos();
+  
+  // Use mock data when API fails
+  const avatars = fetchedAvatars.length > 0 ? fetchedAvatars : [
+    { 
+      avatar_id: "Abigail_sitting_sofa_side", 
+      avatar_name: "Abigail", 
+      gender: "female" 
+    },
+    { 
+      avatar_id: "Dale_casual_sitting", 
+      avatar_name: "Dale", 
+      gender: "male" 
+    }
+  ];
+  
