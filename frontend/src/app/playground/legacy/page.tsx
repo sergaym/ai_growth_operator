@@ -36,3 +36,18 @@ export default function LegacyPlayground() {
     }
   ];
   
+  const voices = fetchedVoices.length > 0 ? fetchedVoices : [
+    { 
+      voice_id: "1985984feded457b9d013b4f6551ac94", 
+      name: "Olivia", 
+      gender: "female", 
+      language: "English" 
+    },
+    { 
+      voice_id: "52b8ddf4120942e4b61b62d38a0404e4", 
+      name: "Michael", 
+      gender: "male", 
+      language: "English" 
+    }
+  ];
+  
