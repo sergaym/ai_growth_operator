@@ -65,43 +65,10 @@ const data = {
       ],
     },
     {
-      title: "Avatars",
+      name: "Avatars",
       url: "/avatars",
       icon: Bot,
-      items: [
-        {
-          title: "Create Avatar",
-          url: "/playground#avatar-creation",
-        },
-        {
-          title: "My Avatars",
-          url: "/avatars",
-        },
-        {
-          title: "Templates",
-          url: "/templates",
-        },
-      ],
-    },
-    {
-      title: "Settings",
-      url: "/settings",
-      icon: Settings2,
-      items: [
-        {
-          title: "Account",
-          url: "/settings/account",
-        },
-        {
-          title: "Billing",
-          url: "/settings/billing",
-        },
-        {
-          title: "API Keys",
-          url: "/settings/api-keys",
-        },
-      ],
-    },
+    }
   ],
   navSecondary: [
     {
