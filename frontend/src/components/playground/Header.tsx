@@ -12,13 +12,11 @@ function AuthStatusSection() {
   const [isLoggingOut, setIsLoggingOut] = useState(false);
   
   const handleLogout = async () => {
+    if (isLoggingOut) return; // Prevent double clicks
     setIsLoggingOut(true);
     
     try {
       await logout('/');
-      // Show success message with toast or alert (in a real app)
-      // We'll just use a simple alert here for demonstration
-      alert('Successfully logged out. Redirecting to home page...');
     } catch (error) {
       console.error('Logout failed:', error);
       setIsLoggingOut(false);
