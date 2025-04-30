@@ -11,9 +11,10 @@ interface SignupStepCompleteProps {
     companyName: string;
   };
   onFinish: () => void;
+  onBack: () => void;
 }
 
-export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) {
+export function SignupStepComplete({ data, onFinish, onBack }: SignupStepCompleteProps) {
   const router = useRouter();
 
   const handleContinue = () => {
