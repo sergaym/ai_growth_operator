@@ -131,13 +131,41 @@ export default function Header() {
             </Link>
           </div>
           
-          {/* Auth actions - only rendered after client-side mount */}
-          {isMounted ? (
-            <AuthenticatedHeader />
-          ) : (
-            /* Empty placeholder to avoid layout shift */
-            <div className="h-6 w-16"></div>
-          )}
+          {/* Desktop Navigation - Hidden on mobile */}
+          <nav className="hidden md:flex items-center gap-6">
+            {[
+              { label: 'Dashboard', href: '/dashboard' },
+              { label: 'Create Video', href: '/create' },
+              { label: 'Templates', href: '/templates' },
+            ].map((item) => (
+              <Link
+                key={item.href}
+                href={item.href}
+                className="text-sm font-medium text-white/70 hover:text-white transition-colors"
+              >
+                {item.label}
+              </Link>
+            ))}
+          </nav>
+          
+          {/* Right section with auth and mobile menu */}
+          <div className="flex items-center gap-4">
+            {/* Auth actions - only rendered after client-side mount */}
+            {isMounted ? (
+              <AuthenticatedHeader />
+            ) : (
+              /* Empty placeholder to avoid layout shift */
+              <div className="h-6 w-16"></div>
+            )}
+            
+            {/* Mobile menu button - Only visible on mobile */}
+            <button
+              onClick={() => setIsMobileMenuOpen(true)}
+              className="md:hidden p-2 hover:bg-white/5 rounded-lg transition-colors text-white/80 hover:text-white"
+            >
+              <Menu className="w-5 h-5" />
+            </button>
+          </div>
         </div>
       </div>
     </header>
