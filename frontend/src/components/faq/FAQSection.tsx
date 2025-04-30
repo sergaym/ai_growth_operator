@@ -66,3 +66,21 @@ export function FAQSection({
         ))}
       </div>
 
+      {showSupport && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="mt-20 text-center"
+        >
+          <h3 className="text-2xl font-bold mb-4">Have more questions?</h3>
+          <p className="text-zinc-400 mb-6">We are happy to help!</p>
+          <Button
+            className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
+          >
+            Contact support
+          </Button>
+        </motion.div>
+      )}
+    </div>
+  );
+} 
