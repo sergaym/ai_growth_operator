@@ -11,6 +11,8 @@ import { SignupStepComplete } from "@/components/signup/SignupStepComplete";
 import { SignupProgress } from "@/components/signup/SignupProgress";
 
 export default function SignupPage() {
+  const router = useRouter();
+  const searchParams = useSearchParams();
   const [step, setStep] = useState(1);
   const [formData, setFormData] = useState({
     // Profile
