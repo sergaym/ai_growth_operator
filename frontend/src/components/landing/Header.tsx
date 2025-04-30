@@ -91,8 +91,8 @@ export function Header() {
             <Logo size={isScrolled ? "sm" : "md"} showText={false} />
           </Link>
 
-          {/* Navigation Buttons */}
-          <div className="flex items-center gap-4">
+          {/* Desktop Navigation Buttons */}
+          <div className="hidden md:flex items-center gap-4">
             <Link href="/login?callbackUrl=/become-actor" className="w-auto">
               <Button 
                 className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white"
