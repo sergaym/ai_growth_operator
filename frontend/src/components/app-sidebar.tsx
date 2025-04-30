@@ -23,6 +23,7 @@ import {
   SidebarMenuItem,
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
+import { nanoid } from 'nanoid'
 
 const data = {
   user: {
@@ -72,6 +73,11 @@ const data = {
 }
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const handleNewProject = () => {
+    const projectId = nanoid(10); // Generate a 10-character unique ID
+    window.location.href = `/playground/${projectId}`;
+  };
+
   return (
     <Sidebar variant="inset" {...props}>
       <SidebarHeader>
@@ -96,7 +102,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
           <Button 
             variant="outline"
             className="w-full"
-            onClick={() => window.location.href = '/playground/projects/new'}
+            onClick={handleNewProject}
           >
             New Project
           </Button>
