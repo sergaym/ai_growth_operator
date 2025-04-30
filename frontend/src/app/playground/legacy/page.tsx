@@ -136,3 +136,103 @@ export default function LegacyPlayground() {
         }, 5000);
       }
       
+      // Find the avatar and voice names from selected IDs
+      const selectedAvatar = avatars.find(a => a.avatar_id === formData.avatar_id);
+      const selectedVoice = voices.find(v => v.voice_id === formData.voice_id);
+      
+      // Create a tracked generation for the UI
+      const trackedGeneration: TrackedVideoGeneration = {
+        id: result.video_id,
+        prompt: formData.prompt,
+        avatarId: formData.avatar_id,
+        voiceId: formData.voice_id,
+        avatarName: selectedAvatar?.avatar_name,
+        voiceName: selectedVoice?.name,
+        status: result.status,
+        createdAt: new Date().toISOString(),
+        videoUrl: result.video_url,
+        thumbnailUrl: result.thumbnail_url,
+      };
+      
+      // Add to state
+      setAvatarVideos(prev => [trackedGeneration, ...prev]);
+      
+      return result;
+    } catch (error) {
+      console.error('Failed to generate avatar video:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error generating video';
+      setApiError(errorMessage);
+      throw error;
+    }
+  };
+  
+  // Handler for updating an existing avatar video
+  const handleAvatarVideoUpdated = (updatedGeneration: TrackedVideoGeneration) => {
+    setAvatarVideos(prev => 
+      prev.map(video => 
+        video.id === updatedGeneration.id ? updatedGeneration : video
+      )
+    );
+  };
+
+  // Handler for creating a new avatar
+  const handleAvatarCreation = async (data: AvatarTrainingData) => {
+    try {
+      setIsCreatingAvatar(true);
+      setAvatarCreationError(null);
+      
+      // Log the request payload for debugging
+      console.log('Sending avatar creation request:', JSON.stringify(data, null, 2));
+      
+      // Placeholder for API call - in a real implementation, this would call your backend API
+      // const result = await yourAPI.createAvatar(data);
+      
+      // For now, simulate a success response after a delay
+      await new Promise(resolve => setTimeout(resolve, 3000));
+      
+      // Mock response
+      const mockResult = {
+        success: true,
+        avatar_id: `custom-${Date.now()}`,
+        avatar_name: data.name,
+        gender: data.gender
+      };
+      
+      // After successful creation, refresh the avatars list
+      refetchAvatars();
+      
+      // Switch to video generation tab after successful avatar creation
+      setActiveTab("video-generation");
+      
+      // Return the result
+      return mockResult;
+    } catch (error) {
+      console.error('Failed to create avatar:', error);
+      const errorMessage = error instanceof Error ? error.message : 'Unknown error creating avatar';
+      setAvatarCreationError(errorMessage);
+      throw error;
+    } finally {
+      setIsCreatingAvatar(false);
+    }
+  };
+
+  // Render the local videos (stored in browser)
+  const renderLocalVideos = () => {
+    return avatarVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <AvatarVideoCard 
+          generation={video} 
+          onUpdate={handleAvatarVideoUpdated} 
+        />
+      </div>
+    ));
+  };
+
+  // Render the database videos
+  const renderDatabaseVideos = () => {
+    return databaseVideos.map((video) => (
+      <div key={video.id} className="border border-[#e6e6e6] rounded-lg overflow-hidden bg-white shadow-sm hover:shadow-md transition-shadow">
+        <DatabaseVideoCard video={video} />
+      </div>
+    ));
+  };
