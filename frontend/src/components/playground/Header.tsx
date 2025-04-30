@@ -34,9 +34,9 @@ function AuthStatusSection() {
       <button 
         onClick={handleLogout}
         disabled={isLoggingOut}
-        className={`text-sm font-medium px-4 py-2 rounded-md transition-colors ${
+        className={`text-sm font-medium px-4 py-2 rounded-md transition-all duration-200 ${
           isLoggingOut 
-            ? 'bg-gray-200 text-gray-500 cursor-not-allowed' 
+            ? 'bg-gray-200 text-gray-500 cursor-not-allowed opacity-70' 
             : 'bg-gray-100 text-gray-600 hover:bg-gray-200 hover:text-gray-900'
         }`}
       >
