@@ -71,16 +71,29 @@ export function NextStepsGuide() {
               ) : (
                 <span className="text-sm font-medium text-white">{step.id}</span>
               )}
+              {index < steps.length - 1 && (
+                <div className={`absolute h-8 w-0.5 top-6 left-1/2 transform -translate-x-1/2 ${
+                  step.completed ? 'bg-green-500' : 'bg-gray-600'
+                }`} />
+              )}
             </div>
             
             <div className="flex-1">
               <div className="flex items-center justify-between">
-                <h4 className="font-medium text-white">{step.title}</h4>
-                {step.href && (
-                  <ChevronRight className="w-4 h-4 text-white/50" />
+                <h4 className={`font-medium ${
+                  step.completed ? 'line-through text-white/50' : 'text-white'
+                }`}>
+                  {step.title}
+                </h4>
+                {step.href && !step.completed && (
+                  <ChevronRight className="w-4 h-4 text-white/50 group-hover:text-white/70 transition-colors" />
                 )}
               </div>
-              <p className="text-sm text-white/70 mt-0.5">{step.description}</p>
+              <p className={`text-sm mt-0.5 ${
+                step.completed ? 'text-white/40' : 'text-white/70'
+              }`}>
+                {step.description}
+              </p>
             </div>
           </Link>
         ))}
