@@ -2,7 +2,6 @@
 
 import * as React from "react"
 import {
-  BookOpen,
   Bot,
   Command,
   Frame,
@@ -71,25 +70,6 @@ const data = {
         {
           title: "Templates",
           url: "/templates",
-        },
-      ],
-    },
-    {
-      title: "Documentation",
-      url: "/docs",
-      icon: BookOpen,
-      items: [
-        {
-          title: "Getting Started",
-          url: "/docs/getting-started",
-        },
-        {
-          title: "API Reference",
-          url: "/docs/api",
-        },
-        {
-          title: "Examples",
-          url: "/docs/examples",
         },
       ],
     },
