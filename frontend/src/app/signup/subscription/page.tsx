@@ -54,3 +54,21 @@ const plans = [
   }
 ];
 
+export default function SubscriptionPage() {
+  return (
+    <div className="min-h-screen bg-[#030712] text-white">
+      <div className="container max-w-7xl mx-auto px-4 py-16 relative z-10">
+        {/* Header */}
+        <motion.div 
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          className="text-center mb-16"
+        >
+          <h1 className="text-4xl font-bold mb-4">
+            Select plan
+          </h1>
+          <p className="text-lg text-zinc-400 max-w-xl mx-auto">
+            Unlock the power of Arcads for your company.
+          </p>
+        </motion.div>
+
