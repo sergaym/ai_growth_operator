@@ -7,9 +7,10 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SendButton } from './SendButton';
-import { Users, UserPlus } from 'lucide-react';
+import { UserPlus, Mic, Volume2 } from 'lucide-react';
 
 type MessageType = 'gesture' | 'talking';
+type SpeechType = 'tts' | 'stt';
 
 export function GestureChat() {
   const [inputValue, setInputValue] = useState('');
