@@ -55,17 +55,11 @@ export function GestureChat() {
               className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
               rows={3}
             />
-            <button 
+            <SendButton
               onClick={handleSend}
               disabled={!inputValue.trim()}
-              className={`absolute bottom-2 right-0 p-1.5 rounded-lg transition-all
-                ${inputValue.trim() 
-                  ? 'text-zinc-600 hover:bg-zinc-100 cursor-pointer' 
-                  : 'text-zinc-300 cursor-not-allowed'}`}
-              aria-label="Send message"
-            >
-              <Send className="w-5 h-5" />
-            </button>
+              className="absolute bottom-2 right-0"
+            />
           </div>
         </div>
 
