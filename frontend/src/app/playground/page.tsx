@@ -13,7 +13,6 @@ import { Card } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import CreateVideoSection from "@/components/playground/CreateVideoSection";
 import VideoList from "@/components/playground/VideoList";
-import PlaygroundHeader from '@/components/playground/Header';
 import { NextStepsGuide } from '@/components/playground/NextStepsGuide';
 
 export default function Playground() {
