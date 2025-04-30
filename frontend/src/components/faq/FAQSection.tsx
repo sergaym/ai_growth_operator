@@ -112,12 +112,12 @@ export function FAQSection({
           animate={{ opacity: 1, y: 0 }}
           className="mt-20 text-center"
         >
-          <h3 className="text-2xl font-bold mb-4">Have more questions?</h3>
-          <p className="text-zinc-400 mb-6">We are happy to help!</p>
+          <h3 className="text-2xl font-bold mb-4">¿Tienes más preguntas?</h3>
+          <p className="text-zinc-400 mb-6">¡Estamos aquí para ayudarte!</p>
           <Button
             className="px-8 py-3 rounded-xl bg-white/5 hover:bg-white/10 border border-white/10 transition-all"
           >
-            Contact support
+            Contactar soporte
           </Button>
         </motion.div>
       )}
