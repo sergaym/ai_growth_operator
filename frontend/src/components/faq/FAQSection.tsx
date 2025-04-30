@@ -51,3 +51,18 @@ export function FAQSection({
         )}
       </motion.div>
 
+      <div className="space-y-6">
+        {faqs.map((faq, i) => (
+          <motion.div
+            key={i}
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: i * 0.1 }}
+            className="p-6 rounded-xl bg-white/[0.02] border border-white/10"
+          >
+            <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
+            <p className="text-zinc-400">{faq.answer}</p>
+          </motion.div>
+        ))}
+      </div>
+
