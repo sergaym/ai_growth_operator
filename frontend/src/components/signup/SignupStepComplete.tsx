@@ -3,6 +3,7 @@ import React from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { CheckCircle } from 'lucide-react';
+import { useRouter } from 'next/navigation';
 
 interface SignupStepCompleteProps {
   data: {
@@ -13,6 +14,13 @@ interface SignupStepCompleteProps {
 }
 
 export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) {
+  const router = useRouter();
+
+  const handleContinue = () => {
+    onFinish();
+    router.push('/signup/subscription');
+  };
+
   return (
     <motion.div
       initial={{ opacity: 0, scale: 0.95 }}
@@ -48,7 +56,7 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
         </p>
       </motion.div>
 
-      {/* Next Steps */}
+      {/* Next Steps Preview */}
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
@@ -59,16 +67,16 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
         <div className="grid gap-4 text-left">
           {[
             {
-              title: "Complete Your Profile",
-              description: "Add your profile picture and additional details to personalize your experience."
+              title: "Choose Your Plan",
+              description: "Select the perfect plan that matches your content creation needs."
             },
             {
               title: "Create Your First Avatar",
               description: "Start by creating your first AI avatar to represent your brand."
             },
             {
-              title: "Explore Templates",
-              description: "Browse our collection of pre-made templates to kickstart your content creation."
+              title: "Launch Your First Campaign",
+              description: "Use our templates to create your first AI-powered video campaign."
             }
           ].map((step, index) => (
             <div
@@ -94,10 +102,10 @@ export function SignupStepComplete({ data, onFinish }: SignupStepCompleteProps) 
         transition={{ delay: 0.8 }}
       >
         <Button
-          onClick={onFinish}
+          onClick={handleContinue}
           className="px-8 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 text-white font-medium hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] text-lg"
         >
-          Go to Dashboard
+          Choose your plan
         </Button>
       </motion.div>
     </motion.div>
