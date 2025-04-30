@@ -23,3 +23,10 @@ const defaultFAQs: FAQItem[] = [
   }
 ];
 
+interface FAQSectionProps {
+  title?: string;
+  subtitle?: string;
+  faqs?: FAQItem[];
+  showSupport?: boolean;
+}
+
