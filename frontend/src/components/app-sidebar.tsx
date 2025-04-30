@@ -33,24 +33,38 @@ const data = {
     email: "demo@example.com",
     avatar: "/avatars/default.jpg",
   },
-  navMain: [
+  projects: [
     {
-      title: "Video Generation",
+      name: "Playground",
       url: "/playground",
       icon: SquareTerminal,
       isActive: true,
       items: [
         {
-          title: "Create Video",
-          url: "/playground#video-generation",
+          title: "Projects",
+          url: "/playground/projects",
+          items: [
+            {
+              title: "Overview",
+              url: "/playground/projects",
+            },
+            {
+              title: "Legacy",
+              url: "/playground/projects/legacy",
+            },
+          ],
         },
         {
-          title: "My Videos",
-          url: "/playground#my-videos",
+          title: "History",
+          url: "/playground/history",
+        },
+        {
+          title: "Starred",
+          url: "/playground/starred",
         },
         {
           title: "Settings",
-          url: "/playground#settings",
+          url: "/playground/settings",
         },
       ],
     },
