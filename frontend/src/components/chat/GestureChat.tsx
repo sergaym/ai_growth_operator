@@ -40,6 +40,7 @@ export function GestureChat() {
 
   // Shared select styles for consistency
   const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
+  const speechSelectStyles = "w-[190px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
   
   // Shared button styles with border matching select component
   const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
@@ -92,7 +93,7 @@ export function GestureChat() {
             {messageType === 'talking' ? (
               <>
                 <Select value={speechType} onValueChange={(value) => setSpeechType(value as SpeechType)}>
-                  <SelectTrigger className={selectTriggerStyles}>
+                  <SelectTrigger className={speechSelectStyles}>
                     <SelectValue>
                       {speechType === 'tts' ? (
                         <span className="flex items-center gap-1.5">
