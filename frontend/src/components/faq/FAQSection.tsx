@@ -81,20 +81,30 @@ export function FAQSection({
         )}
       </motion.div>
 
-      <div className="space-y-6">
-        {faqs.map((faq, i) => (
-          <motion.div
-            key={i}
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: i * 0.1 }}
-            className="p-6 rounded-xl bg-white/[0.02] border border-white/10"
-          >
-            <h3 className="text-lg font-semibold mb-2">{faq.question}</h3>
-            <p className="text-zinc-400">{faq.answer}</p>
-          </motion.div>
-        ))}
-      </div>
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="space-y-4"
+      >
+        <Accordion type="single" collapsible className="space-y-4">
+          {faqs.map((faq, i) => (
+            <AccordionItem
+              key={i}
+              value={`faq-${i}`}
+              className="border border-white/10 rounded-xl bg-white/[0.02] px-6 data-[state=open]:pb-6"
+            >
+              <AccordionTrigger className="py-6 text-left hover:no-underline">
+                <h3 className="text-lg font-semibold text-white">
+                  {faq.question}
+                </h3>
+              </AccordionTrigger>
+              <AccordionContent className="text-zinc-400">
+                {faq.answer}
+              </AccordionContent>
+            </AccordionItem>
+          ))}
+        </Accordion>
+      </motion.div>
 
       {showSupport && (
         <motion.div
