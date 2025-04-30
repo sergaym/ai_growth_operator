@@ -58,3 +58,24 @@ interface PricingPlansProps {
   title?: string;
   subtitle?: string;
 }
+
+export function PricingPlans({ 
+  title = "Select plan",
+  subtitle = "Unlock the power of Arcads for your company."
+}: PricingPlansProps) {
+  return (
+    <div>
+      {/* Header */}
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="text-center mb-16"
+      >
+        <h1 className="text-4xl font-bold mb-4">
+          {title}
+        </h1>
+        <p className="text-lg text-zinc-400 max-w-xl mx-auto">
+          {subtitle}
+        </p>
+      </motion.div>
+
