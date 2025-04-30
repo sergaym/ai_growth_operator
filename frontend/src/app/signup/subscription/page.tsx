@@ -8,102 +8,16 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen bg-[#030712] text-white">
       <div className="container max-w-7xl mx-auto px-4 py-16 relative z-10">
-        {/* Header */}
-        <motion.div 
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="text-center mb-16"
-        >
-          <h1 className="text-4xl font-bold mb-4">
-            Select plan
-          </h1>
-          <p className="text-lg text-zinc-400 max-w-xl mx-auto">
-            Unlock the power of Arcads for your company.
-          </p>
-        </motion.div>
-
-        {/* Plans Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {plans.map((plan, index) => (
-            <motion.div
-              key={plan.name}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-              className={`relative bg-white/[0.02] backdrop-blur-sm rounded-2xl border ${
-                plan.popular ? 'border-red-500' : 'border-white/10'
-              } p-8 flex flex-col`}
-            >
-              {plan.popular && (
-                <div className="absolute -top-3 left-1/2 -translate-x-1/2">
-                  <span className="bg-zinc-800 text-white text-xs font-medium px-3 py-1 rounded-full">
-                    POPULAR
-                  </span>
-                </div>
-              )}
-
-              <div className="mb-8">
-                <h3 className="text-xl font-semibold mb-4">{plan.name}</h3>
-                <div className="flex items-baseline gap-2">
-                  <span className="text-4xl font-bold">{plan.price}</span>
-                  {plan.period && (
-                    <span className="text-zinc-400">{plan.period}</span>
-                  )}
-                </div>
-              </div>
-
-              <ul className="space-y-4 mb-8 flex-grow">
-                {plan.features.map((feature, i) => (
-                  <li key={i} className="flex items-center gap-3">
-                    <CheckIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
-                    <span className="text-zinc-300">{feature}</span>
-                  </li>
-                ))}
-              </ul>
-
-              <Button
-                className={`w-full py-3 rounded-xl transition-all text-base font-medium
-                  ${plan.actionType === 'primary'
-                    ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
-                    : 'bg-zinc-800 text-white hover:bg-zinc-700'
-                  }
-                `}
-              >
-                {plan.actionType === 'secondary' && (
-                  <LockIcon className="w-4 h-4 mr-2 inline-block" />
-                )}
-                {plan.action}
-              </Button>
-            </motion.div>
-          ))}
-        </div>
-
-        {/* Trust Section */}
+        <PricingPlans />
+        
         <div className="mt-32">
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            className="text-center mb-12"
-          >
-            <h2 className="text-3xl font-bold mb-4">
-              Already 5000 winnings ads made with Arcads
-            </h2>
-          </motion.div>
-
-          {/* Video Grid */}
-          <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-6 gap-4">
-            {Array.from({ length: 6 }).map((_, i) => (
-              <motion.div
-                key={i}
-                initial={{ opacity: 0, scale: 0.9 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ delay: i * 0.1 }}
-                className="aspect-[9/16] rounded-xl bg-white/5 overflow-hidden"
-              >
-                {/* This would be replaced with actual video thumbnails */}
-                <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-amber-500/10" />
-              </motion.div>
-            ))}
-          </div>
+          <TrustSection />
         </div>
 
+        <div className="mt-32">
+          <FAQSection />
+        </div>
+      </div>
+    </div>
+  );
+} 
