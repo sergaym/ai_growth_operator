@@ -121,14 +121,14 @@ export default function Header() {
               </svg>
             </Link>
             
-            <div className="h-5 w-px bg-[#e6e6e6]"></div>
+            <div className="h-5 w-px bg-white/10"></div>
             
-            <div className="flex items-center gap-2">
+            <Link href="/" className="flex items-center gap-2 group">
               <Logo size="sm" showText={false} />
-              <span className="text-[15px] font-medium text-[#37352f]">
+              <span className="text-[15px] font-medium text-white/80 group-hover:text-white transition-colors">
                 Playground
               </span>
-            </div>
+            </Link>
           </div>
           
           {/* Auth actions - only rendered after client-side mount */}
