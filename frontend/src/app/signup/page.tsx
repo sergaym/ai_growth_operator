@@ -35,6 +35,21 @@ export default function SignupPage() {
     aiExperience: '',
   });
 
+  // Handle email from login redirect
+  useEffect(() => {
+    const email = searchParams.get('email');
+    const callbackUrl = searchParams.get('callbackUrl');
+    
+    if (email) {
+      setFormData(prev => ({ ...prev, email }));
+    }
+    
+    // Store callback URL if provided
+    if (callbackUrl) {
+      sessionStorage.setItem('signupCallbackUrl', callbackUrl);
+    }
+  }, [searchParams]);
+
   const updateFormData = (data: Partial<typeof formData>) => {
     setFormData(prev => ({ ...prev, ...data }));
   };
