@@ -69,13 +69,7 @@ export function GestureChat() {
         </div>
 
         {/* Bottom Actions */}
-        <div className="flex items-center justify-between px-3 py-1.5 border-t border-zinc-100 bg-zinc-50/50">
-          <button className="inline-flex items-center gap-2 text-xs text-zinc-600">
-            👥 Add actors
-          </button>
-          <button className="inline-flex items-center justify-center w-5 h-5 rounded-full bg-zinc-100">
-            <span className="text-[10px] font-medium text-zinc-600">?</span>
-          </button>
+          </div>
         </div>
       </div>
     </div>
