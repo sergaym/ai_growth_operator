@@ -64,6 +64,12 @@ export function PricingPlans({
   title = "Select plan",
   subtitle = "Unlock the power of Arcads for your company."
 }: PricingPlansProps) {
+  const router = useRouter();
+
+  const handlePlanSelection = () => {
+    router.push('/playground');
+  };
+
   return (
     <div>
       {/* Header */}
