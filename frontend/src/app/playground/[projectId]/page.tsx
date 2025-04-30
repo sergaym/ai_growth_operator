@@ -14,15 +14,15 @@ export default function ProjectPage() {
       title={`Project ${projectId}`}
       description="Create your video scene"
     >
-      <div className="fixed inset-0 top-16 flex flex-col">
+      <div className="flex flex-col h-[calc(78vh-64px)]">
         {/* Main Content Area */}
         <div className="flex-1 overflow-auto">
           {/* Your other content goes here */}
         </div>
 
-        {/* Chat Area at Bottom - Fixed Height */}
+        {/* Chat Area at Bottom */}
         <div className="flex-shrink-0">
-          <div className="px-4 py-3">
+          <div className="container max-w-5xl mx-auto px-4 py-3">
             <GestureChat />
           </div>
         </div>
