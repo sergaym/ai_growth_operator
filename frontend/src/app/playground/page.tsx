@@ -297,47 +297,33 @@ export default function Playground() {
 
   return (
     <PlaygroundLayout
-      title="AI Content Studio"
-      description="Create and manage professional AI-generated videos with virtual avatars"
+      title="Welcome to the Playground"
+      description="This is where you'll create amazing AI-powered videos for your brand."
       error={apiError}
     >
-      {/* Tabs Navigation */}
-      <Tabs defaultValue="video-generation" value={activeTab} onValueChange={setActiveTab} className="w-full mb-6">
-        <TabsList className="grid w-full grid-cols-2">
+      <Tabs defaultValue={activeTab} onValueChange={setActiveTab} className="w-full">
+        <TabsList className="mb-8">
           <TabsTrigger value="video-generation">Video Generation</TabsTrigger>
-          <TabsTrigger value="your-avatars">Your Avatars</TabsTrigger>
+          <TabsTrigger value="avatar-creation">Avatar Creation</TabsTrigger>
+          <TabsTrigger value="my-videos">My Videos</TabsTrigger>
         </TabsList>
-        
-        {/* Video Generation Tab */}
-        <TabsContent value="video-generation" className="mt-6">
-          <CreateVideoSection
-            avatars={avatars}
-            voices={voices}
-            loadingAvatars={loadingAvatars}
-            loadingVoices={loadingVoices}
-            avatarsError={avatarsError}
-            voicesError={voicesError}
-            isGenerating={isGenerating}
-            onVideoGenerated={handleAvatarVideoGenerated}
-            onRetryApiLoad={handleRetryApiLoad}
-          />
-          
-          {/* Videos List (only shown in Video Generation tab) */}
-          <div className="mt-8">
-            <VideoList
-              title="Your Videos"
-              count={avatarVideos.length}
-              noItemsMessage="No videos created yet. Get started by creating your first video above."
-              renderItems={renderLocalVideos}
-              actionButton={
-                avatarVideos.length > 0 ? {
-                  label: "Clear All Videos",
-                  onClick: handleClearVideos,
-                  variant: "danger"
-                } : undefined
-              }
+
+        <TabsContent value="video-generation">
+          <Card className="p-6">
+            <CreateVideoSection
+              avatars={avatars}
+              voices={voices}
+              loadingAvatars={loadingAvatars}
+              loadingVoices={loadingVoices}
+              avatarsError={avatarsError}
+              voicesError={voicesError}
+              isGenerating={isGenerating}
+              onVideoGenerated={handleAvatarVideoGenerated}
+              onCreateAvatar={handleAvatarCreation}
+              onRetryApiLoad={handleRetryApiLoad}
             />
-            
+          </Card>
+        </TabsContent>
             <VideoList
               title="All Database Videos"
               count={databaseVideos.length}
