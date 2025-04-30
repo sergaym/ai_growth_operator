@@ -3,11 +3,11 @@ import React from "react";
 import { Card } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 
-export default function Playground() {
+export default function PlaygroundOverview() {
   return (
     <PlaygroundLayout
-      title="AI Video Studio"
-      description="Create professional AI-powered videos in minutes."
+      title="Playground Overview"
+      description="Welcome to the AI Video Studio. Create and manage your projects."
     >
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Quick Actions */}
