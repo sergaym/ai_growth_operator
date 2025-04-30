@@ -8,3 +8,10 @@ import { AvatarTrainingData } from "@/components/heygen/AvatarCreationForm";
 import AvatarCreationForm from "@/components/heygen/AvatarCreationForm";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Card } from "@/components/ui/card";
+
+// Component imports
+import PlaygroundLayout from "@/components/playground/Layout";
+import CreateVideoSection from "@/components/playground/CreateVideoSection";
+import VideoList from "@/components/playground/VideoList";
+import { NextStepsGuide } from '@/components/playground/NextStepsGuide';
+
