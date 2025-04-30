@@ -46,19 +46,25 @@ export function GestureChat() {
               </SelectContent>
             </Select>
           </div>
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
+          <div className="relative flex items-start gap-2 min-h-[80px] py-2">
+            <textarea
               value={inputValue}
               onChange={(e) => setInputValue(e.target.value)}
+              onKeyDown={handleKeyDown}
               placeholder="Describe a gesture, like 'Make the actor celebrate'"
-              className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none"
+              className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
+              rows={3}
             />
             <button 
-              className="text-zinc-500 hover:text-zinc-600 transition-colors"
+              onClick={handleSend}
+              disabled={!inputValue.trim()}
+              className={`absolute bottom-2 right-0 p-1.5 rounded-lg transition-all
+                ${inputValue.trim() 
+                  ? 'text-zinc-600 hover:bg-zinc-100 cursor-pointer' 
+                  : 'text-zinc-300 cursor-not-allowed'}`}
               aria-label="Send message"
             >
-              <Send className="w-4 h-4" />
+              <Send className="w-5 h-5" />
             </button>
           </div>
         </div>
