@@ -8,28 +8,28 @@ import Link from "next/link";
 export function Hero() {
   return (
     <section className="relative pt-16 md:pt-24 pb-24 md:pb-32 overflow-hidden">
-      {/* Background effects - subtle dot pattern with vibrant accent spheres */}
+      {/* Background effects */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-blue-600/10 via-purple-600/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
         <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
       </div>
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
-        {/* Top badge - inspired by Revolut badging */}
+        {/* Top badge */}
         <div className="text-center mb-10 md:mb-12">
           <motion.div
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
+            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
           >
-            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
-              Introducing AI Growth Operator
+            <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+              Introducing AI Video Generation
             </span>
           </motion.div>
         </div>
 
-        {/* Main content with split view like ramp.com */}
+        {/* Main content */}
         <div className="flex flex-col lg:flex-row items-center justify-between gap-10 md:gap-16 pt-4">
           {/* Left content - Text and CTA */}
           <motion.div 
@@ -45,11 +45,11 @@ export function Hero() {
               className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight"
             >
               <span className="text-white">
-                Automate
+                Create Professional
               </span>
               <br />
-              <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-blue-500 bg-clip-text text-transparent pb-1">
-                Growth Marketing
+              <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-red-500 bg-clip-text text-transparent pb-1">
+                AI Videos
               </span>
             </motion.h1>
             
@@ -59,7 +59,7 @@ export function Hero() {
               transition={{ duration: 0.5, delay: 0.4 }}
               className="text-lg text-zinc-400 mb-10"
             >
-              An intelligent AI agent that runs your user acquisition campaigns end-to-end, optimizing in real-time for maximum ROI.
+              Generate engaging videos in minutes with our AI technology. No cameras, no actors, no hassle.
             </motion.p>
             
             <motion.div 
