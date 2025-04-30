@@ -17,18 +17,23 @@ const steps: Step[] = [
   {
     id: 1,
     title: "Choose Your Plan",
-    description: "Select the perfect plan that matches your content creation needs.",
-    href: "/signup/subscription"
+    description: "Select the perfect subscription that matches your needs.",
+    href: "/signup/subscription",
+    completed: true
   },
   {
     id: 2,
-    title: "Create Your First Avatar",
-    description: "Start by creating your first AI avatar to represent your brand."
+    title: "Complete Your Account",
+    description: "Add your profile information and preferences.",
+    href: "/account/setup",
+    completed: false
   },
   {
     id: 3,
-    title: "Launch Your First Campaign",
-    description: "Use our templates to create your first AI-powered video campaign."
+    title: "Create Your First Video",
+    description: "Start creating amazing AI-powered content.",
+    href: "/studio/create",
+    completed: false
   }
 ];
 
