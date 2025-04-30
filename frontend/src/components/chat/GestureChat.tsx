@@ -16,7 +16,7 @@ export function GestureChat() {
   const [inputValue, setInputValue] = useState('');
   const [gesture, setGesture] = useState('');
   const [messageType, setMessageType] = useState<MessageType>('gesture');
-  const [actor, setActor] = useState('');
+  const [speechType, setSpeechType] = useState<SpeechType>('tts');
 
   const handleSend = () => {
     if (inputValue.trim()) {
