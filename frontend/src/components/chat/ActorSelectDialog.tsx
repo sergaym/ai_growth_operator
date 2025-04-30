@@ -39,3 +39,26 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   ];
 
   // Filter actors based on search and filters
+  const filteredActors = actors.filter(actor => {
+    // Search filter
+    if (searchQuery && !actor.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+      return false;
+    }
+    
+    // Gender filter
+    if (genderFilter !== 'all') {
+      if (genderFilter === 'male' && !actor.tags.includes('male')) return false;
+      if (genderFilter === 'female' && !actor.tags.includes('female')) return false;
+    }
+    
+    // Age filter
+    if (ageFilter !== 'all') {
+      if (!actor.tags.includes(ageFilter)) return false;
+    }
+    
+    // HD filter
+    if (hdFilter && !actor.hd) return false;
+    
+    return true;
+  });
+
