@@ -54,3 +54,7 @@ export const plans = [
   }
 ];
 
+interface PricingPlansProps {
+  title?: string;
+  subtitle?: string;
+}
