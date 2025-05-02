@@ -132,66 +132,60 @@ export default function PlaygroundOverview() {
         </div>
       </div>
 
+      {/* Project Grid */}
+      {filteredProjects.length === 0 ? (
+        <div className="text-center py-12">
+          <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
+          {createElement('h3', { className: "mt-4 text-lg font-medium" }, "No projects found")}
+          <p className="mt-1 text-gray-500">Get started by creating a new project.</p>
+          <Button onClick={handleNewProject} className="mt-4">Create Project</Button>
+        </div>
+      ) : (
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredProjects.map((project) => (
+            <Card key={project.id} className="overflow-hidden group">
+              <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                {/* Placeholder for thumbnail */}
+                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
+                  <div className="text-xl font-bold text-white/70">{project.name.substring(0, 2).toUpperCase()}</div>
                 </div>
-                <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">
-                  Completed
-                </span>
-              </div>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10 hover:bg-white/[0.1] transition-all cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Product Demo</h3>
-                  <p className="text-sm text-zinc-400">Last edited 5 hours ago</p>
+                {/* Hover overlay with actions */}
+                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                  <Button size="sm" variant="secondary" onClick={() => window.location.href = `/playground/${project.id}`}>
+                    Edit
+                  </Button>
                 </div>
-                <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">
-                  In Progress
-                </span>
               </div>
-            </div>
-          </div>
-        </Card>
-
-        {/* Statistics */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Statistics</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-4 rounded-lg border border-white/10">
-              <p className="text-sm text-zinc-400">Total Videos</p>
-              <p className="text-2xl font-semibold mt-1">24</p>
-            </div>
-            <div className="p-4 rounded-lg border border-white/10">
-              <p className="text-sm text-zinc-400">Storage Used</p>
-              <p className="text-2xl font-semibold mt-1">2.4 GB</p>
-            </div>
-          </div>
-        </Card>
-
-        {/* Quick Tips */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Quick Tips</h2>
-          <div className="space-y-3">
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                1
+              
+              <div className="p-4">
+                <div className="flex justify-between items-start mb-2">
+                  {createElement('h3', { className: "font-medium truncate mr-2" }, project.name)}
+                  <DropdownMenu>
+                    <DropdownMenuTrigger asChild>
+                      <Button variant="ghost" size="icon" className="h-8 w-8">
+                        <MoreHorizontal className="h-4 w-4" />
+                      </Button>
+                    </DropdownMenuTrigger>
+                    <DropdownMenuContent align="end">
+                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
+                      <DropdownMenuItem>Rename</DropdownMenuItem>
+                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <p className="text-sm text-gray-500 mb-3 truncate">{project.description}</p>
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center text-xs text-gray-500">
+                    <Clock className="h-3 w-3 mr-1" />
+                    {project.lastEdited}
+                  </div>
+                  {getStatusBadge(project.status)}
+                </div>
               </div>
-              <p className="text-sm text-zinc-400">Start with a clear script and storyboard for best results</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                2
-              </div>
-              <p className="text-sm text-zinc-400">Use high-quality voice recordings for better lip sync</p>
-            </div>
-            <div className="flex items-start gap-3">
-              <div className="w-6 h-6 rounded-full bg-amber-500/10 text-amber-500 flex items-center justify-center flex-shrink-0 mt-0.5">
-                3
-              </div>
-              <p className="text-sm text-zinc-400">Preview your video before finalizing to ensure quality</p>
-            </div>
-          </div>
-        </Card>
-      </div>
+            </Card>
+          ))}
+        </div>
+      )}
     </PlaygroundLayout>
   );
 } 
