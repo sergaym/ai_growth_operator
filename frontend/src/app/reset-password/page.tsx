@@ -199,3 +199,11 @@ function ResetPasswordForm() {
   );
 }
 
+// Main page component with suspense boundary
+export default function ResetPasswordPage() {
+  return (
+    <Suspense fallback={<ResetPasswordSkeleton />}>
+      <ResetPasswordForm />
+    </Suspense>
+  );
+} 
