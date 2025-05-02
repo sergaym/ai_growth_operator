@@ -7,7 +7,6 @@ import { PageBackground } from "@/components/ui/PageBackground";
 import { SignupStepProfile } from "@/components/signup/SignupStepProfile";
 import { SignupStepCompany } from "@/components/signup/SignupStepCompany";
 import { SignupStepGoals } from "@/components/signup/SignupStepGoals";
-import { SignupStepComplete } from "@/components/signup/SignupStepComplete";
 import { SignupProgress } from "@/components/signup/SignupProgress";
 
 function SignupPageContent() {
