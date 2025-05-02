@@ -89,32 +89,49 @@ export default function PlaygroundOverview() {
 
   return (
     <PlaygroundLayout
-      title="Playground Overview"
-      description="Welcome to the AI Video Studio. Create and manage your projects."
+      title="Projects"
+      description="Create and manage your AI-generated content projects."
     >
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        {/* Quick Actions */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Quick Actions</h2>
-          <div className="space-y-4">
-            <button className="w-full py-4 px-6 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white rounded-xl font-medium transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
-              Create New Video
-            </button>
-            <button className="w-full py-4 px-6 border border-white/10 hover:bg-white/[0.1] text-white rounded-xl font-medium transition-all">
-              Browse Templates
-            </button>
-          </div>
-        </Card>
+      {/* Search and Filter Bar */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Search projects..."
+            className="pl-10"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2 items-center">
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="sm" className="gap-1.5">
+                <Filter className="h-4 w-4" />
+                <span>Filter</span>
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end">
+              <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
+                Completed
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
+                In Progress
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
+                Drafts
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+          <Button onClick={handleNewProject} className="gap-1.5">
+            <PlusCircle className="h-4 w-4" />
+            <span>New Project</span>
+          </Button>
+        </div>
+      </div>
 
-        {/* Recent Projects */}
-        <Card className="p-6">
-          <h2 className="text-xl font-semibold mb-4">Recent Projects</h2>
-          <div className="space-y-4">
-            <div className="p-4 rounded-lg border border-white/10 hover:bg-white/[0.1] transition-all cursor-pointer">
-              <div className="flex items-center justify-between">
-                <div>
-                  <h3 className="font-medium">Marketing Campaign</h3>
-                  <p className="text-sm text-zinc-400">Last edited 2 hours ago</p>
                 </div>
                 <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">
                   Completed
