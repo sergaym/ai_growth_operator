@@ -34,3 +34,13 @@ export function PublicAPISettings() {
       duration: 5000,
     });
   };
+
+  const toggleApiKeyVisibility = () => {
+    setShowApiKey(!showApiKey);
+  };
+
+  const maskApiKey = (key: string) => {
+    const prefix = key.substring(0, 7);
+    const suffix = key.substring(key.length - 4);
+    return `${prefix}${'•'.repeat(Math.max(0, key.length - 11))}${suffix}`;
+  };
