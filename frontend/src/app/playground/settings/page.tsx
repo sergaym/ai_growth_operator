@@ -5,9 +5,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { GeneralSettings } from "@/components/settings/GeneralSettings";
 import { MembersSettings } from "@/components/settings/MembersSettings";
 import { PublicAPISettings } from "@/components/settings/PublicAPISettings";
-import { Button } from "@/components/ui/button";
-import { User } from "lucide-react";
-import Link from "next/link";
+import { Badge } from "@/components/ui/badge";
 
 export default function SettingsPage() {
   return (
