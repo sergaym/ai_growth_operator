@@ -188,17 +188,16 @@ export default function AccountSettings() {
                     className="hidden"
                   />
                 </div>
-              </CardContent>
-            </Card>
+                <p className="text-xs text-muted-foreground text-center">
+                  Square images work best. Max size 5MB.
+                </p>
+              </div>
+            </div>
             
-            <Card>
-              <CardHeader>
-                <CardTitle>Account Actions</CardTitle>
-                <CardDescription>
-                  Manage your account status and sessions.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-6">
+            {/* Account Actions Section */}
+            <div className="bg-muted/40 p-6 rounded-lg border border-border space-y-6">
+              <h3 className="font-medium">Account Actions</h3>
+              <div className="space-y-6">
                 <Link href="/api/auth/logout" className="block">
                   <Button variant="outline" className="w-full justify-start">
                     <LogOut className="mr-2 h-4 w-4" />
@@ -206,13 +205,19 @@ export default function AccountSettings() {
                   </Button>
                 </Link>
                 
-                <Separator />
+                <Separator className="my-2" />
                 
-                <Button variant="destructive" className="w-full justify-start">
-                  Delete Account
-                </Button>
-              </CardContent>
-            </Card>
+                <div>
+                  <h4 className="text-sm font-medium text-destructive mb-2">Danger Zone</h4>
+                  <Button variant="destructive" className="w-full justify-start">
+                    Delete Account
+                  </Button>
+                  <p className="text-xs text-muted-foreground mt-2">
+                    This action cannot be undone. All your data will be permanently deleted.
+                  </p>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
