@@ -61,16 +61,7 @@ export function Hero() {
             >
               Generate 100s of winning videos from text. No cameras, no production costs, no hassle.
             </motion.p>
-            
-            <motion.p 
-              initial={{ opacity: 0, y: 10 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ duration: 0.5, delay: 0.5 }}
-              className="text-base text-zinc-500 mb-10"
-            >
-              Turn your ideas into high-converting video ads in minutes with professional AI actors that look and sound just like real humans.
-            </motion.p>
-            
+                        
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
