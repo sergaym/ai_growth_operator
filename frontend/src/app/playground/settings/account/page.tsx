@@ -155,18 +155,22 @@ export default function AccountSettings() {
               </div>
             </div>
             
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-gray-500" />
-              <Input 
-                type="password"
-                placeholder="Confirm new password"
-                className="flex-1 border-gray-200 focus:border-gray-300"
-              />
+            <div>
+              <Label htmlFor="confirm-password" className="text-sm text-gray-600 mb-1 block">Confirm New Password</Label>
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 mr-2 text-gray-500" />
+                <Input 
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirm your new password"
+                  className="flex-1 border-gray-200 focus:border-gray-300"
+                />
+              </div>
             </div>
             
             <div>
               <Button variant="outline" size="sm">
-                Change Password
+                Update Password
               </Button>
             </div>
           </div>
