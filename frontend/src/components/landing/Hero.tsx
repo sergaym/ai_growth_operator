@@ -69,14 +69,9 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
               <Link href="/login?callbackUrl=/playground">
-                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-lg font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
-                  Start Creating
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/login?callbackUrl=/become-actor">
-                <Button className="px-8 py-6 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-lg font-medium text-white">
-                  Become an AI Actor
+                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-lg font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] group">
+                  Get your first video ad generated
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </motion.div>
