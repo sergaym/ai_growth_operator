@@ -32,3 +32,27 @@ export default function SettingsPage() {
             </Link>
           </div>
         </div>
+        
+        <Tabs defaultValue="general" className="w-full">
+          <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
+            <TabsTrigger value="general">General</TabsTrigger>
+            <TabsTrigger value="members">Members</TabsTrigger>
+            <TabsTrigger value="api">Public API</TabsTrigger>
+          </TabsList>
+          
+          <TabsContent value="general">
+            <GeneralSettings />
+          </TabsContent>
+          
+          <TabsContent value="members">
+            <MembersSettings />
+          </TabsContent>
+          
+          <TabsContent value="api">
+            <PublicAPISettings />
+          </TabsContent>
+        </Tabs>
+      </div>
+    </PlaygroundLayout>
+  );
+} 
