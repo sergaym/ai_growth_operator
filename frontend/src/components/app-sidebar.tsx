@@ -46,11 +46,7 @@ const data = {
         {
           title: "Legacy",
           url: "/playground/legacy",
-        },
-        {
-          title: "History",
-          url: "/playground/history",
-        },
+        }
       ],
     },
     {
