@@ -186,3 +186,31 @@ export default function AccountSettings() {
               </CardContent>
             </Card>
             
+            <Card>
+              <CardHeader>
+                <CardTitle>Account Actions</CardTitle>
+                <CardDescription>
+                  Manage your account status and sessions.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                <Link href="/api/auth/logout" className="block">
+                  <Button variant="outline" className="w-full justify-start">
+                    <LogOut className="mr-2 h-4 w-4" />
+                    Sign Out
+                  </Button>
+                </Link>
+                
+                <Separator />
+                
+                <Button variant="destructive" className="w-full justify-start">
+                  Delete Account
+                </Button>
+              </CardContent>
+            </Card>
+          </div>
+        </div>
+      </div>
+    </PlaygroundLayout>
+  );
+} 
