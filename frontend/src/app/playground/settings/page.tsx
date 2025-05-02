@@ -8,3 +8,27 @@ import { PublicAPISettings } from "@/components/settings/PublicAPISettings";
 import { Button } from "@/components/ui/button";
 import { User } from "lucide-react";
 import Link from "next/link";
+
+export default function SettingsPage() {
+  return (
+    <PlaygroundLayout
+      title="Settings"
+      description="Configure your workspace, team members, and application settings."
+    >
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Workspace Settings</h2>
+            <p className="text-muted-foreground mt-1">
+              Manage your workspace preferences, team members, and integrations.
+            </p>
+          </div>
+          <div>
+            <Link href="/playground/settings/account">
+              <Button variant="outline">
+                <User className="h-4 w-4 mr-2" />
+                Account Settings
+              </Button>
+            </Link>
+          </div>
+        </div>
