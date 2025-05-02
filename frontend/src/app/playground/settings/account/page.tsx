@@ -155,3 +155,34 @@ export default function AccountSettings() {
             </Card>
           </div>
           
+          <div className="space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Profile Picture</CardTitle>
+                <CardDescription>
+                  Upload a profile picture to personalize your account.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="flex flex-col items-center justify-center space-y-4">
+                <Avatar className="w-32 h-32">
+                  <AvatarImage src={avatarPreview || "/avatars/default.jpg"} />
+                  <AvatarFallback>{fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+                </Avatar>
+                
+                <div className="w-full">
+                  <Label htmlFor="avatar-upload" className="cursor-pointer">
+                    <div className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90">
+                      Upload New Image
+                    </div>
+                  </Label>
+                  <Input 
+                    id="avatar-upload" 
+                    type="file" 
+                    accept="image/*"
+                    onChange={handleAvatarChange}
+                    className="hidden"
+                  />
+                </div>
+              </CardContent>
+            </Card>
+            
