@@ -7,7 +7,6 @@ import { PageBackground } from "@/components/ui/PageBackground";
 import { SignupStepProfile } from "@/components/signup/SignupStepProfile";
 import { SignupStepCompany } from "@/components/signup/SignupStepCompany";
 import { SignupStepGoals } from "@/components/signup/SignupStepGoals";
-import { SignupStepComplete } from "@/components/signup/SignupStepComplete";
 import { SignupProgress } from "@/components/signup/SignupProgress";
 
 function SignupPageContent() {
@@ -54,7 +53,15 @@ function SignupPageContent() {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
-  const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => {
+    if (step < 3) {
+      setStep(prev => prev + 1);
+    } else {
+      // If we're at step 3 (Goals), redirect to subscription
+      handleSignupComplete();
+    }
+  };
+  
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const handleSignupComplete = async () => {
@@ -62,12 +69,14 @@ function SignupPageContent() {
       // Here you would typically make an API call to create the user
       // For now, we'll simulate success
       
-      // Get the stored callback URL or default to playground
-      const callbackUrl = sessionStorage.getItem('signupCallbackUrl') || '/playground';
-      sessionStorage.removeItem('signupCallbackUrl'); // Clean up
+      // Save user data to sessionStorage for the subscription page
+      sessionStorage.setItem('signupData', JSON.stringify({
+        firstName: formData.firstName,
+        companyName: formData.companyName
+      }));
       
-      // Redirect to the callback URL
-      router.push(callbackUrl);
+      // Redirect directly to subscription page
+      router.push('/signup/subscription');
     } catch (error) {
       console.error('Signup error:', error);
       // Handle error appropriately
@@ -86,10 +95,6 @@ function SignupPageContent() {
     {
       title: "Your AI content goals",
       subtitle: "We'll customize our AI to match your content strategy"
-    },
-    {
-      title: "Almost there!",
-      subtitle: "Review your information and get started"
     }
   ];
 
@@ -116,8 +121,8 @@ function SignupPageContent() {
           </motion.div>
         </div>
 
-        {/* Progress Bar */}
-        <SignupProgress currentStep={step} totalSteps={4} />
+        {/* Progress Bar - Updated to 3 steps */}
+        <SignupProgress currentStep={step} totalSteps={3} />
         
         {/* Form Steps */}
         <div className="max-w-2xl mx-auto mt-12">
@@ -145,14 +150,6 @@ function SignupPageContent() {
                 data={formData}
                 onUpdate={updateFormData}
                 onNext={nextStep}
-                onBack={prevStep}
-              />
-            )}
-            {step === 4 && (
-              <SignupStepComplete
-                key="step4"
-                data={formData}
-                onFinish={handleSignupComplete}
                 onBack={prevStep}
               />
             )}
