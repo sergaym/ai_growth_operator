@@ -5,7 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
-import { MoreHorizontal, UserPlus } from "lucide-react";
+import { MoreHorizontal, UserPlus, Trash2 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -128,7 +128,7 @@ export function MembersSettings() {
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
-                  <Badge variant="outline" className={getRoleBadgeColor(member.role)}>
+                  <Badge variant="secondary" className={`border-0 ${getRoleBadgeColor(member.role)}`}>
                     {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
                   </Badge>
                   {member.role !== 'owner' && (
@@ -162,6 +162,7 @@ export function MembersSettings() {
                           onClick={() => handleRemoveMember(member.id)}
                           className="text-destructive focus:text-destructive"
                         >
+                          <Trash2 className="h-4 w-4 mr-2 text-destructive" />
                           Remove
                         </DropdownMenuItem>
                       </DropdownMenuContent>
