@@ -11,7 +11,12 @@ export function GeneralSettings() {
   const [workspaceName, setWorkspaceName] = useState("My AI UGC Workspace");
   const [isUploading, setIsUploading] = useState(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
+  const handleIconClick = () => {
+    fileInputRef.current?.click();
+  };
 
   const handleIconChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
