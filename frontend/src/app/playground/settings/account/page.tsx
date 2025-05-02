@@ -98,37 +98,49 @@ export default function AccountSettings() {
                 />
               </div>
             </div>
+            
+            <Button 
+              onClick={handleSaveProfile}
+              className="mt-2"
+              size="sm"
+            >
+              Save Changes
+            </Button>
           </div>
+        </div>
+        
+        <Separator className="bg-gray-100" />
+        
+        {/* Password Section */}
+        <div className="space-y-5">
+          <h3 className="text-base font-medium text-gray-700">Password</h3>
           
-          {/* Sidebar - Right Side */}
-          <div className="md:col-span-4 space-y-8">
-            {/* Profile Picture Section */}
-            <div className="bg-muted/40 p-6 rounded-lg border border-border space-y-4">
-              <h3 className="font-medium">Profile Picture</h3>
-              <div className="flex flex-col items-center justify-center space-y-4">
-                <Avatar className="w-32 h-32">
-                  <AvatarImage src={avatarPreview || "/avatars/default.jpg"} />
-                  <AvatarFallback>{fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-                </Avatar>
-                
-                <div className="w-full">
-                  <Label htmlFor="avatar-upload" className="cursor-pointer">
-                    <div className="inline-flex h-9 w-full items-center justify-center rounded-md bg-primary px-4 py-2 text-sm font-medium text-primary-foreground ring-offset-background transition-colors hover:bg-primary/90">
-                      Upload New Image
-                    </div>
-                  </Label>
-                  <Input 
-                    id="avatar-upload" 
-                    type="file" 
-                    accept="image/*"
-                    onChange={handleAvatarChange}
-                    className="hidden"
-                  />
-                </div>
-                <p className="text-xs text-muted-foreground text-center">
-                  Square images work best. Max size 5MB.
-                </p>
-              </div>
+          <div className="grid gap-4 max-w-lg">
+            <div className="flex items-center">
+              <Lock className="w-4 h-4 mr-2 text-gray-500" />
+              <Input 
+                type="password"
+                placeholder="Current password"
+                className="flex-1 border-gray-200 focus:border-gray-300"
+              />
+            </div>
+            
+            <div className="flex items-center">
+              <Shield className="w-4 h-4 mr-2 text-gray-500" />
+              <Input 
+                type="password"
+                placeholder="New password"
+                className="flex-1 border-gray-200 focus:border-gray-300"
+              />
+            </div>
+            
+            <div className="flex items-center">
+              <Shield className="w-4 h-4 mr-2 text-gray-500" />
+              <Input 
+                type="password"
+                placeholder="Confirm new password"
+                className="flex-1 border-gray-200 focus:border-gray-300"
+              />
             </div>
             
             {/* Account Actions Section */}
