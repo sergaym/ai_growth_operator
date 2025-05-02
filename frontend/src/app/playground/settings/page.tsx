@@ -18,7 +18,12 @@ export default function SettingsPage() {
           <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
             <TabsTrigger value="general">General</TabsTrigger>
             <TabsTrigger value="members">Members</TabsTrigger>
-            <TabsTrigger value="api">Public API</TabsTrigger>
+            <TabsTrigger value="api" disabled className="relative">
+              Public API
+              <Badge variant="outline" className="ml-2 bg-zinc-100 text-zinc-500 text-[10px] py-0 px-1.5 absolute -top-2 -right-2">
+                Soon
+              </Badge>
+            </TabsTrigger>
           </TabsList>
           
           <TabsContent value="general">
