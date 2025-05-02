@@ -1,14 +1,13 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { UserIcon, AtSign, Lock, Shield, LogOut, Camera } from "lucide-react";
+import { UserIcon, AtSign, Lock, Shield, Camera, AlertCircle } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { Separator } from "@/components/ui/separator";
-import Link from "next/link";
 
 export default function AccountSettings() {
   const [fullName, setFullName] = useState("John Doe");
