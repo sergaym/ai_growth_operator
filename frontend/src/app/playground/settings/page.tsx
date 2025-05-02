@@ -15,7 +15,7 @@ export default function SettingsPage() {
     >
       <div className="space-y-8">
         <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
+          <TabsList className="grid w-full grid-cols-3 max-w-md mb-4">
             <TabsTrigger value="general">Workspace</TabsTrigger>
             <TabsTrigger value="members">Team Members</TabsTrigger>
             <TabsTrigger value="api" disabled className="relative">
