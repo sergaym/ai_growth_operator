@@ -125,26 +125,34 @@ export default function AccountSettings() {
         <Separator className="bg-gray-100" />
         
         {/* Password Section */}
-        <div className="space-y-5">
-          <h3 className="text-base font-medium text-gray-700">Password</h3>
+        <div>
+          <h3 className="text-base font-medium text-gray-700 mb-4">Security</h3>
           
           <div className="grid gap-4 max-w-lg">
-            <div className="flex items-center">
-              <Lock className="w-4 h-4 mr-2 text-gray-500" />
-              <Input 
-                type="password"
-                placeholder="Current password"
-                className="flex-1 border-gray-200 focus:border-gray-300"
-              />
+            <div>
+              <Label htmlFor="current-password" className="text-sm text-gray-600 mb-1 block">Current Password</Label>
+              <div className="flex items-center">
+                <Lock className="w-4 h-4 mr-2 text-gray-500" />
+                <Input 
+                  id="current-password"
+                  type="password"
+                  placeholder="Enter your current password"
+                  className="flex-1 border-gray-200 focus:border-gray-300"
+                />
+              </div>
             </div>
             
-            <div className="flex items-center">
-              <Shield className="w-4 h-4 mr-2 text-gray-500" />
-              <Input 
-                type="password"
-                placeholder="New password"
-                className="flex-1 border-gray-200 focus:border-gray-300"
-              />
+            <div>
+              <Label htmlFor="new-password" className="text-sm text-gray-600 mb-1 block">New Password</Label>
+              <div className="flex items-center">
+                <Shield className="w-4 h-4 mr-2 text-gray-500" />
+                <Input 
+                  id="new-password"
+                  type="password"
+                  placeholder="Enter a new password"
+                  className="flex-1 border-gray-200 focus:border-gray-300"
+                />
+              </div>
             </div>
             
             <div className="flex items-center">
