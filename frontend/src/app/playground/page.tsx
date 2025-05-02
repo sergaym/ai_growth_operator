@@ -58,6 +58,35 @@ const projectsData = [
 ];
 
 export default function PlaygroundOverview() {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [projects, setProjects] = useState(projectsData);
+
+  // Filter projects based on search query
+  const filteredProjects = searchQuery
+    ? projects.filter(project => 
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        project.description.toLowerCase().includes(searchQuery.toLowerCase())
+      )
+    : projects;
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
+      case "in-progress":
+        return <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">In Progress</span>;
+      case "draft":
+        return <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-1 rounded-full">Draft</span>;
+      default:
+        return null;
+    }
+  };
+
+  const handleNewProject = () => {
+    const projectId = nanoid(10);
+    window.location.href = `/playground/${projectId}`;
+  };
+
   return (
     <PlaygroundLayout
       title="Playground Overview"
