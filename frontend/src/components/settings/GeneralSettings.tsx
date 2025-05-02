@@ -46,39 +46,49 @@ export function GeneralSettings() {
   };
 
   return (
-    <div className="space-y-8">
-      <div className="space-y-6 max-w-2xl">
-        <div className="space-y-2">
-          <Label htmlFor="workspace-name">Workspace Name</Label>
-          <Input 
-            id="workspace-name" 
-            value={workspaceName}
-            onChange={(e) => setWorkspaceName(e.target.value)}
-            placeholder="Enter workspace name"
-          />
-          <p className="text-sm text-muted-foreground">
-            This name will appear in the sidebar and shared documents.
-          </p>
-        </div>
-
-        <Separator className="my-6" />
-
-        <div className="space-y-3">
-          <Label>Workspace Icon</Label>
+    <div className="space-y-8 max-w-2xl">
+      <div className="space-y-6">
+        {/* Workspace Icon - Now left aligned */}
+        <div className="flex flex-col space-y-4">
+          <h3 className="text-lg font-medium">Workspace</h3>
           <div className="flex items-start gap-6">
-            <div className="relative flex-shrink-0">
-              <div className="w-24 h-24 rounded-md overflow-hidden border border-border flex items-center justify-center bg-muted">
-                {iconPreview ? (
-                  <img src={iconPreview} alt="Workspace icon" className="w-full h-full object-cover" />
-                ) : (
-                  <CloudUpload className="h-8 w-8 text-muted-foreground" />
-                )}
-              </div>
-              {isUploading && (
-                <div className="absolute inset-0 bg-background/80 flex items-center justify-center">
-                  <div className="h-4 w-4 border-2 border-primary border-t-transparent rounded-full animate-spin"></div>
+            <div 
+              className="relative w-20 h-20 rounded-md overflow-hidden flex items-center justify-center 
+                        bg-gray-50 cursor-pointer hover:bg-gray-100 transition-colors"
+              onClick={handleIconClick}
+            >
+              {iconPreview ? (
+                <img src={iconPreview} alt="Workspace icon" className="w-full h-full object-cover" />
+              ) : (
+                <div className="flex flex-col items-center justify-center h-full w-full text-gray-400">
+                  <CloudUpload className="h-8 w-8 mb-1" />
+                  <span className="text-[10px]">Upload</span>
                 </div>
               )}
+              {isUploading && (
+                <div className="absolute inset-0 bg-white/80 flex items-center justify-center">
+                  <div className="h-4 w-4 border-2 border-gray-800 border-t-transparent rounded-full animate-spin"></div>
+                </div>
+              )}
+              <div className="absolute inset-0 opacity-0 hover:opacity-100 bg-black/5 flex items-center justify-center transition-opacity">
+                <div className="bg-black/50 rounded-full p-1.5">
+                  <Camera className="h-4 w-4 text-white" />
+                </div>
+              </div>
+            </div>
+            
+            <div className="space-y-2 flex-1">
+              <Label htmlFor="workspace-name" className="text-sm font-medium text-gray-700">Workspace Name</Label>
+              <Input 
+                id="workspace-name" 
+                value={workspaceName}
+                onChange={(e) => setWorkspaceName(e.target.value)}
+                placeholder="Enter workspace name"
+                className="border-gray-200 focus:border-gray-300 focus:ring-gray-200"
+              />
+              <p className="text-xs text-gray-500">
+                This name will appear in the sidebar and shared documents.
+              </p>
             </div>
             <div className="space-y-2">
               <div className="flex flex-col gap-1.5">
