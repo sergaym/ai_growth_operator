@@ -121,8 +121,8 @@ function SignupPageContent() {
           </motion.div>
         </div>
 
-        {/* Progress Bar */}
-        <SignupProgress currentStep={step} totalSteps={4} />
+        {/* Progress Bar - Updated to 3 steps */}
+        <SignupProgress currentStep={step} totalSteps={3} />
         
         {/* Form Steps */}
         <div className="max-w-2xl mx-auto mt-12">
@@ -150,14 +150,6 @@ function SignupPageContent() {
                 data={formData}
                 onUpdate={updateFormData}
                 onNext={nextStep}
-                onBack={prevStep}
-              />
-            )}
-            {step === 4 && (
-              <SignupStepComplete
-                key="step4"
-                data={formData}
-                onFinish={handleSignupComplete}
                 onBack={prevStep}
               />
             )}
