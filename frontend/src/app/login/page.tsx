@@ -143,10 +143,10 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-150 ease-in-out shadow-lg ${
                 loading 
-                  ? 'bg-blue-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                  ? 'bg-red-800/50 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
               }`}
             >
               {loading ? (
@@ -158,18 +158,76 @@ function LoginForm() {
                   Signing in...
                 </span>
               ) : (
-                'Sign in'
+                'Sign in to continue'
               )}
             </button>
           </div>
-        </form>
+        </motion.form>
         
-        <div className="text-center mt-4">
-          <Link href="/" className="text-sm text-blue-600 hover:text-blue-500">
-            Back to home
+        <div className="text-center mt-3">
+          <Link href="/reset-password" className="text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
+            Forgot your password?
           </Link>
         </div>
-      </div>
+      </motion.div>
+      
+      {/* Badge */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="mt-16 inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm relative z-10"
+      >
+        <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+          Create AI Videos in Minutes
+        </span>
+      </motion.div>
+      
+      {/* CTA Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+        className="text-center max-w-lg mx-auto relative z-10"
+      >
+        <h2 className="text-2xl md:text-3xl font-bold text-white mt-5 mb-2">
+          Don't have an account yet?
+        </h2>
+        <p className="text-zinc-400 mb-6">
+          Join thousands of creators using AI to generate professional videos without expensive equipment
+        </p>
+        
+        <motion.div 
+          animate={{ 
+            y: [0, 8, 0],
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 2.5,
+            ease: "easeInOut" 
+          }}
+          className="text-red-500 my-5"
+        >
+          <svg className="w-8 h-8 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V20M12 20L18 14M12 20L6 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </motion.div>
+        
+        <Link href="/signup" className="block mx-auto w-fit">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="py-4 px-10 bg-gradient-to-r from-red-500 to-amber-500 rounded-full text-lg font-bold text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            Start Creating
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 5L20 12L13 19M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.button>
+        </Link>
+        
+        <p className="mt-4 text-xs text-zinc-500">Less than 1 minute to start • Cancel anytime</p>
+      </motion.div>
     </div>
   );
 }
