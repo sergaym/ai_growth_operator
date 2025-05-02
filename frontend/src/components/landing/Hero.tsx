@@ -45,11 +45,11 @@ export function Hero() {
               className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight"
             >
               <span className="text-white">
-                Create Professional
+                Create winning
               </span>
               <br />
               <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-red-500 bg-clip-text text-transparent pb-1">
-                AI Videos
+                ads with AI Actors
               </span>
             </motion.h1>
             
@@ -57,9 +57,18 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-lg text-zinc-400 mb-10"
+              className="text-lg text-zinc-400 mb-6"
             >
-              Generate engaging videos in minutes with our AI technology. No cameras, no actors, no hassle.
+              Generate 100s of winning videos from text. No cameras, no production costs, no hassle.
+            </motion.p>
+            
+            <motion.p 
+              initial={{ opacity: 0, y: 10 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.5, delay: 0.5 }}
+              className="text-base text-zinc-500 mb-10"
+            >
+              Turn your ideas into high-converting video ads in minutes with professional AI actors that look and sound just like real humans.
             </motion.p>
             
             <motion.div 
