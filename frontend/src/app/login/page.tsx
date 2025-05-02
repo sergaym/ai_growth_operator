@@ -63,42 +63,66 @@ function LoginForm() {
   
   // Display either form validation error or auth error
   const displayError = error || authError;
-  
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712] text-white px-4 sm:px-6 relative overflow-hidden">
+      {/* Background effects - matching the landing page */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-xl border border-white/10 backdrop-blur-sm relative z-10"
+      >
         <div className="flex flex-col items-center">
-          <Logo size="md" showText={true} />
-          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access the playground and other protected areas
-          </p>
+          <Link href="/">
+            <Logo size="md" showText={true} />
+          </Link>
         </div>
         
         {displayError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span className="block sm:inline">{displayError}</span>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-900/20 border-l-4 border-red-500 text-red-400 p-3 rounded-md shadow-sm"
+            role="alert"
+          >
+            <div className="flex">
+              <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{displayError}</span>
+            </div>
+          </motion.div>
         )}
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+        <div className="text-lg font-medium mb-1">Email address</div>
+        <motion.form 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mt-2 space-y-5" 
+          onSubmit={handleSubmit}
+        >
+          <div className="space-y-5">
             <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors sm:text-sm"
+                placeholder="user@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+            
             <div>
               <label htmlFor="password" className="sr-only">Password</label>
               <input
