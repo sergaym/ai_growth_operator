@@ -3,6 +3,8 @@
 import React, { Suspense } from 'react';
 import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
+import { ArrowDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Create a loading fallback for the Suspense boundary
 function LoginFormSkeleton() {
