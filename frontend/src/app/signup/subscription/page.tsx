@@ -33,6 +33,47 @@ export default function SubscriptionPage() {
   return (
     <div className="min-h-screen bg-[#030712] text-white">
       <div className="container max-w-7xl mx-auto px-4 py-16 relative z-10">
+        {/* Welcome header */}
+        <div className="max-w-3xl mx-auto text-center mb-16">
+          <motion.div
+            initial={{ scale: 0 }}
+            animate={{ scale: 1 }}
+            transition={{ type: "spring", stiffness: 200 }}
+            className="flex justify-center mb-8"
+          >
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center">
+              <CheckCircle className="w-10 h-10 text-white" />
+            </div>
+          </motion.div>
+          
+          <motion.h1
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.2 }}
+            className="text-3xl md:text-4xl font-bold mb-4"
+          >
+            Welcome aboard, {userData.firstName}!
+          </motion.h1>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3 }}
+            className="text-xl text-zinc-300 mb-6"
+          >
+            You're ready to start creating amazing AI-generated content
+          </motion.p>
+          
+          <motion.p
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4 }}
+            className="text-zinc-400"
+          >
+            Choose the perfect plan that matches your content creation needs.
+          </motion.p>
+        </div>
+        
         <PricingPlans />
         
         <div className="mt-32">
