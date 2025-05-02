@@ -27,3 +27,41 @@ function ResetPasswordSkeleton() {
   );
 }
 
+// Main component for the reset password form
+function ResetPasswordForm() {
+  const [email, setEmail] = useState('');
+  const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isSubmitted, setIsSubmitted] = useState(false);
+  const [error, setError] = useState('');
+  
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!email) {
+      setError('Email is required');
+      return;
+    }
+    
+    if (!email.includes('@')) {
+      setError('Please enter a valid email address');
+      return;
+    }
+    
+    setError('');
+    setIsSubmitting(true);
+    
+    try {
+      // This would be replaced with your actual API call
+      // await resetPasswordService.requestReset(email);
+      
+      // Simulate API call for now
+      await new Promise(resolve => setTimeout(resolve, 1500));
+      
+      setIsSubmitted(true);
+    } catch (err) {
+      setError('Failed to send reset password email. Please try again.');
+    } finally {
+      setIsSubmitting(false);
+    }
+  };
+
