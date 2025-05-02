@@ -82,16 +82,43 @@ export default function AccountSettings() {
                 className="hidden"
               />
             </div>
+            
+            {/* Profile Info */}
+            <div className="flex-1 space-y-4">
+              <div className="space-y-4">
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <Label htmlFor="full-name" className="text-sm text-gray-600 mb-1 block">Name</Label>
+                    <div className="flex items-center">
+                      <UserIcon className="w-4 h-4 mr-2 text-gray-500" />
+                      <Input 
+                        id="full-name"
+                        value={fullName}
+                        onChange={(e) => setFullName(e.target.value)}
+                        className="flex-1 border-gray-200 focus:border-gray-300"
+                        placeholder="Your name"
+                      />
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <Label htmlFor="email" className="text-sm text-gray-600 mb-1 block">Email Address</Label>
+                    <div className="flex items-center">
+                      <AtSign className="w-4 h-4 mr-2 text-gray-500" />
+                      <Input 
+                        id="email"
+                        type="email"
+                        value={email}
+                        readOnly
+                        disabled
+                        className="flex-1 bg-gray-50 text-gray-500 cursor-not-allowed"
+                      />
+                    </div>
+                    <p className="text-xs text-gray-500 mt-1">Contact support to change your email</p>
+                  </div>
+                </div>
               </div>
             </div>
-            
-            <Button 
-              onClick={handleSaveProfile}
-              className="mt-2"
-              size="sm"
-            >
-              Save Changes
-            </Button>
           </div>
         </div>
         
