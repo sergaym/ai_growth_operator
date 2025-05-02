@@ -98,20 +98,25 @@ export default function AccountSettings() {
                     />
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button onClick={handleSaveProfile}>Save Changes</Button>
-              </CardFooter>
-            </Card>
 
-            <Card>
-              <CardHeader>
-                <CardTitle>Security</CardTitle>
-                <CardDescription>
+                <div className="pt-4">
+                  <Button onClick={handleSaveProfile}>Save Changes</Button>
+                </div>
+              </div>
+            </div>
+
+            <Separator className="my-8" />
+
+            {/* Security Section */}
+            <div className="space-y-6">
+              <div>
+                <h3 className="text-lg font-medium">Security</h3>
+                <p className="text-muted-foreground text-sm mt-1 mb-4">
                   Manage your password and security settings.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="space-y-4">
+                </p>
+              </div>
+
+              <div className="space-y-4 max-w-md">
                 <div className="space-y-2">
                   <Label htmlFor="current-password">Current Password</Label>
                   <div className="flex items-center">
