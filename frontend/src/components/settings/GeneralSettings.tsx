@@ -30,19 +30,17 @@ export function GeneralSettings() {
       reader.onload = (event) => {
         setIconPreview(event.target?.result as string);
         setIsUploading(false);
+        
+        // Show toast on successful upload
+        toast({
+          title: "Icon updated",
+          description: "Your workspace icon has been updated.",
+          duration: 3000,
+        });
       };
       
       reader.readAsDataURL(file);
     }
-  };
-
-  const handleSave = () => {
-    // Here you would typically make an API call to save the workspace settings
-    toast({
-      title: "Settings saved",
-      description: "Your workspace settings have been updated successfully.",
-      duration: 3000,
-    });
   };
 
   return (
@@ -50,7 +48,6 @@ export function GeneralSettings() {
       <div className="space-y-6">
         {/* Workspace Icon - Now left aligned */}
         <div className="flex flex-col space-y-4">
-          <h3 className="text-lg font-medium">Workspace</h3>
           <div className="flex items-start gap-6">
             <div 
               className="relative w-20 h-20 rounded-md overflow-hidden flex items-center justify-center 
