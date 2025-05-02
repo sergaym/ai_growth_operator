@@ -60,3 +60,98 @@ export default function AccountSettings() {
           </div>
         </div>
         
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+          <div className="md:col-span-2 space-y-6">
+            <Card>
+              <CardHeader>
+                <CardTitle>Personal Information</CardTitle>
+                <CardDescription>
+                  Update your personal information and how others see you on the platform.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="full-name">Full Name</Label>
+                  <div className="flex items-center">
+                    <UserIcon className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <Input 
+                      id="full-name" 
+                      value={fullName}
+                      onChange={(e) => setFullName(e.target.value)}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <div className="flex items-center">
+                    <AtSign className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <Input 
+                      id="email" 
+                      type="email"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button onClick={handleSaveProfile}>Save Changes</Button>
+              </CardFooter>
+            </Card>
+
+            <Card>
+              <CardHeader>
+                <CardTitle>Security</CardTitle>
+                <CardDescription>
+                  Manage your password and security settings.
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="space-y-2">
+                  <Label htmlFor="current-password">Current Password</Label>
+                  <div className="flex items-center">
+                    <Lock className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <Input 
+                      id="current-password" 
+                      type="password"
+                      placeholder="Enter your current password"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="new-password">New Password</Label>
+                  <div className="flex items-center">
+                    <Shield className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <Input 
+                      id="new-password" 
+                      type="password"
+                      placeholder="Enter a new password"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="confirm-password">Confirm Password</Label>
+                  <div className="flex items-center">
+                    <Shield className="w-4 h-4 mr-2 text-muted-foreground" />
+                    <Input 
+                      id="confirm-password" 
+                      type="password"
+                      placeholder="Confirm your new password"
+                      className="flex-1"
+                    />
+                  </div>
+                </div>
+              </CardContent>
+              <CardFooter>
+                <Button variant="outline">Change Password</Button>
+              </CardFooter>
+            </Card>
+          </div>
+          
