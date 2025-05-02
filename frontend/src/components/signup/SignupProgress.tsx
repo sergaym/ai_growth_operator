@@ -74,7 +74,7 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
       
       {/* Step labels */}
       <div className="flex justify-between mt-8 px-1">
-        {['Profile', 'Company', 'Goals', 'Complete'].map((label, index) => {
+        {['Profile', 'Company', 'Goals'].map((label, index) => {
           const stepNumber = index + 1;
           const isCompleted = stepNumber <= currentStep;
           const isCurrent = stepNumber === currentStep;
