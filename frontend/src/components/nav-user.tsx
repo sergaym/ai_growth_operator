@@ -108,7 +108,7 @@ export function NavUser({
             <DropdownMenuItem
               onClick={handleLogout}
               disabled={isLoggingOut}
-              className="text-red-600 focus:text-red-600 focus:bg-red-50"
+              className="text-foreground focus:bg-accent"
             >
               <LogOut className="mr-2 h-4 w-4" />
               {isLoggingOut ? (
