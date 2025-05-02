@@ -31,3 +31,12 @@ export function GeneralSettings() {
     }
   };
 
+  const handleSave = () => {
+    // Here you would typically make an API call to save the workspace settings
+    toast({
+      title: "Settings saved",
+      description: "Your workspace settings have been updated successfully.",
+      duration: 3000,
+    });
+  };
+
