@@ -45,28 +45,28 @@ export function PublicAPISettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <Card>
-        <CardHeader>
-          <CardTitle>API Keys</CardTitle>
-          <CardDescription>
-            Manage API keys that allow external applications to access your workspace.
-          </CardDescription>
-        </CardHeader>
-        <CardContent className="space-y-6">
-          <div className="flex items-center justify-between">
-            <div className="space-y-0.5">
-              <Label htmlFor="api-access">Enable API Access</Label>
-              <p className="text-sm text-muted-foreground">
-                Allow external applications to access your workspace via API.
-              </p>
-            </div>
-            <Switch
-              id="api-access"
-              checked={apiKeyEnabled}
-              onCheckedChange={setApiKeyEnabled}
-            />
+    <div className="space-y-8">
+      <div>
+        <h3 className="text-lg font-medium mb-2">API Keys</h3>
+        <p className="text-muted-foreground">
+          Manage API keys that allow external applications to access your workspace.
+        </p>
+      </div>
+
+      <div className="max-w-3xl space-y-8">
+        <div className="flex items-center justify-between">
+          <div className="space-y-0.5">
+            <Label htmlFor="api-access" className="text-base">Enable API Access</Label>
+            <p className="text-sm text-muted-foreground">
+              Allow external applications to access your workspace via API.
+            </p>
           </div>
+          <Switch
+            id="api-access"
+            checked={apiKeyEnabled}
+            onCheckedChange={setApiKeyEnabled}
+          />
+        </div>
 
           <Separator />
           
