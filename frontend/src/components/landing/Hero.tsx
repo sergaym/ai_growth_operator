@@ -24,7 +24,7 @@ export function Hero() {
             className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
           >
             <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
-              Introducing AI Video Generation
+              The Future of Ad Creation Is Here
             </span>
           </motion.div>
         </div>
