@@ -179,7 +179,7 @@ function LoginForm() {
         className="mt-16 inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm relative z-10"
       >
         <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
-          Create AI Videos in Minutes
+          Create Winning Ads with AI Actors
         </span>
       </motion.div>
       
@@ -194,7 +194,7 @@ function LoginForm() {
           Don't have an account yet?
         </h2>
         <p className="text-zinc-400 mb-6">
-          Join thousands of creators using AI to generate professional videos without expensive equipment
+          Generate 100s of winning videos from text. No cameras, no production costs, no hassle.
         </p>
         
         <motion.div 
@@ -219,7 +219,7 @@ function LoginForm() {
             whileTap={{ scale: 0.95 }}
             className="py-4 px-10 bg-gradient-to-r from-red-500 to-amber-500 rounded-full text-lg font-bold text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 flex items-center justify-center gap-2"
           >
-            Start Creating
+            Get your first video ad free
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
               <path d="M13 5L20 12L13 19M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
             </svg>
