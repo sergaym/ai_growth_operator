@@ -1,11 +1,9 @@
 "use client";
 import React, { useState, useRef } from 'react';
-import { Button } from "@/components/ui/button";
 import { Label } from "@/components/ui/label";
 import { Input } from "@/components/ui/input";
 import { CloudUpload, Camera } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
-import { Separator } from "@/components/ui/separator";
 
 export function GeneralSettings() {
   const [workspaceName, setWorkspaceName] = useState("My AI UGC Workspace");
