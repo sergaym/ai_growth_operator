@@ -95,10 +95,6 @@ function SignupPageContent() {
     {
       title: "Your AI content goals",
       subtitle: "We'll customize our AI to match your content strategy"
-    },
-    {
-      title: "Almost there!",
-      subtitle: "Review your information and get started"
     }
   ];
 
