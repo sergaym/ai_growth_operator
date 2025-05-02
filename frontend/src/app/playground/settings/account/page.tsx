@@ -128,43 +128,45 @@ export default function AccountSettings() {
         <div>
           <h3 className="text-base font-medium text-gray-700 mb-4">Security</h3>
           
-          <div className="grid gap-4 max-w-lg">
-            <div>
-              <Label htmlFor="current-password" className="text-sm text-gray-600 mb-1 block">Current Password</Label>
-              <div className="flex items-center">
-                <Lock className="w-4 h-4 mr-2 text-gray-500" />
-                <Input 
-                  id="current-password"
-                  type="password"
-                  placeholder="Enter your current password"
-                  className="flex-1 border-gray-200 focus:border-gray-300"
-                />
+          <div className="space-y-4">
+            <div className="grid md:grid-cols-3 gap-4">
+              <div>
+                <Label htmlFor="current-password" className="text-sm text-gray-600 mb-1 block">Current Password</Label>
+                <div className="flex items-center">
+                  <Lock className="w-4 h-4 mr-2 text-gray-500" />
+                  <Input 
+                    id="current-password"
+                    type="password"
+                    placeholder="Enter current"
+                    className="flex-1 border-gray-200 focus:border-gray-300"
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="new-password" className="text-sm text-gray-600 mb-1 block">New Password</Label>
-              <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-gray-500" />
-                <Input 
-                  id="new-password"
-                  type="password"
-                  placeholder="Enter a new password"
-                  className="flex-1 border-gray-200 focus:border-gray-300"
-                />
+              
+              <div>
+                <Label htmlFor="new-password" className="text-sm text-gray-600 mb-1 block">New Password</Label>
+                <div className="flex items-center">
+                  <Shield className="w-4 h-4 mr-2 text-gray-500" />
+                  <Input 
+                    id="new-password"
+                    type="password"
+                    placeholder="Enter new"
+                    className="flex-1 border-gray-200 focus:border-gray-300"
+                  />
+                </div>
               </div>
-            </div>
-            
-            <div>
-              <Label htmlFor="confirm-password" className="text-sm text-gray-600 mb-1 block">Confirm New Password</Label>
-              <div className="flex items-center">
-                <Shield className="w-4 h-4 mr-2 text-gray-500" />
-                <Input 
-                  id="confirm-password"
-                  type="password"
-                  placeholder="Confirm your new password"
-                  className="flex-1 border-gray-200 focus:border-gray-300"
-                />
+              
+              <div>
+                <Label htmlFor="confirm-password" className="text-sm text-gray-600 mb-1 block">Confirm Password</Label>
+                <div className="flex items-center">
+                  <Shield className="w-4 h-4 mr-2 text-gray-500" />
+                  <Input 
+                    id="confirm-password"
+                    type="password"
+                    placeholder="Confirm new"
+                    className="flex-1 border-gray-200 focus:border-gray-300"
+                  />
+                </div>
               </div>
             </div>
             
