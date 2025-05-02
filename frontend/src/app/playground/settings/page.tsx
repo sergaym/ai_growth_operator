@@ -14,23 +14,6 @@ export default function SettingsPage() {
       description="Configure your workspace, team members, and application settings."
     >
       <div className="space-y-8">
-        <div className="flex items-center justify-between">
-          <div>
-            <h2 className="text-2xl font-semibold">Workspace Settings</h2>
-            <p className="text-muted-foreground mt-1">
-              Manage your workspace preferences, team members, and integrations.
-            </p>
-          </div>
-          <div>
-            <Link href="/playground/settings/account">
-              <Button variant="outline">
-                <User className="h-4 w-4 mr-2" />
-                Account Settings
-              </Button>
-            </Link>
-          </div>
-        </div>
-        
         <Tabs defaultValue="general" className="w-full">
           <TabsList className="grid w-full grid-cols-3 max-w-md mb-8">
             <TabsTrigger value="general">General</TabsTrigger>
