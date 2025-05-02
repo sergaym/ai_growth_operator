@@ -69,12 +69,14 @@ function SignupPageContent() {
       // Here you would typically make an API call to create the user
       // For now, we'll simulate success
       
-      // Get the stored callback URL or default to playground
-      const callbackUrl = sessionStorage.getItem('signupCallbackUrl') || '/playground';
-      sessionStorage.removeItem('signupCallbackUrl'); // Clean up
+      // Save user data to sessionStorage for the subscription page
+      sessionStorage.setItem('signupData', JSON.stringify({
+        firstName: formData.firstName,
+        companyName: formData.companyName
+      }));
       
-      // Redirect to the callback URL
-      router.push(callbackUrl);
+      // Redirect directly to subscription page
+      router.push('/signup/subscription');
     } catch (error) {
       console.error('Signup error:', error);
       // Handle error appropriately
