@@ -144,7 +144,27 @@ async def get_video_status(generation_id: str) -> Dict[str, Any]:
     if the generation is complete.
     """
     try:
+        if not generation_id or len(generation_id) < 10:
+            # Return a valid response for invalid IDs
+            return {
+                "status": "error",
+                "generation_id": generation_id or "invalid",
+                "prompt_used": "Invalid generation ID",
+                "duration": "Unknown",
+                "error": "Invalid or missing generation ID"
+            }
+            
         result = check_video_status(generation_id)
         return result
+        
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error checking video status: {str(e)}") 
+        # Return a valid response structure even for exceptions
+        error_msg = str(e)
+        print(f"Error checking generation {generation_id}: {error_msg}")
+        return {
+            "status": "error",
+            "generation_id": generation_id,
+            "prompt_used": "Error retrieving prompt",
+            "duration": "Unknown",
+            "error": error_msg
+        } 
