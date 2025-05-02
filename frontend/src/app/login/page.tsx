@@ -9,25 +9,22 @@ import { motion } from 'framer-motion';
 // Create a loading fallback for the Suspense boundary
 function LoginFormSkeleton() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712]">
+      <div className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-lg border border-white/10 backdrop-blur-sm">
         <div className="flex flex-col items-center">
-          <Logo size="md" showText={true} />
-          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access the playground and other protected areas
-          </p>
+          <div className="h-10 w-40 bg-gray-800 rounded-lg animate-pulse"></div>
         </div>
         
-        <div className="animate-pulse">
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="h-12 bg-gray-200 rounded-t-md"></div>
-            <div className="h-12 bg-gray-200 rounded-b-md"></div>
-          </div>
-          <div className="mt-6 h-12 bg-blue-200 rounded-md"></div>
+        <div className="animate-pulse space-y-3">
+          <div className="h-12 bg-gray-800 rounded-lg"></div>
+          <div className="h-12 bg-gray-800 rounded-lg"></div>
+          <div className="h-12 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg"></div>
         </div>
+      </div>
+      
+      <div className="mt-10 text-center animate-pulse">
+        <div className="h-8 w-64 bg-gray-800 rounded-lg mx-auto"></div>
+        <div className="h-12 w-48 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg mx-auto mt-4"></div>
       </div>
     </div>
   );
