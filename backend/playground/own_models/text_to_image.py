@@ -64,3 +64,36 @@ if not FAL_KEY:
 
 # Set the environment variable fal-client expects
 os.environ["FAL_KEY"] = FAL_KEY
+
+class ImageGenerator:
+    """High-level wrapper for fal.ai's Stable Diffusion API."""
+
+    # Available models with their max dimensions
+    AVAILABLE_MODELS = {
+        "fal-ai/fast-sdxl": (1024, 1024),  # Fast inference
+        "fal-ai/stable-diffusion-v35-large": (1024, 1024),  # High-quality
+        "fal-ai/realistic-vision-v5": (1024, 1024),  # Photorealism
+        "fal-ai/stable-diffusion-xl-turbo": (1024, 1024),  # Lower latency  
+    }
+    
+    # Model-specific scheduler options
+    MODEL_SCHEDULERS = {
+        "fal-ai/fast-sdxl": ["DPM++ 2M", "DPM++ 2M Karras", "DPM++ 2M SDE", "DPM++ 2M SDE Karras", 
+                             "DPM++ SDE", "DPM++ SDE Karras", "KDPM 2A", "Euler", 
+                             "Euler (trailing timesteps)", "Euler A", "LCM",
+                             "EDMDPMSolverMultistepScheduler", "TCDScheduler"],
+        "fal-ai/stable-diffusion-v35-large": ["K_EULER", "K_EULER_ANCESTRAL", "K_HEUN", "K_DPM_2", 
+                                               "K_DPM_2_ANCESTRAL", "K_DPM_FAST", "K_DPM_ADAPTIVE", 
+                                               "K_LMS", "K_DPMPP_2S_ANCESTRAL", "K_DPMPP_2M"],
+        "fal-ai/realistic-vision-v5": ["K_EULER", "K_EULER_ANCESTRAL", "K_DPM_2_ANCESTRAL"],
+        "fal-ai/stable-diffusion-xl-turbo": ["Euler A", "DPM++ 2M Karras"],
+    }
+    
+    # Default schedulers by model
+    DEFAULT_SCHEDULERS = {
+        "fal-ai/fast-sdxl": "Euler A",
+        "fal-ai/stable-diffusion-v35-large": "K_EULER_ANCESTRAL",
+        "fal-ai/realistic-vision-v5": "K_EULER_ANCESTRAL",
+        "fal-ai/stable-diffusion-xl-turbo": "Euler A",
+    }
+
