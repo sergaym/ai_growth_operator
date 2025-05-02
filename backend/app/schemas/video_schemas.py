@@ -42,12 +42,13 @@ class GenerateVideoFromIdeaRequest(BaseModel):
 class VideoGenerationResponse(BaseModel):
     """Response model for video generation"""
     video_url: Optional[str] = None  # URL to the generated video
-    prompt_used: str  # The prompt used to generate the video
-    duration: str  # Actual duration of the generated video
+    prompt_used: Optional[str] = "No prompt available"  # The prompt used to generate the video
+    duration: Optional[str] = "Unknown"  # Actual duration of the generated video
     thumbnail_url: Optional[str] = None  # URL to the video thumbnail
     generation_id: str  # Unique ID for the generation job
     status: str  # Status of the video generation (e.g., "completed", "processing")
     estimated_completion_time: Optional[str] = None  # Estimated completion time if processing
+    error: Optional[str] = None  # Error message if generation failed
 
 class GenerateVideoWithReferencesRequest(BaseModel):
     """Request model for generating a video with specific media references"""
