@@ -139,8 +139,6 @@ export function MembersSettings() {
                         </Button>
                       </DropdownMenuTrigger>
                       <DropdownMenuContent align="end">
-                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
-                        <DropdownMenuSeparator />
                         <DropdownMenuItem
                           onClick={() => handleRoleChange(member.id, 'admin')}
                           disabled={member.role === 'admin'}
