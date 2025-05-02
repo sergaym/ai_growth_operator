@@ -155,22 +155,20 @@ export default function AccountSettings() {
                     />
                   </div>
                 </div>
-              </CardContent>
-              <CardFooter>
-                <Button variant="outline">Change Password</Button>
-              </CardFooter>
-            </Card>
+
+                <div className="pt-4">
+                  <Button variant="outline">Change Password</Button>
+                </div>
+              </div>
+            </div>
           </div>
           
-          <div className="space-y-6">
-            <Card>
-              <CardHeader>
-                <CardTitle>Profile Picture</CardTitle>
-                <CardDescription>
-                  Upload a profile picture to personalize your account.
-                </CardDescription>
-              </CardHeader>
-              <CardContent className="flex flex-col items-center justify-center space-y-4">
+          {/* Sidebar - Right Side */}
+          <div className="md:col-span-4 space-y-8">
+            {/* Profile Picture Section */}
+            <div className="bg-muted/40 p-6 rounded-lg border border-border space-y-4">
+              <h3 className="font-medium">Profile Picture</h3>
+              <div className="flex flex-col items-center justify-center space-y-4">
                 <Avatar className="w-32 h-32">
                   <AvatarImage src={avatarPreview || "/avatars/default.jpg"} />
                   <AvatarFallback>{fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
