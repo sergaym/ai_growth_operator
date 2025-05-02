@@ -34,3 +34,10 @@ import {
 
 type Role = 'owner' | 'admin' | 'member' | 'viewer';
 
+interface TeamMember {
+  id: string;
+  name: string;
+  email: string;
+  avatar?: string;
+  role: Role;
+}
