@@ -106,3 +106,127 @@ export function MembersSettings() {
     }
   };
 
+  return (
+    <div className="space-y-6">
+      <Card>
+        <CardHeader className="flex flex-row items-center justify-between">
+          <div>
+            <CardTitle>Team Members</CardTitle>
+            <CardDescription>
+              Manage who has access to your workspace and their permissions.
+            </CardDescription>
+          </div>
+          <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
+            <DialogTrigger asChild>
+              <Button>
+                <UserPlus className="mr-2 h-4 w-4" />
+                Invite Member
+              </Button>
+            </DialogTrigger>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Invite Team Member</DialogTitle>
+                <DialogDescription>
+                  Send an invitation to someone to join your workspace.
+                </DialogDescription>
+              </DialogHeader>
+              <div className="space-y-4 py-4">
+                <div className="space-y-2">
+                  <Label htmlFor="email">Email Address</Label>
+                  <Input
+                    id="email"
+                    placeholder="colleague@example.com"
+                    value={inviteEmail}
+                    onChange={(e) => setInviteEmail(e.target.value)}
+                  />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="role">Role</Label>
+                  <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as Role)}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a role" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      <SelectItem value="admin">Admin</SelectItem>
+                      <SelectItem value="member">Member</SelectItem>
+                      <SelectItem value="viewer">Viewer</SelectItem>
+                    </SelectContent>
+                  </Select>
+                </div>
+              </div>
+              <DialogFooter>
+                <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
+                  Cancel
+                </Button>
+                <Button onClick={handleInviteMember} disabled={!inviteEmail}>
+                  Send Invitation
+                </Button>
+              </DialogFooter>
+            </DialogContent>
+          </Dialog>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-4">
+            {members.map((member) => (
+              <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border">
+                <div className="flex items-center gap-3">
+                  <Avatar>
+                    <AvatarImage src={member.avatar} />
+                    <AvatarFallback>{member.name.substring(0, 2).toUpperCase()}</AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <p className="font-medium">{member.name}</p>
+                    <p className="text-sm text-muted-foreground">{member.email}</p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <Badge variant="outline" className={getRoleBadgeColor(member.role)}>
+                    {member.role.charAt(0).toUpperCase() + member.role.slice(1)}
+                  </Badge>
+                  {member.role !== 'owner' && (
+                    <DropdownMenu>
+                      <DropdownMenuTrigger asChild>
+                        <Button variant="ghost" size="icon">
+                          <MoreHorizontal className="h-4 w-4" />
+                        </Button>
+                      </DropdownMenuTrigger>
+                      <DropdownMenuContent align="end">
+                        <DropdownMenuLabel>Actions</DropdownMenuLabel>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleRoleChange(member.id, 'admin')}
+                          disabled={member.role === 'admin'}
+                        >
+                          Make Admin
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleRoleChange(member.id, 'member')}
+                          disabled={member.role === 'member'}
+                        >
+                          Make Member
+                        </DropdownMenuItem>
+                        <DropdownMenuItem
+                          onClick={() => handleRoleChange(member.id, 'viewer')}
+                          disabled={member.role === 'viewer'}
+                        >
+                          Make Viewer
+                        </DropdownMenuItem>
+                        <DropdownMenuSeparator />
+                        <DropdownMenuItem
+                          onClick={() => handleRemoveMember(member.id)}
+                          className="text-destructive focus:text-destructive"
+                        >
+                          Remove
+                        </DropdownMenuItem>
+                      </DropdownMenuContent>
+                    </DropdownMenu>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
+    </div>
+  );
+} 
