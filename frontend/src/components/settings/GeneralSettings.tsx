@@ -100,17 +100,6 @@ export function GeneralSettings() {
             className="hidden"
           />
         </div>
-
-        <Separator className="my-6 bg-gray-100" />
-
-        <div className="flex justify-end">
-          <Button 
-            onClick={handleSave}
-            className="bg-gray-800 hover:bg-gray-700 text-white"
-          >
-            Save Changes
-          </Button>
-        </div>
       </div>
     </div>
   );
