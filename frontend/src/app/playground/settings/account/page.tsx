@@ -38,3 +38,25 @@ export default function AccountSettings() {
     });
   };
 
+  return (
+    <PlaygroundLayout
+      title="Settings"
+      description="Configure your workspace, team members, and application settings."
+    >
+      <div className="space-y-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h2 className="text-2xl font-semibold">Account Settings</h2>
+            <p className="text-muted-foreground mt-1">
+              Manage your personal account information and preferences.
+            </p>
+          </div>
+          <div>
+            <Link href="/playground/settings">
+              <Button variant="outline">
+                Back to Settings
+              </Button>
+            </Link>
+          </div>
+        </div>
+        
