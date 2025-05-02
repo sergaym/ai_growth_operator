@@ -69,9 +69,10 @@ const data = {
       ],
     },
     {
-      name: "Company",
-      url: "/company",
+      name: "Avatars",
+      url: "#",
       icon: Bot,
+      disabled: true,
     }
   ],
   navSecondary: [
