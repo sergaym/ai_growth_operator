@@ -454,7 +454,7 @@ def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     # Required arguments
     parser.add_argument(
         "--prompt", 
-        default="A serene mountain lake at sunset with perfect reflections, golden hour lighting, snow-capped peaks, and a small wooden cabin on the shore. 8K, hyperrealistic, cinematic, professional photography.",
+        default="Create a hyperrealistic 4K actor of a charismatic 25-35 year-old person (gender-neutral or [specify gender if needed]) with a natural, approachable expression. The actor should have clear skin, subtle makeup (if any), and modern casual clothing (like a neutral-toned T-shirt or hoodie). Lighting should be soft and natural, emulating indoor daylight. Background should be minimal or softly blurred, keeping full focus on the face. The avatar must look camera-ready for direct-to-camera speaking in UGC content—authentic, warm, and trustworthy. Include micro-details like skin texture, eye reflection, and natural hair flow.",
         help="Text description of the image to generate",
     )
     
