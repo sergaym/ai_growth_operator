@@ -11,9 +11,25 @@ import { Separator } from "@/components/ui/separator";
 
 export default function AccountSettings() {
   const [fullName, setFullName] = useState("John Doe");
-  const [email, setEmail] = useState("john.doe@example.com");
+  const [email] = useState("john.doe@example.com");
   const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const { toast } = useToast();
+
+  // Auto-save name when it changes
+  useEffect(() => {
+    // Debounce to avoid too many saves
+    const timer = setTimeout(() => {
+      // We would typically save to the server here
+      // For now, we'll just show a toast for demonstration
+      toast({
+        title: "Name updated",
+        description: "Your name has been updated automatically.",
+        duration: 2000,
+      });
+    }, 1000);
+
+    return () => clearTimeout(timer);
+  }, [fullName, toast]);
 
   const handleAvatarChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
