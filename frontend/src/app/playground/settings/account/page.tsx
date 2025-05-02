@@ -73,6 +73,30 @@ export default function AccountSettings() {
               className="hidden"
             />
           </div>
+          
+          {/* Profile Info */}
+          <div className="flex-1 space-y-4">
+            <div className="space-y-2">
+              <div className="flex items-center">
+                <UserIcon className="w-4 h-4 mr-2 text-gray-500" />
+                <Input 
+                  value={fullName}
+                  onChange={(e) => setFullName(e.target.value)}
+                  className="flex-1 border-gray-200 focus:border-gray-300"
+                  placeholder="Your name"
+                />
+              </div>
+              
+              <div className="flex items-center">
+                <AtSign className="w-4 h-4 mr-2 text-gray-500" />
+                <Input 
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="flex-1 border-gray-200 focus:border-gray-300"
+                  placeholder="your.email@example.com"
+                />
+              </div>
             </div>
           </div>
           
