@@ -108,13 +108,7 @@ export function MembersSettings() {
 
   return (
     <div className="space-y-8">
-      <div className="flex items-center justify-between">
-        <div>
-          <h3 className="text-lg font-medium mb-2">Team Members</h3>
-          <p className="text-muted-foreground">
-            Manage who has access to your workspace and their permissions.
-          </p>
-        </div>
+      <div>
         <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
           <DialogTrigger asChild>
             <Button>
