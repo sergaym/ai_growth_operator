@@ -1,8 +1,10 @@
 "use client";
-import React from 'react';
+import React, { useEffect, useState } from 'react';
+import { motion } from 'framer-motion';
 import { PricingPlans } from '@/components/pricing/PricingPlans';
 import { TrustSection } from '@/components/trust/TrustSection';
 import { FAQSection } from '@/components/faq/FAQSection';
+import { CheckCircle } from 'lucide-react';
 
 export default function SubscriptionPage() {
   return (
