@@ -28,6 +28,7 @@ export function NavProjects({
     url: string
     icon: LucideIcon
     isActive?: boolean
+    disabled?: boolean
     items?: {
       title: string
       url: string
@@ -41,13 +42,21 @@ export function NavProjects({
         {projects.map((item) => (
           <Collapsible key={item.name} asChild defaultOpen={item.isActive}>
             <SidebarMenuItem>
-              <SidebarMenuButton asChild>
-                <a href={item.url}>
+              {item.disabled ? (
+                <SidebarMenuButton className="opacity-70 pointer-events-none cursor-default text-muted-foreground hover:bg-transparent">
                   <item.icon />
                   <span>{item.name}</span>
-                </a>
-              </SidebarMenuButton>
-              {item.items?.length ? (
+                  <span className="ml-2 text-xs bg-gray-100 text-gray-500 px-1.5 py-0.5 rounded">Soon</span>
+                </SidebarMenuButton>
+              ) : (
+                <SidebarMenuButton asChild>
+                  <a href={item.url}>
+                    <item.icon />
+                    <span>{item.name}</span>
+                  </a>
+                </SidebarMenuButton>
+              )}
+              {item.items?.length && !item.disabled ? (
                 <>
                   <CollapsibleTrigger asChild>
                     <SidebarMenuAction className="data-[state=open]:rotate-90">
