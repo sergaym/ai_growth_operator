@@ -92,3 +92,17 @@ export function MembersSettings() {
   const handleRemoveMember = (memberId: string) => {
     setMembers(members.filter(member => member.id !== memberId));
   };
+
+  const getRoleBadgeColor = (role: Role) => {
+    switch (role) {
+      case 'owner':
+        return 'bg-purple-500/10 text-purple-500 hover:bg-purple-500/20';
+      case 'admin':
+        return 'bg-blue-500/10 text-blue-500 hover:bg-blue-500/20';
+      case 'member':
+        return 'bg-green-500/10 text-green-500 hover:bg-green-500/20';
+      case 'viewer':
+        return 'bg-orange-500/10 text-orange-500 hover:bg-orange-500/20';
+    }
+  };
+
