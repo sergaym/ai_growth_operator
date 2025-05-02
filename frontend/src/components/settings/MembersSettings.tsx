@@ -232,8 +232,8 @@ export function MembersSettings() {
               </div>
             ))}
           </div>
-        </CardContent>
-      </Card>
+        )}
+      </div>
     </div>
   );
 } 
