@@ -37,3 +37,17 @@ from typing import Dict, Any, Optional, List, Union
 
 import fal_client
 from dotenv import load_dotenv
+import requests
+
+# Add parent directories to path for imports
+ROOT_DIR = Path(__file__).resolve().parents[3]  # ai-ugc root
+BACKEND_DIR = Path(__file__).resolve().parents[2]  # backend directory
+for p in (ROOT_DIR, BACKEND_DIR):
+    if str(p) not in sys.path:
+        sys.path.append(str(p))
+
+# ---------------------------------------------------------------------------
+# Environment setup
+# ---------------------------------------------------------------------------
+load_dotenv()  # Load .env if present
+
