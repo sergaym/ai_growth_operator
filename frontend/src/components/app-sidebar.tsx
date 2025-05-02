@@ -7,6 +7,7 @@ import {
   LifeBuoy,
   Send,
   SquareTerminal,
+  Settings,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -50,6 +51,21 @@ const data = {
           title: "History",
           url: "/playground/history",
         },
+      ],
+    },
+    {
+      name: "Settings",
+      url: "/playground/settings",
+      icon: Settings,
+      items: [
+        {
+          title: "Workspace",
+          url: "/playground/settings",
+        },
+        {
+          title: "Account",
+          url: "/playground/settings/account",
+        }
       ],
     },
     {
