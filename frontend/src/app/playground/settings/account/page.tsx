@@ -23,6 +23,12 @@ export default function AccountSettings() {
       
       reader.onload = (event) => {
         setAvatarPreview(event.target?.result as string);
+        
+        toast({
+          title: "Profile picture updated",
+          description: "Your profile picture has been updated successfully.",
+          duration: 3000,
+        });
       };
       
       reader.readAsDataURL(file);
