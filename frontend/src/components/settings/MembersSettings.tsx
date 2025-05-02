@@ -107,69 +107,16 @@ export function MembersSettings() {
   };
 
   return (
-    <div className="space-y-8">
-      <div>
-        <Dialog open={isInviteDialogOpen} onOpenChange={setIsInviteDialogOpen}>
-          <DialogTrigger asChild>
-            <Button>
-              <UserPlus className="mr-2 h-4 w-4" />
-              Invite Member
-            </Button>
-          </DialogTrigger>
-          <DialogContent>
-            <DialogHeader>
-              <DialogTitle>Invite Team Member</DialogTitle>
-              <DialogDescription>
-                Send an invitation to someone to join your workspace.
-              </DialogDescription>
-            </DialogHeader>
-            <div className="space-y-4 py-4">
-              <div className="space-y-2">
-                <Label htmlFor="email">Email Address</Label>
-                <Input
-                  id="email"
-                  placeholder="colleague@example.com"
-                  value={inviteEmail}
-                  onChange={(e) => setInviteEmail(e.target.value)}
-                />
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="role">Role</Label>
-                <Select value={inviteRole} onValueChange={(value) => setInviteRole(value as Role)}>
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select a role" />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="admin">Admin</SelectItem>
-                    <SelectItem value="member">Member</SelectItem>
-                    <SelectItem value="viewer">Viewer</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-            <DialogFooter>
-              <Button variant="outline" onClick={() => setIsInviteDialogOpen(false)}>
-                Cancel
-              </Button>
-              <Button onClick={handleInviteMember} disabled={!inviteEmail}>
-                Send Invitation
-              </Button>
-            </DialogFooter>
-          </DialogContent>
-        </Dialog>
-      </div>
-
-      <Separator className="my-6" />
-      
-      <div className="space-y-2 max-w-4xl">
+    <div className="space-y-4">
+      <div className="max-w-4xl">
         {members.length === 0 ? (
-          <div className="py-8 text-center text-muted-foreground">
+          <div className="py-6 text-center text-muted-foreground">
             No team members yet. Invite someone to get started.
           </div>
         ) : (
-          <div className="divide-y">
+          <div className="divide-y divide-gray-100">
             {members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between py-4">
+              <div key={member.id} className="flex items-center justify-between py-3">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src={member.avatar} />
