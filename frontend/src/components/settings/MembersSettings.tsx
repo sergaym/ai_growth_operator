@@ -31,3 +31,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+
+type Role = 'owner' | 'admin' | 'member' | 'viewer';
+
