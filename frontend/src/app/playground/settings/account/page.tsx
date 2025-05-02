@@ -178,27 +178,26 @@ export default function AccountSettings() {
         
         <Separator className="bg-gray-100" />
         
-        {/* Account Actions */}
-        <div className="space-y-5">
-          <h3 className="text-base font-medium text-gray-700">Account</h3>
-          
-          <div className="space-y-4">
-            <Link href="/api/auth/logout" className="block max-w-lg">
-              <Button variant="outline" className="w-full justify-start" size="sm">
-                <LogOut className="mr-2 h-4 w-4" />
-                Sign Out
-              </Button>
-            </Link>
-            
-            <div className="pt-2 max-w-lg">
-              <Button variant="destructive" className="w-full justify-start" size="sm">
+        {/* Account Actions - Only Delete Account */}
+        <div className="pt-2">
+          <details className="group">
+            <summary className="flex items-center text-sm text-gray-500 cursor-pointer hover:text-gray-700">
+              <AlertCircle className="w-4 h-4 mr-2" />
+              <span>Advanced Account Options</span>
+            </summary>
+            <div className="mt-4 pl-6 border-l-2 border-gray-100">
+              <Button 
+                variant="outline" 
+                className="text-red-500 border-red-100 hover:bg-red-50 hover:text-red-600" 
+                size="sm"
+              >
                 Delete Account
               </Button>
               <p className="text-xs text-gray-500 mt-2">
                 This action cannot be undone. All your data will be permanently deleted.
               </p>
             </div>
-          </div>
+          </details>
         </div>
       </div>
     </PlaygroundLayout>
