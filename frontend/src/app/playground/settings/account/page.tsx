@@ -50,14 +50,6 @@ export default function AccountSettings() {
     }
   };
 
-  const handleSaveProfile = () => {
-    toast({
-      title: "Profile updated",
-      description: "Your profile information has been updated successfully.",
-      duration: 3000,
-    });
-  };
-
   return (
     <PlaygroundLayout
       title="Settings"
@@ -65,52 +57,31 @@ export default function AccountSettings() {
     >
       <div className="max-w-4xl mx-auto space-y-8 pt-4">
         {/* Profile Section */}
-        <div className="flex items-start gap-6">
-          {/* Profile Photo */}
-          <div className="relative group">
-            <Avatar className="w-24 h-24">
-              <AvatarImage src={avatarPreview || "/avatars/default.jpg"} />
-              <AvatarFallback className="text-xl">{fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
-            </Avatar>
-            <Label 
-              htmlFor="avatar-upload" 
-              className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-3xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
-            >
-              <div className="bg-black/50 rounded-3xl p-2">
-                <Camera className="h-5 w-5 text-white" />
-              </div>
-            </Label>
-            <Input 
-              id="avatar-upload" 
-              type="file" 
-              accept="image/*"
-              onChange={handleAvatarChange}
-              className="hidden"
-            />
-          </div>
-          
-          {/* Profile Info */}
-          <div className="flex-1 space-y-4">
-            <div className="space-y-2">
-              <div className="flex items-center">
-                <UserIcon className="w-4 h-4 mr-2 text-gray-500" />
-                <Input 
-                  value={fullName}
-                  onChange={(e) => setFullName(e.target.value)}
-                  className="flex-1 border-gray-200 focus:border-gray-300"
-                  placeholder="Your name"
-                />
-              </div>
-              
-              <div className="flex items-center">
-                <AtSign className="w-4 h-4 mr-2 text-gray-500" />
-                <Input 
-                  type="email"
-                  value={email}
-                  onChange={(e) => setEmail(e.target.value)}
-                  className="flex-1 border-gray-200 focus:border-gray-300"
-                  placeholder="your.email@example.com"
-                />
+        <div>
+          <h3 className="text-base font-medium text-gray-700 mb-4">Profile Information</h3>
+          <div className="flex items-start gap-6">
+            {/* Profile Photo */}
+            <div className="relative group">
+              <Avatar className="w-24 h-24">
+                <AvatarImage src={avatarPreview || "/avatars/default.jpg"} />
+                <AvatarFallback className="text-xl">{fullName.substring(0, 2).toUpperCase()}</AvatarFallback>
+              </Avatar>
+              <Label 
+                htmlFor="avatar-upload" 
+                className="absolute inset-0 flex items-center justify-center bg-black/20 rounded-3xl opacity-0 group-hover:opacity-100 cursor-pointer transition-opacity"
+              >
+                <div className="bg-black/50 rounded-3xl p-2">
+                  <Camera className="h-5 w-5 text-white" />
+                </div>
+              </Label>
+              <Input 
+                id="avatar-upload" 
+                type="file" 
+                accept="image/*"
+                onChange={handleAvatarChange}
+                className="hidden"
+              />
+            </div>
               </div>
             </div>
             
