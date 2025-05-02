@@ -166,8 +166,16 @@ export function MembersSettings() {
       </div>
 
       <Separator className="my-6" />
+      
+      <div className="space-y-2 max-w-4xl">
+        {members.length === 0 ? (
+          <div className="py-8 text-center text-muted-foreground">
+            No team members yet. Invite someone to get started.
+          </div>
+        ) : (
+          <div className="divide-y">
             {members.map((member) => (
-              <div key={member.id} className="flex items-center justify-between p-4 rounded-lg border">
+              <div key={member.id} className="flex items-center justify-between py-4">
                 <div className="flex items-center gap-3">
                   <Avatar>
                     <AvatarImage src={member.avatar} />
