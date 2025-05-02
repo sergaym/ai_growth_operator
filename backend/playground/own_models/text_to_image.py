@@ -51,3 +51,16 @@ for p in (ROOT_DIR, BACKEND_DIR):
 # ---------------------------------------------------------------------------
 load_dotenv()  # Load .env if present
 
+# Validate API key early - check multiple possible environment variables
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API")
+if not FAL_KEY:
+    print("\033[91mError: No FAL API key found.\033[0m")
+    print("You can get your API key from: https://app.fal.ai/settings/api-keys")
+    print("Then set it as one of these environment variables or add to your .env file:\n")
+    print("    export FAL_KEY=your-key-here")
+    print("    export FAL_API_KEY=your-key-here")
+    print("    export FAL_CLIENT_API=your-key-here\n")
+    sys.exit(1)
+
+# Set the environment variable fal-client expects
+os.environ["FAL_KEY"] = FAL_KEY
