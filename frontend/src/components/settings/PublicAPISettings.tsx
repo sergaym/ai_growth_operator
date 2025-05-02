@@ -24,3 +24,13 @@ export function PublicAPISettings() {
       duration: 3000,
     });
   };
+
+  const handleGenerateNewApiKey = () => {
+    // In a real implementation, you would make an API call to generate a new key
+    setApiKey('sk_live_' + Math.random().toString(36).substring(2, 15) + Math.random().toString(36).substring(2, 15));
+    toast({
+      title: "New API key generated",
+      description: "Your new API key has been generated. Make sure to update any applications using the old key.",
+      duration: 5000,
+    });
+  };
