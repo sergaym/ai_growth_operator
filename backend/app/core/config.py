@@ -34,6 +34,8 @@ class Settings(BaseSettings):
     LUMAAI_API_KEY: Optional[str] = os.getenv("LUMAAI_API_KEY")
     RUNWAY_API_KEY: Optional[str] = os.getenv("RUNWAY_API_KEY")
     HEYGEN_API_KEY: Optional[str] = os.getenv("HEYGEN_API_KEY")
+    FAL_API_KEY: Optional[str] = os.getenv("FAL_API_KEY")
+    FAL_CLIENT_API: Optional[str] = os.getenv("FAL_CLIENT_API")
     
     # Database Configuration
     DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
