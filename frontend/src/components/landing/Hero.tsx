@@ -24,7 +24,7 @@ export function Hero() {
             className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
           >
             <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
-              Introducing AI Video Generation
+              The Future of Ad Creation Is Here
             </span>
           </motion.div>
         </div>
@@ -45,11 +45,11 @@ export function Hero() {
               className="text-5xl sm:text-6xl lg:text-7xl font-extrabold mb-6 leading-[1.1] tracking-tight"
             >
               <span className="text-white">
-                Create Professional
+                Create winning
               </span>
               <br />
               <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-red-500 bg-clip-text text-transparent pb-1">
-                AI Videos
+                ads with AI Actors
               </span>
             </motion.h1>
             
@@ -57,11 +57,11 @@ export function Hero() {
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.5, delay: 0.4 }}
-              className="text-lg text-zinc-400 mb-10"
+              className="text-lg text-zinc-400 mb-6"
             >
-              Generate engaging videos in minutes with our AI technology. No cameras, no actors, no hassle.
+              Generate 100s of winning videos from text. No cameras, no production costs, no hassle.
             </motion.p>
-            
+                        
             <motion.div 
               initial={{ opacity: 0, y: 10 }}
               animate={{ opacity: 1, y: 0 }}
@@ -69,14 +69,9 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
               <Link href="/login?callbackUrl=/playground">
-                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-lg font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
-                  Start Creating
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </Button>
-              </Link>
-              <Link href="/login?callbackUrl=/become-actor">
-                <Button className="px-8 py-6 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-lg font-medium text-white">
-                  Become an AI Actor
+                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-lg font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] group">
+                  Get your first video ad generated
+                  <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
               </Link>
             </motion.div>
@@ -101,7 +96,7 @@ export function Hero() {
                     <div className="w-3 h-3 rounded-full bg-amber-500/90"></div>
                     <div className="w-3 h-3 rounded-full bg-green-500/90"></div>
                   </div>
-                  <div className="mx-auto text-xs text-white/60 font-medium">AI Video Generator</div>
+                  <div className="mx-auto text-xs text-white/60 font-medium">AI Ad Creator</div>
                 </div>
                 
                 <div className="relative aspect-[16/9] bg-black rounded-b-2xl overflow-hidden">
@@ -141,16 +136,12 @@ export function Hero() {
                   <div className="flex-shrink-0">
                     <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-red-500 flex items-center justify-center shadow-md shadow-amber-500/20">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-                        <path d="M18 8C19.6569 8 21 6.65685 21 5C21 3.34315 19.6569 2 18 2C16.3431 2 15 3.34315 15 5C15 6.65685 16.3431 8 18 8Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M6 15C7.65685 15 9 13.6569 9 12C9 10.3431 7.65685 9 6 9C4.34315 9 3 10.3431 3 12C3 13.6569 4.34315 15 6 15Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M18 22C19.6569 22 21 20.6569 21 19C21 17.3431 19.6569 16 18 16C16.3431 16 15 17.3431 15 19C15 20.6569 16.3431 22 18 22Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M8.59 13.51L15.42 17.49" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
-                        <path d="M15.41 6.51L8.59 10.49" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+                        <path d="M12 8V12L15 15M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 9.61305 20.0518 7.32387 18.364 5.63604C16.6761 3.94821 14.3869 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>
                     </div>
                   </div>
                   <div>
-                    <div className="text-xs text-zinc-400">Average Creation Time</div>
+                    <div className="text-xs text-zinc-400">From Text to Video</div>
                     <div className="text-xl font-bold text-white tracking-tight">5 min <span className="text-green-400 text-sm ml-0.5">↓</span></div>
                   </div>
                 </div>

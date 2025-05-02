@@ -3,29 +3,28 @@
 import React, { Suspense } from 'react';
 import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
+import { ArrowDown } from 'lucide-react';
+import { motion } from 'framer-motion';
 
 // Create a loading fallback for the Suspense boundary
 function LoginFormSkeleton() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712]">
+      <div className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-lg border border-white/10 backdrop-blur-sm">
         <div className="flex flex-col items-center">
-          <Logo size="md" showText={true} />
-          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access the playground and other protected areas
-          </p>
+          <div className="h-10 w-40 bg-gray-800 rounded-lg animate-pulse"></div>
         </div>
         
-        <div className="animate-pulse">
-          <div className="rounded-md shadow-sm -space-y-px">
-            <div className="h-12 bg-gray-200 rounded-t-md"></div>
-            <div className="h-12 bg-gray-200 rounded-b-md"></div>
-          </div>
-          <div className="mt-6 h-12 bg-blue-200 rounded-md"></div>
+        <div className="animate-pulse space-y-3">
+          <div className="h-12 bg-gray-800 rounded-lg"></div>
+          <div className="h-12 bg-gray-800 rounded-lg"></div>
+          <div className="h-12 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg"></div>
         </div>
+      </div>
+      
+      <div className="mt-10 text-center animate-pulse">
+        <div className="h-8 w-64 bg-gray-800 rounded-lg mx-auto"></div>
+        <div className="h-12 w-48 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg mx-auto mt-4"></div>
       </div>
     </div>
   );
@@ -64,52 +63,76 @@ function LoginForm() {
   
   // Display either form validation error or auth error
   const displayError = error || authError;
-  
+
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gray-50 py-12 px-4 sm:px-6 lg:px-8">
-      <div className="max-w-md w-full space-y-8 bg-white p-8 rounded-lg shadow-md">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712] text-white px-4 sm:px-6 relative overflow-hidden">
+      {/* Background effects - matching the landing page */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+      </div>
+
+      <motion.div 
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.6 }}
+        className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-xl border border-white/10 backdrop-blur-sm relative z-10"
+      >
         <div className="flex flex-col items-center">
-          <Logo size="md" showText={true} />
-          <h2 className="mt-6 text-center text-2xl font-semibold text-gray-900">
-            Sign in to your account
-          </h2>
-          <p className="mt-2 text-center text-sm text-gray-600">
-            Access the playground and other protected areas
-          </p>
+          <Link href="/">
+            <Logo size="md" showText={true} />
+          </Link>
         </div>
         
         {displayError && (
-          <div className="bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded relative" role="alert">
-            <span className="block sm:inline">{displayError}</span>
-          </div>
+          <motion.div 
+            initial={{ opacity: 0, y: -10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="bg-red-900/20 border-l-4 border-red-500 text-red-400 p-3 rounded-md shadow-sm"
+            role="alert"
+          >
+            <div className="flex">
+              <svg className="h-5 w-5 text-red-500 mr-2" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor">
+                <path fillRule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7 4a1 1 0 11-2 0 1 1 0 012 0zm-1-9a1 1 0 00-1 1v4a1 1 0 102 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
+              </svg>
+              <span>{displayError}</span>
+            </div>
+          </motion.div>
         )}
         
-        <form className="mt-8 space-y-6" onSubmit={handleSubmit}>
-          <div className="rounded-md shadow-sm -space-y-px">
+        <div className="text-lg font-medium mb-1">Email address</div>
+        <motion.form 
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          transition={{ duration: 0.4, delay: 0.2 }}
+          className="mt-2 space-y-5" 
+          onSubmit={handleSubmit}
+        >
+          <div className="space-y-5">
             <div>
-              <label htmlFor="email-address" className="sr-only">Email address</label>
               <input
                 id="email-address"
                 name="email"
                 type="email"
                 autoComplete="email"
                 required
-                className="appearance-none rounded-t-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Email address"
+                className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors sm:text-sm"
+                placeholder="user@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
               />
             </div>
+            
+            <div className="text-lg font-medium mb-1">Password</div>
             <div>
-              <label htmlFor="password" className="sr-only">Password</label>
               <input
                 id="password"
                 name="password"
                 type="password"
                 autoComplete="current-password"
                 required
-                className="appearance-none rounded-b-md relative block w-full px-3 py-3 border border-gray-300 placeholder-gray-500 text-gray-900 focus:outline-none focus:ring-blue-500 focus:border-blue-500 focus:z-10 sm:text-sm"
-                placeholder="Password"
+                className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors sm:text-sm"
+                placeholder="••••••••"
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
               />
@@ -120,10 +143,10 @@ function LoginForm() {
             <button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-md text-white focus:outline-none focus:ring-2 focus:ring-offset-2 ${
+              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-150 ease-in-out shadow-lg ${
                 loading 
-                  ? 'bg-blue-400 cursor-not-allowed' 
-                  : 'bg-blue-600 hover:bg-blue-700 focus:ring-blue-500'
+                  ? 'bg-red-800/50 cursor-not-allowed' 
+                  : 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
               }`}
             >
               {loading ? (
@@ -135,18 +158,76 @@ function LoginForm() {
                   Signing in...
                 </span>
               ) : (
-                'Sign in'
+                'Sign in to continue'
               )}
             </button>
           </div>
-        </form>
+        </motion.form>
         
-        <div className="text-center mt-4">
-          <Link href="/" className="text-sm text-blue-600 hover:text-blue-500">
-            Back to home
+        <div className="text-center mt-3">
+          <Link href="/reset-password" className="text-sm font-medium text-zinc-400 hover:text-zinc-300 transition-colors">
+            Forgot your password?
           </Link>
         </div>
-      </div>
+      </motion.div>
+      
+      {/* Badge */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.7 }}
+        className="mt-16 inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm relative z-10"
+      >
+        <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+          Create Winning Ads with AI Actors
+        </span>
+      </motion.div>
+      
+      {/* CTA Section */}
+      <motion.div 
+        initial={{ opacity: 0, y: 10 }}
+        animate={{ opacity: 1, y: 0 }}
+        transition={{ duration: 0.5, delay: 0.9 }}
+        className="text-center max-w-lg mx-auto relative z-10"
+      >
+        <h2 className="text-2xl md:text-3xl font-bold text-white mt-5 mb-2">
+          Don't have an account yet?
+        </h2>
+        <p className="text-zinc-400 mb-6">
+          Generate 100s of winning videos from text. No cameras, no production costs, no hassle.
+        </p>
+        
+        <motion.div 
+          animate={{ 
+            y: [0, 8, 0],
+          }}
+          transition={{ 
+            repeat: Infinity, 
+            duration: 2.5,
+            ease: "easeInOut" 
+          }}
+          className="text-red-500 my-5"
+        >
+          <svg className="w-8 h-8 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+            <path d="M12 4V20M12 20L18 14M12 20L6 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+          </svg>
+        </motion.div>
+        
+        <Link href="/signup" className="block mx-auto w-fit">
+          <motion.button 
+            whileHover={{ scale: 1.05 }}
+            whileTap={{ scale: 0.95 }}
+            className="py-4 px-10 bg-gradient-to-r from-red-500 to-amber-500 rounded-full text-lg font-bold text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+          >
+            Get your first video ad free
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+              <path d="M13 5L20 12L13 19M4 12H20" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
+            </svg>
+          </motion.button>
+        </Link>
+        
+        <p className="mt-4 text-xs text-zinc-500">Less than 1 minute to start • Cancel anytime</p>
+      </motion.div>
     </div>
   );
 }
