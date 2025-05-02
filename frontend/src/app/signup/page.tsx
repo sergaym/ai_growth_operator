@@ -53,7 +53,15 @@ function SignupPageContent() {
     setFormData(prev => ({ ...prev, ...data }));
   };
 
-  const nextStep = () => setStep(prev => Math.min(prev + 1, 4));
+  const nextStep = () => {
+    if (step < 3) {
+      setStep(prev => prev + 1);
+    } else {
+      // If we're at step 3 (Goals), redirect to subscription
+      handleSignupComplete();
+    }
+  };
+  
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const handleSignupComplete = async () => {
