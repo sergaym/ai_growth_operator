@@ -233,7 +233,34 @@ def parse_args():
 async def main_async():
     """Async entry point."""
     args = parse_args()
-    await submit(args.prompt, args.output_dir)
+    
+    # If we have a direct prompt, use it; otherwise, build from parameters
+    if args.prompt:
+        await submit(prompt=args.prompt, output_dir=args.output_dir)
+    else:
+        # Convert args to dictionary for the parameter builder
+        params = {
+            "gender": args.gender,
+            "age": args.age,
+            "ethnicity": args.ethnicity,
+            "skin_tone": args.skin_tone,
+            "hair_style": args.hair_style,
+            "hair_color": args.hair_color,
+            "facial_features": args.facial_features,
+            "expression": args.expression,
+            "style": args.style,
+            "background": args.background,
+            "lighting": args.lighting
+        }
+        
+        # Filter out None values
+        params = {k: v for k, v in params.items() if v is not None}
+        
+        if not params:
+            print("Error: Either provide a --prompt or at least one avatar parameter")
+            return
+            
+        await submit(params=params, output_dir=args.output_dir)
 
 if __name__ == "__main__":
     asyncio.run(main_async())
