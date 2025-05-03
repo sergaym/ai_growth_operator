@@ -166,7 +166,7 @@ async def submit(prompt=None, params=None, output_dir=None):
                         
                         image_bytes = base64.b64decode(image_data)
                         timestamp = int(time.time())
-                        filename = f"image_{timestamp}_{i}.png"
+                        filename = f"avatar_{timestamp}_{i}.png"
                         filepath = output_path / filename
                         
                         with open(filepath, "wb") as f:
@@ -180,7 +180,7 @@ async def submit(prompt=None, params=None, output_dir=None):
                         response = requests.get(url)
                         if response.status_code == 200:
                             timestamp = int(time.time())
-                            filename = f"image_{timestamp}_{i}.png"
+                            filename = f"avatar_{timestamp}_{i}.png"
                             filepath = output_path / filename
                             
                             with open(filepath, "wb") as f:
@@ -201,12 +201,12 @@ async def submit(prompt=None, params=None, output_dir=None):
 
 def parse_args():
     """Parse command line arguments."""
-    parser = argparse.ArgumentParser(description="Generate images using fal.ai")
+    parser = argparse.ArgumentParser(description="Generate hyperrealistic avatar images using fal.ai")
     
+    # Basic arguments
     parser.add_argument(
-        "--prompt",
-        default="Find a real actor (25–35 years old) with a naturally charismatic presence, able to speak directly to camera in a warm, relatable tone. The actor should look authentic, not overly polished—someone who feels like a trusted peer. They must have clear facial expressions, excellent micro-expression control, and speak fluently and casually as if explaining something to a friend. Appearance should be clean and modern: casual clothing (T-shirt, hoodie), neutral background or soft indoor setting, and soft natural lighting. Prioritize diversity and inclusivity. The final output must feel native to platforms like TikTok or Instagram, not scripted or corporate.",
-        help="Prompt for image generation"
+        "--prompt", 
+        help="Custom prompt for image generation (will override other parameters)"
     )
     
     parser.add_argument(
