@@ -159,35 +159,36 @@ class ImageGenerator:
 
     def __init__(
         self,
-        model: str = "fal-ai/fast-sdxl",
+        quality: Quality = Quality.STANDARD,
+        output_dir: Optional[str] = None,
         width: int = 1024,
         height: int = 1024,
-        output_dir: Optional[str] = None,
     ):
-        """Initialize the image generator.
+        """Initialize the image generator with quality settings.
 
         Args:
-            model: Which fal.ai model to use
-            width: Image width (must be multiple of 8)
-            height: Image height (must be multiple of 8) 
+            quality: Quality preset (determines model and parameters)
             output_dir: Directory to save images (default: ./output)
+            width: Image width (default: 1024)
+            height: Image height (default: 1024)
         """
-        if model not in self.AVAILABLE_MODELS:
-            raise ValueError(
-                f"Model {model} not recognized. Available models: {list(self.AVAILABLE_MODELS.keys())}"
-            )
-
+        self.quality = quality
+        self.model = self.QUALITY_MODELS[quality]
+        self.settings = self.QUALITY_SETTINGS[quality]
+        
         # Ensure dimensions are valid
-        self.model = model
         self.width = self._validate_dimension(width, "width")
         self.height = self._validate_dimension(height, "height")
-
+        
         # Set up output directory
         if output_dir:
             self.output_dir = Path(output_dir)
         else:
             self.output_dir = Path(__file__).parent / "output"
         self.output_dir.mkdir(exist_ok=True, parents=True)
+        
+        print(f"Initialized generator with quality '{quality}', using model '{self.model}'")
+        print(f"Steps: {self.settings['steps']}, Guidance: {self.settings['guidance']}")
 
     @staticmethod
     def _validate_dimension(value: int, dim_name: str) -> int:
