@@ -316,11 +316,6 @@ class ImageGenerator:
                 
             return results
             
-        except fal_client.auth.MissingCredentialsError:
-            print("\033[91mError: FAL_KEY environment variable not found or is invalid.\033[0m")
-            print("Visit https://app.fal.ai/settings/api-keys to get your API key.")
-            raise
-            
         except Exception as e:
             print(f"\033[91mError during image generation: {str(e)}\033[0m")
             raise
@@ -328,174 +323,270 @@ class ImageGenerator:
     async def _process_generation(self, handler) -> Dict[str, Any]:
         """Process the generation events and return the final result."""
         try:
-            # 1. Display logs and progress during generation
+            # Try to display logs and progress during generation
             async for event in handler.iter_events(with_logs=True):
                 if "logs" in event and event["logs"].strip():
                     print(f"[fal.ai] {event['logs'].strip()}")
-        except TypeError as e:
-            # If iter_events fails (e.g., when 'Completed' is not iterable)
+        except Exception:
+            # Some models don't support streaming logs
             print(f"[fal.ai] Note: Progress streaming not available for this model")
-        except Exception as e:
-            print(f"[fal.ai] Warning: Could not stream progress logs: {str(e)}")
                 
-        # 2. Get the final result (this should still work regardless of streaming support)
+        # Get the final result (always works regardless of streaming support)
         result = await handler.get()
         return result
-
-    def _save_image(self, image_base64: str, index: int = 0, suffix: str = "") -> str:
-        """Save a base64-encoded image to disk and return the filename."""
+        
+    async def _extract_images(self, result_data: Dict[str, Any], seed: Optional[int]) -> List[Dict[str, Any]]:
+        """Extract and save images from any supported response format."""
+        results = []
+        
+        # Try different response formats
+        if "images" in result_data:
+            images_data = result_data.get("images", [])
+            if isinstance(images_data, list):
+                for i, image_data in enumerate(images_data):
+                    # Different models use different formats
+                    if isinstance(image_data, dict):
+                        # Format 1: Image in dict
+                        if "image" in image_data:
+                            image_b64 = image_data.get("image", "")
+                            if image_b64:
+                                result = await self._save_base64_image(
+                                    image_b64, i, result_data.get("seed", seed)
+                                )
+                                if result:
+                                    results.append(result)
+                                    
+                        # Format 2: URL in dict
+                        elif "url" in image_data or "file_path" in image_data:
+                            img_url = image_data.get("url") or image_data.get("file_path")
+                            if img_url:
+                                result = await self._save_image_from_url(
+                                    img_url, i, result_data.get("seed", seed),
+                                    width=image_data.get("width", self.width),
+                                    height=image_data.get("height", self.height),
+                                )
+                                if result:
+                                    results.append(result)
+                    
+                    # Format 3: Direct string
+                    elif isinstance(image_data, str):
+                        result = await self._save_base64_image(
+                            image_data, i, result_data.get("seed", seed)
+                        )
+                        if result:
+                            results.append(result)
+        
+        # Format 4: Direct image
+        elif "image" in result_data:
+            image_b64 = result_data.get("image", "")
+            if image_b64:
+                result = await self._save_base64_image(
+                    image_b64, 0, result_data.get("seed", seed)
+                )
+                if result:
+                    results.append(result)
+                    
+        # Debug info if no images found
+        if not results:
+            print(f"[fal.ai] Response keys: {list(result_data.keys())}")
+            if "images" in result_data:
+                images_val = result_data["images"]
+                print(f"[fal.ai] Type of 'images': {type(images_val)}")
+                if isinstance(images_val, list) and len(images_val) > 0:
+                    print(f"[fal.ai] First item type: {type(images_val[0])}")
+                    if isinstance(images_val[0], dict):
+                        print(f"[fal.ai] First item keys: {list(images_val[0].keys())}")
+                        
+        return results
+    
+    async def _save_base64_image(
+        self, 
+        image_base64: str, 
+        index: int, 
+        seed: Optional[int]
+    ) -> Optional[Dict[str, Any]]:
+        """Save a base64-encoded image to disk."""
         try:
-            # Generate a timestamped filename
-            timestamp = int(time.time())
-            if suffix:
-                filename = f"image_{timestamp}_{index}_{suffix}.png"
-            else:
-                filename = f"image_{timestamp}_{index}.png"
-            filepath = self.output_dir / filename
-            
             # Handle different base64 formats
             if "," in image_base64 and ";base64," in image_base64:
-                # Handle format like "data:image/png;base64,ABC123..."
                 image_base64 = image_base64.split(";base64,")[1]
             
             # Decode and save the image
-            try:
-                image_data = base64.b64decode(image_base64)
-                with open(filepath, "wb") as f:
-                    f.write(image_data)
-                
-                print(f"[fal.ai] Saved image to {filepath}")
-                return filename
-            except Exception as e:
-                print(f"[fal.ai] Error decoding image data: {str(e)}")
-                # Save the raw response for debugging
-                debug_file = self.output_dir / f"debug_response_{timestamp}.txt"
-                with open(debug_file, "w") as f:
-                    f.write(f"Error: {str(e)}\n\nBase64 data (first 100 chars):\n{image_base64[:100]}...")
-                print(f"[fal.ai] Saved debug info to {debug_file}")
-                return f"error_saving_{timestamp}.png"
+            image_data = base64.b64decode(image_base64)
+            timestamp = int(time.time())
+            filename = f"actor_{timestamp}_{index}.png"
+            filepath = self.output_dir / filename
+            
+            with open(filepath, "wb") as f:
+                f.write(image_data)
+            
+            print(f"[fal.ai] Saved actor portrait to {filepath}")
+            return {
+                "filename": filename,
+                "path": str(filepath),
+                "seed": seed,
+                "width": self.width,
+                "height": self.height,
+                "quality": self.quality,
+            }
         except Exception as e:
             print(f"[fal.ai] Error saving image: {str(e)}")
-            return f"error_{int(time.time())}.png"
+            return None
+            
+    async def _save_image_from_url(
+        self, 
+        url: str, 
+        index: int,
+        seed: Optional[int],
+        width: Optional[int] = None,
+        height: Optional[int] = None,
+    ) -> Optional[Dict[str, Any]]:
+        """Download and save an image from a URL."""
+        try:
+            print(f"[fal.ai] Downloading actor portrait from URL: {url}")
+            response = requests.get(url)
+            if response.status_code == 200:
+                timestamp = int(time.time())
+                filename = f"actor_{timestamp}_{index}.png"
+                filepath = self.output_dir / filename
+                
+                with open(filepath, "wb") as f:
+                    f.write(response.content)
+                
+                print(f"[fal.ai] Saved actor portrait to {filepath}")
+                return {
+                    "filename": filename,
+                    "path": str(filepath),
+                    "url": url,
+                    "seed": seed,
+                    "width": width or self.width,
+                    "height": height or self.height,
+                    "quality": self.quality,
+                }
+            else:
+                print(f"[fal.ai] Failed to download image: HTTP {response.status_code}")
+                return None
+        except Exception as e:
+            print(f"[fal.ai] Error downloading image: {str(e)}")
+            return None
 
 
 # ---------------------------------------------------------------------------
-# CLI entry-point
+# CLI interface
 # ---------------------------------------------------------------------------
 
 def parse_args(argv: Optional[List[str]] = None) -> argparse.Namespace:
     """Parse command line arguments."""
     parser = argparse.ArgumentParser(
-        description="Generate images from text using fal.ai's Stable Diffusion API"
+        description="Generate high-quality actor portraits for UGC content"
     )
     
-    # Required arguments
+    parser.add_argument(
+        "--preset",
+        type=str,
+        choices=[p.value for p in ActorPreset],
+        help="Actor type preset (headshot, casual, corporate, dramatic, friendly)",
+    )
+    
     parser.add_argument(
         "--prompt", 
         default="Create a hyperrealistic 4K actor of a charismatic 25-35 year-old person (gender-neutral or [specify gender if needed]) with a natural, approachable expression. The actor should have clear skin, subtle makeup (if any), and modern casual clothing (like a neutral-toned T-shirt or hoodie). Lighting should be soft and natural, emulating indoor daylight. Background should be minimal or softly blurred, keeping full focus on the face. The avatar must look camera-ready for direct-to-camera speaking in UGC content—authentic, warm, and trustworthy. Include micro-details like skin texture, eye reflection, and natural hair flow.",
-        help="Text description of the image to generate",
+        help="Custom prompt for the actor portrait",
     )
     
-    # Optional arguments
     parser.add_argument(
-        "--model", 
-        default="fal-ai/fast-sdxl",
-        choices=ImageGenerator.AVAILABLE_MODELS.keys(),
-        help="Which model to use for generation",
+        "--quality", 
+        type=str,
+        default="standard",
+        choices=[q.value for q in Quality],
+        help="Quality preset: draft (fast), standard, high, ultra (slowest)",
     )
+    
     parser.add_argument(
-        "--width", 
-        type=int, 
-        default=1024,
-        help="Image width (multiple of 8, max 1024)",
+        "--gender",
+        type=str,
+        default="person",
+        help="Gender description for the actor (used with presets)"
     )
+    
     parser.add_argument(
-        "--height", 
-        type=int, 
-        default=1024,
-        help="Image height (multiple of 8, max 1024)",
+        "--age",
+        type=str,
+        default="25-35",
+        help="Age range for the actor (used with presets)"
     )
-    parser.add_argument(
-        "--negative-prompt", 
-        default="ugly, blurry, low quality, distorted, deformed",
-        help="Elements to avoid in the generated image",
-    )
+    
     parser.add_argument(
         "--samples", 
         type=int, 
         default=1,
-        help="Number of images to generate (max 4)",
+        help="Number of variations to generate (max 4)",
     )
-    parser.add_argument(
-        "--steps", 
-        type=int, 
-        default=25,
-        help="Number of inference steps (higher = better quality but slower)",
-    )
-    parser.add_argument(
-        "--guidance", 
-        type=float, 
-        default=7.5,
-        help="Guidance scale (higher = more faithful to prompt)",
-    )
-    parser.add_argument(
-        "--scheduler",
-        type=str,
-        default=None,
-        help="Diffusion scheduler to use (model-specific, leave empty for default)",
-    )
+    
     parser.add_argument(
         "--seed", 
         type=int, 
         default=None,
         help="Random seed for reproducibility",
     )
+    
+    parser.add_argument(
+        "--width", 
+        type=int, 
+        default=1024,
+        help="Image width (multiple of 8, max 1024)",
+    )
+    
+    parser.add_argument(
+        "--height", 
+        type=int, 
+        default=1024,
+        help="Image height (multiple of 8, max 1024)",
+    )
+    
     parser.add_argument(
         "--output-dir", 
         default=None,
-        help="Directory to save generated images",
+        help="Directory to save generated portraits",
     )
     
-    args = parser.parse_args(argv)
-    
-    # Print available schedulers for the chosen model
-    model = args.model
-    print(f"Available schedulers for {model}:")
-    for scheduler in ImageGenerator.MODEL_SCHEDULERS.get(model, []):
-        print(f"  - {scheduler}")
-    print(f"Default scheduler: {ImageGenerator.DEFAULT_SCHEDULERS.get(model, 'unknown')}")
-    
-    return args
+    return parser.parse_args(argv)
 
 async def main_async() -> None:
     """Async entry point for the image generator."""
     args = parse_args()
     
+    # Convert string args to enums
+    quality = Quality(args.quality)
+    preset = ActorPreset(args.preset) if args.preset else None
+    
+    # Create generator with quality settings
     generator = ImageGenerator(
-        model=args.model,
+        quality=quality,
+        output_dir=args.output_dir,
         width=args.width,
         height=args.height,
-        output_dir=args.output_dir,
     )
     
     try:
-        # Generate the image(s)
-        results = await generator.generate_image(
+        # Generate actor portrait(s)
+        results = await generator.generate_actor_portrait(
             prompt=args.prompt,
-            negative_prompt=args.negative_prompt,
+            preset=preset,
+            gender=args.gender,
+            age_range=args.age,
             num_samples=args.samples,
-            scheduler=args.scheduler,
-            num_inference_steps=args.steps,
-            guidance_scale=args.guidance,
             seed=args.seed,
         )
         
         # Print result summary
-        print("\n--- RESULT --------------------------------------------------------------")
-        print(f"Generated {len(results)} image(s):")
+        print("\n--- ACTOR PORTRAITS GENERATED ---------------------------------------")
+        print(f"Generated {len(results)} portrait(s):")
         for i, result in enumerate(results):
-            print(f"  {i+1}. {result['path']} (seed: {result['seed']})")
-        print("-----------------------------------------------------------------------\n")
+            print(f"  {i+1}. {result['path']}")
+            if 'seed' in result and result['seed']:
+                print(f"     Seed: {result['seed']} (use this seed to recreate this exact image)")
+        print("--------------------------------------------------------------------\n")
         
     except Exception as e:
         print(f"\033[91mError: {str(e)}\033[0m")
