@@ -283,3 +283,5 @@ async def main_async():
         filename=args.filename
     )
 
+if __name__ == "__main__":
+    asyncio.run(main_async()) 
