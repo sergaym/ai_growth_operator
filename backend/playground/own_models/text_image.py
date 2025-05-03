@@ -110,15 +110,26 @@ def build_avatar_prompt(
         base_prompt += f" {custom_prompt}"
     
     return base_prompt
+
+async def submit(prompt=None, params=None, output_dir=None):
     """Submit an image generation request to fal.ai and save the result."""
+    
+    # Build prompt from parameters if provided
+    if params:
+        generated_prompt = build_avatar_prompt(**params)
+        prompt = generated_prompt
+    
     print(f"Generating image with prompt: {prompt}")
     
     try:
-        # Submit the request
+        # Submit the request with additional parameters for better face generation
         handler = await fal_client.submit_async(
             "fal-ai/flux/dev",
             arguments={
-                "prompt": prompt
+                "prompt": prompt,
+                "negative_prompt": "deformed faces, unrealistic features, cartoon-like, illustration, painting, drawing, artificial looking, low quality, blurry",
+                "num_inference_steps": 50,  # Higher step count for better quality
+                "guidance_scale": 7.5,      # Higher guidance for closer adherence to prompt
             },
         )
 
