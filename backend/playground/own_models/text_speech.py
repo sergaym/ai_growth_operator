@@ -54,3 +54,88 @@ async def list_voices():
         print(f"Error listing voices: {str(e)}")
         return []
 
+async def generate_speech(
+    text, 
+    voice_id=None,
+    voice_preset=None,
+    stability=0.5,
+    similarity_boost=0.75,
+    style=0.0,
+    use_speaker_boost=True,
+    output_dir=None,
+    filename=None
+):
+    """Generate speech from text using ElevenLabs API."""
+    
+    # Determine which voice ID to use
+    if voice_preset and voice_preset in SPANISH_VOICES:
+        voice_id = SPANISH_VOICES[voice_preset]
+    elif not voice_id:
+        # Default to the first Spanish voice if none specified
+        voice_id = SPANISH_VOICES["male_1"]
+    
+    # Prepare the request data
+    data = {
+        "text": text,
+        "model_id": "eleven_multilingual_v2",  # Using the multilingual model for better Spanish
+        "voice_settings": {
+            "stability": stability,
+            "similarity_boost": similarity_boost,
+            "style": style,
+            "use_speaker_boost": use_speaker_boost
+        }
+    }
+    
+    print(f"Generating speech with voice ID: {voice_id}")
+    print(f"Text: {text[:100]}{'...' if len(text) > 100 else ''}")
+    
+    try:
+        # Make the API request
+        response = requests.post(
+            f"{ELEVENLABS_BASE_URL}/text-to-speech/{voice_id}/stream",
+            json=data,
+            headers=headers,
+            stream=True
+        )
+        response.raise_for_status()
+        
+        # Create output directory if it doesn't exist
+        if output_dir:
+            output_path = Path(output_dir)
+            output_path.mkdir(exist_ok=True, parents=True)
+            
+            # Generate filename if not provided
+            if not filename:
+                timestamp = int(time.time())
+                voice_name = voice_preset or voice_id
+                filename = f"speech_{voice_name}_{timestamp}.mp3"
+            
+            # Ensure filename has .mp3 extension
+            if not filename.endswith(".mp3"):
+                filename += ".mp3"
+            
+            filepath = output_path / filename
+            
+            # Save the audio file
+            with open(filepath, "wb") as f:
+                for chunk in response.iter_content(chunk_size=1024):
+                    if chunk:
+                        f.write(chunk)
+            
+            print(f"Speech generated and saved to: {filepath}")
+            return str(filepath)
+        else:
+            print("No output directory specified, audio not saved.")
+            return None
+        
+    except Exception as e:
+        print(f"Error generating speech: {str(e)}")
+        if hasattr(e, 'response') and e.response is not None:
+            try:
+                error_detail = e.response.json()
+                print(f"API Error: {json.dumps(error_detail, indent=2)}")
+            except:
+                print(f"API Error Status Code: {e.response.status_code}")
+                print(f"API Error Text: {e.response.text}")
+        return None
+
