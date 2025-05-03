@@ -194,23 +194,42 @@ class ImageGenerator:
     def _validate_dimension(value: int, dim_name: str) -> int:
         """Ensure dimensions are multiples of 8 and within bounds."""
         if value % 8 != 0:
-            print(f"Warning: {dim_name} {value} is not a multiple of 8. Rounding to {value - value % 8}")
             value = value - value % 8
         
         if value < 512:
-            print(f"Warning: {dim_name} {value} is too small. Setting to minimum of 512")
             value = 512
         
         if value > 1024:
-            print(f"Warning: {dim_name} {value} is too large. Setting to maximum of 1024")
             value = 1024
             
         return value
-
-    async def generate_image(
+        
+    def format_actor_prompt(
         self, 
         prompt: str, 
-        negative_prompt: str = "",
+        preset: Optional[ActorPreset] = None,
+        gender: str = "person",
+        age: str = "25-35",
+    ) -> str:
+        """Format a prompt using preset templates or return custom prompt.
+        
+        Args:
+            prompt: Custom prompt or None to use preset
+            preset: Actor preset type
+            gender: Gender for preset templates
+            age: Age range for preset templates
+            
+        Returns:
+            Formatted prompt
+        """
+        if preset and not prompt:
+            # Use preset template
+            template = self.PRESET_PROMPTS.get(preset)
+            if template:
+                return template.format(gender=gender, age=age)
+                
+        # Custom prompt or fallback
+        return prompt
         num_samples: int = 1,
         scheduler: Optional[str] = None,
         guidance_scale: float = 7.5,
