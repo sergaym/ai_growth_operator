@@ -215,6 +215,19 @@ def parse_args():
         help="Directory to save generated images"
     )
     
+    # Avatar parameter arguments
+    parser.add_argument("--gender", choices=["male", "female", "non-binary", "custom"], help="Gender of the avatar")
+    parser.add_argument("--age", help="Age of the avatar (e.g., '25', 'middle-aged', 'elderly')")
+    parser.add_argument("--ethnicity", help="Ethnicity or cultural background (e.g., 'African', 'East Asian', 'European')")
+    parser.add_argument("--skin-tone", help="Skin tone (e.g., 'dark', 'medium', 'light', 'olive')")
+    parser.add_argument("--hair-style", help="Hair style (e.g., 'short', 'long', 'curly', 'straight')")
+    parser.add_argument("--hair-color", help="Hair color (e.g., 'black', 'blonde', 'brown', 'red')")
+    parser.add_argument("--facial-features", help="Notable facial features (e.g., 'strong jawline', 'high cheekbones')")
+    parser.add_argument("--expression", help="Facial expression (e.g., 'neutral', 'smiling', 'serious')")
+    parser.add_argument("--style", help="Visual style (e.g., 'studio', 'natural', 'cinematic')")
+    parser.add_argument("--background", help="Background description (e.g., 'neutral', 'office', 'gradient')")
+    parser.add_argument("--lighting", help="Lighting description (e.g., 'soft', 'dramatic', 'natural')")
+    
     return parser.parse_args()
 
 async def main_async():
