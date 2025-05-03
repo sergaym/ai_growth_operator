@@ -168,3 +168,77 @@ async def list_spanish_voices():
         print(f"Error listing Spanish voices: {str(e)}")
         return []
 
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Generate speech using ElevenLabs API with focus on Spanish voices")
+    
+    # Basic arguments
+    parser.add_argument(
+        "--text", 
+        help="Text to convert to speech"
+    )
+    
+    parser.add_argument(
+        "--text-file",
+        help="Path to a text file containing content to convert to speech"
+    )
+    
+    parser.add_argument(
+        "--output-dir",
+        default="./output",
+        help="Directory to save generated audio files"
+    )
+    
+    parser.add_argument(
+        "--filename",
+        help="Filename for the output audio file (default: auto-generated)"
+    )
+    
+    # Voice selection arguments
+    parser.add_argument(
+        "--voice-id",
+        help="ElevenLabs voice ID to use"
+    )
+    
+    parser.add_argument(
+        "--voice-preset",
+        choices=list(SPANISH_VOICES.keys()),
+        help=f"Preset Spanish voice to use: {', '.join(SPANISH_VOICES.keys())}"
+    )
+    
+    # Voice customization arguments
+    parser.add_argument(
+        "--stability",
+        type=float,
+        default=0.5,
+        help="Voice stability (0.0-1.0): lower values are more expressive"
+    )
+    
+    parser.add_argument(
+        "--similarity-boost",
+        type=float,
+        default=0.75,
+        help="Voice similarity boost (0.0-1.0): higher values preserve voice better"
+    )
+    
+    parser.add_argument(
+        "--style",
+        type=float,
+        default=0.0,
+        help="Style emphasis (0.0-1.0): higher values emphasize style"
+    )
+    
+    # Utility commands
+    parser.add_argument(
+        "--list-voices",
+        action="store_true",
+        help="List all available voices"
+    )
+    
+    parser.add_argument(
+        "--list-spanish-voices",
+        action="store_true",
+        help="List only Spanish voices"
+    )
+    
+    return parser.parse_args()
