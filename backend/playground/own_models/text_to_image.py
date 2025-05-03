@@ -230,54 +230,58 @@ class ImageGenerator:
                 
         # Custom prompt or fallback
         return prompt
+
+    async def generate_actor_portrait(
+        self, 
+        prompt: str,
+        preset: Optional[ActorPreset] = None,
+        gender: str = "person",
+        age_range: str = "25-35",
         num_samples: int = 1,
-        scheduler: Optional[str] = None,
-        guidance_scale: float = 7.5,
-        num_inference_steps: int = 25,
         seed: Optional[int] = None,
     ) -> List[Dict[str, Any]]:
-        """Generate image from prompt using the fal.ai API.
+        """Generate realistic actor portraits.
 
         Args:
-            prompt: Text description of the desired image
-            negative_prompt: Elements to avoid in the image
+            prompt: Custom prompt (or None to use preset)
+            preset: Actor type preset
+            gender: Gender description for preset templates
+            age_range: Age range for preset templates
             num_samples: Number of images to generate
-            scheduler: The diffusion scheduler to use
-            guidance_scale: How closely to follow the prompt (higher = more faithful)
-            num_inference_steps: Number of denoising steps (more = higher quality but slower)
             seed: Random seed for reproducibility
 
         Returns:
             List of dicts containing image data and metadata
         """
-        print(f"\n[fal.ai] Generating {num_samples} image(s) with '{self.model}'")
-        print(f"[fal.ai] Prompt: {prompt}")
+        # Format the prompt based on preset if needed
+        formatted_prompt = self.format_actor_prompt(
+            prompt=prompt, 
+            preset=preset,
+            gender=gender,
+            age=age_range,
+        )
         
-        # Use model-specific scheduler if none provided
-        if scheduler is None:
-            scheduler = self.DEFAULT_SCHEDULERS.get(self.model, "Euler A")
+        # Quality-specific settings
+        steps = self.settings["steps"]  
+        guidance = self.settings["guidance"]
+        scheduler = self.MODEL_SCHEDULERS.get(self.model, "Euler A")
         
-        # Validate scheduler for current model
-        valid_schedulers = self.MODEL_SCHEDULERS.get(self.model, [])
-        if valid_schedulers and scheduler not in valid_schedulers:
-            print(f"[fal.ai] Warning: Scheduler '{scheduler}' not supported for model '{self.model}'")
-            print(f"[fal.ai] Using default scheduler '{self.DEFAULT_SCHEDULERS.get(self.model)}'")
-            scheduler = self.DEFAULT_SCHEDULERS.get(self.model, "Euler A")
-        
-        print(f"[fal.ai] Using scheduler: {scheduler}")
+        print(f"\n[fal.ai] Generating {num_samples} actor portrait(s) with '{self.model}'")
+        print(f"[fal.ai] Prompt: {formatted_prompt}")
+        print(f"[fal.ai] Quality settings: {steps} steps, {guidance} guidance")
         
         start_time = time.time()
         
         # Prepare the arguments based on the model
         arguments = {
-            "prompt": prompt,
-            "negative_prompt": negative_prompt,
+            "prompt": formatted_prompt,
+            "negative_prompt": self.ACTOR_NEGATIVE_PROMPT,
             "width": self.width,
             "height": self.height,
             "num_images": min(num_samples, 4),  # API limit
             "scheduler": scheduler,
-            "guidance_scale": guidance_scale,
-            "num_inference_steps": num_inference_steps,
+            "guidance_scale": guidance,
+            "num_inference_steps": steps,
         }
         
         if seed is not None:
@@ -290,171 +294,25 @@ class ImageGenerator:
                 arguments=arguments,
             )
 
-            # Wait for the request to complete
+            # Process the result
             result_data = await self._process_generation(handler)
             
             elapsed = time.time() - start_time
             print(f"[fal.ai] Generation completed in {elapsed:.2f}s ✅")
             
-            # DEBUGGING: Create a detailed debug file with the full response
+            # Save the full response for debugging
             debug_file = self.output_dir / f"debug_response_{int(time.time())}.json"
-            print(f"[fal.ai] Saving full response to {debug_file}")
             with open(debug_file, "w") as f:
                 import json
                 json.dump(result_data, f, indent=2)
             
-            # Save results
-            results = []
+            # Extract and save images
+            results = await self._extract_images(result_data, seed)
             
-            # Different models return different response structures
-            if "images" in result_data:
-                images_data = result_data.get("images", [])
-                # Handle nested arrays or direct objects
-                if isinstance(images_data, list):
-                    if len(images_data) > 0:
-                        print(f"[fal.ai] Found {len(images_data)} images in response")
-                        for i, image_data in enumerate(images_data):
-                            # Different models might return different structures
-                            if isinstance(image_data, dict) and "image" in image_data:
-                                # Handle structure: {"images": [{"image": "data:image/..."}]}
-                                image_b64 = image_data.get("image", "")
-                                if not image_b64:
-                                    continue
-                                
-                                # Save the image
-                                filename = self._save_image(image_b64, i)
-                                results.append({
-                                    "filename": filename,
-                                    "path": str(self.output_dir / filename),
-                                    "seed": image_data.get("seed", seed) or result_data.get("seed"),
-                                    "width": self.width,
-                                    "height": self.height,
-                                })
-                            elif isinstance(image_data, dict) and "file_path" in image_data:
-                                # Special case for fast-sdxl which returns file_path rather than embedded images
-                                file_path = image_data.get("file_path", "")
-                                if not file_path:
-                                    continue
-                                
-                                print(f"[fal.ai] Image available at URL: {file_path}")
-                                # Download the image from the URL
-                                try:
-                                    response = requests.get(file_path)
-                                    if response.status_code == 200:
-                                        timestamp = int(time.time())
-                                        filename = f"image_{timestamp}_{i}.png"
-                                        filepath = self.output_dir / filename
-                                        
-                                        with open(filepath, "wb") as f:
-                                            f.write(response.content)
-                                        
-                                        print(f"[fal.ai] Downloaded image to {filepath}")
-                                        results.append({
-                                            "filename": filename,
-                                            "path": str(filepath),
-                                            "url": file_path,
-                                            "seed": image_data.get("seed", seed) or result_data.get("seed"),
-                                            "width": self.width,
-                                            "height": self.height,
-                                        })
-                                    else:
-                                        print(f"[fal.ai] Failed to download image from {file_path}: HTTP {response.status_code}")
-                                except Exception as e:
-                                    print(f"[fal.ai] Error downloading image from {file_path}: {str(e)}")
-                            elif isinstance(image_data, dict) and "url" in image_data:
-                                # Another format with 'url' instead of 'file_path' or 'image'
-                                img_url = image_data.get("url", "")
-                                if not img_url:
-                                    continue
-                                
-                                print(f"[fal.ai] Image available at URL: {img_url}")
-                                # Download the image from the URL
-                                try:
-                                    response = requests.get(img_url)
-                                    if response.status_code == 200:
-                                        timestamp = int(time.time())
-                                        filename = f"image_{timestamp}_{i}.png"
-                                        filepath = self.output_dir / filename
-                                        
-                                        with open(filepath, "wb") as f:
-                                            f.write(response.content)
-                                        
-                                        print(f"[fal.ai] Downloaded image to {filepath}")
-                                        results.append({
-                                            "filename": filename,
-                                            "path": str(filepath),
-                                            "url": img_url,
-                                            "width": image_data.get("width", self.width),
-                                            "height": image_data.get("height", self.height),
-                                            "content_type": image_data.get("content_type", "image/png"),
-                                            "seed": result_data.get("seed", seed),
-                                        })
-                                    else:
-                                        print(f"[fal.ai] Failed to download image from {img_url}: HTTP {response.status_code}")
-                                except Exception as e:
-                                    print(f"[fal.ai] Error downloading image from {img_url}: {str(e)}")
-                            elif isinstance(image_data, str):
-                                # Handle structure: {"images": ["data:image/..."]}
-                                image_b64 = image_data
-                                filename = self._save_image(image_b64, i)
-                                results.append({
-                                    "filename": filename,
-                                    "path": str(self.output_dir / filename),
-                                    "seed": result_data.get("seed", seed),
-                                    "width": self.width,
-                                    "height": self.height,
-                                })
-                            else:
-                                print(f"[fal.ai] Unexpected image data format at index {i}: {type(image_data)}")
-                                print(f"[fal.ai] Keys in image data: {list(image_data.keys()) if isinstance(image_data, dict) else 'N/A'}")
-                    else:
-                        print("[fal.ai] 'images' key exists but contains no elements")
-                else:
-                    print(f"[fal.ai] 'images' key exists but is not a list: {type(images_data)}")
-            elif "image" in result_data:
-                # Handle response format with just a single 'image' key
-                image_b64 = result_data.get("image", "")
-                if image_b64:
-                    filename = self._save_image(image_b64, 0)
-                    results.append({
-                        "filename": filename,
-                        "path": str(self.output_dir / filename),
-                        "seed": result_data.get("seed", seed),
-                        "width": self.width,
-                        "height": self.height,
-                    })
+            if results:
+                print(f"[fal.ai] Successfully generated {len(results)} actor portrait(s)")
             else:
-                # For other formats, print the keys to help debug
-                print(f"[fal.ai] Warning: Unexpected response format. Keys: {list(result_data.keys())}")
-                # Try to find any base64 image in the response
-                for key, value in result_data.items():
-                    if isinstance(value, str) and value.startswith("data:image") and ";base64," in value:
-                        # Extract the base64 part
-                        image_b64 = value.split(";base64,")[1]
-                        filename = self._save_image(image_b64, 0, key)
-                        results.append({
-                            "filename": filename,
-                            "path": str(self.output_dir / filename),
-                            "key": key,
-                            "width": self.width,
-                            "height": self.height,
-                        })
-                
-            if not results:
-                print("[fal.ai] Warning: No images found in the API response")
-                print(f"[fal.ai] Response keys: {list(result_data.keys())}")
-                
-                # Special handling for the 'images' key when debugging
-                if "images" in result_data:
-                    images_val = result_data["images"]
-                    print(f"[fal.ai] Type of 'images' value: {type(images_val)}")
-                    if isinstance(images_val, list):
-                        print(f"[fal.ai] Number of items in 'images': {len(images_val)}")
-                        if len(images_val) > 0:
-                            first_item = images_val[0]
-                            print(f"[fal.ai] Type of first item in 'images': {type(first_item)}")
-                            if isinstance(first_item, dict):
-                                print(f"[fal.ai] Keys in first item: {list(first_item.keys())}")
+                print("[fal.ai] No images could be extracted from the response")
                 
             return results
             
