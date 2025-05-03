@@ -119,3 +119,11 @@ def parse_args():
     )
     
     return parser.parse_args()
+
+async def main_async():
+    """Async entry point."""
+    args = parse_args()
+    await submit(args.prompt, args.output_dir)
+
+if __name__ == "__main__":
+    asyncio.run(main_async())
