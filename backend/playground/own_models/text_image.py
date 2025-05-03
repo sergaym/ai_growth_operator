@@ -23,7 +23,93 @@ if not FAL_KEY:
 # Set the environment variable fal-client expects
 os.environ["FAL_KEY"] = FAL_KEY
 
-async def submit(prompt, output_dir=None):
+def build_avatar_prompt(
+    gender=None,
+    age=None,
+    ethnicity=None, 
+    skin_tone=None,
+    hair_style=None,
+    hair_color=None,
+    facial_features=None,
+    expression=None,
+    style=None,
+    background=None,
+    lighting=None,
+    custom_prompt=None
+):
+    """Build a comprehensive prompt for avatar generation based on parameters."""
+    
+    # Base prompt structure
+    base_prompt = "Generate a hyperrealistic portrait of a"
+    
+    # Add gender
+    if gender:
+        if gender.lower() in ["male", "man"]:
+            base_prompt += " man"
+        elif gender.lower() in ["female", "woman"]:
+            base_prompt += " woman"
+        elif gender.lower() == "non-binary":
+            base_prompt += " non-binary person"
+        else:
+            base_prompt += f" person with {gender} gender expression"
+    else:
+        base_prompt += " person"
+    
+    # Add age
+    if age:
+        if age.isdigit():
+            base_prompt += f", {age} years old"
+        else:
+            base_prompt += f", {age}"
+    
+    # Add ethnicity/cultural background
+    if ethnicity:
+        base_prompt += f" of {ethnicity} descent"
+    
+    # Add skin tone
+    if skin_tone:
+        base_prompt += f" with {skin_tone} skin tone"
+    
+    # Add hair details
+    hair_details = []
+    if hair_style:
+        hair_details.append(hair_style)
+    if hair_color:
+        hair_details.append(f"{hair_color} colored")
+    
+    if hair_details:
+        hair_text = " and ".join(hair_details)
+        base_prompt += f", {hair_text} hair"
+    
+    # Add facial features
+    if facial_features:
+        base_prompt += f", {facial_features}"
+    
+    # Add expression
+    if expression:
+        base_prompt += f", with a {expression} expression"
+    
+    # Add style specifications
+    base_prompt += ". The portrait should be extremely photorealistic"
+    if style:
+        base_prompt += f", in {style} style"
+    
+    # Add background
+    if background:
+        base_prompt += f" with {background} background"
+    
+    # Add lighting
+    if lighting:
+        base_prompt += f" and {lighting} lighting"
+    
+    # Professional quality specifications
+    base_prompt += ". Professional portrait photography, 8k, extremely detailed facial features, suitable for professional video avatars."
+    
+    # Add custom prompt elements at the end if provided
+    if custom_prompt:
+        base_prompt += f" {custom_prompt}"
+    
+    return base_prompt
     """Submit an image generation request to fal.ai and save the result."""
     print(f"Generating image with prompt: {prompt}")
     
