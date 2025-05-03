@@ -139,3 +139,32 @@ async def generate_speech(
                 print(f"API Error Text: {e.response.text}")
         return None
 
+async def list_spanish_voices():
+    """List all Spanish voices from ElevenLabs."""
+    try:
+        voices = await list_voices()
+        
+        print("\n=== Spanish Voices ===")
+        spanish_voices = []
+        for voice in voices:
+            languages = [
+                lang.get('name', '').lower() 
+                for lang in voice.get('labels', {}).get('languages', [])
+            ]
+            
+            # Check if this voice supports Spanish
+            if any('spanish' in lang or 'español' in lang for lang in languages):
+                print(f"ID: {voice['voice_id']}")
+                print(f"Name: {voice['name']}")
+                print(f"Description: {voice.get('description', 'No description')}")
+                print("-" * 30)
+                spanish_voices.append(voice)
+        
+        if not spanish_voices:
+            print("No Spanish voices found. Consider using a multilingual voice.")
+        
+        return spanish_voices
+    except Exception as e:
+        print(f"Error listing Spanish voices: {str(e)}")
+        return []
+
