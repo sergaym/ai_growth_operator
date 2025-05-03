@@ -242,3 +242,44 @@ def parse_args():
     )
     
     return parser.parse_args()
+
+async def main_async():
+    """Async entry point."""
+    args = parse_args()
+    
+    # Handle utility commands
+    if args.list_voices:
+        await list_voices()
+        return
+    
+    if args.list_spanish_voices:
+        await list_spanish_voices()
+        return
+    
+    # Get text content
+    text = None
+    if args.text:
+        text = args.text
+    elif args.text_file:
+        try:
+            with open(args.text_file, 'r', encoding='utf-8') as f:
+                text = f.read()
+        except Exception as e:
+            print(f"Error reading text file: {str(e)}")
+            return
+    else:
+        print("Error: Either --text or --text-file must be provided")
+        return
+    
+    # Generate speech
+    await generate_speech(
+        text=text,
+        voice_id=args.voice_id,
+        voice_preset=args.voice_preset,
+        stability=args.stability,
+        similarity_boost=args.similarity_boost,
+        style=args.style,
+        output_dir=args.output_dir,
+        filename=args.filename
+    )
+
