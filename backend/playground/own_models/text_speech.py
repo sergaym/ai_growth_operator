@@ -34,3 +34,23 @@ SPANISH_VOICES = {
     "female_2": "zcAOhNBS3c14rBihAFp2", # Example ID for another Spanish female voice
 }
 
+async def list_voices():
+    """List all available voices from ElevenLabs with their details."""
+    try:
+        response = requests.get(f"{ELEVENLABS_BASE_URL}/voices", headers=headers)
+        response.raise_for_status()
+        voices = response.json()["voices"]
+        
+        print("\n=== Available Voices ===")
+        for voice in voices:
+            print(f"ID: {voice['voice_id']}")
+            print(f"Name: {voice['name']}")
+            print(f"Description: {voice.get('description', 'No description')}")
+            print(f"Languages: {', '.join([lang.get('name', 'Unknown') for lang in voice.get('labels', {}).get('languages', [])])}")
+            print("-" * 30)
+        
+        return voices
+    except Exception as e:
+        print(f"Error listing voices: {str(e)}")
+        return []
+
