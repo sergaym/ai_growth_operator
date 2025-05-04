@@ -169,33 +169,49 @@ def check_video_status(generation_id: str) -> Dict[str, Any]:
         # Get the generation status
         generation = client.generations.get(id=generation_id)
         
-        # Determine the status and extract relevant information
+        # Get prompt and duration regardless of status
+        prompt_used = getattr(generation, "prompt", "No prompt available")
+        duration = getattr(generation, "duration", "Unknown")
+        
+        # Build base result with fields required by the response model
+        base_result = {
+            "generation_id": generation_id,
+            "prompt_used": prompt_used,
+            "duration": duration
+        }
+        
+        # Determine the status and add status-specific fields
         if generation.state == "completed":
             result = {
+                **base_result,
                 "status": "completed",
                 "video_url": generation.assets.video,
                 "thumbnail_url": getattr(generation.assets, "thumbnail", None),
-                "generation_id": generation_id,
-                "duration": getattr(generation, "duration", "Unknown"),
-                "prompt_used": generation.prompt
             }
         elif generation.state == "failed":
             result = {
+                **base_result,
                 "status": "failed",
-                "generation_id": generation_id,
                 "error": getattr(generation, "failure_reason", "Unknown error")
             }
         else:
             result = {
+                **base_result,
                 "status": "processing",
-                "generation_id": generation_id,
                 "estimated_completion_time": _estimate_completion_time(30)  # Default estimate
             }
         
         return result
         
     except Exception as e:
-        raise Exception(f"Error checking video status: {str(e)}")
+        # For exceptions, return a minimal valid response
+        return {
+            "status": "error",
+            "generation_id": generation_id,
+            "prompt_used": "Error retrieving prompt",
+            "duration": "Unknown",
+            "error": str(e)
+        }
 
 def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[str, Any]:
     """
@@ -211,31 +227,57 @@ def wait_for_video_completion(generation_id: str, timeout: int = 300) -> Dict[st
     client = get_luma_client()
     
     start_time = time.time()
+    polling_interval = LUMA_POLLING_INTERVAL
+    attempt = 0
     
     while time.time() - start_time < timeout:
-        # Get the generation status
-        generation = client.generations.get(id=generation_id)
+        attempt += 1
         
-        if generation.state == "completed":
-            return {
-                "status": "completed",
-                "video_url": generation.assets.video,
-                "thumbnail_url": getattr(generation.assets, "thumbnail", None),
-                "generation_id": generation_id,
-                "duration": getattr(generation, "duration", "Unknown"),
-                "prompt_used": generation.prompt
-            }
-        elif generation.state == "failed":
-            return {
-                "status": "failed",
-                "generation_id": generation_id,
-                "error": getattr(generation, "failure_reason", "Unknown error")
-            }
+        try:
+            # Get the generation status
+            generation = client.generations.get(id=generation_id)
+            
+            print(f"[LumaAI] Poll attempt {attempt}: Status = {generation.state}")
+            
+            if generation.state == "completed":
+                video_url = getattr(generation.assets, "video", None)
+                if video_url:
+                    print(f"[LumaAI] Video URL: {video_url}")
+                else:
+                    print("[LumaAI] Warning: Video URL is None despite completed status")
+                
+                return {
+                    "status": "completed",
+                    "video_url": video_url,
+                    "thumbnail_url": getattr(generation.assets, "thumbnail", None),
+                    "generation_id": generation_id,
+                    "duration": getattr(generation, "duration", "Unknown"),
+                    "prompt_used": generation.prompt
+                }
+            elif generation.state == "failed":
+                error_reason = getattr(generation, "failure_reason", "Unknown error")
+                print(f"[LumaAI] Generation failed: {error_reason}")
+                return {
+                    "status": "failed",
+                    "generation_id": generation_id,
+                    "error": error_reason
+                }
+            
+            # For debugging purposes, print full generation object on the first few polls
+            if attempt <= 2:
+                print(f"[LumaAI] Debug - Generation object: {vars(generation)}")
+                if hasattr(generation, 'assets'):
+                    print(f"[LumaAI] Debug - Assets: {vars(generation.assets)}")
+                
+        except Exception as e:
+            print(f"[LumaAI] Error checking generation status (attempt {attempt}): {str(e)}")
+            # Don't fail completely on individual poll errors, just continue
         
         # Wait before polling again
-        time.sleep(LUMA_POLLING_INTERVAL)
+        time.sleep(polling_interval)
     
     # If we reach here, we've timed out
+    print(f"[LumaAI] Timeout reached after {timeout} seconds")
     return {
         "status": "timeout",
         "generation_id": generation_id,

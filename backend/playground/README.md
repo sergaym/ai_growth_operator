@@ -2,38 +2,43 @@
 
 This directory contains experimental Python scripts for testing different functionalities.
 
-## Ad Generator
+## Modules
 
-The `ad_generator.py` script creates commercial ad scripts (max 1 minute) using OpenAI's models.
+### Ad Generator
+
+The `ad_generator` package contains implementations for generating commercial advertisements using OpenAI's models.
+
+#### Versions Available:
+- **Simple Ad Generator**: Basic implementation that generates ads based on company, audience, and product descriptions.
+- **Ad Generator Agent**: Advanced implementation that acts as an expert agent, asking follow-up questions to create higher-quality ads.
+- **Advanced Ad Generator**: Professional-grade implementation that functions like an expert content director.
+
+See the [Ad Generator README](ad_generator/README.md) for more details.
+
+### Avatar Creation
+
+The `avatar_creation` package contains tools for generating professional avatar images based on target audience analysis.
+
+#### Features:
+- Target audience analysis to create audience-resonant avatars
+- Brand alignment to ensure avatars reflect brand identity
+- Multiple avatar variations (standard, professional, friendly, creative)
+- Refinement process for iterative improvement
+
+See the [Avatar Creation README](avatar_creation/README.md) for more details.
 
 ### Requirements
 - OpenAI API key set in your environment variables
 
 ### Usage
-1. Make sure you have an OpenAI API key set in your environment:
-   ```
-   export OPENAI_API_KEY=your-api-key
-   ```
-   Or create a `.env` file in the root directory with:
-   ```
-   OPENAI_API_KEY=your-api-key
-   ```
+For ad generation:
+```
+python -m ad_generator.simple
+python -m ad_generator.agent
+python -m ad_generator.advanced_agent
+```
 
-2. Run the script:
-   ```
-   python ad_generator.py
-   ```
-
-3. Follow the prompts to enter:
-   - Company description
-   - Target audience
-   - Product description
-   - OpenAI model (optional, defaults to gpt-4-turbo)
-
-4. The script will generate a 1-minute commercial ad script based on your inputs.
-
-### Example Input
-- **Company**: "EcoTech Solutions is a sustainable technology company focused on reducing carbon footprints through innovative smart home devices."
-- **Target Audience**: "Environmentally conscious homeowners aged 30-45 with above-average income who value technology and sustainability."
-- **Product**: "The EcoSmart Thermostat learns your habits and automatically adjusts temperature settings to minimize energy usage while maintaining comfort, saving users an average of 30% on heating and cooling costs."
-- **Model**: "gpt-4-turbo" (or any other OpenAI model like "gpt-3.5-turbo" for faster, cheaper results) 
+For avatar creation:
+```
+python -m avatar_creation.pro_avatar_generator
+``` 
