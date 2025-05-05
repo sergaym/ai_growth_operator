@@ -36,7 +36,7 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
     <div className={`inline-flex items-center ${currentSize.gap} ${currentSize.container} bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-2xl`}>
       <div className={`relative ${currentSize.logoSize}`}>
         <motion.div 
-          className="absolute inset-0 rounded-xl bg-gradient-to-tr from-red-500 to-amber-500"
+          className="absolute inset-0 rounded-xl bg-gradient-to-tr from-blue-500 to-purple-500"
           animate={{ 
             rotate: [0, 360],
           }}
@@ -47,7 +47,7 @@ export function Logo({ size = "md", showText = true }: LogoProps) {
             ease: "linear"
           }}
         />
-        <div className="absolute inset-[3px] bg-[#030712] rounded-lg flex items-center justify-center text-white font-bold">
+        <div className="absolute inset-[3px] bg-[#070b1a] rounded-lg flex items-center justify-center text-white font-bold">
           A
         </div>
       </div>
