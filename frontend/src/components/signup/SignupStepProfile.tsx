@@ -48,7 +48,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
               required
               value={data.firstName}
               onChange={(e) => onUpdate({ firstName: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               placeholder="Enter your first name"
             />
           </div>
@@ -61,7 +61,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
               required
               value={data.lastName}
               onChange={(e) => onUpdate({ lastName: e.target.value })}
-              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+              className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
               placeholder="Enter your last name"
             />
           </div>
@@ -77,7 +77,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
             required
             value={data.email}
             onChange={(e) => onUpdate({ email: e.target.value })}
-            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-red-500/20 focus:border-red-500"
+            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             placeholder="name@company.com"
           />
         </div>
@@ -95,7 +95,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
                 onClick={() => onUpdate({ role: role.id })}
                 className={`flex items-center p-4 rounded-xl border transition-all ${
                   data.role === role.id
-                    ? 'border-red-500 bg-red-500/10'
+                    ? 'border-blue-500 bg-blue-500/10'
                     : 'border-white/10 bg-white/5 hover:bg-white/10'
                 }`}
               >
@@ -110,7 +110,11 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
 
         {/* Submit button */}
         <div className="flex justify-end">
-          <Button className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-base font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]">
+          <Button 
+            variant="gradient" 
+            gradient="purple-blue" 
+            className="rounded-xl text-base font-medium"
+          >
             Continue
           </Button>
         </div>
