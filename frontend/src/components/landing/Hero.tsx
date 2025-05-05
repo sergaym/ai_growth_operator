@@ -21,9 +21,9 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
+            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
           >
-            <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               The Future of Ad Creation Is Here
             </span>
           </motion.div>
@@ -48,7 +48,7 @@ export function Hero() {
                 Create winning
               </span>
               <br />
-              <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-red-500 bg-clip-text text-transparent pb-1">
+              <span className="inline-block bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-500 bg-clip-text text-transparent pb-1">
                 ads with AI Actors
               </span>
             </motion.h1>
