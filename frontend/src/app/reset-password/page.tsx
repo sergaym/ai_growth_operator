@@ -9,7 +9,7 @@ import { ArrowLeft } from 'lucide-react';
 // Create a loading fallback for the Suspense boundary
 function ResetPasswordSkeleton() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b1a]">
       <div className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-lg border border-white/10 backdrop-blur-sm">
         <div className="flex flex-col items-center">
           <div className="h-10 w-40 bg-gray-800 rounded-lg animate-pulse"></div>
@@ -20,7 +20,7 @@ function ResetPasswordSkeleton() {
         
         <div className="animate-pulse space-y-3">
           <div className="h-12 bg-gray-800 rounded-lg"></div>
-          <div className="h-12 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg"></div>
+          <div className="h-12 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-lg"></div>
         </div>
       </div>
     </div>
@@ -66,11 +66,11 @@ function ResetPasswordForm() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712] text-white px-4 sm:px-6 relative overflow-hidden">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b1a] text-white px-4 sm:px-6 relative overflow-hidden">
       {/* Background effects - matching the login page */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
-        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
       </div>
       
       <motion.div 
@@ -92,8 +92,8 @@ function ResetPasswordForm() {
             animate={{ opacity: 1, scale: 1 }}
             className="text-center space-y-5 py-6"
           >
-            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-red-500/20 to-amber-500/20 rounded-full flex items-center justify-center">
-              <svg className="w-8 h-8 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+            <div className="mx-auto w-16 h-16 bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-full flex items-center justify-center">
+              <svg className="w-8 h-8 text-blue-500" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
               </svg>
             </div>
@@ -105,7 +105,7 @@ function ResetPasswordForm() {
             
             <div className="pt-4">
               <Link href="/login">
-                <button className="flex items-center justify-center gap-2 text-amber-400 hover:text-amber-300 font-medium transition-colors">
+                <button className="flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors">
                   <ArrowLeft className="w-4 h-4" />
                   Back to login
                 </button>
@@ -154,7 +154,7 @@ function ResetPasswordForm() {
                   type="email"
                   autoComplete="email"
                   required
-                  className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-white focus:outline-none focus:ring-2 focus:ring-red-500 focus:border-red-500 transition-colors sm:text-sm"
+                  className="appearance-none rounded-lg relative block w-full px-4 py-3 bg-zinc-900 border border-zinc-800 placeholder-zinc-500 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-blue-500 transition-colors sm:text-sm"
                   placeholder="user@example.com"
                   value={email}
                   onChange={(e) => setEmail(e.target.value)}
@@ -167,8 +167,8 @@ function ResetPasswordForm() {
                   disabled={isSubmitting}
                   className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-150 ease-in-out shadow-lg ${
                     isSubmitting 
-                      ? 'bg-red-800/50 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
+                      ? 'bg-blue-800/50 cursor-not-allowed' 
+                      : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px]'
                   }`}
                 >
                   {isSubmitting ? (
