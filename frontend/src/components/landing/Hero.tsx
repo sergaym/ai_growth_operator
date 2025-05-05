@@ -69,7 +69,12 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
               <Link href="/login?callbackUrl=/playground">
-                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all text-lg font-medium text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px] group">
+                <Button 
+                  variant="gradient" 
+                  gradient="purple-blue" 
+                  size="lg"
+                  className="text-lg font-medium rounded-xl group"
+                >
                   Get your first video ad generated
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -103,7 +108,7 @@ export function Hero() {
                   {/* Video or Mockup with play button overlay */}
                   <div className="relative w-full h-full">
                     <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg shadow-blue-500/30">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M8 5.14V19.14L19 12.14L8 5.14Z" fill="white"/>
                         </svg>
