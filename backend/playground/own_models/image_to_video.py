@@ -139,3 +139,34 @@ async def submit(
                 print(f"Failed to download video: HTTP {response.status_code}")
         
         return result
+    
+    except Exception as e:
+        print(f"Error generating video: {str(e)}")
+        return None
+
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Generate video from an image using Kling API")
+    
+    # Input image options (must provide one)
+    image_group = parser.add_mutually_exclusive_group(required=True)
+    image_group.add_argument("--image-path", help="Path to local image file")
+    image_group.add_argument("--image-url", help="URL to hosted image")
+    
+    # Video generation parameters
+    parser.add_argument("--prompt", default="Realistic, cinematic movement, high quality", 
+                       help="Text prompt to guide the video generation")
+    parser.add_argument("--duration", choices=["5", "10"], default="5",
+                       help="Duration of the video in seconds")
+    parser.add_argument("--aspect-ratio", choices=["16:9", "9:16", "1:1"], default="16:9",
+                       help="Aspect ratio of the output video")
+    parser.add_argument("--negative-prompt", default="blur, distort, and low quality",
+                       help="Negative prompt specifying what to avoid")
+    parser.add_argument("--cfg-scale", type=float, default=0.5,
+                       help="How closely to follow the prompt (0.0-1.0)")
+    
+    # Output options
+    parser.add_argument("--output-dir", default="./output",
+                       help="Directory to save the output video")
+    
+    return parser.parse_args()
