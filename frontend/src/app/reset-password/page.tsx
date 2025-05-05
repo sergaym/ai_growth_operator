@@ -5,6 +5,7 @@ import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
 import { motion } from 'framer-motion';
 import { ArrowLeft } from 'lucide-react';
+import { Button } from "@/components/ui/button";
 
 // Create a loading fallback for the Suspense boundary
 function ResetPasswordSkeleton() {
@@ -105,10 +106,10 @@ function ResetPasswordForm() {
             
             <div className="pt-4">
               <Link href="/login">
-                <button className="flex items-center justify-center gap-2 text-blue-400 hover:text-blue-300 font-medium transition-colors">
+                <Button variant="ghost" className="text-blue-400 hover:text-blue-300 flex items-center justify-center gap-2">
                   <ArrowLeft className="w-4 h-4" />
                   Back to login
-                </button>
+                </Button>
               </Link>
             </div>
           </motion.div>
@@ -162,14 +163,12 @@ function ResetPasswordForm() {
               </div>
               
               <div>
-                <button
+                <Button
                   type="submit"
                   disabled={isSubmitting}
-                  className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-150 ease-in-out shadow-lg ${
-                    isSubmitting 
-                      ? 'bg-blue-800/50 cursor-not-allowed' 
-                      : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px]'
-                  }`}
+                  variant="gradient"
+                  gradient="purple-blue"
+                  className="w-full rounded-lg"
                 >
                   {isSubmitting ? (
                     <span className="flex items-center">
@@ -182,7 +181,7 @@ function ResetPasswordForm() {
                   ) : (
                     'Send reset link'
                   )}
-                </button>
+                </Button>
               </div>
             </motion.form>
             
