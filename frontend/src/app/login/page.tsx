@@ -9,7 +9,7 @@ import { motion } from 'framer-motion';
 // Create a loading fallback for the Suspense boundary
 function LoginFormSkeleton() {
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-[#030712]">
+    <div className="min-h-screen flex flex-col items-center justify-center bg-[#070b1a]">
       <div className="max-w-md w-full space-y-4 bg-[#111827]/80 p-8 rounded-xl shadow-lg border border-white/10 backdrop-blur-sm">
         <div className="flex flex-col items-center">
           <div className="h-10 w-40 bg-gray-800 rounded-lg animate-pulse"></div>
@@ -18,13 +18,13 @@ function LoginFormSkeleton() {
         <div className="animate-pulse space-y-3">
           <div className="h-12 bg-gray-800 rounded-lg"></div>
           <div className="h-12 bg-gray-800 rounded-lg"></div>
-          <div className="h-12 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg"></div>
+          <div className="h-12 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-lg"></div>
         </div>
       </div>
       
       <div className="mt-10 text-center animate-pulse">
         <div className="h-8 w-64 bg-gray-800 rounded-lg mx-auto"></div>
-        <div className="h-12 w-48 bg-gradient-to-r from-red-500/30 to-amber-500/30 rounded-lg mx-auto mt-4"></div>
+        <div className="h-12 w-48 bg-gradient-to-r from-blue-500/30 to-purple-500/30 rounded-lg mx-auto mt-4"></div>
       </div>
     </div>
   );
