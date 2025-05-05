@@ -95,7 +95,7 @@ export function PricingPlans({
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: index * 0.1 }}
             className={`relative bg-white/[0.02] backdrop-blur-sm rounded-2xl border ${
-              plan.popular ? 'border-red-500' : 'border-white/10'
+              plan.popular ? 'border-blue-500' : 'border-white/10'
             } p-8 flex flex-col`}
           >
             {plan.popular && (
@@ -119,7 +119,7 @@ export function PricingPlans({
             <ul className="space-y-4 mb-8 flex-grow">
               {plan.features.map((feature, i) => (
                 <li key={i} className="flex items-center gap-3">
-                  <CheckIcon className="w-5 h-5 text-red-500 flex-shrink-0" />
+                  <CheckIcon className="w-5 h-5 text-blue-500 flex-shrink-0" />
                   <span className="text-zinc-300">{feature}</span>
                 </li>
               ))}
@@ -129,7 +129,7 @@ export function PricingPlans({
               onClick={handlePlanSelection}
               className={`w-full py-3 rounded-xl transition-all text-base font-medium
                 ${plan.actionType === 'primary'
-                  ? 'bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]'
+                  ? 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px]'
                   : 'bg-zinc-800 text-white hover:bg-zinc-700'
                 }
               `}

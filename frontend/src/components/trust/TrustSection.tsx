@@ -34,7 +34,7 @@ export function TrustSection({
             className="aspect-[9/16] rounded-xl bg-white/5 overflow-hidden"
           >
             {/* This would be replaced with actual video thumbnails */}
-            <div className="w-full h-full bg-gradient-to-br from-red-500/10 to-amber-500/10" />
+            <div className="w-full h-full bg-gradient-to-br from-blue-500/10 to-purple-500/10" />
           </motion.div>
         ))}
       </div>

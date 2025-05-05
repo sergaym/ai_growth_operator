@@ -12,7 +12,7 @@ import "./globals.css";
 
 export default function Home() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#070b1a] text-white overflow-x-hidden">
       {/* Background component */}
       <PageBackground />
       

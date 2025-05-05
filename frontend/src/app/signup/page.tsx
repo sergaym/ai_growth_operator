@@ -99,7 +99,7 @@ function SignupPageContent() {
   ];
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-hidden">
+    <div className="min-h-screen bg-[#070b1a] text-white overflow-hidden">
       <PageBackground />
       
       <div className="container max-w-6xl mx-auto px-4 py-8 relative z-10">
@@ -162,7 +162,7 @@ function SignupPageContent() {
 
 export default function SignupPage() {
   return (
-    <Suspense fallback={<div className="min-h-screen bg-[#030712] flex items-center justify-center text-white">Loading...</div>}>
+    <Suspense fallback={<div className="min-h-screen bg-[#070b1a] flex items-center justify-center text-white">Loading...</div>}>
       <SignupPageContent />
     </Suspense>
   );

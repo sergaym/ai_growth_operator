@@ -5,6 +5,7 @@ import { PricingPlans } from '@/components/pricing/PricingPlans';
 import { TrustSection } from '@/components/trust/TrustSection';
 import { FAQSection } from '@/components/faq/FAQSection';
 import { CheckCircle } from 'lucide-react';
+import { PageBackground } from "@/components/ui/PageBackground";
 
 export default function SubscriptionPage() {
   const [userData, setUserData] = useState({
@@ -31,7 +32,9 @@ export default function SubscriptionPage() {
   }, []);
 
   return (
-    <div className="min-h-screen bg-[#030712] text-white">
+    <div className="min-h-screen bg-[#070b1a] text-white overflow-hidden">
+      <PageBackground />
+      
       <div className="container max-w-7xl mx-auto px-4 py-16 relative z-10">
         {/* Welcome header */}
         <div className="max-w-3xl mx-auto text-center mb-16">
@@ -41,7 +44,7 @@ export default function SubscriptionPage() {
             transition={{ type: "spring", stiffness: 200 }}
             className="flex justify-center mb-8"
           >
-            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center">
+            <div className="w-20 h-20 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center">
               <CheckCircle className="w-10 h-10 text-white" />
             </div>
           </motion.div>

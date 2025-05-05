@@ -10,8 +10,8 @@ export function Hero() {
     <section className="relative pt-32 md:pt-36 pb-24 md:pb-32 overflow-hidden">
       {/* Background effects */}
       <div className="absolute inset-0 z-0">
-        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
-        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-red-500/10 via-amber-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
       </div>
 
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
@@ -21,9 +21,9 @@ export function Hero() {
             initial={{ opacity: 0, y: 20 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ duration: 0.5 }}
-            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
+            className="inline-block py-2 px-4 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-white/80 text-sm font-medium backdrop-blur-sm"
           >
-            <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
               The Future of Ad Creation Is Here
             </span>
           </motion.div>
@@ -48,7 +48,7 @@ export function Hero() {
                 Create winning
               </span>
               <br />
-              <span className="inline-block bg-gradient-to-r from-red-400 via-amber-400 to-red-500 bg-clip-text text-transparent pb-1">
+              <span className="inline-block bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-500 bg-clip-text text-transparent pb-1">
                 ads with AI Actors
               </span>
             </motion.h1>
@@ -69,7 +69,12 @@ export function Hero() {
               className="flex flex-col sm:flex-row items-center justify-center lg:justify-start gap-4"
             >
               <Link href="/login?callbackUrl=/playground">
-                <Button className="px-8 py-6 rounded-xl bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 transition-all text-lg font-medium text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px] group">
+                <Button 
+                  variant="gradient" 
+                  gradient="purple-blue" 
+                  size="lg"
+                  className="text-lg font-medium rounded-xl group"
+                >
                   Get your first video ad generated
                   <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
                 </Button>
@@ -86,7 +91,7 @@ export function Hero() {
           >
             <div className="relative">
               {/* Decorative gradient glow */}
-              <div className="absolute -inset-3 bg-gradient-to-r from-amber-500/30 via-red-500/20 to-amber-500/30 rounded-2xl blur-2xl opacity-30"></div>
+              <div className="absolute -inset-3 bg-gradient-to-r from-purple-500/30 via-blue-500/20 to-indigo-500/30 rounded-2xl blur-2xl opacity-30"></div>
               
               <div className="relative rounded-2xl overflow-hidden border border-white/10 shadow-2xl shadow-black/50 bg-black backdrop-blur-sm">
                 {/* Browser-like top bar */}
@@ -103,7 +108,7 @@ export function Hero() {
                   {/* Video or Mockup with play button overlay */}
                   <div className="relative w-full h-full">
                     <div className="absolute inset-0 bg-black/40 z-10 flex items-center justify-center">
-                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-red-500 to-amber-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg shadow-red-500/30">
+                      <div className="w-24 h-24 rounded-full bg-gradient-to-r from-blue-500 to-purple-500 flex items-center justify-center cursor-pointer hover:scale-105 transition-transform duration-300 shadow-lg">
                         <svg width="30" height="30" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                           <path d="M8 5.14V19.14L19 12.14L8 5.14Z" fill="white"/>
                         </svg>
@@ -134,7 +139,7 @@ export function Hero() {
               >
                 <div className="bg-white/[0.08] backdrop-blur-lg rounded-xl py-2 px-3 border border-white/10 shadow-[0_10px_40px_rgba(0,0,0,0.2)] flex items-center gap-2">
                   <div className="flex-shrink-0">
-                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-amber-400 to-red-500 flex items-center justify-center shadow-md shadow-amber-500/20">
+                    <div className="w-10 h-10 rounded-lg bg-gradient-to-br from-purple-400 to-blue-500 flex items-center justify-center shadow-md shadow-purple-500/20">
                       <svg width="18" height="18" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <path d="M12 8V12L15 15M3 12C3 13.1819 3.23279 14.3522 3.68508 15.4442C4.13738 16.5361 4.80031 17.5282 5.63604 18.364C6.47177 19.1997 7.46392 19.8626 8.55585 20.3149C9.64778 20.7672 10.8181 21 12 21C13.1819 21 14.3522 20.7672 15.4442 20.3149C16.5361 19.8626 17.5282 19.1997 18.364 18.364C19.1997 17.5282 19.8626 16.5361 20.3149 15.4442C20.7672 14.3522 21 13.1819 21 12C21 9.61305 20.0518 7.32387 18.364 5.63604C16.6761 3.94821 14.3869 3 12 3C9.61305 3 7.32387 3.94821 5.63604 5.63604C3.94821 7.32387 3 9.61305 3 12Z" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
                       </svg>

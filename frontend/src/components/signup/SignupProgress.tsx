@@ -17,7 +17,7 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
         
         {/* Progress bar */}
         <motion.div
-          className="absolute top-0 left-0 h-1 bg-gradient-to-r from-red-500 to-amber-500 rounded-full"
+          className="absolute top-0 left-0 h-1 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full"
           initial={{ width: '0%' }}
           animate={{ width: `${(currentStep / totalSteps) * 100}%` }}
           transition={{ duration: 0.5, ease: "easeInOut" }}
@@ -41,11 +41,11 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
                 <motion.div
                   className={`w-10 h-10 rounded-full flex items-center justify-center
                     ${isCompleted 
-                      ? 'bg-gradient-to-r from-red-500 to-amber-500' 
+                      ? 'bg-gradient-to-r from-blue-500 to-purple-500' 
                       : 'bg-zinc-800'
                     }
                     ${isCurrent 
-                      ? 'ring-4 ring-red-500/20' 
+                      ? 'ring-4 ring-blue-500/20' 
                       : ''
                     }
                   `}
@@ -53,7 +53,7 @@ export function SignupProgress({ currentStep, totalSteps }: SignupProgressProps)
                   animate={{
                     scale: isCurrent ? 1.1 : 1,
                     background: isCompleted 
-                      ? 'linear-gradient(to right, rgb(239, 68, 68), rgb(245, 158, 11))' 
+                      ? 'linear-gradient(to right, rgb(59, 130, 246), rgb(168, 85, 247))' 
                       : '#27272a'
                   }}
                   transition={{ duration: 0.2 }}
