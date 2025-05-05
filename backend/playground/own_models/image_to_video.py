@@ -86,3 +86,56 @@ async def submit(
             "negative_prompt": negative_prompt,
             "cfg_scale": cfg_scale
         }
+        
+        print("Submitting request to Kling API...")
+        
+        # Method 1: Using subscribe (blocking but simpler)
+        try:
+            # Try using the subscribe method first, which returns the result directly
+            result = fal_client.subscribe(
+                "fal-ai/kling-video/v1.6/pro/image-to-video",
+                arguments=arguments,
+                with_logs=True,
+                on_queue_update=on_queue_update
+            )
+            print("Video generation completed!")
+        except Exception as e:
+            print(f"Subscribe method failed, falling back to submit/result: {str(e)}")
+            
+            # Method 2: Submit and then get result (non-blocking initially)
+            handler = fal_client.submit(
+                "fal-ai/kling-video/v1.6/pro/image-to-video",
+                arguments=arguments
+            )
+            
+            request_id = handler.request_id
+            print(f"Request ID: {request_id}")
+            
+            # Wait for the result
+            print("Waiting for result...")
+            # Use the correct method to get the result
+            result = fal_client.result("fal-ai/kling-video/v1.6/pro/image-to-video", request_id)
+            print("Video generation completed!")
+        
+        # Save the video if we have output_dir
+        if output_dir and "video" in result and "url" in result["video"]:
+            video_url = result["video"]["url"]
+            output_path = Path(output_dir)
+            output_path.mkdir(exist_ok=True, parents=True)
+            
+            # Generate a filename based on timestamp
+            timestamp = int(time.time())
+            video_filename = f"video_{timestamp}.mp4"
+            video_path = output_path / video_filename
+            
+            # Download the video
+            print(f"Downloading video from {video_url}...")
+            response = requests.get(video_url)
+            if response.status_code == 200:
+                with open(video_path, "wb") as f:
+                    f.write(response.content)
+                print(f"Saved video to: {video_path}")
+            else:
+                print(f"Failed to download video: HTTP {response.status_code}")
+        
+        return result
