@@ -38,12 +38,12 @@ export function Footer() {
   ];
 
   return (
-    <footer className="bg-[#030712] border-t border-white/5 text-white pt-24 pb-12 relative overflow-hidden">
+    <footer className="bg-[#070b1a] border-t border-white/5 text-white pt-24 pb-12 relative overflow-hidden">
       {/* Background decorative elements */}
       <div className="absolute inset-0 z-0">
         <div className="absolute inset-0 bg-[url('/grid-pattern.svg')] bg-repeat opacity-[0.015]"></div>
         <div className="absolute bottom-0 left-0 w-full h-1/2 bg-gradient-to-t from-black/20 to-transparent"></div>
-        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[radial-gradient(circle_at_center,#f33_1%,transparent_35%)] opacity-[0.07] blur-2xl"></div>
+        <div className="absolute top-0 right-0 w-1/3 h-1/3 bg-[radial-gradient(circle_at_center,#5b3bff_1%,transparent_35%)] opacity-[0.07] blur-2xl"></div>
       </div>
       
       <div className="container max-w-7xl mx-auto px-6 relative z-10">
@@ -58,7 +58,7 @@ export function Footer() {
         >
           <div className="relative p-8 rounded-2xl overflow-hidden">
             {/* Background gradient */}
-            <div className="absolute inset-0 bg-gradient-to-r from-red-500/[0.08] via-amber-500/[0.08] to-red-500/[0.08]"></div>
+            <div className="absolute inset-0 bg-gradient-to-r from-blue-500/[0.08] via-purple-500/[0.08] to-indigo-500/[0.08]"></div>
             
             {/* Micro grid pattern */}
             <div className="absolute inset-0 bg-[linear-gradient(to_right,#ffffff05_1px,transparent_1px),linear-gradient(to_bottom,#ffffff05_1px,transparent_1px)] bg-[size:20px_20px]"></div>
@@ -74,9 +74,9 @@ export function Footer() {
                   <input 
                     type="email" 
                     placeholder="Enter your email" 
-                    className="py-3 pl-4 pr-36 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder:text-zinc-500 w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-amber-500/50"
+                    className="py-3 pl-4 pr-36 bg-white/[0.03] backdrop-blur-sm border border-white/10 rounded-xl text-white placeholder:text-zinc-500 w-full md:w-auto focus:outline-none focus:ring-2 focus:ring-purple-500/50"
                   />
-                  <button className="absolute right-1.5 top-1.5 px-4 py-1.5 bg-gradient-to-r from-red-500 to-amber-500 hover:from-red-600 hover:to-amber-600 rounded-lg text-white font-medium transition-all">
+                  <button className="absolute right-1.5 top-1.5 px-4 py-1.5 bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 rounded-lg text-white font-medium transition-all">
                     Subscribe
                   </button>
                 </div>
@@ -104,7 +104,7 @@ export function Footer() {
                     scale: 1.2,
                     transition: { duration: 0.2 } 
                   }}
-                  className="text-zinc-400 group-hover:text-amber-400"
+                  className="text-zinc-400 group-hover:text-purple-400"
                 >
                   {item.icon}
                 </motion.div>
