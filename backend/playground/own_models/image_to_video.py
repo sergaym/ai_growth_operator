@@ -170,3 +170,21 @@ def parse_args():
                        help="Directory to save the output video")
     
     return parser.parse_args()
+
+async def main_async():
+    """Async entry point."""
+    args = parse_args()
+    
+    await submit(
+        image_path=args.image_path,
+        image_url=args.image_url,
+        prompt=args.prompt,
+        duration=args.duration,
+        aspect_ratio=args.aspect_ratio,
+        negative_prompt=args.negative_prompt,
+        cfg_scale=args.cfg_scale,
+        output_dir=args.output_dir
+    )
+
+if __name__ == "__main__":
+    asyncio.run(main_async())
