@@ -176,9 +176,9 @@ function LoginForm() {
         initial={{ opacity: 0, y: 10 }}
         animate={{ opacity: 1, y: 0 }}
         transition={{ duration: 0.5, delay: 0.7 }}
-        className="mt-16 inline-block py-2 px-4 rounded-full bg-gradient-to-r from-red-500/10 to-amber-500/10 border border-red-500/20 text-white/80 text-sm font-medium backdrop-blur-sm relative z-10"
+        className="mt-16 inline-block py-2 px-4 rounded-full bg-gradient-to-r from-blue-500/10 to-purple-500/10 border border-blue-500/20 text-white/80 text-sm font-medium backdrop-blur-sm relative z-10"
       >
-        <span className="bg-gradient-to-r from-red-400 to-amber-500 bg-clip-text text-transparent">
+        <span className="bg-gradient-to-r from-blue-400 to-purple-500 bg-clip-text text-transparent">
           Create Winning Ads with AI Actors
         </span>
       </motion.div>
@@ -206,7 +206,7 @@ function LoginForm() {
             duration: 2.5,
             ease: "easeInOut" 
           }}
-          className="text-red-500 my-5"
+          className="text-blue-500 my-5"
         >
           <svg className="w-8 h-8 mx-auto" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M12 4V20M12 20L18 14M12 20L6 14" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"/>
@@ -217,7 +217,7 @@ function LoginForm() {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="py-4 px-10 bg-gradient-to-r from-red-500 to-amber-500 rounded-full text-lg font-bold text-white shadow-lg shadow-red-500/20 hover:shadow-red-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+            className="py-4 px-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-lg font-bold text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2"
           >
             Get your first video ad free
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
