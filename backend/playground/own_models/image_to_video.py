@@ -58,3 +58,31 @@ async def submit(
     if not image_path and not image_url:
         print("Error: Either image_path or image_url must be provided")
         return None
+    
+    # If we have a local image but no URL, upload it first
+    if image_path and not image_url:
+        print(f"Uploading image: {image_path}")
+        try:
+            with open(image_path, "rb") as f:
+                image_data = f.read()
+            
+            # Upload using fal client
+            upload_response = await fal_client.upload_file_async(image_path)
+            image_url = upload_response
+            print(f"Image uploaded: {image_url}")
+        except Exception as e:
+            print(f"Error uploading image: {str(e)}")
+            return None
+    
+    print(f"Generating video from image with prompt: {prompt}")
+    
+    try:
+        # Prepare arguments for the API
+        arguments = {
+            "prompt": prompt,
+            "image_url": image_url,
+            "duration": duration,
+            "aspect_ratio": aspect_ratio,
+            "negative_prompt": negative_prompt,
+            "cfg_scale": cfg_scale
+        }
