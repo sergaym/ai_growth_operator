@@ -5,6 +5,7 @@ import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
 import { ArrowDown } from 'lucide-react';
 import { motion } from 'framer-motion';
+import { Button } from "@/components/ui/button";
 
 // Create a loading fallback for the Suspense boundary
 function LoginFormSkeleton() {
@@ -140,14 +141,12 @@ function LoginForm() {
           </div>
           
           <div>
-            <button
+            <Button
               type="submit"
               disabled={loading}
-              className={`group relative w-full flex justify-center py-3 px-4 border border-transparent text-sm font-medium rounded-lg text-white transition-all duration-150 ease-in-out shadow-lg ${
-                loading 
-                  ? 'bg-blue-800/50 cursor-not-allowed' 
-                  : 'bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px]'
-              }`}
+              variant="gradient"
+              gradient="purple-blue"
+              className="w-full rounded-lg"
             >
               {loading ? (
                 <span className="flex items-center">
@@ -160,7 +159,7 @@ function LoginForm() {
               ) : (
                 'Sign in to continue'
               )}
-            </button>
+            </Button>
           </div>
         </motion.form>
         
@@ -217,7 +216,7 @@ function LoginForm() {
           <motion.button 
             whileHover={{ scale: 1.05 }}
             whileTap={{ scale: 0.95 }}
-            className="py-4 px-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-full text-lg font-bold text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2"
+            className="py-4 px-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl text-lg font-bold text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/40 transition-all duration-300 flex items-center justify-center gap-2"
           >
             Get your first video ad free
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
