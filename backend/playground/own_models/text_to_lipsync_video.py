@@ -97,3 +97,33 @@ async def generate_speech(text, output_dir, voice_id="en_us_m_1"):
         print(f"❌ Error generating speech: {str(e)}")
         return None
 
+async def text_to_lipsync_video(
+    text,
+    avatar_prompt=None,
+    avatar_params=None,
+    video_prompt="Realistic, subtle movement, person talking naturally",
+    duration="5",
+    aspect_ratio="16:9",
+    voice_id="en_us_m_1",
+    output_dir="./output"
+):
+    """
+    Generate a talking video from text.
+    
+    Args:
+        text: The text to be spoken in the video
+        avatar_prompt: Prompt for generating the avatar image (if no image path is provided)
+        avatar_params: Optional parameters for avatar generation
+        video_prompt: Prompt for guiding the video animation
+        duration: Video duration in seconds ("5" or "10")
+        aspect_ratio: Video aspect ratio ("16:9", "9:16", "1:1")
+        voice_id: ID of the voice to use for speech
+        output_dir: Directory to save all output files
+        
+    Returns:
+        Dict with paths to all generated files (image, audio, raw video, final video)
+    """
+    result = {}
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True, parents=True)
+    
