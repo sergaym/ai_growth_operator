@@ -206,3 +206,13 @@ async def text_to_lipsync_video(
         # Step 4: Apply lipsync to synchronize audio with video
         print("\n👄 Step 4: Applying lipsync to synchronize audio with video...")
         
+        lipsync_result = await apply_lipsync(
+            video_path=raw_video_path,
+            audio_path=audio_path,
+            output_dir=output_dir
+        )
+        
+        if not lipsync_result or "video" not in lipsync_result or "url" not in lipsync_result["video"]:
+            print("❌ Failed to apply lipsync.")
+            return result
+            
