@@ -18,4 +18,4 @@ python playground/own_models/text_speech.py --text-file script.txt --voice-prese
 
 
 
-python playground/own_models/avatar_animation.py --image playground/own_models/avatar_1746310434_0.png --audio playground/own_models/speech_female_1_1746314883.mp3 --quality high --motion-scale 1.2 --output-size 720,720
+python playground/own_models/image_to_video.py --image-path playground/own_models/avatar_1746310434_0.png --prompt "Realistic motion of person talking"
