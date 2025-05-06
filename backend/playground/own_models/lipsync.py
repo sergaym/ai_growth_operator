@@ -28,3 +28,27 @@ def on_queue_update(update):
         for log in update.logs:
             print(log["message"])
 
+async def submit(
+    video_path=None,
+    video_url=None,
+    audio_path=None,
+    audio_url=None,
+    output_dir=None
+):
+    """
+    Submit a lipsync request to synchronize audio with video.
+    
+    Args:
+        video_path: Path to local video file
+        video_url: URL to hosted video (alternative to video_path)
+        audio_path: Path to local audio file
+        audio_url: URL to hosted audio (alternative to audio_path)
+        output_dir: Directory to save the output synchronized video
+        
+    Returns:
+        Result object from the API with the synchronized video URL
+    """
+    if not ((video_path or video_url) and (audio_path or audio_url)):
+        print("Error: Both video and audio sources must be provided")
+        return None
+    
