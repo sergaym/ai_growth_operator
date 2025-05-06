@@ -168,3 +168,6 @@ async def main_async():
         audio_url=args.audio_url,
         output_dir=args.output_dir
     )
+
+if __name__ == "__main__":
+    asyncio.run(main_async()) 
