@@ -265,3 +265,33 @@ async def main_async():
     for param in ["gender", "age", "ethnicity", "expression"]:
         if hasattr(args, param) and getattr(args, param):
             avatar_params[param] = getattr(args, param)
+    
+    # Only pass avatar_params if we have some
+    avatar_params = avatar_params if avatar_params else None
+    
+    result = await text_to_lipsync_video(
+        text=args.text,
+        avatar_prompt=args.avatar_prompt,
+        avatar_params=avatar_params,
+        video_prompt=args.video_prompt,
+        duration=args.duration,
+        aspect_ratio=args.aspect_ratio,
+        voice_id=args.voice_id,
+        output_dir=args.output_dir
+    )
+    
+    if result:
+        print("\n✨ Text-to-Lipsync-Video Generation Complete ✨")
+        if "image_path" in result:
+            print(f"📷 Avatar Image: {result['image_path']}")
+        if "audio_path" in result:
+            print(f"🔊 Audio: {result['audio_path']}")
+        if "raw_video_path" in result:
+            print(f"🎬 Raw Video: {result['raw_video_path']}")
+        if "lipsync_video_path" in result:
+            print(f"🎞️ Final Lipsync Video: {result['lipsync_video_path']}")
+        if "lipsync_video_url" in result:
+            print(f"🌐 Final Video URL: {result['lipsync_video_url']}")
+
+if __name__ == "__main__":
+    asyncio.run(main_async()) 
