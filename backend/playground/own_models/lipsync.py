@@ -19,3 +19,12 @@ if not FAL_KEY:
     print("Get your API key from: https://app.fal.ai/settings/api-keys")
     sys.exit(1)
 
+# Set the environment variable fal-client expects
+os.environ["FAL_KEY"] = FAL_KEY
+
+def on_queue_update(update):
+    """Process queue updates and logs."""
+    if isinstance(update, fal_client.InProgress):
+        for log in update.logs:
+            print(log["message"])
+
