@@ -110,3 +110,30 @@ async def submit(
             result = fal_client.result("fal-ai/latentsync", request_id)
             print("Lipsync completed!")
         
+        # Save the video if we have output_dir
+        if output_dir and "video" in result and "url" in result["video"]:
+            video_url = result["video"]["url"]
+            output_path = Path(output_dir)
+            output_path.mkdir(exist_ok=True, parents=True)
+            
+            # Generate a filename based on timestamp
+            timestamp = int(time.time())
+            video_filename = f"lipsync_{timestamp}.mp4"
+            video_path = output_path / video_filename
+            
+            # Download the video
+            print(f"Downloading synchronized video from {video_url}...")
+            response = requests.get(video_url)
+            if response.status_code == 200:
+                with open(video_path, "wb") as f:
+                    f.write(response.content)
+                print(f"Saved synchronized video to: {video_path}")
+            else:
+                print(f"Failed to download video: HTTP {response.status_code}")
+        
+        return result
+    
+    except Exception as e:
+        print(f"Error in lipsync process: {str(e)}")
+        return None
+
