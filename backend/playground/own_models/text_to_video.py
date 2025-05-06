@@ -136,3 +136,13 @@ def parse_args():
     
     return parser.parse_args()
 
+async def main_async():
+    """Async entry point for the text-to-video utility."""
+    args = parse_args()
+    
+    # Collect avatar parameters if any were provided
+    avatar_params = {}
+    for param in ["gender", "age", "ethnicity", "expression"]:
+        if hasattr(args, param) and getattr(args, param):
+            avatar_params[param] = getattr(args, param)
+    
