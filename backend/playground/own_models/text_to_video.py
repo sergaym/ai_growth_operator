@@ -123,3 +123,16 @@ def parse_args():
     avatar_group.add_argument("--ethnicity", help="Ethnicity for avatar generation")
     avatar_group.add_argument("--expression", help="Facial expression for avatar generation")
     
+    # Video parameters
+    video_group = parser.add_argument_group("Video Parameters")
+    video_group.add_argument("--video-prompt", help="Optional separate prompt for video generation")
+    video_group.add_argument("--duration", choices=["5", "10"], default="5", help="Video duration in seconds")
+    video_group.add_argument("--aspect-ratio", choices=["16:9", "9:16", "1:1"], default="16:9", help="Video aspect ratio")
+    video_group.add_argument("--negative-prompt", default="blur, distort, and low quality", help="Negative prompt for video")
+    video_group.add_argument("--cfg-scale", type=float, default=0.5, help="How closely to follow the prompt (0.0-1.0)")
+    
+    # Output options
+    parser.add_argument("--output-dir", default="./output", help="Directory to save outputs")
+    
+    return parser.parse_args()
+
