@@ -161,3 +161,21 @@ async def text_to_lipsync_video(
         with open(image_path, "rb") as src, open(output_image_path, "wb") as dst:
             dst.write(src.read())
             
+        print(f"✅ Avatar image generated and saved to {output_image_path}")
+        result["image_path"] = str(output_image_path)
+        
+        # Step 2: Generate speech from text
+        print("\n🔊 Step 2: Generating speech from text...")
+        
+        audio_path = await generate_speech(
+            text=text,
+            output_dir=output_dir,
+            voice_id=voice_id
+        )
+        
+        if not audio_path:
+            print("❌ Failed to generate speech. Aborting.")
+            return result
+            
+        result["audio_path"] = audio_path
+        
