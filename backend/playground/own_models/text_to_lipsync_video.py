@@ -216,3 +216,11 @@ async def text_to_lipsync_video(
             print("❌ Failed to apply lipsync.")
             return result
             
+        # Find the saved lipsync video file
+        lipsync_files = list(output_path.glob("lipsync_*.mp4"))
+        if lipsync_files:
+            result["lipsync_video_path"] = str(lipsync_files[-1])
+            result["lipsync_video_url"] = lipsync_result["video"]["url"]
+    
+    return result
+
