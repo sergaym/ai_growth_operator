@@ -127,3 +127,21 @@ async def text_to_lipsync_video(
     output_path = Path(output_dir)
     output_path.mkdir(exist_ok=True, parents=True)
     
+    # Step 1: Generate avatar image (if not provided)
+    print("\n🖼️ Step 1: Generating avatar image...")
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Generate the image using avatar parameters
+        if not avatar_prompt:
+            avatar_prompt = "Professional portrait of a person with a neutral expression, ready to speak"
+        
+        image_result = await generate_image(
+            prompt=avatar_prompt,
+            params=avatar_params,
+            output_dir=temp_dir
+        )
+        
+        if not image_result:
+            print("❌ Failed to generate avatar image. Aborting.")
+            return None
+        
