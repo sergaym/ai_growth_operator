@@ -157,3 +157,14 @@ def parse_args():
     
     return parser.parse_args()
 
+async def main_async():
+    """Async entry point."""
+    args = parse_args()
+    
+    await submit(
+        video_path=args.video_path,
+        video_url=args.video_url,
+        audio_path=args.audio_path,
+        audio_url=args.audio_url,
+        output_dir=args.output_dir
+    )
