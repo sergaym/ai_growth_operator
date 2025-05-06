@@ -40,3 +40,47 @@ async def text_to_video(
         Dict with paths to the generated image and video
     """
     result = {}
+    output_path = Path(output_dir)
+    output_path.mkdir(exist_ok=True, parents=True)
+    
+    # Step 1: Generate image from text
+    print("🖼️ Step 1: Generating image from text prompt...")
+    
+    with tempfile.TemporaryDirectory() as temp_dir:
+        # Generate the image
+        image_result = await generate_image(
+            prompt=prompt,
+            params=avatar_params,
+            output_dir=temp_dir
+        )
+        
+        if not image_result:
+            print("❌ Failed to generate image. Aborting.")
+            return None
+        
+        # Find the image file in the temp directory
+        temp_path = Path(temp_dir)
+        image_files = list(temp_path.glob("*.png"))
+        
+        if not image_files:
+            print("❌ No image was generated. Aborting.")
+            return None
+            
+        # Use the first image file
+        image_path = image_files[0]
+        
+        # Copy the image to the output directory
+        output_image_path = output_path / image_path.name
+        with open(image_path, "rb") as src, open(output_image_path, "wb") as dst:
+            dst.write(src.read())
+            
+        print(f"✅ Image generated and saved to {output_image_path}")
+        result["image_path"] = str(output_image_path)
+        
+        # Step 2: Generate video from the image
+        print("🎬 Step 2: Generating video from the image...")
+        
+        # Use the same prompt for video if not specified
+        if not video_prompt:
+            video_prompt = f"Realistic animation of: {prompt}"
+        
