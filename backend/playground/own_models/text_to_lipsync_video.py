@@ -84,3 +84,16 @@ async def generate_speech(text, output_dir, voice_id="en_us_m_1"):
         #     with open(output_path, 'wb') as f:
         #         f.write(response.content)
         
+        # For demo purposes, just create a dummy file if no API key
+        if not os.getenv("ELEVEN_API_KEY"):
+            print("Note: Using a dummy audio file since no ELEVEN_API_KEY is set")
+            # Just create an empty file for demonstration purposes
+            output_path.touch()
+        
+        print(f"✅ Speech generated and saved to {output_path}")
+        return str(output_path)
+    
+    except Exception as e:
+        print(f"❌ Error generating speech: {str(e)}")
+        return None
+
