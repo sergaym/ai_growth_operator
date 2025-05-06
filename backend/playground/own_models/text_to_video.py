@@ -109,3 +109,17 @@ async def text_to_video(
     
     return result
 
+def parse_args():
+    """Parse command line arguments for the text-to-video utility."""
+    parser = argparse.ArgumentParser(description="Generate videos from text prompts")
+    
+    # Text-to-image parameters
+    parser.add_argument("--prompt", required=True, help="Text prompt for image generation")
+    
+    # Avatar parameters (optional)
+    avatar_group = parser.add_argument_group("Avatar Parameters (optional)")
+    avatar_group.add_argument("--gender", choices=["male", "female", "non-binary"], help="Gender for avatar generation")
+    avatar_group.add_argument("--age", help="Age for avatar generation")
+    avatar_group.add_argument("--ethnicity", help="Ethnicity for avatar generation")
+    avatar_group.add_argument("--expression", help="Facial expression for avatar generation")
+    
