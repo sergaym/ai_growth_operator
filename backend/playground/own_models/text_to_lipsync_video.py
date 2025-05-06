@@ -179,3 +179,18 @@ async def text_to_lipsync_video(
             
         result["audio_path"] = audio_path
         
+        # Step 3: Generate video from the image
+        print("\n🎬 Step 3: Generating video from the avatar image...")
+        
+        video_result = await generate_video(
+            image_path=str(image_path),
+            prompt=video_prompt,
+            duration=duration,
+            aspect_ratio=aspect_ratio,
+            output_dir=output_dir
+        )
+        
+        if not video_result or "video" not in video_result or "url" not in video_result["video"]:
+            print("❌ Failed to generate video.")
+            return result
+        
