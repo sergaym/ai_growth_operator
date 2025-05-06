@@ -137,3 +137,23 @@ async def submit(
         print(f"Error in lipsync process: {str(e)}")
         return None
 
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Synchronize audio with video using lipsync AI")
+    
+    # Input video options (must provide one)
+    video_group = parser.add_mutually_exclusive_group(required=True)
+    video_group.add_argument("--video-path", help="Path to local video file")
+    video_group.add_argument("--video-url", help="URL to hosted video")
+    
+    # Input audio options (must provide one)
+    audio_group = parser.add_mutually_exclusive_group(required=True)
+    audio_group.add_argument("--audio-path", help="Path to local audio file")
+    audio_group.add_argument("--audio-url", help="URL to hosted audio")
+    
+    # Output options
+    parser.add_argument("--output-dir", default="./output",
+                       help="Directory to save the output synchronized video")
+    
+    return parser.parse_args()
+
