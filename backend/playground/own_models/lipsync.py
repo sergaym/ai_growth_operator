@@ -52,3 +52,26 @@ async def submit(
         print("Error: Both video and audio sources must be provided")
         return None
     
+    # If we have local files but no URLs, upload them first
+    if video_path and not video_url:
+        print(f"Uploading video: {video_path}")
+        try:
+            # Upload video using fal client
+            video_url = await fal_client.upload_file_async(video_path)
+            print(f"Video uploaded: {video_url}")
+        except Exception as e:
+            print(f"Error uploading video: {str(e)}")
+            return None
+    
+    if audio_path and not audio_url:
+        print(f"Uploading audio: {audio_path}")
+        try:
+            # Upload audio using fal client
+            audio_url = await fal_client.upload_file_async(audio_path)
+            print(f"Audio uploaded: {audio_url}")
+        except Exception as e:
+            print(f"Error uploading audio: {str(e)}")
+            return None
+    
+    print("Starting lipsync process...")
+    
