@@ -84,3 +84,28 @@ async def text_to_video(
         if not video_prompt:
             video_prompt = f"Realistic animation of: {prompt}"
         
+        video_result = await generate_video(
+            image_path=str(image_path),
+            prompt=video_prompt,
+            duration=duration,
+            aspect_ratio=aspect_ratio,
+            negative_prompt=negative_prompt,
+            cfg_scale=cfg_scale,
+            output_dir=output_dir
+        )
+        
+        if not video_result:
+            print("❌ Failed to generate video.")
+            return result
+        
+        if "video" in video_result and "url" in video_result["video"]:
+            print(f"✅ Video generated successfully")
+            result["video_url"] = video_result["video"]["url"]
+            
+            # Find the saved video file
+            video_files = list(output_path.glob("video_*.mp4"))
+            if video_files:
+                result["video_path"] = str(video_files[-1])
+    
+    return result
+
