@@ -146,3 +146,28 @@ async def main_async():
         if hasattr(args, param) and getattr(args, param):
             avatar_params[param] = getattr(args, param)
     
+    # Only pass avatar_params if we have some
+    avatar_params = avatar_params if avatar_params else None
+    
+    result = await text_to_video(
+        prompt=args.prompt,
+        avatar_params=avatar_params,
+        video_prompt=args.video_prompt,
+        duration=args.duration,
+        aspect_ratio=args.aspect_ratio,
+        negative_prompt=args.negative_prompt,
+        cfg_scale=args.cfg_scale,
+        output_dir=args.output_dir
+    )
+    
+    if result:
+        print("\n✨ Text-to-Video Generation Complete ✨")
+        if "image_path" in result:
+            print(f"📷 Image: {result['image_path']}")
+        if "video_path" in result:
+            print(f"🎥 Video: {result['video_path']}")
+        if "video_url" in result:
+            print(f"🌐 Video URL: {result['video_url']}")
+
+if __name__ == "__main__":
+    asyncio.run(main_async()) 
