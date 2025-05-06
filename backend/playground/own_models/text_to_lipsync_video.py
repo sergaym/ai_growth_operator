@@ -194,3 +194,15 @@ async def text_to_lipsync_video(
             print("❌ Failed to generate video.")
             return result
         
+        # Find the saved video file
+        video_files = list(output_path.glob("video_*.mp4"))
+        if not video_files:
+            print("❌ Video file not found. Aborting.")
+            return result
+            
+        raw_video_path = str(video_files[-1])
+        result["raw_video_path"] = raw_video_path
+        
+        # Step 4: Apply lipsync to synchronize audio with video
+        print("\n👄 Step 4: Applying lipsync to synchronize audio with video...")
+        
