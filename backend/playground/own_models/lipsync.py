@@ -75,3 +75,38 @@ async def submit(
     
     print("Starting lipsync process...")
     
+    try:
+        # Prepare arguments for the API
+        arguments = {
+            "video_url": video_url,
+            "audio_url": audio_url
+        }
+        
+        print("Submitting request to latentsync API...")
+        
+        # Try using the subscribe method first (blocking but simpler)
+        try:
+            result = fal_client.subscribe(
+                "fal-ai/latentsync",
+                arguments=arguments,
+                with_logs=True,
+                on_queue_update=on_queue_update
+            )
+            print("Lipsync completed!")
+        except Exception as e:
+            print(f"Subscribe method failed, falling back to submit/result: {str(e)}")
+            
+            # Fall back to submit and then get result
+            handler = fal_client.submit(
+                "fal-ai/latentsync",
+                arguments=arguments
+            )
+            
+            request_id = handler.request_id
+            print(f"Request ID: {request_id}")
+            
+            # Wait for the result
+            print("Waiting for result...")
+            result = fal_client.result("fal-ai/latentsync", request_id)
+            print("Lipsync completed!")
+        
