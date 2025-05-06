@@ -38,3 +38,19 @@ if not FAL_KEY:
 # Set the environment variable
 os.environ["FAL_KEY"] = FAL_KEY
 
+async def generate_speech(text, output_dir, voice_id="en_us_m_1"):
+    """
+    Generate speech from text using a simple TTS service.
+    
+    Args:
+        text: The text to convert to speech
+        output_dir: Directory to save the audio file
+        voice_id: Voice ID to use (default is a male English voice)
+        
+    Returns:
+        Path to the generated audio file
+    """
+    print("🔊 Generating speech from text...")
+    
+    # Example using a free TTS API (replace with your preferred service)
+    # This is a placeholder, in production you would use a better service
