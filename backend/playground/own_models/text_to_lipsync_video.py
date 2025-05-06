@@ -54,3 +54,33 @@ async def generate_speech(text, output_dir, voice_id="en_us_m_1"):
     
     # Example using a free TTS API (replace with your preferred service)
     # This is a placeholder, in production you would use a better service
+    try:
+        # Create a timestamped filename
+        timestamp = int(time.time())
+        audio_filename = f"speech_{timestamp}.mp3"
+        output_path = Path(output_dir) / audio_filename
+        
+        # For simplicity, using ElevenLabs-style API
+        # In a real implementation, you would use a proper TTS service API
+        base_url = "https://api.elevenlabs.io/v1/text-to-speech"
+        headers = {
+            "Accept": "audio/mpeg",
+            "Content-Type": "application/json",
+            "xi-api-key": os.getenv("ELEVEN_API_KEY", "dummy-key")
+        }
+        
+        data = {
+            "text": text,
+            "model_id": "eleven_monolingual_v1",
+            "voice_settings": {
+                "stability": 0.5,
+                "similarity_boost": 0.75
+            }
+        }
+        
+        # Placeholder function - in a real implementation, uncomment below
+        # response = requests.post(f"{base_url}/{voice_id}", json=data, headers=headers)
+        # if response.status_code == 200:
+        #     with open(output_path, 'wb') as f:
+        #         f.write(response.content)
+        
