@@ -11,3 +11,11 @@ from dotenv import load_dotenv
 
 # Load environment variables
 load_dotenv()
+
+# Check for API key
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API_KEY")
+if not FAL_KEY:
+    print("Error: No FAL API key found. Please set FAL_KEY environment variable.")
+    print("Get your API key from: https://app.fal.ai/settings/api-keys")
+    sys.exit(1)
+
