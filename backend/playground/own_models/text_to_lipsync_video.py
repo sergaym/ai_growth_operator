@@ -145,3 +145,19 @@ async def text_to_lipsync_video(
             print("❌ Failed to generate avatar image. Aborting.")
             return None
         
+        # Find the image file in the temp directory
+        temp_path = Path(temp_dir)
+        image_files = list(temp_path.glob("*.png"))
+        
+        if not image_files:
+            print("❌ No image was generated. Aborting.")
+            return None
+            
+        # Use the first image file
+        image_path = image_files[0]
+        
+        # Copy the image to the output directory
+        output_image_path = output_path / image_path.name
+        with open(image_path, "rb") as src, open(output_image_path, "wb") as dst:
+            dst.write(src.read())
+            
