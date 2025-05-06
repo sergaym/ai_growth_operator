@@ -224,3 +224,20 @@ async def text_to_lipsync_video(
     
     return result
 
+def parse_args():
+    """Parse command line arguments."""
+    parser = argparse.ArgumentParser(description="Generate a talking video from text")
+    
+    # Required text parameter
+    parser.add_argument("--text", required=True, help="Text to be spoken in the video")
+    
+    # Avatar parameters
+    parser.add_argument("--avatar-prompt", help="Prompt for generating the avatar image")
+    
+    # Avatar customization
+    avatar_group = parser.add_argument_group("Avatar Customization")
+    avatar_group.add_argument("--gender", choices=["male", "female", "non-binary"], help="Gender for avatar generation")
+    avatar_group.add_argument("--age", help="Age for avatar generation")
+    avatar_group.add_argument("--ethnicity", help="Ethnicity for avatar generation")
+    avatar_group.add_argument("--expression", default="neutral", help="Facial expression for avatar")
+    
