@@ -62,7 +62,7 @@ interface PricingPlansProps {
 
 export function PricingPlans({ 
   title = "Select plan",
-  subtitle = "Unlock the power of Arcads for your company."
+  subtitle = "Unlock the power of our platform for your company."
 }: PricingPlansProps) {
   const router = useRouter();
 
