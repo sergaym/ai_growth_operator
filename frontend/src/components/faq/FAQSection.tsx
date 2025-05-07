@@ -24,7 +24,7 @@ const defaultFAQs: FAQItem[] = [
     answer: "Por supuesto. Hemos negociado los derechos para que puedas utilizar los videos generados con fines comerciales."
   },
   {
-    question: "¿Los actores de IA otorgan permisos para usar Arcads?",
+    question: "¿Los actores de IA otorgan permisos para usar la plataforma?",
     answer: "Sí, todas las versiones de IA de nuestros actores se desarrollan con pleno consentimiento y cooperación. Están completamente informados y compensados por su trabajo. Nos aseguramos de que todos estén de acuerdo antes de usar su imagen en cualquier creación de IA."
   },
   {
@@ -32,7 +32,7 @@ const defaultFAQs: FAQItem[] = [
     answer: "Obtendrás la actuación y el discurso más convincente. Recibes un video en bruto cautivador. Luego puedes transformarlo como quieras con tus propias herramientas de edición. También puedes solicitar una edición en la plataforma."
   },
   {
-    question: "¿Cuánto tiempo tarda en generar mis videos con Arcads?",
+    question: "¿Cuánto tiempo tarda en generar mis videos con la plataforma?",
     answer: "Alrededor de 2 minutos y 30 segundos."
   },
   {
@@ -41,7 +41,7 @@ const defaultFAQs: FAQItem[] = [
   },
   {
     question: "¿Puedo controlar cómo se mueven los actores, cómo hablan y su fondo?",
-    answer: "Hay muchas formas diferentes de controlar los resultados de los videos en Arcads. Todo suena atractivo y natural sin hacer nada. Pero también puedes cambiar la velocidad del habla y la entonación. Puedes elegir entre una variedad de actores de IA con diferentes fondos, emociones y energías en la biblioteca de actores."
+    answer: "Hay muchas formas diferentes de controlar los resultados de los videos en la plataforma. Todo suena atractivo y natural sin hacer nada. Pero también puedes cambiar la velocidad del habla y la entonación. Puedes elegir entre una variedad de actores de IA con diferentes fondos, emociones y energías en la biblioteca de actores."
   },
   {
     question: "¿Qué sucede si supero el límite mensual de mi plan?",
