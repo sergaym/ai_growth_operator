@@ -142,3 +142,138 @@ class TextToImageService:
         
         return base_prompt
     
+    async def generate_image(
+        self,
+        prompt: Optional[str] = None,
+        params: Optional[Dict[str, Any]] = None,
+        negative_prompt: str = "deformed faces, unrealistic features, cartoon-like, illustration, painting, drawing, artificial looking, low quality, blurry",
+        num_inference_steps: int = 50,
+        guidance_scale: float = 7.5,
+        output_dir: Optional[str] = None,
+        save_image: bool = True
+    ) -> Dict[str, Any]:
+        """
+        Generate an image from a text prompt.
+        
+        Args:
+            prompt: Text prompt for image generation
+            params: Parameters for avatar generation if using the avatar builder
+            negative_prompt: Negative prompt for better quality
+            num_inference_steps: Number of inference steps
+            guidance_scale: Guidance scale for prompt adherence
+            output_dir: Directory to save the generated image
+            save_image: Whether to save the image to disk
+            
+        Returns:
+            Dictionary containing the image data, URLs, and paths
+        """
+        # Build prompt from parameters if provided
+        if params and not prompt:
+            prompt = self.build_avatar_prompt(**params)
+        
+        if not prompt:
+            raise ValueError("Either prompt or params must be provided")
+        
+        # Generate a unique ID for this request
+        request_id = str(uuid.uuid4())
+        
+        try:
+            # Submit the request with additional parameters for better face generation
+            result = fal_client.subscribe(
+                "fal-ai/flux/dev",
+                arguments={
+                    "prompt": prompt,
+                    "negative_prompt": negative_prompt,
+                    "num_inference_steps": num_inference_steps,
+                    "guidance_scale": guidance_scale,
+                },
+            )
+            
+            # Prepare the result dictionary
+            response = {
+                "request_id": request_id,
+                "prompt": prompt,
+                "status": "completed",
+                "timestamp": int(time.time())
+            }
+            
+            # Extract images
+            if "images" in result and isinstance(result["images"], list) and result["images"]:
+                # Track if we actually saved an image
+                image_saved = False
+                image_urls = []
+                image_paths = []
+                
+                if save_image and output_dir:
+                    # Create output directory if it doesn't exist
+                    output_path = Path(output_dir)
+                    output_path.mkdir(exist_ok=True, parents=True)
+                
+                for i, image_data in enumerate(result["images"]):
+                    # Handle base64 image data
+                    if isinstance(image_data, str):
+                        if "," in image_data and ";base64," in image_data:
+                            image_data = image_data.split(";base64,")[1]
+                        
+                        if save_image and output_dir:
+                            try:
+                                image_bytes = base64.b64decode(image_data)
+                                timestamp = int(time.time())
+                                filename = f"avatar_{timestamp}_{i}.png"
+                                filepath = output_path / filename
+                                
+                                with open(filepath, "wb") as f:
+                                    f.write(image_bytes)
+                                
+                                image_saved = True
+                                image_paths.append(str(filepath))
+                                image_urls.append(f"file://{filepath}")
+                            except Exception as e:
+                                print(f"Error saving image: {str(e)}")
+                        
+                        # Always include the base64 data in the response
+                        response["image_data"] = f"data:image/png;base64,{image_data}"
+                    
+                    # Handle URL image
+                    elif isinstance(image_data, dict) and "url" in image_data:
+                        url = image_data["url"]
+                        image_urls.append(url)
+                        
+                        if save_image and output_dir:
+                            try:
+                                import requests
+                                response_data = requests.get(url)
+                                if response_data.status_code == 200:
+                                    timestamp = int(time.time())
+                                    filename = f"avatar_{timestamp}_{i}.png"
+                                    filepath = output_path / filename
+                                    
+                                    with open(filepath, "wb") as f:
+                                        f.write(response_data.content)
+                                    
+                                    image_saved = True
+                                    image_paths.append(str(filepath))
+                            except Exception as e:
+                                print(f"Error downloading image: {str(e)}")
+                
+                # Add image URLs and paths to response
+                if image_urls:
+                    response["image_urls"] = image_urls
+                if image_paths:
+                    response["image_paths"] = image_paths
+                
+                # Add image saved status
+                response["image_saved"] = image_saved
+            
+            return response
+        
+        except Exception as e:
+            # Handle errors
+            return {
+                "request_id": request_id,
+                "prompt": prompt,
+                "status": "failed",
+                "error": str(e),
+                "timestamp": int(time.time())
+            }
+    
