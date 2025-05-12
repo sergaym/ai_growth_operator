@@ -1,11 +1,11 @@
 """
-Idea generation endpoints for v1 of the AI Growth Operator API
+Idea generation endpoints for v0 (legacy) of the AI Growth Operator API
 """
 
 from fastapi import APIRouter, HTTPException
 from typing import Dict, Any, Optional
 
-from app.schemas import (
+from app.api.v0.schemas import (
     IdeaRequest, 
     IdeaResponse,
     RefineIdeaRequest,
@@ -13,7 +13,7 @@ from app.schemas import (
     LanguageAdaptRequest,
     LanguageAdaptResponse
 )
-from app.services.openai_service import generate_idea, refine_idea, adapt_language
+from app.api.v0.services import generate_idea, refine_idea, adapt_language
 
 # Create router
 router = APIRouter()
