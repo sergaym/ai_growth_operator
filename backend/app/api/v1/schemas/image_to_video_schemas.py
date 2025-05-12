@@ -138,3 +138,22 @@ class GenerateVideoFromBase64Request(BaseModel):
             raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
         return v
 
+
+class VideoGenerationParameters(BaseModel):
+    """Parameters used for video generation"""
+    duration: str = Field(..., description="Video duration in seconds")
+    aspect_ratio: str = Field(..., description="Aspect ratio of the video")
+    cfg_scale: float = Field(..., description="How closely the prompt was followed")
+
+
+class VideoGenerationResponse(BaseModel):
+    """Response model for video generation"""
+    request_id: str = Field(..., description="Unique ID for the request")
+    prompt: str = Field(..., description="Text prompt used for generation")
+    status: str = Field(..., description="Status of the generation (completed/error)")
+    timestamp: int = Field(..., description="Timestamp of the request")
+    parameters: VideoGenerationParameters = Field(..., description="Parameters used for generation")
+    video_url: Optional[HttpUrl] = Field(None, description="URL to the generated video")
+    video_path: Optional[str] = Field(None, description="Local path to the saved video file")
+    preview_image_url: Optional[HttpUrl] = Field(None, description="URL to the preview image")
+    error: Optional[str] = Field(None, description="Error message if generation failed") 
