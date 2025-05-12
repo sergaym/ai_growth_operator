@@ -1,18 +1,18 @@
 """
-Marketing endpoints for v1 of the AI Growth Operator API (Legacy)
+Marketing endpoints for v0 (legacy) of the AI Growth Operator API
 This module is maintained for backward compatibility and redirects to the idea endpoints.
 """
 
 from fastapi import APIRouter, HTTPException, Depends
 from typing import Dict, Any
 
-from app.schemas import (
+from app.api.v0.schemas import (
     MarketingIdeaRequest, 
     MarketingIdeaResponse,
     RefineIdeaRequest,
     RefineIdeaResponse
 )
-from app.api.v1.endpoints.idea import generate_idea_endpoint, refine_idea_endpoint
+from app.api.v0.endpoints.idea import generate_idea_endpoint, refine_idea_endpoint
 
 # Create router
 router = APIRouter()
