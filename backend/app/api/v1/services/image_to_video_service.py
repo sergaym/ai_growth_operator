@@ -72,3 +72,39 @@ class ImageToVideoService:
             print(f"Error uploading image: {str(e)}")
             raise ValueError(f"Failed to upload image: {str(e)}")
     
+    async def upload_base64_image(self, base64_data: str, filename: str = None) -> str:
+        """
+        Upload a base64-encoded image to the fal.ai service.
+        
+        Args:
+            base64_data: Base64-encoded image data
+            filename: Optional filename to use
+            
+        Returns:
+            URL of the uploaded image
+        """
+        try:
+            # Generate a temporary file name if not provided
+            if not filename:
+                timestamp = int(time.time())
+                filename = f"temp_image_{timestamp}.png"
+            
+            # Ensure the base64 data doesn't include the prefix
+            if "," in base64_data and ";base64," in base64_data:
+                base64_data = base64_data.split(";base64,")[1]
+            
+            # Create a temporary file
+            temp_path = os.path.join(self.video_dir, filename)
+            with open(temp_path, "wb") as f:
+                f.write(base64.b64decode(base64_data))
+            
+            # Upload the temporary file
+            url = await self.upload_image(temp_path)
+            
+            # Clean up the temporary file
+            os.remove(temp_path)
+            
+            return url
+        except Exception as e:
+            print(f"Error uploading base64 image: {str(e)}")
+            raise ValueError(f"Failed to upload base64 image: {str(e)}")
