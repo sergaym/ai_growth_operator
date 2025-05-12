@@ -1,11 +1,11 @@
 """
-HeyGen avatar video generation endpoints
+HeyGen avatar video generation endpoints (v0 legacy)
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import Dict, Any, List, Optional
 
-from app.schemas import (
+from app.api.v0.schemas import (
     # Avatar video schemas
     HeygenGenerateAvatarVideoRequest,
     HeygenVideoResponse,
@@ -22,7 +22,7 @@ from app.schemas import (
     HeygenAvatarVideoResponse,
 )
 
-from app.services.heygen_service import heygen_service
+from app.api.v0.services import heygen_service
 
 # Create router
 router = APIRouter()
