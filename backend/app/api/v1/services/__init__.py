@@ -4,5 +4,9 @@ This package contains service integrations for external APIs used in v1 of the A
 """
 
 from .text_to_image_service import text_to_image_service
+from .text_to_speech_service import text_to_speech_service
 
-__all__ = ["text_to_image_service"] 
+__all__ = [
+    "text_to_image_service",
+    "text_to_speech_service"
+] 

@@ -12,11 +12,27 @@ from .text_to_image_schemas import (
     ImageGenerationResponse,
 )
 
+from .text_to_speech_schemas import (
+    VoiceSettings,
+    GenerateSpeechRequest,
+    SpeechGenerationResponse,
+    VoiceResponse,
+    VoicesListResponse,
+)
+
 __all__ = [
+    # Text-to-Image schemas
     "AvatarParameters",
     "GenerateImageRequest",
     "GenerateAvatarRequest",
     "UploadImageRequest",
     "UploadImageResponse",
     "ImageGenerationResponse",
+    
+    # Text-to-Speech schemas
+    "VoiceSettings",
+    "GenerateSpeechRequest",
+    "SpeechGenerationResponse",
+    "VoiceResponse",
+    "VoicesListResponse",
 ] 

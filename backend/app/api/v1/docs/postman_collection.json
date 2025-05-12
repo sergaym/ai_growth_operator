@@ -1,0 +1,288 @@
+{
+	"info": {
+		"_postman_id": "a7b3c9d8-e2f1-48g5-h6i7-j8k9l0m1n2o3",
+		"name": "AI Growth Operator API v1",
+		"description": "Collection for testing the AI Growth Operator API v1 endpoints",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "Text-to-Image",
+			"item": [
+				{
+					"name": "Generate Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"prompt\": \"a hyperrealistic portrait of a young woman smiling, high detail, studio lighting, professional photography style\",\n  \"params\": {\n    \"gender\": \"female\",\n    \"age\": \"25\",\n    \"ethnicity\": \"latina\",\n    \"skin_tone\": \"medium\",\n    \"hair_style\": \"wavy long\",\n    \"hair_color\": \"brown\",\n    \"facial_features\": \"soft features, small nose, full lips\",\n    \"expression\": \"smiling\",\n    \"style\": \"hyperrealistic\",\n    \"background\": \"neutral grey studio backdrop\",\n    \"lighting\": \"soft studio lighting\",\n    \"custom_prompt\": \"\"\n  },\n  \"negative_prompt\": \"cartoon, illustration, drawing, blurry, distorted, low resolution\",\n  \"num_inference_steps\": 35,\n  \"guidance_scale\": 8.0,\n  \"save_image\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-image/generate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-image",
+								"generate"
+							]
+						},
+						"description": "Generate an image from text prompt or parameters"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Avatar",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"gender\": \"female\",\n  \"age\": \"25\",\n  \"ethnicity\": \"latina\",\n  \"skin_tone\": \"medium\",\n  \"hair_style\": \"wavy long\",\n  \"hair_color\": \"brown\",\n  \"facial_features\": \"soft features, small nose, full lips\",\n  \"expression\": \"smiling\",\n  \"style\": \"hyperrealistic\",\n  \"background\": \"neutral grey studio backdrop\",\n  \"lighting\": \"soft studio lighting\",\n  \"custom_prompt\": \"\",\n  \"negative_prompt\": \"cartoon, illustration, drawing, blurry, distorted, low resolution\",\n  \"num_inference_steps\": 35,\n  \"guidance_scale\": 8.0\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-image/avatar",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-image",
+								"avatar"
+							]
+						},
+						"description": "Generate an avatar using specific attributes"
+					},
+					"response": []
+				},
+				{
+					"name": "Upload Image",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"file_content\": \"{{base64_image}}\",\n  \"filename\": \"test_image.png\"\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-image/upload",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-image",
+								"upload"
+							]
+						},
+						"description": "Upload an image to the server"
+					},
+					"response": []
+				}
+			],
+			"description": "Text-to-Image generation endpoints"
+		},
+		{
+			"name": "Text-to-Speech",
+			"item": [
+				{
+					"name": "Generate Speech",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"text\": \"Welcome to AI Growth Operator! We're excited to help you create engaging content for your marketing campaigns.\",\n  \"voice_preset\": \"female_2\",\n  \"language\": \"english\",\n  \"model_id\": \"eleven_multilingual_v2\",\n  \"voice_settings\": {\n    \"stability\": 0.5,\n    \"similarity_boost\": 0.75,\n    \"style\": 0.3,\n    \"use_speaker_boost\": true\n  }\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-speech/generate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-speech",
+								"generate"
+							]
+						},
+						"description": "Generate speech from text"
+					},
+					"response": []
+				},
+				{
+					"name": "List Voices",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-speech/voices",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-speech",
+								"voices"
+							]
+						},
+						"description": "Get a list of available voices"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Voice Presets",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-speech/voices/presets?language=english",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-speech",
+								"voices",
+								"presets"
+							],
+							"query": [
+								{
+									"key": "language",
+									"value": "english"
+								}
+							]
+						},
+						"description": "Get voice presets for a specific language"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Audio File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/text-to-speech/audio/speech_1684932145_a7b3c9d8.mp3",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"text-to-speech",
+								"audio",
+								"speech_1684932145_a7b3c9d8.mp3"
+							]
+						},
+						"description": "Get a generated audio file"
+					},
+					"response": []
+				}
+			],
+			"description": "Text-to-Speech generation endpoints"
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		},
+		{
+			"key": "api_key",
+			"value": "your_api_key_here",
+			"type": "string"
+		},
+		{
+			"key": "base64_image",
+			"value": "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mNk+A8AAQUBAScY42YAAAAASUVORK5CYII=",
+			"type": "string"
+		}
+	]
+} 
