@@ -7,6 +7,8 @@ from fastapi import APIRouter
 # Import endpoint routers
 from app.api.v1.endpoints.text_to_image import router as text_to_image_router
 from app.api.v1.endpoints.text_to_speech import router as text_to_speech_router
+from app.api.v1.endpoints.image_to_video import router as image_to_video_router
+from app.api.v1.endpoints.lipsync import router as lipsync_router
 
 # Create main API router for v1
 api_router = APIRouter()
@@ -14,3 +16,5 @@ api_router = APIRouter()
 # Include endpoint routers
 api_router.include_router(text_to_image_router, prefix="/text-to-image", tags=["Text-to-Image Generation"])
 api_router.include_router(text_to_speech_router, prefix="/text-to-speech", tags=["Text-to-Speech Generation"])
+api_router.include_router(image_to_video_router, prefix="/image-to-video", tags=["Image-to-Video Generation"])
+api_router.include_router(lipsync_router, prefix="/lipsync", tags=["Lipsync Generation"])
