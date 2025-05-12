@@ -1,24 +1,18 @@
 """
-Luma AI video generation endpoints
+Luma AI video generation endpoints (v0 legacy)
 """
 
 from fastapi import APIRouter, HTTPException, BackgroundTasks
 from typing import Dict, Any
 
-from app.schemas import (
+from app.api.v0.schemas import (
     VideoPromptRequest, 
     VideoPromptResponse,
     GenerateVideoFromIdeaRequest,
     VideoGenerationResponse,
     GenerateVideoWithReferencesRequest,
 )
-from app.services.openai_service import generate_video_prompt
-from app.services.luma_service import (
-    generate_video, 
-    check_video_status, 
-    wait_for_video_completion,
-    generate_video_with_references
-)
+from app.api.v0.services import generate_video_prompt, luma_service
 
 # Create router
 router = APIRouter()
@@ -75,7 +69,7 @@ async def generate_video_from_idea(request: GenerateVideoFromIdeaRequest, backgr
         )
         
         # Then, initiate the video generation with Luma AI
-        result = generate_video(
+        result = luma_service.generate_video(
             prompt=video_prompt,
             visual_style=request.video_settings.visual_style,
             duration=request.video_settings.duration,
@@ -92,7 +86,7 @@ async def generate_video_from_idea(request: GenerateVideoFromIdeaRequest, backgr
         # This doesn't block the API response but allows for webhook callbacks
         # or status polling by the client
         background_tasks.add_task(
-            wait_for_video_completion, 
+            luma_service.wait_for_video_completion, 
             generation_id=result["generation_id"]
         )
         
@@ -119,7 +113,7 @@ async def generate_video_with_references_endpoint(
         settings = request.settings.dict()
         
         # Initiate the video generation
-        result = generate_video_with_references(
+        result = luma_service.generate_video_with_references(
             prompt=request.prompt,
             media_references=media_refs,
             settings=settings
@@ -127,7 +121,7 @@ async def generate_video_with_references_endpoint(
         
         # Start a background task to wait for video completion
         background_tasks.add_task(
-            wait_for_video_completion, 
+            luma_service.wait_for_video_completion, 
             generation_id=result["generation_id"]
         )
         
@@ -154,7 +148,7 @@ async def get_video_status(generation_id: str) -> Dict[str, Any]:
                 "error": "Invalid or missing generation ID"
             }
             
-        result = check_video_status(generation_id)
+        result = luma_service.check_video_status(generation_id)
         return result
         
     except Exception as e:
