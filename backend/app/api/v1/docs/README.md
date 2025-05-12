@@ -8,6 +8,7 @@ The AI Growth Operator API provides access to various AI-powered content generat
 
 - **Text-to-Image Generation**: Generate realistic images and avatars from text descriptions
 - **Text-to-Speech Generation**: Convert text to natural-sounding speech with various voices
+- **Image-to-Video Generation**: Animate still images into realistic videos with natural movements
 
 ## Available Endpoints
 
@@ -31,6 +32,18 @@ The AI Growth Operator API provides access to various AI-powered content generat
 | `/api/v1/text-to-speech/audio/{filename}` | GET | Get a generated audio file |
 
 [View Text-to-Speech examples](./text_to_speech_examples.md)
+
+### Image-to-Video Endpoints
+
+| Endpoint | Method | Description |
+|----------|--------|-------------|
+| `/api/v1/image-to-video/generate` | POST | Generate a video from an image URL or base64 data |
+| `/api/v1/image-to-video/from-url` | POST | Generate a video from an image URL |
+| `/api/v1/image-to-video/from-base64` | POST | Generate a video from base64 image data |
+| `/api/v1/image-to-video/from-file` | POST | Generate a video from an uploaded image file |
+| `/api/v1/image-to-video/videos/{filename}` | GET | Get a generated video file |
+
+[View Image-to-Video examples](./image_to_video_examples.md)
 
 ## Authentication
 
