@@ -84,3 +84,17 @@ async def generate_avatar(request: GenerateAvatarRequest):
     
     return result
 
+@router.post("/upload", response_model=UploadImageResponse, summary="Upload image to fal.ai")
+async def upload_image(request: UploadImageRequest):
+    """
+    Upload an image to the fal.ai platform for future use.
+    
+    - **image_path**: Path to the image file to upload
+    
+    Returns the URL of the uploaded image.
+    """
+    try:
+        url = await text_to_image_service.upload_image(request.image_path)
+        return {"url": url}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e)) 
