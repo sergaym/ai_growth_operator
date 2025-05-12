@@ -1,5 +1,5 @@
 """
-Video-related schemas for the AI Growth Operator API.
+Video-related schemas for the AI Growth Operator API (v0 legacy).
 """
 
 from typing import List, Dict, Any, Optional, Union

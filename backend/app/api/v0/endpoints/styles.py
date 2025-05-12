@@ -1,11 +1,11 @@
 """
-Styles endpoints for v1 of the AI Growth Operator API
+Styles endpoints for v0 (legacy) of the AI Growth Operator API
 """
 
 from fastapi import APIRouter
 
-from app.schemas import StylesResponse
-from app.services.prompt_service import get_available_styles
+from app.api.v0.schemas import StylesResponse
+from app.api.v0.services import get_available_styles
 
 # Create router
 router = APIRouter()
