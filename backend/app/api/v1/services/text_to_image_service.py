@@ -16,3 +16,10 @@ from dotenv import load_dotenv
 
 # Import settings
 from app.core.config import settings
+
+# Load environment variables
+load_dotenv()
+
+# Constants
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API_KEY")
+
