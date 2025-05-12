@@ -20,3 +20,15 @@ from app.core.config import settings
 
 # Load environment variables
 load_dotenv()
+
+# Constants
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API_KEY") or settings.FAL_CLIENT_API_KEY
+FAL_KLING_MODEL = "fal-ai/kling-video/v1.6/pro/image-to-video"
+
+# Default video settings
+DEFAULT_DURATION = "5"  # 5 seconds
+DEFAULT_ASPECT_RATIO = "16:9"
+DEFAULT_PROMPT = "Realistic, cinematic movement, high quality"
+DEFAULT_NEGATIVE_PROMPT = "blur, distort, and low quality"
+DEFAULT_CFG_SCALE = 0.5
+
