@@ -31,7 +31,7 @@ class GenerateImageRequest(BaseModel):
     save_image: Optional[bool] = Field(True, description="Whether to save the image to disk")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "prompt": "A hyperrealistic portrait of a professional woman with a friendly smile, suitable for a corporate website, high quality, 8k",
                 "negative_prompt": "deformed faces, unrealistic features, cartoon-like, low quality",
@@ -51,7 +51,7 @@ class GenerateAvatarRequest(BaseModel):
     custom_prompt: Optional[str] = Field(None, description="Additional custom elements")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "gender": "female",
                 "age": "35",
