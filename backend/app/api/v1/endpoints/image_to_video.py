@@ -90,3 +90,33 @@ async def generate_video_from_url(request: GenerateVideoFromUrlRequest):
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
 
+
+@router.post("/from-base64", response_model=VideoGenerationResponse, summary="Generate video from base64 image data")
+async def generate_video_from_base64(request: GenerateVideoFromBase64Request):
+    """
+    Generate a video from base64-encoded image data.
+    
+    Args:
+        request: Request model containing base64 image data and video generation parameters
+        
+    Returns:
+        Response with details of the generated video
+    """
+    try:
+        result = await image_to_video_service.generate_video(
+            image_base64=request.image_base64,
+            prompt=request.prompt,
+            duration=request.duration,
+            aspect_ratio=request.aspect_ratio,
+            negative_prompt=request.negative_prompt,
+            cfg_scale=request.cfg_scale
+        )
+        
+        if result["status"] == "error":
+            raise HTTPException(status_code=500, detail=result["error"])
+        
+        return result
+    except HTTPException:
+        raise
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
