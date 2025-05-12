@@ -1,26 +1,36 @@
 """
 Schema package for the AI Growth Operator API.
-This module re-exports all schemas for backward compatibility.
+This module re-exports all schemas from versioned packages for backward compatibility.
 """
 
-# Idea generation schemas
-from .idea_schemas import (
+# Text-to-Image schemas (re-export from v1)
+from app.api.v1.schemas.text_to_image_schemas import (
+    AvatarParameters,
+    GenerateImageRequest,
+    GenerateAvatarRequest,
+    UploadImageRequest,
+    UploadImageResponse,
+    ImageGenerationResponse,
+)
+
+# Legacy schemas (re-export from v0)
+from app.api.v0.schemas import (
+    # Idea generation schemas
     IdeaRequest,
     IdeaResponse,
     RefineIdeaRequest,
     RefineIdeaResponse,
     LanguageAdaptRequest,
     LanguageAdaptResponse,
-)
-
-# Marketing schemas (legacy, for backward compatibility)
-from .marketing_schemas import (
+    
+    # Marketing schemas
     MarketingIdeaRequest,
     MarketingIdeaResponse,
-)
-
-# Video schemas
-from .video_schemas import (
+    
+    # Styles schemas
+    StylesResponse,
+    
+    # Video schemas
     VideoPromptRequest,
     VideoPromptResponse,
     VideoGenerationSettings,
@@ -28,12 +38,14 @@ from .video_schemas import (
     VideoGenerationResponse,
     MediaReference,
     GenerateVideoWithReferencesRequest,
+    
     # Heygen schemas
     HeygenGenerateAvatarVideoRequest,
     HeygenAvatarResponse,
     HeygenVoiceResponse,
     HeygenVideoResponse,
     HeygenAvatarVideoResponse,
+    
     # Photo Avatar schemas
     HeygenGeneratePhotoAvatarRequest,
     HeygenPhotoAvatarResponse,
@@ -42,7 +54,4 @@ from .video_schemas import (
     HeygenGenerateAvatarLooksRequest,
     HeygenAddMotionRequest,
     HeygenAddSoundEffectRequest,
-)
-
-# Styles schemas
-from .styles_schemas import StylesResponse 
+) 
