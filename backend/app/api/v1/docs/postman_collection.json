@@ -246,6 +246,207 @@
 				}
 			],
 			"description": "Text-to-Speech generation endpoints"
+		},
+		{
+			"name": "Image-to-Video",
+			"item": [
+				{
+					"name": "Generate Video",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image_url\": \"https://example.com/images/portrait.jpg\",\n  \"prompt\": \"Realistic, cinematic movement, subject talking and smiling naturally\",\n  \"duration\": \"5\",\n  \"aspect_ratio\": \"16:9\",\n  \"negative_prompt\": \"blur, distort, and low quality\",\n  \"cfg_scale\": 0.5,\n  \"save_video\": true\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/image-to-video/generate",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image-to-video",
+								"generate"
+							]
+						},
+						"description": "Generate a video from an image URL or base64 data"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Video from URL",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image_url\": \"https://example.com/images/portrait.jpg\",\n  \"prompt\": \"Elegant head movement, professional looking\",\n  \"duration\": \"10\",\n  \"aspect_ratio\": \"9:16\",\n  \"negative_prompt\": \"blur, distort, and low quality\",\n  \"cfg_scale\": 0.7\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/image-to-video/from-url",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image-to-video",
+								"from-url"
+							]
+						},
+						"description": "Generate a video from an image URL"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Video from Base64",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Content-Type",
+								"value": "application/json"
+							},
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "raw",
+							"raw": "{\n  \"image_base64\": \"{{base64_image}}\",\n  \"prompt\": \"Subtle facial animation, slight smile, blinking naturally\",\n  \"duration\": \"5\",\n  \"aspect_ratio\": \"1:1\",\n  \"negative_prompt\": \"blur, distort, and low quality\",\n  \"cfg_scale\": 0.4\n}"
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/image-to-video/from-base64",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image-to-video",
+								"from-base64"
+							]
+						},
+						"description": "Generate a video from base64 image data"
+					},
+					"response": []
+				},
+				{
+					"name": "Generate Video from File",
+					"request": {
+						"method": "POST",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"body": {
+							"mode": "formdata",
+							"formdata": [
+								{
+									"key": "file",
+									"type": "file",
+									"src": "/path/to/your/image.jpg"
+								},
+								{
+									"key": "prompt",
+									"value": "Realistic, cinematic movement, high quality",
+									"type": "text"
+								},
+								{
+									"key": "duration",
+									"value": "5",
+									"type": "text"
+								},
+								{
+									"key": "aspect_ratio",
+									"value": "16:9",
+									"type": "text"
+								},
+								{
+									"key": "negative_prompt",
+									"value": "blur, distort, and low quality",
+									"type": "text"
+								},
+								{
+									"key": "cfg_scale",
+									"value": "0.5",
+									"type": "text"
+								}
+							]
+						},
+						"url": {
+							"raw": "{{base_url}}/api/v1/image-to-video/from-file",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image-to-video",
+								"from-file"
+							]
+						},
+						"description": "Upload an image and generate a video from it"
+					},
+					"response": []
+				},
+				{
+					"name": "Get Video File",
+					"request": {
+						"method": "GET",
+						"header": [
+							{
+								"key": "Authorization",
+								"value": "Bearer {{api_key}}",
+								"type": "text"
+							}
+						],
+						"url": {
+							"raw": "{{base_url}}/api/v1/image-to-video/videos/video_1684932145_a7b3c9d8.mp4",
+							"host": [
+								"{{base_url}}"
+							],
+							"path": [
+								"api",
+								"v1",
+								"image-to-video",
+								"videos",
+								"video_1684932145_a7b3c9d8.mp4"
+							]
+						},
+						"description": "Get a generated video file"
+					},
+					"response": []
+				}
+			],
+			"description": "Image-to-Video generation endpoints"
 		}
 	],
 	"event": [
