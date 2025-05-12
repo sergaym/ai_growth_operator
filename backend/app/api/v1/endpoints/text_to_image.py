@@ -54,3 +54,33 @@ async def generate_image(request: GenerateImageRequest):
     
     return result
 
+@router.post("/avatar", response_model=ImageGenerationResponse, summary="Generate avatar image")
+async def generate_avatar(request: GenerateAvatarRequest):
+    """
+    Generate an avatar image with specific characteristics.
+    
+    - **gender**: (Optional) Gender of the avatar
+    - **age**: (Optional) Age of the avatar
+    - **ethnicity**: (Optional) Ethnicity of the avatar
+    - **expression**: (Optional) Facial expression
+    - **style**: (Optional) Visual style
+    - **custom_prompt**: (Optional) Additional custom elements
+    
+    Returns information about the generated avatar image.
+    """
+    # Set default storage directory
+    output_dir = os.path.join(os.getcwd(), "output", "avatars")
+    
+    # Extract parameters from the request
+    params = request.dict(exclude_none=True)
+    
+    result = await text_to_image_service.generate_avatar(
+        output_dir=output_dir,
+        **params
+    )
+    
+    if result["status"] == "failed":
+        raise HTTPException(status_code=500, detail=result.get("error", "Failed to generate avatar"))
+    
+    return result
+
