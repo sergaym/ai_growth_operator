@@ -81,3 +81,55 @@ async def generate_lipsync(
         logger.error(f"Exception in lipsync endpoint: {str(e)}")
         raise HTTPException(status_code=500, detail=str(e))
 
+
+@router.post(
+    "/upload",
+    response_model=Dict[str, Any],
+    summary="Upload a file for lipsync processing",
+    description="""
+    Upload video or audio files to be used in lipsync generation.
+    
+    - Supports MP4, MOV, MP3, WAV, and other common formats
+    - Returns a URL that can be used with the generate endpoint
+    """
+)
+async def upload_file(
+    file: UploadFile = File(...),
+    file_type: str = Query(..., description="Type of file being uploaded (video or audio)")
+):
+    """Upload a file for lipsync processing."""
+    try:
+        # Validate file type
+        if file_type not in ["video", "audio"]:
+            raise HTTPException(status_code=400, detail="file_type must be either 'video' or 'audio'")
+        
+        # Save the file temporarily
+        temp_path = f"/tmp/{file.filename}"
+        with open(temp_path, "wb") as buffer:
+            content = await file.read()
+            buffer.write(content)
+        
+        # Upload the file using the service
+        url = await lipsync_service.upload_file(temp_path)
+        
+        # Return the URL
+        return {
+            "url": url,
+            "filename": file.filename,
+            "file_type": file_type
+        }
+        
+    except Exception as e:
+        logger.error(f"Error uploading file: {str(e)}")
+        raise HTTPException(status_code=500, detail=str(e))
+
+
+@router.get(
+    "/examples",
+    response_model=LipsyncDocumentationExample,
+    summary="Get example requests for lipsync generation",
+    description="Provides example payload formats for the lipsync generation endpoint"
+)
+async def get_examples():
+    """Get example requests for lipsync generation."""
+    return LipsyncDocumentationExample() 
