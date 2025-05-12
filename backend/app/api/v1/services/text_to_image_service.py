@@ -277,3 +277,41 @@ class TextToImageService:
                 "timestamp": int(time.time())
             }
     
+    async def generate_avatar(
+        self,
+        gender: Optional[str] = None,
+        age: Optional[str] = None,
+        ethnicity: Optional[str] = None,
+        expression: Optional[str] = None,
+        output_dir: Optional[str] = None,
+        **kwargs
+    ) -> Dict[str, Any]:
+        """
+        Convenience method to generate an avatar with specific characteristics.
+        
+        Args:
+            gender: Gender of the avatar
+            age: Age of the avatar
+            ethnicity: Ethnicity of the avatar
+            expression: Expression of the avatar
+            output_dir: Directory to save the generated avatar
+            **kwargs: Additional parameters for the avatar builder
+            
+        Returns:
+            Dictionary containing the avatar image data, URLs, and paths
+        """
+        # Prepare avatar parameters
+        params = {
+            "gender": gender,
+            "age": age,
+            "ethnicity": ethnicity,
+            "expression": expression,
+            **kwargs
+        }
+        
+        # Filter out None values
+        params = {k: v for k, v in params.items() if v is not None}
+        
+        # Generate the avatar
+        return await self.generate_image(params=params, output_dir=output_dir)
+    
