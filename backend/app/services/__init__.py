@@ -6,6 +6,9 @@ This package re-exports services from versioned packages for backward compatibil
 # Text-to-Image service (re-export from v1)
 from app.api.v1.services.text_to_image_service import text_to_image_service, TextToImageService
 
+# Text-to-Speech service (re-export from v1)
+from app.api.v1.services.text_to_speech_service import text_to_speech_service, TextToSpeechService
+
 # Legacy services (re-export from v0)
 from app.api.v0.services import (
     generate_idea,
@@ -21,6 +24,10 @@ __all__ = [
     # Text-to-Image services
     "text_to_image_service",
     "TextToImageService",
+    
+    # Text-to-Speech services
+    "text_to_speech_service",
+    "TextToSpeechService",
     
     # Legacy services
     "generate_idea",
