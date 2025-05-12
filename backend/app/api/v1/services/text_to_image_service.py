@@ -315,3 +315,23 @@ class TextToImageService:
         # Generate the avatar
         return await self.generate_image(params=params, output_dir=output_dir)
     
+    async def upload_image(self, image_path: str) -> str:
+        """
+        Upload an image to the fal.ai platform.
+        
+        Args:
+            image_path: Path to the image file to upload
+            
+        Returns:
+            URL of the uploaded image
+        """
+        try:
+            # Upload the image
+            upload_response = await fal_client.upload_file_async(image_path)
+            return upload_response
+        except Exception as e:
+            raise Exception(f"Error uploading image: {str(e)}")
+
+
+# Create a singleton instance of the service
+text_to_image_service = TextToImageService() 
