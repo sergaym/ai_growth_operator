@@ -189,3 +189,26 @@ async def generate_video_from_file(
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
 
+
+@router.get("/videos/{filename}", response_class=FileResponse, summary="Get generated video file")
+async def get_video_file(filename: str):
+    """
+    Get a generated video file by filename.
+    
+    Args:
+        filename: Name of the video file
+        
+    Returns:
+        Video file as a streaming response
+    """
+    video_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "videos")
+    file_path = os.path.join(video_dir, filename)
+    
+    if not os.path.exists(file_path):
+        raise HTTPException(status_code=404, detail="Video file not found")
+    
+    return FileResponse(
+        path=file_path,
+        media_type="video/mp4",
+        filename=filename
+    ) 
