@@ -77,6 +77,8 @@ class Settings(BaseSettings):
         """Pydantic configuration class."""
         case_sensitive = True
         env_file = ".env"
+        # Use json_schema_extra instead of schema_extra for Pydantic V2
+        json_schema_extra = {"title": "AI Growth Operator API Settings"}
 
 # Create global settings object
 settings = Settings() 
