@@ -18,6 +18,10 @@ from dotenv import load_dotenv
 # Import settings
 from app.core.config import settings
 
+# Import database components
+from app.db import get_db, video_repository, image_repository
+from app.db.blob_storage import upload_file, AssetType
+
 # Load environment variables
 load_dotenv()
 
@@ -119,7 +123,11 @@ class ImageToVideoService:
         aspect_ratio: str = DEFAULT_ASPECT_RATIO,
         negative_prompt: str = DEFAULT_NEGATIVE_PROMPT,
         cfg_scale: float = DEFAULT_CFG_SCALE,
-        save_video: bool = True
+        save_video: bool = True,
+        upload_to_blob: bool = True,
+        source_image_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate a video from an image.
@@ -134,6 +142,10 @@ class ImageToVideoService:
             negative_prompt: What to avoid in the video
             cfg_scale: How closely to follow the prompt (0.0-1.0)
             save_video: Whether to save the video to disk
+            upload_to_blob: Whether to upload the video to blob storage
+            source_image_id: Optional ID of image from database to link to this video
+            user_id: Optional user ID to associate with the video
+            workspace_id: Optional workspace ID to associate with the video
             
         Returns:
             Dictionary containing the video generation results
@@ -211,6 +223,7 @@ class ImageToVideoService:
             
             # Save the video if requested and URL is available
             video_path = None
+            blob_url = None
             if "video" in result and "url" in result["video"]:
                 video_url = result["video"]["url"]
                 response["video_url"] = video_url
@@ -231,12 +244,80 @@ class ImageToVideoService:
                         # Add file path to response
                         response["video_path"] = str(video_path)
                         response["local_video_url"] = f"file://{video_path}"
+                        
+                        # Upload to blob storage if requested
+                        if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
+                            try:
+                                with open(video_path, "rb") as video_file:
+                                    blob_result = await upload_file(
+                                        file_content=video_file.read(),
+                                        asset_type=AssetType.VIDEOS,
+                                        filename=video_filename,
+                                        content_type="video/mp4"
+                                    )
+                                blob_url = blob_result.get("url")
+                                response["blob_url"] = blob_url
+                                print(f"Uploaded video to blob storage: {blob_url}")
+                            except Exception as e:
+                                print(f"Error uploading to blob storage: {str(e)}")
                     else:
                         print(f"Failed to download video: HTTP {download_response.status_code}")
             
             # Include the preview image if available
+            preview_image_url = None
             if "preview_image" in result and "url" in result["preview_image"]:
-                response["preview_image_url"] = result["preview_image"]["url"]
+                preview_image_url = result["preview_image"]["url"]
+                response["preview_image_url"] = preview_image_url
+            
+            # Save to database
+            try:
+                # Try to find source image record if ID provided
+                source_image = None
+                if source_image_id:
+                    db = next(get_db())
+                    source_image = image_repository.get_by_id(source_image_id, db)
+                
+                # Prepare database data
+                db_data = {
+                    "prompt": prompt,
+                    "duration": duration,
+                    "aspect_ratio": aspect_ratio,
+                    "cfg_scale": cfg_scale,
+                    "preview_image_url": preview_image_url,
+                    "status": "completed",
+                    "metadata": {
+                        "arguments": arguments,
+                        "result": result
+                    }
+                }
+                
+                # Add file paths/URLs if available
+                if video_path:
+                    db_data["file_path"] = video_path
+                    db_data["local_url"] = f"file://{video_path}"
+                if video_url:
+                    db_data["file_url"] = video_url
+                if blob_url:
+                    db_data["blob_url"] = blob_url
+                
+                # Link to source image if available
+                if source_image:
+                    db_data["source_image_id"] = source_image.id
+                
+                # Add user and workspace IDs if provided
+                if user_id:
+                    db_data["user_id"] = user_id
+                if workspace_id:
+                    db_data["workspace_id"] = workspace_id
+                
+                # Save to database
+                db = next(get_db())
+                db_video = video_repository.create(db_data, db)
+                
+                if db_video:
+                    response["db_id"] = db_video.id
+            except Exception as e:
+                print(f"Error saving to database: {str(e)}")
             
             return response
             
@@ -244,13 +325,46 @@ class ImageToVideoService:
             error_message = str(e)
             print(f"Error generating video: {error_message}")
             
-            return {
+            error_data = {
                 "request_id": request_id,
                 "prompt": prompt,
                 "status": "error",
                 "error": error_message,
                 "timestamp": timestamp
             }
+            
+            # Try to save the error to database for tracking
+            try:
+                db = next(get_db())
+                error_db_data = {
+                    "prompt": prompt,
+                    "duration": duration,
+                    "aspect_ratio": aspect_ratio,
+                    "cfg_scale": cfg_scale,
+                    "status": "error",
+                    "metadata": {
+                        "error": error_message,
+                        "arguments": arguments
+                    }
+                }
+                
+                # Link to source image if available
+                if source_image_id:
+                    error_db_data["source_image_id"] = source_image_id
+                
+                # Add user and workspace IDs if provided
+                if user_id:
+                    error_db_data["user_id"] = user_id
+                if workspace_id:
+                    error_db_data["workspace_id"] = workspace_id
+                
+                db_video = video_repository.create(error_db_data, db)
+                if db_video:
+                    error_data["db_id"] = db_video.id
+            except Exception as db_error:
+                print(f"Error saving failed request to database: {str(db_error)}")
+            
+            return error_data
 
 
 # Create a singleton instance of the service

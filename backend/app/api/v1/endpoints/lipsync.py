@@ -17,7 +17,7 @@ from app.api.v1.schemas import (
 )
 
 # Import services
-from app.api.v1.services import lipsync_service
+from app.services import lipsync_service
 
 # Setup router
 router = APIRouter()

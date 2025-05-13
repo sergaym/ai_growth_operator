@@ -14,7 +14,7 @@ from app.api.v1.schemas import (
     UploadImageResponse,
     ImageGenerationResponse,
 )
-from app.api.v1.services.text_to_image_service import text_to_image_service
+from app.services.text_to_image_service import text_to_image_service
 
 # Create router for text-to-image endpoints
 router = APIRouter()

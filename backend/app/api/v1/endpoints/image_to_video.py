@@ -15,7 +15,7 @@ from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoFromBase64Request,
     VideoGenerationResponse
 )
-from app.api.v1.services.image_to_video_service import image_to_video_service
+from app.services.image_to_video_service import image_to_video_service
 
 router = APIRouter()
 

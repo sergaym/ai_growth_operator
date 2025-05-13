@@ -1,47 +1,38 @@
-# Services Package
+# API v1 Services
 
-This directory contains service integrations with external APIs for the AI Growth Operator.
+This directory contains services for version 1 of the AI Growth Operator API.
 
-## Versioned Services
+## Current Services
 
-We've organized our services into versioned packages:
+Version 1 of the API currently focuses on Text-to-Image generation:
 
-- **v0**: Legacy services (idea generation, marketing, video generation, styles)
-- **v1**: Current generation services (text-to-image generation)
+- `text_to_image_service.py`: Service for generating images from text prompts
+  - `TextToImageService`: Class for interacting with the fal.ai API
+  - `text_to_image_service`: Singleton instance of the TextToImageService class
 
-## Root-Level Re-exports
+## Usage
 
-For backward compatibility, this package re-exports:
+When working with v1 endpoints, import services from this package:
 
-1. All v1 services (text-to-image)
-2. All v0 services (legacy)
+```python
+from app.api.v1.services import text_to_image_service
+```
 
-## Usage Guidelines
+## Adding New Services
 
-For new development:
+When adding new services to v1:
 
-- **For v1 features**: Import directly from the versioned package
-  ```python
-  from app.api.v1.services import text_to_image_service
-  ```
+1. Create a new file for the service (e.g., `image_editing_service.py`)
+2. Define the service class and/or functions
+3. Export the service in the `__init__.py` file
+4. Update documentation as needed
 
-- **For legacy features**: Import from the v0 package
-  ```python
-  from app.api.v0.services import generate_idea, refine_idea
-  ```
+## Service Design Principles
 
-- **For backward compatibility**: Import from this package
-  ```python
-  from app.services import text_to_image_service, generate_idea
-  ```
+When designing new services:
 
-## Implementation Note
-
-This package contains no actual service implementations. All service code has been moved to the appropriate versioned packages:
-
-- Legacy services (v0): `app/api/v0/services/`
-- Current services (v1): `app/api/v1/services/`
-
-## Future Development
-
-New services should be developed in the appropriate versioned package (e.g., `app/api/v1/services/`) rather than in this root directory. 
+1. Use dependency injection where possible
+2. Create singleton instances for stateful services
+3. Use async/await for I/O-bound operations
+4. Handle errors gracefully and provide meaningful error messages
+5. Document all public methods and functions 
