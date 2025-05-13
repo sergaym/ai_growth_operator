@@ -17,6 +17,10 @@ from dotenv import load_dotenv
 # Import settings
 from app.core.config import settings
 
+# Import database components
+from app.db import get_db, image_repository
+from app.db.blob_storage import upload_file, AssetType
+
 # Load environment variables
 load_dotenv()
 
@@ -150,7 +154,10 @@ class TextToImageService:
         num_inference_steps: int = 50,
         guidance_scale: float = 7.5,
         output_dir: Optional[str] = None,
-        save_image: bool = True
+        save_image: bool = True,
+        upload_to_blob: bool = True,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate an image from a text prompt.
@@ -163,6 +170,9 @@ class TextToImageService:
             guidance_scale: Guidance scale for prompt adherence
             output_dir: Directory to save the generated image
             save_image: Whether to save the image to disk
+            upload_to_blob: Whether to upload the image to blob storage
+            user_id: Optional user ID to associate with the image
+            workspace_id: Optional workspace ID to associate with the image
             
         Returns:
             Dictionary containing the image data, URLs, and paths
@@ -203,6 +213,7 @@ class TextToImageService:
                 image_saved = False
                 image_urls = []
                 image_paths = []
+                blob_urls = []
                 
                 if save_image and output_dir:
                     # Create output directory if it doesn't exist
@@ -228,6 +239,19 @@ class TextToImageService:
                                 image_saved = True
                                 image_paths.append(str(filepath))
                                 image_urls.append(f"file://{filepath}")
+                                
+                                # Upload to blob storage if requested
+                                if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
+                                    try:
+                                        blob_result = await upload_file(
+                                            file_content=image_bytes,
+                                            asset_type=AssetType.IMAGES,
+                                            filename=filename,
+                                            content_type="image/png"
+                                        )
+                                        blob_urls.append(blob_result.get("url"))
+                                    except Exception as e:
+                                        print(f"Error uploading to blob storage: {str(e)}")
                             except Exception as e:
                                 print(f"Error saving image: {str(e)}")
                         
@@ -253,6 +277,19 @@ class TextToImageService:
                                     
                                     image_saved = True
                                     image_paths.append(str(filepath))
+                                    
+                                    # Upload to blob storage if requested
+                                    if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
+                                        try:
+                                            blob_result = await upload_file(
+                                                file_content=response_data.content,
+                                                asset_type=AssetType.IMAGES,
+                                                filename=filename,
+                                                content_type="image/png"
+                                            )
+                                            blob_urls.append(blob_result.get("url"))
+                                        except Exception as e:
+                                            print(f"Error uploading to blob storage: {str(e)}")
                             except Exception as e:
                                 print(f"Error downloading image: {str(e)}")
                 
@@ -261,21 +298,94 @@ class TextToImageService:
                     response["image_urls"] = image_urls
                 if image_paths:
                     response["image_paths"] = image_paths
+                if blob_urls:
+                    response["blob_urls"] = blob_urls
                 
                 # Add image saved status
                 response["image_saved"] = image_saved
+                
+                # Save to database
+                try:
+                    # Use first image for database storage
+                    db_data = {
+                        "prompt": prompt,
+                        "negative_prompt": negative_prompt,
+                        "guidance_scale": guidance_scale,
+                        "num_inference_steps": num_inference_steps,
+                        "status": "completed",
+                        "metadata": {
+                            "params": params,
+                            "result": result
+                        }
+                    }
+                    
+                    # Add file information if available
+                    if image_paths:
+                        db_data["file_path"] = image_paths[0]
+                    if image_urls:
+                        db_data["file_url"] = image_urls[0]
+                    if blob_urls:
+                        db_data["blob_url"] = blob_urls[0]
+                    
+                    # Add local URL if available
+                    if "file://" in str(image_urls[0]) if image_urls else "":
+                        db_data["local_url"] = image_urls[0]
+                    
+                    # Add user and workspace IDs if provided
+                    if user_id:
+                        db_data["user_id"] = user_id
+                    if workspace_id:
+                        db_data["workspace_id"] = workspace_id
+                    
+                    # Get a database session and save the image
+                    db = next(get_db())
+                    db_image = image_repository.create(db_data, db)
+                    
+                    if db_image:
+                        response["db_id"] = db_image.id
+                except Exception as e:
+                    print(f"Error saving to database: {str(e)}")
             
             return response
         
         except Exception as e:
             # Handle errors
-            return {
+            error_data = {
                 "request_id": request_id,
                 "prompt": prompt,
                 "status": "failed",
                 "error": str(e),
                 "timestamp": int(time.time())
             }
+            
+            # Try to save the error to database for tracking
+            try:
+                db = next(get_db())
+                error_db_data = {
+                    "prompt": prompt,
+                    "negative_prompt": negative_prompt,
+                    "guidance_scale": guidance_scale,
+                    "num_inference_steps": num_inference_steps,
+                    "status": "failed",
+                    "metadata": {
+                        "params": params,
+                        "error": str(e)
+                    }
+                }
+                
+                # Add user and workspace IDs if provided
+                if user_id:
+                    error_db_data["user_id"] = user_id
+                if workspace_id:
+                    error_db_data["workspace_id"] = workspace_id
+                
+                db_image = image_repository.create(error_db_data, db)
+                if db_image:
+                    error_data["db_id"] = db_image.id
+            except Exception as db_error:
+                print(f"Error saving failed request to database: {str(db_error)}")
+            
+            return error_data
     
     async def generate_avatar(
         self,
@@ -284,6 +394,8 @@ class TextToImageService:
         ethnicity: Optional[str] = None,
         expression: Optional[str] = None,
         output_dir: Optional[str] = None,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
         **kwargs
     ) -> Dict[str, Any]:
         """
@@ -295,6 +407,8 @@ class TextToImageService:
             ethnicity: Ethnicity of the avatar
             expression: Expression of the avatar
             output_dir: Directory to save the generated avatar
+            user_id: Optional user ID to associate with the avatar
+            workspace_id: Optional workspace ID to associate with the avatar
             **kwargs: Additional parameters for the avatar builder
             
         Returns:
@@ -313,7 +427,12 @@ class TextToImageService:
         params = {k: v for k, v in params.items() if v is not None}
         
         # Generate the avatar
-        return await self.generate_image(params=params, output_dir=output_dir)
+        return await self.generate_image(
+            params=params, 
+            output_dir=output_dir,
+            user_id=user_id,
+            workspace_id=workspace_id
+        )
     
     async def upload_image(self, image_path: str) -> str:
         """
