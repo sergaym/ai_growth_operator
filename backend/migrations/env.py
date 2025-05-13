@@ -7,7 +7,7 @@ from alembic import context
 
 # Import Base and models
 from app.db.database import Base
-import app.models.video  # This imports the models to be included in migrations
+import app.models  # Import centralized models.py for migrations
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
