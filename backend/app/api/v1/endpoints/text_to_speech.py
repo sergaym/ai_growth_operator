@@ -14,7 +14,7 @@ from app.api.v1.schemas import (
     VoiceResponse,
     VoicesListResponse
 )
-from app.api.v1.services.text_to_speech_service import text_to_speech_service
+from app.services.text_to_speech_service import text_to_speech_service
 
 router = APIRouter()
 
