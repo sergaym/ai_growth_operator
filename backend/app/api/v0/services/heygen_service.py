@@ -8,8 +8,8 @@ import time
 import logging
 from typing import Dict, Any, List, Optional
 
-from app.repositories import create_heygen_avatar_video, update_heygen_avatar_video, get_heygen_avatar_videos
 from app.models import VideoStatus
+from app.db.repositories import create_heygen_avatar_video, update_heygen_avatar_video, get_heygen_avatar_videos
 
 # Configure logging
 logger = logging.getLogger(__name__)
