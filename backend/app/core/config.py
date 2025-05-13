@@ -3,10 +3,11 @@ Configuration settings for the AI Growth Operator API.
 """
 
 import os
-from typing import Any, Dict, List, Optional, Union
+from typing import List, Optional, Union
 
 from pydantic import AnyHttpUrl, validator
 from pydantic_settings import BaseSettings
+
 
 class Settings(BaseSettings):
     """Application settings."""
@@ -40,6 +41,10 @@ class Settings(BaseSettings):
     
     # Database Configuration
     DATABASE_URL: Optional[str] = os.getenv("DATABASE_URL")
+    BLOB_READ_WRITE_TOKEN: Optional[str] = os.getenv("BLOB_READ_WRITE_TOKEN")
+    BLOB_STORAGE_ENDPOINT: Optional[str] = os.getenv("BLOB_STORAGE_ENDPOINT")
+    BLOB_STORAGE_BUCKET: str = os.getenv("BLOB_STORAGE_BUCKET")
+    BLOB_STORAGE_REGION: str = os.getenv("BLOB_STORAGE_REGION")
     
     @validator("DATABASE_URL", pre=True)
     def validate_database_url(cls, v: Optional[str]) -> Optional[str]:
@@ -72,6 +77,7 @@ class Settings(BaseSettings):
     def ensure_video_dir_exists(cls, v):
         os.makedirs(v, exist_ok=True)
         return v
+    
     
     class Config:
         """Pydantic configuration class."""
