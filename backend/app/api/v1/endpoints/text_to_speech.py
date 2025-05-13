@@ -14,7 +14,7 @@ from app.api.v1.schemas import (
     VoiceResponse,
     VoicesListResponse
 )
-from app.services.text_to_speech_service import text_to_speech_service
+from app.services.text_to_speech_service import text_to_speech_service, VOICE_PRESETS
 
 router = APIRouter()
 
@@ -61,7 +61,6 @@ async def list_voice_presets(language: str = Query("english", description="Langu
     Returns:
         Dictionary of preset names mapped to voice IDs.
     """
-    from app.api.v1.services.text_to_speech_service import VOICE_PRESETS
     
     language = language.lower()
     if language not in VOICE_PRESETS:
