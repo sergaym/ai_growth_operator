@@ -90,6 +90,11 @@ class LipsyncService:
             audio_path: Path to local audio file
             audio_url: URL to hosted audio
             save_result: Whether to save the result to disk
+            upload_to_blob: Whether to upload the result to blob storage
+            video_id: Optional ID of a video record to link
+            audio_id: Optional ID of an audio record to link
+            user_id: Optional user ID to associate with the lipsync video
+            workspace_id: Optional workspace ID to associate with the lipsync video
             
         Returns:
             Dictionary containing the lipsync results
@@ -97,6 +102,10 @@ class LipsyncService:
         # Validate input - need both video and audio
         if not ((video_path or video_url) and (audio_path or audio_url)):
             raise ValueError("Both video source (path or URL) and audio source (path or URL) must be provided")
+        
+        # Generate a unique ID for this request
+        request_id = str(uuid.uuid4())
+        timestamp = int(time.time())
         
         # Upload files if paths are provided but not URLs
         if video_path and not video_url:
@@ -110,10 +119,6 @@ class LipsyncService:
             print(f"Audio uploaded to: {audio_url}")
         
         print("Starting lipsync process...")
-        
-        # Generate a unique ID for this request
-        request_id = str(uuid.uuid4())
-        timestamp = int(time.time())
         
         try:
             # Prepare arguments for the API
