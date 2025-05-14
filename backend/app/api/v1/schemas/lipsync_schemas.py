@@ -54,7 +54,7 @@ class LipsyncRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "video_url": "https://example.com/video.mp4",
                 "audio_url": "https://example.com/audio.mp3",
@@ -75,7 +75,7 @@ class LipsyncResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if the request failed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                 "status": "completed",
