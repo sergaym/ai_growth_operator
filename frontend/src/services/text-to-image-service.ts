@@ -11,22 +11,58 @@ import type {
   UploadImageResponse,
   ImageGenerationResponse
 } from '@/types/text-to-image';
-import type { ApiResponse } from '@/types/api';
+import type { ApiResponse, AsyncApiResponse } from '@/types/api';
 
 /**
  * Generate an image from text prompt
  */
 export async function generateImage(request: GenerateImageRequest): Promise<ImageGenerationResponse> {
-  const response = await apiClient.post<ImageGenerationResponse>('/text-to-image/generate', request);
-  return mapTextToImageResponse(response);
+  try {
+    // Ensure upload_to_blob is set to true for the frontend
+    const requestWithBlob = {
+      ...request,
+      upload_to_blob: true
+    };
+    
+    const response = await apiClient.post<ImageGenerationResponse>('/text-to-image/generate', requestWithBlob);
+    return mapTextToImageResponse(response);
+  } catch (error) {
+    console.error('Error generating image:', error);
+    // Create error response that's compatible with ImageGenerationResponse
+    return {
+      request_id: 'error-' + Date.now(),
+      prompt: request.prompt || 'Unknown prompt',
+      status: 'failed',
+      timestamp: Date.now(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 }
 
 /**
  * Generate an avatar image
  */
 export async function generateAvatar(request: GenerateAvatarRequest): Promise<ImageGenerationResponse> {
-  const response = await apiClient.post<ImageGenerationResponse>('/text-to-image/avatar', request);
-  return mapTextToImageResponse(response);
+  try {
+    // Ensure upload_to_blob is set to true for the frontend
+    const requestWithBlob = {
+      ...request,
+      upload_to_blob: true
+    };
+    
+    const response = await apiClient.post<ImageGenerationResponse>('/text-to-image/avatar', requestWithBlob);
+    return mapTextToImageResponse(response);
+  } catch (error) {
+    console.error('Error generating avatar:', error);
+    // Create error response that's compatible with ImageGenerationResponse
+    return {
+      request_id: 'error-' + Date.now(),
+      prompt: request.custom_prompt || 'Avatar generation',
+      status: 'failed',
+      timestamp: Date.now(),
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
 }
 
 /**
