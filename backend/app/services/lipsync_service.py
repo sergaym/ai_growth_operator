@@ -17,6 +17,10 @@ from dotenv import load_dotenv
 # Import settings
 from app.core.config import settings
 
+# Import database components
+from app.db import get_db, lipsync_repository, video_repository, audio_repository
+from app.db.blob_storage import upload_file, AssetType
+
 # Load environment variables
 load_dotenv()
 
@@ -70,7 +74,12 @@ class LipsyncService:
         video_url: Optional[str] = None,
         audio_path: Optional[str] = None,
         audio_url: Optional[str] = None,
-        save_result: bool = True
+        save_result: bool = True,
+        upload_to_blob: bool = False,
+        video_id: Optional[str] = None,
+        audio_id: Optional[str] = None,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Synchronize audio with video.
