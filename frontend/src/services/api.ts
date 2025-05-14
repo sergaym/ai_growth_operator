@@ -8,6 +8,11 @@ import {
   DatabaseAvatarVideo
 } from "@/types/heygen";
 import { API_BASE_URL, HEYGEN_API } from "@/config/api";
+import type { ImageGenerationResponse } from '@/types/text-to-image';
+import type { SpeechGenerationResponse } from '@/types/text-to-speech';
+import type { VideoGenerationResponse } from '@/types/image-to-video';
+import type { LipsyncResponse, LipsyncRequest } from '@/types/lipsync';
+import type { ApiResponse } from '@/types/api';
 
 /**
  * Helper function for making API requests
@@ -130,25 +135,6 @@ export const heygenAPI = {
       throw error;
     }
   }
-};
-
-/**
- * API utility functions to handle response mapping and conversions
- */
-
-import type { ImageGenerationResponse } from './text-to-image-service';
-import type { SpeechGenerationResponse } from './text-to-speech-service';
-import type { VideoGenerationResponse } from './image-to-video-service';
-import type { LipsyncResponse, LipsyncRequest } from './lipsync-service';
-
-/**
- * Type for external API responses
- */
-export type ApiResponse<T> = {
-  data: T;
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
 };
 
 /**
