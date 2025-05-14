@@ -39,13 +39,19 @@ export function TextToImageDemo() {
         num_inference_steps: numInferenceSteps,
         guidance_scale: guidanceScale,
         save_image: true,
+        upload_to_blob: true, // Ensure blobs are created for display
       };
       
       const response = await generateImage(request);
+      
+      if (response.status === 'failed') {
+        throw new Error(response.error || 'Failed to generate image');
+      }
+      
       setResult(response);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'An error occurred');
       console.error('Image generation error:', err);
+      setError(err instanceof Error ? err.message : 'An error occurred during image generation');
     } finally {
       setLoading(false);
     }
