@@ -6,7 +6,8 @@
 "use client";
 
 import React, { useState } from 'react';
-import { generateImage, GenerateImageRequest, ImageGenerationResponse } from '@/services/text-to-image-service';
+import { generateImage } from '@/services';
+import type { GenerateImageRequest, ImageGenerationResponse } from '@/types/text-to-image';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Label } from '@/components/ui/label';
@@ -173,7 +174,7 @@ export function TextToImageDemo() {
             <p className="text-sm text-gray-500">Request ID: {result.request_id}</p>
             {result.blob_urls.length > 1 && (
               <div className="grid grid-cols-4 gap-2 w-full">
-                {result.blob_urls.map((url, i) => (
+                {result.blob_urls.map((url: string, i: number) => (
                   <div key={i} className="relative aspect-square overflow-hidden rounded-md border">
                     <Image
                       src={url}
