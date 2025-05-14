@@ -11,15 +11,31 @@ import type { ApiResponse } from '@/types/api';
 /**
  * Maps text-to-image response fields for compatibility with frontend
  */
-export function mapTextToImageResponse(response: ApiResponse<ImageGenerationResponse>): ImageGenerationResponse {
-  const data = response.data;
+export function mapTextToImageResponse(response: ApiResponse<ImageGenerationResponse> | ImageGenerationResponse): ImageGenerationResponse {
+  // Handle both ApiResponse objects and raw data objects
+  const data = 'data' in response ? response.data : response;
   
-  // Add blob_urls for frontend if not present but image_urls exists
-  if (data && !data.blob_urls && data.image_urls) {
-    data.blob_urls = data.image_urls;
+  // Make a copy to avoid modifying the original object
+  const mappedData = { ...data };
+  
+  // Ensure blob_urls exists (necessary for the demo component)
+  if (!mappedData.blob_urls) {
+    // Try to use image_urls if available
+    if (mappedData.image_urls && mappedData.image_urls.length > 0) {
+      mappedData.blob_urls = mappedData.image_urls;
+    } 
+    // If no image_urls but we have a single image_data, create blob_urls with it
+    else if (mappedData.image_data && !mappedData.blob_urls) {
+      mappedData.blob_urls = [mappedData.image_data];
+    }
   }
   
-  return data;
+  // Set default status if missing
+  if (!mappedData.status) {
+    mappedData.status = 'completed';
+  }
+  
+  return mappedData;
 }
 
 /**
