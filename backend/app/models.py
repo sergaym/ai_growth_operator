@@ -7,7 +7,7 @@ This file contains all SQLAlchemy ORM models for the application database.
 import enum
 import uuid
 from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, DateTime, Text, JSON, ForeignKey, Boolean
+from sqlalchemy import Column, String, Integer, Float, DateTime, Text, JSON, ForeignKey, Boolean, Table
 from sqlalchemy.orm import relationship
 
 from app.db.database import Base
@@ -243,3 +243,37 @@ class HeygenAvatarVideo(Base):
     def __repr__(self):
         """String representation of the Heygen avatar video."""
         return f"<HeygenAvatarVideo {self.id}: {self.avatar_id}>" 
+
+# ----------------
+# User and Workspace Models
+# ----------------
+class Workspace(Base):
+    __tablename__ = "workspaces"
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    type = Column(String(50), nullable=False)
+    users = relationship("User", back_populates="workspaces", secondary="user_workspaces")
+
+    def __repr__(self):
+        return f"<Workspace {self.id}: {self.name}>"
+
+class User(Base):
+    __tablename__ = "users"
+    id = Column(Integer, primary_key=True, index=True)
+    first_name = Column(String(100), nullable=False)
+    last_name = Column(String(100), nullable=False)
+    email = Column(String(255), unique=True, nullable=False, index=True)
+    password = Column(String(255), nullable=False)
+    role = Column(String(50), nullable=True)
+    workspaces = relationship("Workspace", back_populates="users", secondary="user_workspaces")
+
+    def __repr__(self):
+        return f"<User {self.id}: {self.email}>"
+
+# Association table for many-to-many relationship between users and workspaces
+user_workspaces = Table(
+    "user_workspaces",
+    Base.metadata,
+    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
+    Column("workspace_id", Integer, ForeignKey("workspaces.id"), primary_key=True)
+)

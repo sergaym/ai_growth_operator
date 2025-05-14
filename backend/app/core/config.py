@@ -18,6 +18,12 @@ class Settings(BaseSettings):
     PROJECT_VERSION: str = "1.0.0"
     PROJECT_DESCRIPTION: str = "Backend API for AI-powered marketing campaign generation"
     
+    # Security / Auth
+    SECRET_KEY: Optional[str] = os.getenv("SECRET_KEY")
+    ALGORITHM: Optional[str] = os.getenv("ALGORITHM")
+    ACCESS_TOKEN_EXPIRE_MINUTES: Optional[int] = int(os.getenv("ACCESS_TOKEN_EXPIRE_MINUTES", 30))
+    REFRESH_TOKEN_EXPIRE_DAYS: Optional[int] = int(os.getenv("REFRESH_TOKEN_EXPIRE_DAYS", 7))
+    
     # CORS Configuration
     BACKEND_CORS_ORIGINS: List[Union[str, AnyHttpUrl]] = ["*"]
     
