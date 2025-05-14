@@ -10,4 +10,15 @@ export type ApiResponse<T> = {
   status: number;
   statusText: string;
   headers: Record<string, string>;
-}; 
+};
+
+/**
+ * Type for async API operations that need job status tracking
+ */
+export interface AsyncApiResponse<T> {
+  success: boolean;
+  data?: T;
+  error?: string;
+  message: string;
+  pending?: boolean;
+} 
