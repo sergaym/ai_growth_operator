@@ -20,6 +20,7 @@ from .text_to_speech_schemas import (
     SpeechGenerationResponse,
     VoiceResponse,
     VoicesListResponse,
+    JobStatusResponse,
 )
 
 from .image_to_video_schemas import (
@@ -53,6 +54,7 @@ __all__ = [
     "SpeechGenerationResponse",
     "VoiceResponse",
     "VoicesListResponse",
+    "JobStatusResponse",
     
     # Image-to-Video schemas
     "GenerateVideoRequest",
