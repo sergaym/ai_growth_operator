@@ -48,15 +48,130 @@ class ImageToVideoService:
         # Set the environment variable fal-client expects
         os.environ["FAL_KEY"] = self.api_key
         
-        # Create video directory if it doesn't exist
-        self.video_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "videos")
+        # Create directories if they don't exist
+        self.root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__)))))
+        self.video_dir = os.path.join(self.root_dir, "output", "videos")
+        self.image_dir = os.path.join(self.root_dir, "output", "images")
+        
         os.makedirs(self.video_dir, exist_ok=True)
+        os.makedirs(self.image_dir, exist_ok=True)
     
     def on_queue_update(self, update):
         """Process queue updates and logs."""
         if isinstance(update, fal_client.InProgress):
             for log in update.logs:
                 print(log["message"])
+    
+    async def create_image_record(
+        self, 
+        image_url: Optional[str] = None,
+        image_path: Optional[str] = None,
+        image_type: str = "source", 
+        prompt: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None
+    ) -> Dict[str, Any]:
+        """
+        Create a new image record in the database.
+        
+        Args:
+            image_url: URL of the image if available
+            image_path: Local path to the image if available
+            image_type: Type of image (source, generated, etc.)
+            prompt: Prompt used to generate or process the image
+            metadata: Additional metadata about the image
+            user_id: Optional user ID to associate with the image
+            workspace_id: Optional workspace ID to associate with the image
+            
+        Returns:
+            The created image record
+        """
+        try:
+            # Prepare the image data
+            image_data = {
+                "type": image_type,
+                "status": "processing",
+                "metadata": metadata or {}
+            }
+            
+            # Add optional fields if available
+            if image_url:
+                image_data["file_url"] = image_url
+            
+            if image_path:
+                image_data["file_path"] = image_path
+                image_data["local_url"] = f"file://{image_path}"
+            
+            if prompt:
+                image_data["prompt"] = prompt
+            
+            if user_id:
+                image_data["user_id"] = user_id
+                
+            if workspace_id:
+                image_data["workspace_id"] = workspace_id
+            
+            # Save to database
+            db = next(get_db())
+            db_image = image_repository.create(image_data, db)
+            
+            return db_image
+        except Exception as e:
+            print(f"Error creating image record: {str(e)}")
+            raise
+    
+    async def update_image_record(
+        self, 
+        image_id: str,
+        status: Optional[str] = None,
+        image_url: Optional[str] = None,
+        blob_url: Optional[str] = None,
+        metadata: Optional[Dict[str, Any]] = None
+    ) -> Dict[str, Any]:
+        """
+        Update an existing image record in the database.
+        
+        Args:
+            image_id: ID of the image record to update
+            status: New status if changed
+            image_url: URL of the image if available
+            blob_url: Blob storage URL if available
+            metadata: Additional metadata to merge
+            
+        Returns:
+            The updated image record
+        """
+        try:
+            # Prepare update data
+            update_data = {}
+            
+            if status:
+                update_data["status"] = status
+                
+            if image_url:
+                update_data["file_url"] = image_url
+                
+            if blob_url:
+                update_data["blob_url"] = blob_url
+            
+            # Handle metadata update (merge with existing)
+            if metadata:
+                db = next(get_db())
+                existing_image = image_repository.get_by_id(image_id, db)
+                if existing_image:
+                    existing_metadata = existing_image.metadata or {}
+                    updated_metadata = {**existing_metadata, **metadata}
+                    update_data["metadata"] = updated_metadata
+            
+            # Update the record
+            db = next(get_db())
+            updated_image = image_repository.update(image_id, update_data, db)
+            
+            return updated_image
+        except Exception as e:
+            print(f"Error updating image record: {str(e)}")
+            raise
     
     async def upload_image(self, image_path: str) -> str:
         """
@@ -76,7 +191,7 @@ class ImageToVideoService:
             print(f"Error uploading image: {str(e)}")
             raise ValueError(f"Failed to upload image: {str(e)}")
     
-    async def upload_base64_image(self, base64_data: str, filename: str = None) -> str:
+    async def upload_base64_image(self, base64_data: str, filename: str = None) -> (str, str):
         """
         Upload a base64-encoded image to the fal.ai service.
         
@@ -85,7 +200,7 @@ class ImageToVideoService:
             filename: Optional filename to use
             
         Returns:
-            URL of the uploaded image
+            Tuple of (URL of the uploaded image, local file path)
         """
         try:
             # Generate a temporary file name if not provided
@@ -98,17 +213,14 @@ class ImageToVideoService:
                 base64_data = base64_data.split(";base64,")[1]
             
             # Create a temporary file
-            temp_path = os.path.join(self.video_dir, filename)
+            temp_path = os.path.join(self.image_dir, filename)
             with open(temp_path, "wb") as f:
                 f.write(base64.b64decode(base64_data))
             
             # Upload the temporary file
             url = await self.upload_image(temp_path)
             
-            # Clean up the temporary file
-            os.remove(temp_path)
-            
-            return url
+            return url, temp_path
         except Exception as e:
             print(f"Error uploading base64 image: {str(e)}")
             raise ValueError(f"Failed to upload base64 image: {str(e)}")
@@ -154,20 +266,88 @@ class ImageToVideoService:
         if not image_path and not image_url and not image_base64:
             raise ValueError("Either image_path, image_url, or image_base64 must be provided")
         
+        # Generate a unique ID for this request and timestamp
+        request_id = str(uuid.uuid4())
+        timestamp = int(time.time())
+        local_image_path = None
+        
+        # Create source image record in the database if not provided
+        if not source_image_id:
+            try:
+                # Handle the different image input types
+                source_metadata = {
+                    "request_id": request_id,
+                    "timestamp": timestamp
+                }
+                
+                if image_url:
+                    # Create record for existing image URL
+                    source_image = await self.create_image_record(
+                        image_url=image_url,
+                        image_type="source",
+                        metadata=source_metadata,
+                        user_id=user_id,
+                        workspace_id=workspace_id
+                    )
+                    source_image_id = source_image.id
+                
+                elif image_path:
+                    # Create record for local file
+                    source_image = await self.create_image_record(
+                        image_path=image_path,
+                        image_type="source",
+                        metadata=source_metadata,
+                        user_id=user_id,
+                        workspace_id=workspace_id
+                    )
+                    source_image_id = source_image.id
+                    
+                elif image_base64:
+                    # Process base64 content later - we'll do this after upload
+                    pass
+                
+                print(f"Created source image record with ID: {source_image_id}")
+            except Exception as e:
+                print(f"Error creating source image record: {str(e)}")
+        
         # Use the image URL if provided, otherwise upload the image
         if not image_url:
             if image_path:
                 print(f"Uploading image from path: {image_path}")
                 image_url = await self.upload_image(image_path)
+                
+                # Update source image record with the URL if it exists
+                if source_image_id:
+                    await self.update_image_record(
+                        source_image_id,
+                        image_url=image_url,
+                        status="uploaded"
+                    )
+                    
             elif image_base64:
                 print("Uploading base64 image data")
-                image_url = await self.upload_base64_image(image_base64)
+                image_filename = f"source_{timestamp}_{request_id[:8]}.png"
+                image_url, local_image_path = await self.upload_base64_image(image_base64, image_filename)
+                
+                # Create source image record now that we have a path and URL
+                if not source_image_id:
+                    source_metadata = {
+                        "request_id": request_id,
+                        "timestamp": timestamp
+                    }
+                    
+                    source_image = await self.create_image_record(
+                        image_url=image_url,
+                        image_path=local_image_path,
+                        image_type="source",
+                        metadata=source_metadata,
+                        user_id=user_id,
+                        workspace_id=workspace_id
+                    )
+                    source_image_id = source_image.id
+                    print(f"Created source image record for base64 image with ID: {source_image_id}")
         
         print(f"Generating video from image with prompt: {prompt}")
-        
-        # Generate a unique ID for this request
-        request_id = str(uuid.uuid4())
-        timestamp = int(time.time())
         
         try:
             # Prepare arguments for the API
@@ -179,6 +359,23 @@ class ImageToVideoService:
                 "negative_prompt": negative_prompt,
                 "cfg_scale": cfg_scale
             }
+            
+            # Update the source image record with the generation parameters
+            if source_image_id:
+                generation_metadata = {
+                    "generation_parameters": {
+                        "prompt": prompt,
+                        "duration": duration,
+                        "aspect_ratio": aspect_ratio,
+                        "negative_prompt": negative_prompt,
+                        "cfg_scale": cfg_scale
+                    }
+                }
+                
+                await self.update_image_record(
+                    source_image_id,
+                    metadata=generation_metadata
+                )
             
             print("Submitting request to Kling API...")
             
@@ -221,12 +418,27 @@ class ImageToVideoService:
                 }
             }
             
+            # If we have a source image ID, include it in the response
+            if source_image_id:
+                response["source_image_id"] = source_image_id
+            
             # Save the video if requested and URL is available
             video_path = None
             blob_url = None
             if "video" in result and "url" in result["video"]:
                 video_url = result["video"]["url"]
                 response["video_url"] = video_url
+                
+                # Update source image record with the result
+                if source_image_id:
+                    await self.update_image_record(
+                        source_image_id,
+                        status="completed",
+                        metadata={
+                            "video_url": video_url,
+                            "processing_completed_at": int(time.time())
+                        }
+                    )
                 
                 # Save to disk if requested
                 if save_video:
@@ -245,6 +457,16 @@ class ImageToVideoService:
                         response["video_path"] = str(video_path)
                         response["local_video_url"] = f"file://{video_path}"
                         
+                        # Update source image with local video path
+                        if source_image_id:
+                            await self.update_image_record(
+                                source_image_id,
+                                metadata={
+                                    "video_path": video_path,
+                                    "local_video_url": f"file://{video_path}"
+                                }
+                            )
+                        
                         # Upload to blob storage if requested
                         if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
                             try:
@@ -258,6 +480,16 @@ class ImageToVideoService:
                                 blob_url = blob_result.get("url")
                                 response["blob_url"] = blob_url
                                 print(f"Uploaded video to blob storage: {blob_url}")
+                                
+                                # Update source image with blob URL
+                                if source_image_id:
+                                    await self.update_image_record(
+                                        source_image_id,
+                                        blob_url=blob_url,
+                                        metadata={
+                                            "video_blob_url": blob_url
+                                        }
+                                    )
                             except Exception as e:
                                 print(f"Error uploading to blob storage: {str(e)}")
                     else:
@@ -268,16 +500,46 @@ class ImageToVideoService:
             if "preview_image" in result and "url" in result["preview_image"]:
                 preview_image_url = result["preview_image"]["url"]
                 response["preview_image_url"] = preview_image_url
+                
+                # Create a preview image record linked to the source
+                if preview_image_url:
+                    try:
+                        preview_metadata = {
+                            "source_image_id": source_image_id,
+                            "video_request_id": request_id,
+                            "generation_parameters": {
+                                "prompt": prompt,
+                                "duration": duration,
+                                "aspect_ratio": aspect_ratio
+                            }
+                        }
+                        
+                        preview_image = await self.create_image_record(
+                            image_url=preview_image_url,
+                            image_type="preview",
+                            prompt=prompt,
+                            metadata=preview_metadata,
+                            user_id=user_id,
+                            workspace_id=workspace_id
+                        )
+                        
+                        response["preview_image_id"] = preview_image.id
+                        
+                        # Update source image with link to the preview
+                        if source_image_id:
+                            await self.update_image_record(
+                                source_image_id,
+                                metadata={
+                                    "preview_image_id": preview_image.id,
+                                    "preview_image_url": preview_image_url
+                                }
+                            )
+                    except Exception as e:
+                        print(f"Error creating preview image record: {str(e)}")
             
             # Save to database
             try:
-                # Try to find source image record if ID provided
-                source_image = None
-                if source_image_id:
-                    db = next(get_db())
-                    source_image = image_repository.get_by_id(source_image_id, db)
-                
-                # Prepare database data
+                # Prepare database data for video
                 db_data = {
                     "prompt": prompt,
                     "duration": duration,
@@ -287,7 +549,8 @@ class ImageToVideoService:
                     "status": "completed",
                     "metadata": {
                         "arguments": arguments,
-                        "result": result
+                        "result": result,
+                        "source_image_id": source_image_id
                     }
                 }
                 
@@ -301,8 +564,8 @@ class ImageToVideoService:
                     db_data["blob_url"] = blob_url
                 
                 # Link to source image if available
-                if source_image:
-                    db_data["source_image_id"] = source_image.id
+                if source_image_id:
+                    db_data["source_image_id"] = source_image_id
                 
                 # Add user and workspace IDs if provided
                 if user_id:
@@ -316,6 +579,15 @@ class ImageToVideoService:
                 
                 if db_video:
                     response["db_id"] = db_video.id
+                    
+                    # Update source image with video ID
+                    if source_image_id:
+                        await self.update_image_record(
+                            source_image_id,
+                            metadata={
+                                "output_video_id": db_video.id
+                            }
+                        )
             except Exception as e:
                 print(f"Error saving to database: {str(e)}")
             
@@ -325,6 +597,17 @@ class ImageToVideoService:
             error_message = str(e)
             print(f"Error generating video: {error_message}")
             
+            # Update source image with error status
+            if source_image_id:
+                await self.update_image_record(
+                    source_image_id,
+                    status="error",
+                    metadata={
+                        "error": error_message,
+                        "error_timestamp": int(time.time())
+                    }
+                )
+            
             error_data = {
                 "request_id": request_id,
                 "prompt": prompt,
@@ -332,6 +615,9 @@ class ImageToVideoService:
                 "error": error_message,
                 "timestamp": timestamp
             }
+            
+            if source_image_id:
+                error_data["source_image_id"] = source_image_id
             
             # Try to save the error to database for tracking
             try:
@@ -344,7 +630,8 @@ class ImageToVideoService:
                     "status": "error",
                     "metadata": {
                         "error": error_message,
-                        "arguments": arguments
+                        "arguments": arguments,
+                        "source_image_id": source_image_id
                     }
                 }
                 

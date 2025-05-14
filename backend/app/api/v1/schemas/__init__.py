@@ -14,10 +14,13 @@ from .text_to_image_schemas import (
 
 from .text_to_speech_schemas import (
     VoiceSettings,
+    Language,
+    VoicePreset,
     GenerateSpeechRequest,
     SpeechGenerationResponse,
     VoiceResponse,
     VoicesListResponse,
+    JobStatusResponse,
 )
 
 from .image_to_video_schemas import (
@@ -45,10 +48,13 @@ __all__ = [
     
     # Text-to-Speech schemas
     "VoiceSettings",
+    "Language",
+    "VoicePreset",
     "GenerateSpeechRequest",
     "SpeechGenerationResponse",
     "VoiceResponse",
     "VoicesListResponse",
+    "JobStatusResponse",
     
     # Image-to-Video schemas
     "GenerateVideoRequest",

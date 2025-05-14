@@ -4,7 +4,10 @@ These endpoints handle video generation from images.
 """
 
 import os
-from typing import Optional
+import uuid
+import json
+import time
+from typing import Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Query, BackgroundTasks
 from fastapi.responses import FileResponse
@@ -16,123 +19,261 @@ from app.api.v1.schemas.image_to_video_schemas import (
     VideoGenerationResponse
 )
 from app.services.image_to_video_service import image_to_video_service
+from app.db import get_db
 
 router = APIRouter()
 
+# In-memory job store - in production, use Redis or a database
+# Maps job_id to status information
+job_store = {}
 
-@router.post("/generate", response_model=VideoGenerationResponse, summary="Generate video from an image")
-async def generate_video(request: GenerateVideoRequest):
+
+# Background task function to process video generation
+async def process_video_generation(
+    job_id: str,
+    image_url: Optional[str] = None,
+    image_base64: Optional[str] = None,
+    image_path: Optional[str] = None,
+    prompt: str = "Realistic, cinematic movement, high quality",
+    duration: str = "5",
+    aspect_ratio: str = "16:9",
+    negative_prompt: str = "blur, distort, and low quality",
+    cfg_scale: float = 0.5,
+    save_video: bool = True,
+    upload_to_blob: bool = True,
+    source_image_id: Optional[str] = None,
+    user_id: Optional[str] = None,
+    workspace_id: Optional[str] = None
+):
+    """Process video generation in the background."""
+    try:
+        # Set job status to processing
+        job_store[job_id]["status"] = "processing"
+        job_store[job_id]["updated_at"] = time.time()
+        
+        # Process the video generation
+        result = await image_to_video_service.generate_video(
+            image_url=image_url,
+            image_base64=image_base64,
+            image_path=image_path,
+            prompt=prompt,
+            duration=duration,
+            aspect_ratio=aspect_ratio,
+            negative_prompt=negative_prompt,
+            cfg_scale=cfg_scale,
+            save_video=save_video,
+            upload_to_blob=upload_to_blob,
+            source_image_id=source_image_id,
+            user_id=user_id,
+            workspace_id=workspace_id
+        )
+        
+        # Update job status with result
+        job_store[job_id]["status"] = "completed" if result.get("status") != "error" else "error"
+        job_store[job_id]["result"] = result
+        job_store[job_id]["updated_at"] = time.time()
+        
+    except Exception as e:
+        # Handle any exceptions
+        job_store[job_id]["status"] = "error"
+        job_store[job_id]["error"] = str(e)
+        job_store[job_id]["updated_at"] = time.time()
+
+
+@router.post("/generate", response_model=Dict[str, Any], summary="Generate video from an image")
+async def generate_video(request: GenerateVideoRequest, background_tasks: BackgroundTasks):
     """
     Generate a video from an image using either an image URL or base64-encoded image data.
     
+    This endpoint immediately returns a job ID and processes the video generation in the background.
+    Use the /status/{job_id} endpoint to check the status of the job.
+    
     Args:
         request: Request model containing image source and video generation parameters
+        background_tasks: FastAPI background tasks
         
     Returns:
-        Response with details of the generated video
+        Dictionary with job ID and initial status
     """
     # Check that at least one image source is provided
-    if not request.image_url and not request.image_base64:
+    if not request.image_url and not request.image_base64 and not request.image_path:
         raise HTTPException(
             status_code=400,
-            detail="Either image_url or image_base64 must be provided"
+            detail="Either image_url or image_base64 or image_path must be provided"
         )
     
-    try:
-        result = await image_to_video_service.generate_video(
-            image_url=request.image_url,
-            image_base64=request.image_base64,
-            prompt=request.prompt,
-            duration=request.duration,
-            aspect_ratio=request.aspect_ratio,
-            negative_prompt=request.negative_prompt,
-            cfg_scale=request.cfg_scale,
-            save_video=request.save_video
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["error"])
-        
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
+    # Generate a unique job ID
+    job_id = str(uuid.uuid4())
+    
+    # Create a job record
+    job_store[job_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "updated_at": time.time(),
+        "request": {
+            "image_url": request.image_url,
+            "image_base64": "(base64 data)" if request.image_base64 else None,
+            "image_path": request.image_path,
+            "prompt": request.prompt,
+            "duration": request.duration,
+            "aspect_ratio": request.aspect_ratio
+        }
+    }
+    
+    # Add the task to the background tasks
+    background_tasks.add_task(
+        process_video_generation,
+        job_id=job_id,
+        image_url=request.image_url,
+        image_base64=request.image_base64,
+        image_path=request.image_path,
+        prompt=request.prompt,
+        duration=request.duration,
+        aspect_ratio=request.aspect_ratio,
+        negative_prompt=request.negative_prompt,
+        cfg_scale=request.cfg_scale,
+        save_video=request.save_video,
+        upload_to_blob=request.upload_to_blob,
+        source_image_id=request.source_image_id,
+        user_id=request.user_id,
+        workspace_id=request.workspace_id
+    )
+    
+    # Return the job ID and status to the client
+    return {
+        "job_id": job_id,
+        "status": "pending",
+        "message": "Video generation started. Use /status/{job_id} to check status."
+    }
 
 
-@router.post("/from-url", response_model=VideoGenerationResponse, summary="Generate video from an image URL")
-async def generate_video_from_url(request: GenerateVideoFromUrlRequest):
+@router.post("/from-url", response_model=Dict[str, Any], summary="Generate video from an image URL")
+async def generate_video_from_url(request: GenerateVideoFromUrlRequest, background_tasks: BackgroundTasks):
     """
     Generate a video from an image URL.
     
+    This endpoint immediately returns a job ID and processes the video generation in the background.
+    Use the /status/{job_id} endpoint to check the status of the job.
+    
     Args:
         request: Request model containing image URL and video generation parameters
+        background_tasks: FastAPI background tasks
         
     Returns:
-        Response with details of the generated video
+        Dictionary with job ID and initial status
     """
-    try:
-        result = await image_to_video_service.generate_video(
-            image_url=request.image_url,
-            prompt=request.prompt,
-            duration=request.duration,
-            aspect_ratio=request.aspect_ratio,
-            negative_prompt=request.negative_prompt,
-            cfg_scale=request.cfg_scale
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["error"])
-        
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
+    # Generate a unique job ID
+    job_id = str(uuid.uuid4())
+    
+    # Create a job record
+    job_store[job_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "updated_at": time.time(),
+        "request": {
+            "image_url": request.image_url,
+            "prompt": request.prompt,
+            "duration": request.duration,
+            "aspect_ratio": request.aspect_ratio
+        }
+    }
+    
+    # Add the task to the background tasks
+    background_tasks.add_task(
+        process_video_generation,
+        job_id=job_id,
+        image_url=request.image_url,
+        prompt=request.prompt,
+        duration=request.duration,
+        aspect_ratio=request.aspect_ratio,
+        negative_prompt=request.negative_prompt,
+        cfg_scale=request.cfg_scale,
+        save_video=request.save_video,
+        upload_to_blob=request.upload_to_blob,
+        user_id=request.user_id,
+        workspace_id=request.workspace_id
+    )
+    
+    # Return the job ID and status to the client
+    return {
+        "job_id": job_id,
+        "status": "pending",
+        "message": "Video generation started. Use /status/{job_id} to check status."
+    }
 
 
-@router.post("/from-base64", response_model=VideoGenerationResponse, summary="Generate video from base64 image data")
-async def generate_video_from_base64(request: GenerateVideoFromBase64Request):
+@router.post("/from-base64", response_model=Dict[str, Any], summary="Generate video from base64 image data")
+async def generate_video_from_base64(request: GenerateVideoFromBase64Request, background_tasks: BackgroundTasks):
     """
     Generate a video from base64-encoded image data.
     
+    This endpoint immediately returns a job ID and processes the video generation in the background.
+    Use the /status/{job_id} endpoint to check the status of the job.
+    
     Args:
         request: Request model containing base64 image data and video generation parameters
+        background_tasks: FastAPI background tasks
         
     Returns:
-        Response with details of the generated video
+        Dictionary with job ID and initial status
     """
-    try:
-        result = await image_to_video_service.generate_video(
-            image_base64=request.image_base64,
-            prompt=request.prompt,
-            duration=request.duration,
-            aspect_ratio=request.aspect_ratio,
-            negative_prompt=request.negative_prompt,
-            cfg_scale=request.cfg_scale
-        )
-        
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["error"])
-        
-        return result
-    except HTTPException:
-        raise
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
+    # Generate a unique job ID
+    job_id = str(uuid.uuid4())
+    
+    # Create a job record
+    job_store[job_id] = {
+        "status": "pending",
+        "created_at": time.time(),
+        "updated_at": time.time(),
+        "request": {
+            "image_base64": "(base64 data)",
+            "prompt": request.prompt,
+            "duration": request.duration,
+            "aspect_ratio": request.aspect_ratio
+        }
+    }
+    
+    # Add the task to the background tasks
+    background_tasks.add_task(
+        process_video_generation,
+        job_id=job_id,
+        image_base64=request.image_base64,
+        prompt=request.prompt,
+        duration=request.duration,
+        aspect_ratio=request.aspect_ratio,
+        negative_prompt=request.negative_prompt,
+        cfg_scale=request.cfg_scale,
+        save_video=request.save_video,
+        upload_to_blob=request.upload_to_blob,
+        user_id=request.user_id,
+        workspace_id=request.workspace_id
+    )
+    
+    # Return the job ID and status to the client
+    return {
+        "job_id": job_id,
+        "status": "pending",
+        "message": "Video generation started. Use /status/{job_id} to check status."
+    }
 
 
-@router.post("/from-file", response_model=VideoGenerationResponse, summary="Generate video from an uploaded image")
+@router.post("/from-file", response_model=Dict[str, Any], summary="Generate video from an uploaded image")
 async def generate_video_from_file(
+    background_tasks: BackgroundTasks,
     file: UploadFile = File(...),
     prompt: str = Form("Realistic, cinematic movement, high quality"),
     duration: str = Form("5"),
     aspect_ratio: str = Form("16:9"),
     negative_prompt: str = Form("blur, distort, and low quality"),
-    cfg_scale: float = Form(0.5)
+    cfg_scale: float = Form(0.5),
+    user_id: Optional[str] = Form(None),
+    workspace_id: Optional[str] = Form(None)
 ):
     """
     Generate a video from an uploaded image file.
+    
+    This endpoint immediately returns a job ID and processes the video generation in the background.
+    Use the /status/{job_id} endpoint to check the status of the job.
     
     Args:
         file: Uploaded image file
@@ -141,9 +282,10 @@ async def generate_video_from_file(
         aspect_ratio: Aspect ratio of the output video ('16:9', '9:16', '1:1')
         negative_prompt: What to avoid in the video
         cfg_scale: How closely to follow the prompt (0.0-1.0)
+        background_tasks: FastAPI background tasks
         
     Returns:
-        Response with details of the generated video
+        Dictionary with job ID and initial status
     """
     # Validate parameters
     if duration not in ["5", "10"]:
@@ -167,27 +309,84 @@ async def generate_video_from_file(
         with open(temp_path, "wb") as f:
             f.write(file_content)
         
-        # Generate the video
-        result = await image_to_video_service.generate_video(
+        # Generate a unique job ID
+        job_id = str(uuid.uuid4())
+        
+        # Create a job record
+        job_store[job_id] = {
+            "status": "pending",
+            "created_at": time.time(),
+            "updated_at": time.time(),
+            "request": {
+                "image_path": temp_path,
+                "prompt": prompt,
+                "duration": duration,
+                "aspect_ratio": aspect_ratio
+            }
+        }
+        
+        # Add the task to the background tasks
+        background_tasks.add_task(
+            process_video_generation,
+            job_id=job_id,
             image_path=temp_path,
             prompt=prompt,
             duration=duration,
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
-            cfg_scale=cfg_scale
+            cfg_scale=cfg_scale,
+            save_video=True,
+            upload_to_blob=True,
+            user_id=user_id,
+            workspace_id=workspace_id
         )
         
-        # Clean up the temporary file
-        os.remove(temp_path)
+        # Return the job ID and status to the client
+        return {
+            "job_id": job_id,
+            "status": "pending",
+            "message": "Video generation started. Use /status/{job_id} to check status."
+        }
         
-        if result["status"] == "error":
-            raise HTTPException(status_code=500, detail=result["error"])
-        
-        return result
     except HTTPException:
         raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to generate video: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to process image upload: {str(e)}")
+
+
+@router.get("/status/{job_id}", response_model=Dict[str, Any], summary="Get status of a video generation job")
+async def get_job_status(job_id: str):
+    """
+    Get the status of a video generation job.
+    
+    Args:
+        job_id: ID of the job to check
+        
+    Returns:
+        Dictionary with job status and result if completed
+    """
+    # Check if the job exists
+    if job_id not in job_store:
+        raise HTTPException(status_code=404, detail=f"Job with ID {job_id} not found")
+    
+    # Return the job status
+    job = job_store[job_id]
+    response = {
+        "job_id": job_id,
+        "status": job["status"],
+        "created_at": job["created_at"],
+        "updated_at": job["updated_at"],
+    }
+    
+    # Add result if available
+    if job["status"] == "completed" and "result" in job:
+        response["result"] = job["result"]
+    
+    # Add error if available
+    if job["status"] == "error" and "error" in job:
+        response["error"] = job["error"]
+    
+    return response
 
 
 @router.get("/videos/{filename}", response_class=FileResponse, summary="Get generated video file")

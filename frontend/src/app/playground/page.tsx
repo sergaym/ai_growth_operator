@@ -1,6 +1,6 @@
 "use client";
 import React, { useState, createElement } from "react";
-import { Card } from "@/components/ui/card";
+import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -131,6 +131,25 @@ export default function PlaygroundOverview() {
           </Button>
         </div>
       </div>
+
+      {/* Featured Card */}
+      <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
+        <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
+          <div className="mb-4 sm:mb-0">
+            <h3 className="text-xl font-semibold mb-2">API Playground</h3>
+            <p className="text-sm text-gray-500 max-w-md">
+              Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
+            </p>
+          </div>
+          <Button 
+            onClick={() => window.location.href = '/playground/api-demo'} 
+            variant="default" 
+            className="min-w-[120px]"
+          >
+            Try Now
+          </Button>
+        </CardContent>
+      </Card>
 
       {/* Project Grid */}
       {filteredProjects.length === 0 ? (
