@@ -81,7 +81,7 @@ class GenerateVideoRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "image_url": "https://example.com/images/portrait.jpg",
                 "prompt": "Realistic, cinematic movement, professional talking",
@@ -150,7 +150,7 @@ class GenerateVideoFromUrlRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "image_url": "https://example.com/images/portrait.jpg",
                 "prompt": "Realistic, cinematic movement, person talking",
@@ -215,7 +215,7 @@ class GenerateVideoFromBase64Request(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQE...",
                 "prompt": "Realistic, cinematic movement, person nodding",
@@ -250,7 +250,7 @@ class VideoGenerationResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if generation failed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                 "prompt": "Realistic, cinematic movement, high quality",
