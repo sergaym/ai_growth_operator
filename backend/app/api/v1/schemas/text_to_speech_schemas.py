@@ -97,6 +97,14 @@ class GenerateSpeechRequest(BaseModel):
         True,
         description="Whether to save the audio to a file"
     )
+    user_id: Optional[str] = Field(
+        None,
+        description="User ID to associate with this generation"
+    )
+    workspace_id: Optional[str] = Field(
+        None,
+        description="Workspace ID to associate with this generation"
+    )
     
     @validator('output_format')
     def validate_output_format(cls, v):
@@ -143,6 +151,36 @@ class SpeechGenerationResponse(BaseModel):
         }
 
 
+class JobStatusResponse(BaseModel):
+    """Response model for job status"""
+    job_id: str = Field(..., description="Unique ID for the job")
+    status: str = Field(..., description="Status of the job: pending, processing, completed, error")
+    created_at: float = Field(..., description="Unix timestamp when the job was created")
+    updated_at: float = Field(..., description="Unix timestamp when the job was last updated")
+    result: Optional[Dict[str, Any]] = Field(None, description="Result of the job if completed")
+    error: Optional[str] = Field(None, description="Error message if job failed")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "job_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "status": "completed",
+                "created_at": 1620000000,
+                "updated_at": 1620000060,
+                "result": {
+                    "audio_url": "file:///path/to/output/speech_123456.mp3",
+                    "text": "Hello, welcome to our platform. How can I help you today?",
+                    "voice_id": "EXAVITQu4vr4xnSDxMaL",
+                    "voice_name": "Bella",
+                    "model_id": "eleven_multilingual_v2",
+                    "status": "success",
+                    "timestamp": 1620000060,
+                    "request_id": "abc123"
+                }
+            }
+        }
+
+
 class VoiceResponse(BaseModel):
     """Response model for voice information"""
     voice_id: str = Field(..., description="Unique ID of the voice")
@@ -154,6 +192,9 @@ class VoiceResponse(BaseModel):
     age: Optional[str] = Field(None, description="Age category of the voice (if applicable)")
     accent: Optional[str] = Field(None, description="Accent of the voice (if applicable)")
     is_cloned: bool = Field(False, description="Whether the voice is a custom cloned voice")
+    category: Optional[str] = Field(None, description="Category of the voice (e.g., 'professional', 'generated')")
+    default_settings: Optional[Dict[str, Any]] = Field(None, description="Default voice settings")
+    labels: Optional[Dict[str, Any]] = Field(None, description="Additional voice labels and metadata")
     
     class Config:
         schema_extra = {
@@ -165,7 +206,14 @@ class VoiceResponse(BaseModel):
                 "languages": ["english"],
                 "gender": "female",
                 "age": "adult",
-                "accent": "american"
+                "accent": "american",
+                "category": "premade",
+                "default_settings": {
+                    "stability": 0.5,
+                    "similarity_boost": 0.75,
+                    "style": 0.0,
+                    "use_speaker_boost": True
+                }
             }
         }
 
