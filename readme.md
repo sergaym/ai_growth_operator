@@ -500,3 +500,5 @@ The process for creating custom avatars involves several steps:
    ```
 
 Once your custom avatar is created, you can use it in your video generation workflows just like any other HeyGen avatar.
+
+deploy
