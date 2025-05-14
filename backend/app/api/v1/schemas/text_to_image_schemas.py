@@ -21,7 +21,7 @@ class AvatarParameters(BaseModel):
     custom_prompt: Optional[str] = Field(None, description="Additional custom elements")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "gender": "female",
                 "age": "35",
@@ -61,7 +61,7 @@ class GenerateImageRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "prompt": "A hyperrealistic portrait of a professional woman with a friendly smile, suitable for a corporate website, high quality, 8k",
                 "negative_prompt": "deformed faces, unrealistic features, cartoon-like, low quality",
@@ -93,7 +93,7 @@ class GenerateAvatarRequest(BaseModel):
     workspace_id: Optional[str] = Field(None, description="Workspace ID to associate with the image")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "gender": "female",
                 "age": "35",
@@ -128,7 +128,7 @@ class ImageGenerationResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if generation failed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                 "prompt": "A hyperrealistic portrait of a professional woman with a friendly smile",
