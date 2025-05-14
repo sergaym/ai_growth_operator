@@ -1,52 +1,69 @@
-import { NextResponse } from 'next/server';
-import type { NextRequest } from 'next/server';
+import { NextRequest, NextResponse } from 'next/server';
 
-// Protected routes that require authentication
+// Define protected routes that require authentication
 const PROTECTED_ROUTES = [
   '/playground',
-  '/playground/(.*)' // Protect all routes under playground
+  '/playground/(.*)',
+  '/api/v1',
+];
+
+// Define public routes that don't need redirection
+const PUBLIC_ROUTES = [
+  '/login',
+  '/register',
+  '/reset-password',
+  '/api/auth',
 ];
 
 export function middleware(request: NextRequest) {
-  // Get the pathname of the request
   const { pathname } = request.nextUrl;
   
-  // Check if the route should be protected
-  const isProtectedRoute = PROTECTED_ROUTES.some(route => {
-    const regex = new RegExp(`^${route}$`);
-    return regex.test(pathname);
-  });
+  // Check if the route is protected
+  const isProtectedRoute = PROTECTED_ROUTES.some(route => 
+    pathname.startsWith(route)
+  );
   
-  // If this is a protected route, check for authentication
-  if (isProtectedRoute) {
-    // Get authentication token from cookie
-    const authToken = request.cookies.get('auth-token')?.value;
-    const isAuthenticated = !!authToken;
-    
-    // If not authenticated, redirect to login
-    if (!isAuthenticated) {
-      // Create login URL with callback to current page
-      const url = new URL('/login', request.url);
-      url.searchParams.set('callbackUrl', pathname);
-      
-      return NextResponse.redirect(url);
-    }
+  // Check if the route is a public route
+  const isPublicRoute = PUBLIC_ROUTES.some(route => 
+    pathname.startsWith(route)
+  );
+  
+  // Skip middleware for public routes
+  if (isPublicRoute) {
+    return NextResponse.next();
   }
   
-  // Continue with the request if authenticated or not a protected route
+  // Check for auth token in cookies for protected routes
+  const authToken = request.cookies.get('auth-token')?.value;
+  
+  if (isProtectedRoute && !authToken) {
+    // Redirect to login with callback URL
+    const url = new URL('/login', request.url);
+    url.searchParams.set('callbackUrl', pathname);
+    return NextResponse.redirect(url);
+  }
+  
+  // For API routes, handle authentication via header
+  if (pathname.startsWith('/api/') && isProtectedRoute) {
+    // Forward the auth token to the backend
+    const requestHeaders = new Headers(request.headers);
+    if (authToken) {
+      requestHeaders.set('Authorization', `Bearer ${authToken}`);
+    }
+    
+    return NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+  }
+  
   return NextResponse.next();
 }
 
-// Configure middleware to run on all routes
 export const config = {
   matcher: [
-    /*
-     * Match all request paths except for the ones starting with:
-     * - _next/static (static files)
-     * - _next/image (image optimization files)
-     * - favicon.ico (favicon file)
-     * - public files (public directory)
-     */
-    '/((?!_next/static|_next/image|favicon.ico|public).*)',
+    // Match all routes except for static files, favicons, etc.
+    '/((?!_next/static|_next/image|favicon.ico|.*\\.(?:jpg|jpeg|gif|png|svg)).*)',
   ],
 }; 
