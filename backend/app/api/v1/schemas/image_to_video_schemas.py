@@ -16,6 +16,10 @@ class GenerateVideoRequest(BaseModel):
         None, 
         description="Base64-encoded image data"
     )
+    image_path: Optional[str] = Field(
+        None,
+        description="Path to a local image file to animate"
+    )
     prompt: str = Field(
         "Realistic, cinematic movement, high quality", 
         description="Text description to guide the video generation"
@@ -42,6 +46,22 @@ class GenerateVideoRequest(BaseModel):
         True, 
         description="Whether to save the video to disk"
     )
+    upload_to_blob: bool = Field(
+        True,
+        description="Whether to upload the video to blob storage"
+    )
+    source_image_id: Optional[str] = Field(
+        None,
+        description="ID of a previously uploaded/generated image to use"
+    )
+    user_id: Optional[str] = Field(
+        None,
+        description="User ID to associate with the video"
+    )
+    workspace_id: Optional[str] = Field(
+        None,
+        description="Workspace ID to associate with the video"
+    )
     
     @validator('duration')
     def validate_duration(cls, v):
@@ -55,10 +75,24 @@ class GenerateVideoRequest(BaseModel):
             raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
         return v
     
-    @validator('image_url', 'image_base64', pre=True)
+    @validator('image_url', 'image_base64', 'image_path', 'source_image_id')
     def check_image_source(cls, v, values):
-        # This will be checked at the API level to ensure at least one is provided
+        # This validation will be checked at the API level to ensure at least one image source is provided
         return v
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "image_url": "https://example.com/images/portrait.jpg",
+                "prompt": "Realistic, cinematic movement, professional talking",
+                "duration": "5",
+                "aspect_ratio": "16:9",
+                "negative_prompt": "blur, distort, low quality",
+                "cfg_scale": 0.5,
+                "save_video": True,
+                "upload_to_blob": True
+            }
+        }
 
 
 class GenerateVideoFromUrlRequest(BaseModel):
@@ -86,6 +120,22 @@ class GenerateVideoFromUrlRequest(BaseModel):
         le=1.0, 
         description="How closely to follow the prompt (0.0-1.0)"
     )
+    save_video: bool = Field(
+        True, 
+        description="Whether to save the video to disk"
+    )
+    upload_to_blob: bool = Field(
+        True,
+        description="Whether to upload the video to blob storage"
+    )
+    user_id: Optional[str] = Field(
+        None,
+        description="User ID to associate with the video"
+    )
+    workspace_id: Optional[str] = Field(
+        None,
+        description="Workspace ID to associate with the video"
+    )
     
     @validator('duration')
     def validate_duration(cls, v):
@@ -98,6 +148,16 @@ class GenerateVideoFromUrlRequest(BaseModel):
         if v not in ["16:9", "9:16", "1:1"]:
             raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
         return v
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "image_url": "https://example.com/images/portrait.jpg",
+                "prompt": "Realistic, cinematic movement, person talking",
+                "duration": "5",
+                "aspect_ratio": "16:9"
+            }
+        }
 
 
 class GenerateVideoFromBase64Request(BaseModel):
@@ -125,6 +185,22 @@ class GenerateVideoFromBase64Request(BaseModel):
         le=1.0, 
         description="How closely to follow the prompt (0.0-1.0)"
     )
+    save_video: bool = Field(
+        True, 
+        description="Whether to save the video to disk"
+    )
+    upload_to_blob: bool = Field(
+        True,
+        description="Whether to upload the video to blob storage"
+    )
+    user_id: Optional[str] = Field(
+        None,
+        description="User ID to associate with the video"
+    )
+    workspace_id: Optional[str] = Field(
+        None,
+        description="Workspace ID to associate with the video"
+    )
     
     @validator('duration')
     def validate_duration(cls, v):
@@ -137,6 +213,16 @@ class GenerateVideoFromBase64Request(BaseModel):
         if v not in ["16:9", "9:16", "1:1"]:
             raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
         return v
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQE...",
+                "prompt": "Realistic, cinematic movement, person nodding",
+                "duration": "5",
+                "aspect_ratio": "16:9"
+            }
+        }
 
 
 class VideoGenerationParameters(BaseModel):
@@ -144,6 +230,8 @@ class VideoGenerationParameters(BaseModel):
     duration: str = Field(..., description="Video duration in seconds")
     aspect_ratio: str = Field(..., description="Aspect ratio of the video")
     cfg_scale: float = Field(..., description="How closely the prompt was followed")
+    prompt: str = Field(..., description="Text prompt used for generation")
+    negative_prompt: Optional[str] = Field(None, description="Negative prompt used")
 
 
 class VideoGenerationResponse(BaseModel):
@@ -153,7 +241,31 @@ class VideoGenerationResponse(BaseModel):
     status: str = Field(..., description="Status of the generation (completed/error)")
     timestamp: int = Field(..., description="Timestamp of the request")
     parameters: VideoGenerationParameters = Field(..., description="Parameters used for generation")
-    video_url: Optional[HttpUrl] = Field(None, description="URL to the generated video")
+    video_url: Optional[str] = Field(None, description="URL to the generated video")
     video_path: Optional[str] = Field(None, description="Local path to the saved video file")
-    preview_image_url: Optional[HttpUrl] = Field(None, description="URL to the preview image")
-    error: Optional[str] = Field(None, description="Error message if generation failed") 
+    preview_image_url: Optional[str] = Field(None, description="URL to the preview image")
+    blob_url: Optional[str] = Field(None, description="Blob storage URL to the video")
+    db_id: Optional[str] = Field(None, description="Database ID of the video record")
+    source_image_id: Optional[str] = Field(None, description="ID of the source image used")
+    error: Optional[str] = Field(None, description="Error message if generation failed")
+    
+    class Config:
+        schema_extra = {
+            "example": {
+                "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "prompt": "Realistic, cinematic movement, high quality",
+                "status": "completed",
+                "timestamp": 1620000000,
+                "parameters": {
+                    "duration": "5",
+                    "aspect_ratio": "16:9",
+                    "cfg_scale": 0.5,
+                    "prompt": "Realistic, cinematic movement, high quality",
+                    "negative_prompt": "blur, distort, and low quality"
+                },
+                "video_url": "https://example.com/videos/generated.mp4",
+                "preview_image_url": "https://example.com/videos/preview.jpg",
+                "blob_url": "https://example.blob.core.windows.net/videos/generated.mp4",
+                "db_id": "550e8400-e29b-41d4-a716-446655440000"
+            }
+        } 
