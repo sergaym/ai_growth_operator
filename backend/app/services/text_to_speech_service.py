@@ -17,6 +17,10 @@ from dotenv import load_dotenv
 # Import settings
 from app.core.config import settings
 
+# Import database components
+from app.db import get_db, audio_repository
+from app.db.blob_storage import upload_file, AssetType
+
 # Load environment variables
 load_dotenv()
 
@@ -161,7 +165,10 @@ class TextToSpeechService:
         model_id: str = "eleven_multilingual_v2",
         voice_settings: Optional[Dict[str, Any]] = None,
         output_format: str = "mp3",
-        save_to_file: bool = True
+        save_to_file: bool = True,
+        upload_to_blob: bool = False,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate speech from text using ElevenLabs API.
@@ -175,6 +182,9 @@ class TextToSpeechService:
             voice_settings: Custom voice settings
             output_format: Audio format to output
             save_to_file: Whether to save the audio to a file
+            upload_to_blob: Whether to upload the audio to blob storage
+            user_id: Optional user ID to associate with the audio
+            workspace_id: Optional workspace ID to associate with the audio
             
         Returns:
             Dictionary with response data
