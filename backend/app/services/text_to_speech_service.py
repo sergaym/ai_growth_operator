@@ -8,6 +8,7 @@ import time
 import uuid
 import asyncio
 import requests
+import json
 from pathlib import Path
 from typing import Dict, List, Any, Optional, Union
 from urllib.parse import urljoin
@@ -90,50 +91,92 @@ class TextToSpeechService:
     
     async def list_voices(self) -> List[Dict[str, Any]]:
         """
-        Get a list of available voices from ElevenLabs.
+        Get a list of all available voices from ElevenLabs.
         
         Returns:
             List of voice objects
         """
         try:
-            response = requests.get(urljoin(self.api_url, "voices"), headers=self.headers)
-            response.raise_for_status()
+            # Use v2 API for better voice listing
+            api_url = "https://api.elevenlabs.io/v2/voices"
+            all_voices = []
+            next_page_token = None
+            page_size = 100  # Maximum page size allowed by ElevenLabs
             
-            data = response.json()
-            voices = data.get("voices", [])
-            
-            # Enhance the response with additional metadata
-            for voice in voices:
-                # Add language info if available
-                if "labels" in voice and voice["labels"]:
-                    language = voice["labels"].get("language")
-                    if language:
-                        voice["languages"] = [language]
-                    
-                    # Add gender info if available
-                    gender = voice["labels"].get("gender")
-                    if gender:
-                        voice["gender"] = gender
-                    
-                    # Add age info if available
-                    age = voice["labels"].get("age")
-                    if age:
-                        voice["age"] = age
-                    
-                    # Add accent info if available
-                    accent = voice["labels"].get("accent")
-                    if accent:
-                        voice["accent"] = accent
+            # Make paginated requests until we get all voices
+            while True:
+                # Prepare query parameters for pagination
+                params = {
+                    "page_size": page_size,
+                    "include_total_count": True
+                }
                 
-                # Add preview URL if available
-                if "preview_url" in voice:
-                    voice["preview_url"] = voice["preview_url"]
+                # Add page token for subsequent requests
+                if next_page_token:
+                    params["next_page_token"] = next_page_token
                 
-                # Add description if available
-                if "description" in voice:
-                    voice["description"] = voice["description"]
+                # Make the API request
+                response = requests.get(
+                    api_url, 
+                    headers=self.headers,
+                    params=params
+                )
+                response.raise_for_status()
+                
+                data = response.json()
+                voices = data.get("voices", [])
+                all_voices.extend(voices)
+                
+                # Check if there are more pages
+                if not data.get("has_more", False):
+                    break
+                
+                # Get the next page token for the next request
+                next_page_token = data.get("next_page_token")
+                if not next_page_token:
+                    break
             
-            return voices
+            # Process and enhance voice data
+            enhanced_voices = []
+            for voice in all_voices:
+                enhanced_voice = {
+                    "voice_id": voice.get("voice_id"),
+                    "name": voice.get("name"),
+                    "description": voice.get("description", ""),
+                    "preview_url": voice.get("preview_url"),
+                    "category": voice.get("category", ""),
+                    "labels": {}
+                }
+                
+                # Extract labels if available
+                if "labels" in voice:
+                    enhanced_voice["labels"] = voice["labels"]
+                    
+                    # Add specific properties for convenience
+                    if "gender" in voice["labels"]:
+                        enhanced_voice["gender"] = voice["labels"]["gender"]
+                    
+                    if "accent" in voice["labels"]:
+                        enhanced_voice["accent"] = voice["labels"]["accent"]
+                    
+                    if "age" in voice["labels"]:
+                        enhanced_voice["age"] = voice["labels"]["age"]
+                
+                # Extract languages if available
+                if "verified_languages" in voice:
+                    languages = []
+                    for lang in voice.get("verified_languages", []):
+                        if "language" in lang:
+                            languages.append(lang["language"])
+                    enhanced_voice["languages"] = languages
+                
+                # Add default settings if available
+                if "settings" in voice:
+                    enhanced_voice["default_settings"] = voice["settings"]
+                
+                enhanced_voices.append(enhanced_voice)
+            
+            return enhanced_voices
             
         except Exception as e:
             print(f"Error getting voices: {str(e)}")
@@ -200,15 +243,21 @@ class TextToSpeechService:
                 # Fallback to English male_1 if no voice for the language
                 voice_id = VOICE_PRESETS["english"]["male_1"]
         
+        # Set default voice settings if not provided
+        if not voice_settings:
+            voice_settings = {
+                "stability": 0.5,
+                "similarity_boost": 0.75,
+                "style": 0.0,
+                "use_speaker_boost": True
+            }
+        
         # Prepare request data
         request_data = {
             "text": text,
             "model_id": model_id,
+            "voice_settings": voice_settings
         }
-        
-        # Add voice settings if provided
-        if voice_settings:
-            request_data["voice_settings"] = voice_settings
         
         # Generate a unique ID for this request
         request_id = str(uuid.uuid4())
@@ -225,25 +274,39 @@ class TextToSpeechService:
             file_name = f"speech_{timestamp}_{request_id[:8]}.{output_format}"
             file_path = os.path.join(self.audio_dir, file_name)
             
-            # Make the API request
-            tts_url = urljoin(self.api_url, f"text-to-speech/{voice_id}")
-            response = requests.post(tts_url, json=request_data, headers=headers)
+            # Make the API request - use /stream endpoint for getting audio content
+            tts_url = f"{self.api_url}text-to-speech/{voice_id}/stream"
+            
+            print(f"Generating speech with voice ID: {voice_id}")
+            print(f"URL: {tts_url}")
+            print(f"Text: {text[:100]}{'...' if len(text) > 100 else ''}")
+            
+            response = requests.post(
+                tts_url,
+                json=request_data,
+                headers=headers,
+                stream=True
+            )
             response.raise_for_status()
             
             # Save to file if requested
             if save_to_file:
                 with open(file_path, "wb") as f:
-                    f.write(response.content)
+                    for chunk in response.iter_content(chunk_size=1024):
+                        if chunk:
+                            f.write(chunk)
+                print(f"Speech generated and saved to: {file_path}")
                 
                 # Upload to blob storage if requested
                 if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
                     try:
-                        blob_result = await upload_file(
-                            file_content=response.content,
-                            asset_type=AssetType.AUDIO,
-                            filename=file_name,
-                            content_type=f"audio/{output_format}"
-                        )
+                        with open(file_path, "rb") as audio_file:
+                            blob_result = await upload_file(
+                                file_content=audio_file.read(),
+                                asset_type=AssetType.AUDIO,
+                                filename=file_name,
+                                content_type=f"audio/{output_format}"
+                            )
                         blob_url = blob_result.get("url")
                     except Exception as e:
                         print(f"Error uploading to blob storage: {str(e)}")
@@ -323,6 +386,16 @@ class TextToSpeechService:
         except Exception as e:
             error_message = str(e)
             print(f"Error generating speech: {error_message}")
+            
+            # Check for more detailed error information
+            if hasattr(e, 'response') and e.response is not None:
+                try:
+                    error_detail = e.response.json()
+                    print(f"API Error: {json.dumps(error_detail, indent=2)}")
+                    error_message = f"{error_message} - {error_detail.get('detail', '')}"
+                except:
+                    print(f"API Error Status Code: {e.response.status_code}")
+                    print(f"API Error Text: {e.response.text}")
             
             error_result = {
                 "status": "error",
