@@ -3,22 +3,14 @@
  * Uses Next.js native fetch capabilities
  */
 
+import type { ApiResponse } from '@/types/api';
+
 // Get the API base URL from environment variable with fallback
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
 const API_VERSION = 'v1';
 
 type RequestOptions = RequestInit & {
   params?: Record<string, string>;
-};
-
-/**
- * Type for API responses matching the expected structure in service layers
- */
-export type ApiResponse<T> = {
-  data: T;
-  status: number;
-  statusText: string;
-  headers: Record<string, string>;
 };
 
 // Helper function to get auth token from cookies
