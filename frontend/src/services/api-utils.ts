@@ -25,16 +25,17 @@ export function mapTextToImageResponse(response: ApiResponse<ImageGenerationResp
 /**
  * Maps text-to-speech response fields for compatibility with frontend
  */
-export function mapTextToSpeechResponse(response: ApiResponse<SpeechGenerationResponse>): SpeechGenerationResponse {
-  const data = response.data;
+export function mapTextToSpeechResponse(response: any): SpeechGenerationResponse {
+  // Handle both ApiResponse objects and raw data objects
+  const data = response.data ? response.data : response;
   
   // Add default status field for frontend components that might expect it
-  if (data && !data.status) {
+  if (!data.status) {
     data.status = 'completed';
   }
   
   // Map audio_url to blob_url for frontend components
-  if (data && data.audio_url && !data.blob_url) {
+  if (data.audio_url && !data.blob_url) {
     data.blob_url = data.audio_url;
   }
   
