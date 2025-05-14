@@ -16,6 +16,7 @@ from app.db.repositories import (
     image_repository, 
     video_repository, 
     audio_repository,
+    lipsync_repository,
     create_heygen_avatar_video,
     update_heygen_avatar_video,
     get_heygen_avatar_videos
@@ -46,6 +47,7 @@ __all__ = [
     "image_repository",
     "video_repository",
     "audio_repository",
+    "lipsync_repository",
     "create_heygen_avatar_video",
     "update_heygen_avatar_video",
     "get_heygen_avatar_videos"
