@@ -324,13 +324,50 @@ class TextToSpeechService:
             error_message = str(e)
             print(f"Error generating speech: {error_message}")
             
-            return {
+            error_result = {
                 "status": "error",
                 "error": error_message,
                 "text": text,
                 "voice_id": voice_id,
-                "model_id": model_id
+                "model_id": model_id,
+                "timestamp": timestamp,
+                "request_id": request_id
             }
+            
+            # Save error to database
+            try:
+                # Prepare error data for database
+                error_db_data = {
+                    "text": text,
+                    "voice_id": voice_id,
+                    "model_id": model_id,
+                    "language": language,
+                    "status": "failed",
+                    "metadata_json": {
+                        "error": error_message,
+                        "voice_settings": voice_settings,
+                        "timestamp": timestamp,
+                        "request_id": request_id
+                    }
+                }
+                
+                # Add user and workspace IDs if provided
+                if user_id:
+                    error_db_data["user_id"] = user_id
+                
+                if workspace_id:
+                    error_db_data["workspace_id"] = workspace_id
+                
+                # Get a database session and save the error
+                db = next(get_db())
+                db_audio = audio_repository.create(error_db_data, db)
+                
+                if db_audio:
+                    error_result["db_id"] = db_audio.id
+            except Exception as db_error:
+                print(f"Error saving failed request to database: {str(db_error)}")
+            
+            return error_result
 
 
 # Create a singleton instance of the service
