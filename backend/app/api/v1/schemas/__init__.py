@@ -14,6 +14,8 @@ from .text_to_image_schemas import (
 
 from .text_to_speech_schemas import (
     VoiceSettings,
+    Language,
+    VoicePreset,
     GenerateSpeechRequest,
     SpeechGenerationResponse,
     VoiceResponse,
@@ -45,6 +47,8 @@ __all__ = [
     
     # Text-to-Speech schemas
     "VoiceSettings",
+    "Language",
+    "VoicePreset",
     "GenerateSpeechRequest",
     "SpeechGenerationResponse",
     "VoiceResponse",
