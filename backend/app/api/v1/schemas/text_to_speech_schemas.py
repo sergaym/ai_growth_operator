@@ -33,7 +33,7 @@ class VoiceSettings(BaseModel):
     )
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "stability": 0.5,
                 "similarity_boost": 0.75,
@@ -113,7 +113,7 @@ class GenerateSpeechRequest(BaseModel):
         return v
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "text": "Hello, welcome to our platform. How can I help you today?",
                 "voice_preset": "female_1",
@@ -137,7 +137,7 @@ class SpeechGenerationResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if generation failed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "audio_url": "file:///path/to/output/speech_123456.mp3",
                 "text": "Hello, welcome to our platform. How can I help you today?",
@@ -161,7 +161,7 @@ class JobStatusResponse(BaseModel):
     error: Optional[str] = Field(None, description="Error message if job failed")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "job_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
                 "status": "completed",
@@ -197,7 +197,7 @@ class VoiceResponse(BaseModel):
     labels: Optional[Dict[str, Any]] = Field(None, description="Additional voice labels and metadata")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "voice_id": "EXAVITQu4vr4xnSDxMaL",
                 "name": "Bella",
@@ -223,7 +223,7 @@ class VoicesListResponse(BaseModel):
     voices: List[VoiceResponse] = Field(..., description="List of available voices")
     
     class Config:
-        schema_extra = {
+        json_schema_extra = {
             "example": {
                 "voices": [
                     {
