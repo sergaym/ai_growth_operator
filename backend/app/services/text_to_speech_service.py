@@ -210,14 +210,18 @@ class TextToSpeechService:
         if voice_settings:
             request_data["voice_settings"] = voice_settings
         
+        # Generate a unique ID for this request
+        request_id = str(uuid.uuid4())
+        timestamp = int(time.time())
+        file_path = None
+        blob_url = None
+        
         try:
             # Set headers for audio response
             headers = self.headers.copy()
             headers["Accept"] = "audio/mpeg" if output_format == "mp3" else "audio/wav"
             
             # Generate a unique filename
-            timestamp = int(time.time())
-            request_id = str(uuid.uuid4())
             file_name = f"speech_{timestamp}_{request_id[:8]}.{output_format}"
             file_path = os.path.join(self.audio_dir, file_name)
             
@@ -230,6 +234,19 @@ class TextToSpeechService:
             if save_to_file:
                 with open(file_path, "wb") as f:
                     f.write(response.content)
+                
+                # Upload to blob storage if requested
+                if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
+                    try:
+                        blob_result = await upload_file(
+                            file_content=response.content,
+                            asset_type=AssetType.AUDIO,
+                            filename=file_name,
+                            content_type=f"audio/{output_format}"
+                        )
+                        blob_url = blob_result.get("url")
+                    except Exception as e:
+                        print(f"Error uploading to blob storage: {str(e)}")
             
             # Get voice name for the response
             voice_name = None
@@ -255,6 +272,51 @@ class TextToSpeechService:
                 "timestamp": timestamp,
                 "request_id": request_id
             }
+            
+            if blob_url:
+                result["blob_url"] = blob_url
+            
+            # Save to database
+            try:
+                # Prepare data for database
+                db_data = {
+                    "text": text,
+                    "voice_id": voice_id,
+                    "voice_name": voice_name,
+                    "model_id": model_id,
+                    "language": language,
+                    "status": "completed",
+                    "audio_format": output_format,
+                    "metadata_json": {
+                        "voice_settings": voice_settings,
+                        "timestamp": timestamp,
+                        "request_id": request_id
+                    }
+                }
+                
+                # Add file paths if available
+                if file_path:
+                    db_data["file_path"] = file_path
+                    db_data["local_url"] = f"file://{file_path}"
+                
+                if blob_url:
+                    db_data["blob_url"] = blob_url
+                
+                # Add user and workspace IDs if provided
+                if user_id:
+                    db_data["user_id"] = user_id
+                
+                if workspace_id:
+                    db_data["workspace_id"] = workspace_id
+                
+                # Get a database session and save the audio
+                db = next(get_db())
+                db_audio = audio_repository.create(db_data, db)
+                
+                if db_audio:
+                    result["db_id"] = db_audio.id
+            except Exception as e:
+                print(f"Error saving to database: {str(e)}")
             
             return result
             
