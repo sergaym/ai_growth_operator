@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.user import User, Workspace
+from app.models import User, Workspace
 from app.schemas.user_schemas import UserCreate
 
 class UserService:
