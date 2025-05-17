@@ -13,16 +13,12 @@ type RequestOptions = RequestInit & {
   params?: Record<string, string>;
 };
 
-// Helper function to get auth token from cookies
+// Helper function to get access token from localStorage
 export function getAuthToken(): string | null {
-  if (typeof document === 'undefined') return null;
-  
-  const cookies = document.cookie.split('; ');
-  const tokenCookie = cookies.find(cookie => cookie.startsWith('auth-token='));
-  
-  if (!tokenCookie) return null;
-  
-  return tokenCookie.split('=')[1];
+  if (typeof window !== 'undefined') {
+    return window.localStorage.getItem('access_token');
+  }
+  return null;
 }
 
 /**
@@ -81,10 +77,10 @@ function createHeaders(customHeaders?: HeadersInit): Headers {
     headers.set('Content-Type', 'application/json');
   }
   
-  // Add auth token if available
-  const authToken = getAuthToken();
-  if (authToken) {
-    headers.set('Authorization', `Bearer ${authToken}`);
+  // Add access token if available
+  const accessToken = getAuthToken();
+  if (accessToken) {
+    headers.set('Authorization', `Bearer ${accessToken}`);
   }
   
   return headers;
@@ -120,15 +116,41 @@ async function fetchApi<T>(
   // Create request URL with params
   const url = buildUrl(endpoint, { params });
   
-  // Set headers with auth token
-  const headers = createHeaders(fetchOptions.headers);
+  let headers = createHeaders(fetchOptions.headers);
   
   // Make request
-  const response = await fetch(url, {
+  let response = await fetch(url, {
     ...fetchOptions,
     headers,
+    credentials: 'include', // always include cookies for refresh
   });
-  
+  // If unauthorized, try to refresh access token and retry once
+  if (response.status === 401) {
+    // Attempt to refresh access token using refresh token (httpOnly cookie)
+    const refreshResp = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/refresh', {
+      method: 'POST',
+      credentials: 'include',
+    });
+    const refreshData = await refreshResp.json();
+    if (refreshResp.ok && refreshData.access_token) {
+      if (typeof window !== 'undefined') {
+        window.localStorage.setItem('access_token', refreshData.access_token);
+      }
+      // Retry original request with new token
+      headers = createHeaders(fetchOptions.headers);
+      response = await fetch(url, {
+        ...fetchOptions,
+        headers,
+        credentials: 'include',
+      });
+    } else {
+      // If refresh fails, clear token and reject
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('access_token');
+      }
+      throw new Error('Session expired. Please sign in again.');
+    }
+  }
   return handleResponse<T>(response);
 }
 

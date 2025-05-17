@@ -1,6 +1,7 @@
 "use client";
 
-import React, { Suspense } from 'react';
+import React, { Suspense, useEffect } from 'react';
+import { useRouter } from 'next/navigation';
 import { Logo } from "@/components/ui/Logo";
 import Link from 'next/link';
 import { ArrowDown } from 'lucide-react';
@@ -33,15 +34,22 @@ function LoginFormSkeleton() {
 
 // Extract the form into a separate client component
 function LoginForm() {
-  // Client-side hooks
+  const router = useRouter();
+  const { useAuth } = require('@/hooks/useAuth');
+  const { user, login, loading, error: authError } = useAuth();
   const { useState } = React;
   const { useSearchParams } = require('next/navigation');
-  const { useAuth } = require('@/hooks/useAuth');
+
+  // Redirect to playground if already authenticated
+  useEffect(() => {
+    if (user.isAuthenticated) {
+      router.push('/playground');
+    }
+  }, [user.isAuthenticated, router]);
   
   const searchParams = useSearchParams();
   const callbackUrl = searchParams.get('callbackUrl') || '/playground';
   
-  const { login, loading, error: authError } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [error, setError] = useState('');
