@@ -189,6 +189,18 @@ export function useImageToVideo() {
       if (options.negative_prompt) formData.append('negative_prompt', options.negative_prompt);
       if (options.cfg_scale !== undefined) formData.append('cfg_scale', options.cfg_scale.toString());
       
+      // Validate file size
+      const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB limit
+      if (file.size > MAX_FILE_SIZE) {
+        throw new Error(`File size exceeds the maximum allowed size of ${MAX_FILE_SIZE / (1024 * 1024)}MB`);
+      }
+      
+      // Validate file type
+      const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+      if (!allowedTypes.includes(file.type)) {
+        throw new Error(`Unsupported file type: ${file.type}. Please use JPEG, PNG or WebP images.`);
+      }
+      
       // Log detailed information about the request for debugging
       console.log('Preparing file upload request:', {
         fileName: file.name,
@@ -203,13 +215,15 @@ export function useImageToVideo() {
         options
       });
       
-      // Using fetch directly with FormData - no need to set Content-Type header
-      // The browser will automatically set it with the correct boundary
-      console.log('Sending request to /api/v1/image-to-video/from-file...');
-      const response = await fetch('/api/v1/image-to-video/from-file', {
+      // Make sure we use the from-file endpoint
+      const uploadUrl = '/api/v1/image-to-video/from-file';
+      console.log(`Sending file upload to: ${uploadUrl}`);
+      
+      const response = await fetch(uploadUrl, {
         method: 'POST',
-        body: formData
-        // Do NOT set 'Content-Type': 'multipart/form-data' header - browser will do this automatically with the correct boundary
+        body: formData,
+        // Ensure proper content type is not manually set for multipart/form-data
+        // The browser will set the correct boundary
       });
       
       // Log response status for debugging
