@@ -301,15 +301,41 @@ class TextToSpeechService:
                 if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
                     try:
                         with open(file_path, "rb") as audio_file:
-                            blob_result = await upload_file(
-                                file_content=audio_file.read(),
-                                asset_type=AssetType.AUDIO,
-                                filename=file_name,
-                                content_type=f"audio/{output_format}"
-                            )
-                        blob_url = blob_result.get("url")
+                            # Read the file content
+                            file_data = audio_file.read()
+                            
+                            # Only attempt to upload if we have data
+                            if file_data:
+                                # Map file extensions to correct MIME types
+                                mime_type_map = {
+                                    "mp3": "audio/mpeg",
+                                    "wav": "audio/wav",
+                                    "ogg": "audio/ogg"
+                                }
+                                
+                                # Use the correct MIME type or default to the format-based one
+                                content_type = mime_type_map.get(output_format, f"audio/{output_format}")
+                                
+                                blob_result = await upload_file(
+                                    file_content=file_data,
+                                    asset_type=AssetType.AUDIO,
+                                    filename=file_name,
+                                    content_type=content_type
+                                )
+                                
+                                blob_url = blob_result.get("url")
+                                if blob_url:
+                                    print(f"Successfully uploaded audio to blob storage: {blob_url}")
+                                    # Add blob URL to the response
+                                    result["blob_url"] = blob_url
+                            else:
+                                print(f"Warning: Audio file is empty, skipping blob upload")
                     except Exception as e:
                         print(f"Error uploading to blob storage: {str(e)}")
+                        # Continue execution even if blob upload fails (local file is still available)
+                        # Log additional information to help debugging
+                        import traceback
+                        print(f"Blob upload error traceback: {traceback.format_exc()}")
             
             # Get voice name for the response
             voice_name = None
