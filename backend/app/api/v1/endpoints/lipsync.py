@@ -53,33 +53,56 @@ async def generate_lipsync(
                 detail="Both video and audio sources must be provided (either as paths or URLs)"
             )
         
-        # Log request
-        logger.info(f"Processing lipsync request: video_path={request.video_path}, video_url={request.video_url}, audio_path={request.audio_path}, audio_url={request.audio_url}")
+        # Log the request parameters for debugging
+        logger.info(f"Processing lipsync request: video_url={request.video_url}, audio_url={request.audio_url}")
         
         # Process the request through the service
-        response = await lipsync_service.lipsync(
-            video_path=request.video_path,
-            video_url=request.video_url,
-            audio_path=request.audio_path,
-            audio_url=request.audio_url,
-            save_result=request.save_result
-        )
+        try:
+            response = await lipsync_service.lipsync(
+                video_path=request.video_path,
+                video_url=request.video_url,
+                audio_path=request.audio_path,
+                audio_url=request.audio_url,
+                save_result=request.save_result
+            )
+        except ValueError as ve:
+            # Handle specific value errors from the service
+            logger.error(f"Service value error: {str(ve)}")
+            raise HTTPException(status_code=400, detail=str(ve))
+        except Exception as se:
+            # Handle other service errors
+            logger.error(f"Service error: {type(se).__name__}: {str(se)}")
+            raise HTTPException(status_code=500, detail=f"Service error: {str(se)}")
         
-        # Check for errors
+        # Check for errors in the response
         if response.get("status") == "error":
             error_message = response.get("error", "Unknown error")
-            logger.error(f"Lipsync error: {error_message}")
+            logger.error(f"Lipsync error in response: {error_message}")
             raise HTTPException(status_code=500, detail=error_message)
         
-        # Return the response
+        # Validate response has required fields
+        if not response.get("video_url"):
+            logger.error(f"Missing video_url in response: {response}")
+            raise HTTPException(status_code=500, detail="Service did not return a video URL")
+        
+        # All good, return the response
+        logger.info(f"Lipsync successful, returning video URL: {response.get('video_url')}")
         return response
         
     except ValidationError as e:
         logger.error(f"Validation error: {str(e)}")
         raise HTTPException(status_code=422, detail=str(e))
+    except ValueError as e:
+        logger.error(f"Value error: {str(e)}")
+        if "Invalid URL" in str(e):
+            raise HTTPException(status_code=422, detail=str(e))
+        raise HTTPException(status_code=400, detail=str(e))
+    except HTTPException:
+        # Re-raise HTTP exceptions as they're already properly formatted
+        raise
     except Exception as e:
-        logger.error(f"Exception in lipsync endpoint: {str(e)}")
-        raise HTTPException(status_code=500, detail=str(e))
+        logger.error(f"Unexpected exception in lipsync endpoint: {type(e).__name__}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Unexpected error: {str(e)}")
 
 
 @router.post(
@@ -110,11 +133,18 @@ async def upload_file(
             buffer.write(content)
         
         # Upload the file using the service
-        url = await lipsync_service.upload_file(temp_path)
+        try:
+            url = await lipsync_service.upload_file(temp_path)
+            # The service should now return a string, but let's ensure it
+            url_str = str(url)
+            logger.info(f"File uploaded successfully: {url_str}")
+        except Exception as upload_error:
+            logger.error(f"Error uploading file: {str(upload_error)}")
+            raise HTTPException(status_code=500, detail=f"Error uploading file: {str(upload_error)}")
         
-        # Return the URL
+        # Return the URL response
         return {
-            "url": url,
+            "url": url_str,
             "filename": file.filename,
             "file_type": file_type
         }
