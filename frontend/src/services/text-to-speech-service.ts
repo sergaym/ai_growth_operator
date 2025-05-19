@@ -7,19 +7,44 @@ import { mapTextToSpeechResponse } from './api-utils';
 import type {
   GenerateSpeechRequest,
   SpeechGenerationResponse,
-  VoicesListResponse
+  VoicesListResponse,
+  JobStatusResponse
 } from '@/types/text-to-speech';
 import type { ApiResponse, AsyncApiResponse } from '@/types/api';
 
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
+
 /**
- * Generate speech from text
+ * Fetches all available voices for text-to-speech
  */
-export async function generateSpeech(request: GenerateSpeechRequest): Promise<AsyncApiResponse<string>> {
-  const response = await apiClient.post<any>('/text-to-speech/generate', request);
-  const jobId = response.data?.job_id;
+export async function listVoices(
+  filterByLanguage?: string,
+  filterByGender?: string,
+  filterByAccent?: string
+): Promise<VoicesListResponse> {
+  // Build query params
+  const params = new URLSearchParams();
+  if (filterByLanguage) params.append('filter_by_language', filterByLanguage);
+  if (filterByGender) params.append('filter_by_gender', filterByGender);
+  if (filterByAccent) params.append('filter_by_accent', filterByAccent);
+
+  const query = params.toString() ? `?${params.toString()}` : '';
   
-  if (!jobId) {
-    throw new Error('No job ID returned from the API');
+  const response = await fetch(`${API_URL}/api/v1/text-to-speech/voices${query}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Failed to fetch voices: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
   }
   
   return {
