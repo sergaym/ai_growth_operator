@@ -77,3 +77,68 @@ export function LipsyncDemo() {
     }
   };
 
+  // Handle audio file selection
+  const handleAudioFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0] || null;
+    if (file) {
+      setAudioFile(file);
+      
+      // Create a preview URL for audio
+      const audioUrl = URL.createObjectURL(file);
+      setAudioPreview(audioUrl);
+    }
+  };
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (activeTab === 'upload') {
+      // Validate file inputs
+      if (!videoFile || !audioFile) {
+        toast({
+          title: 'Missing files',
+          description: 'Please upload both video and audio files',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      try {
+        await generateFromFiles(videoFile, audioFile);
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'An error occurred';
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+      }
+    } else {
+      // Validate URL inputs
+      if (!videoUrl || !audioUrl) {
+        toast({
+          title: 'Missing URLs',
+          description: 'Please provide both video and audio URLs',
+          variant: 'destructive',
+        });
+        return;
+      }
+      
+      try {
+        await generateFromUrls({
+          video_url: videoUrl,
+          audio_url: audioUrl,
+          save_result: true
+        });
+      } catch (err) {
+        const message = err instanceof Error ? err.message : 'An error occurred';
+        toast({
+          title: 'Error',
+          description: message,
+          variant: 'destructive',
+        });
+      }
+    }
+  };
+
