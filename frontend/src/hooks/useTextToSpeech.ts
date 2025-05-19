@@ -139,3 +139,51 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
     }
   }, []);
 
+  // Poll job status
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    try {
+      const status = await checkJobStatus(jobId);
+      
+      setState(prev => ({
+        ...prev,
+        currentJobStatus: status.status,
+      }));
+
+      if (status.status === 'completed' && status.result) {
+        // Job completed successfully
+        const audioUrl = status.result.blob_url || 
+                      (status.result.file_name ? getAudioUrl(status.result.file_name) : null);
+        
+        setState(prev => ({
+          ...prev,
+          isGenerating: false,
+          audioUrl,
+        }));
+
+        // Set audio URL if available
+        if (audioUrl && audioRef.current) {
+          audioRef.current.src = audioUrl;
+        }
+      } else if (status.status === 'error') {
+        // Job failed
+        setState(prev => ({
+          ...prev,
+          isGenerating: false,
+          error: status.error || 'Failed to generate speech',
+        }));
+      } else {
+        // Job still in progress, continue polling
+        pollingTimerRef.current = setTimeout(() => {
+          pollJobStatus(jobId);
+        }, pollingInterval);
+      }
+    } catch (err) {
+      console.error('Error polling job status:', err);
+      setState(prev => ({
+        ...prev,
+        isGenerating: false,
+        error: err instanceof Error ? err.message : 'Failed to check job status',
+      }));
+    }
+  }, [pollingInterval]);
+
