@@ -1,6 +1,6 @@
 """
 Lipsync service integration for the AI Growth Operator.
-This module provides interactions with the fal.ai latentsync API for synchronizing audio with video.
+This module provides integration with fal.ai latentsync model for lip synchronization.
 """
 
 import os
@@ -9,24 +9,29 @@ import uuid
 import asyncio
 import requests
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, Any, Optional, Union
+import logging
 
+# Import fal client for API access
 import fal_client
 from dotenv import load_dotenv
 
 # Import settings
 from app.core.config import settings
 
-# Import database components
-from app.db import get_db, lipsync_repository, video_repository, audio_repository
+# Import database components if needed for storage
 from app.db.blob_storage import upload_file, AssetType
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
 
 # Constants
-FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API_KEY") or settings.FAL_CLIENT_API_KEY
-FAL_LIPSYNC_MODEL = "fal-ai/latentsync"
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or settings.FAL_CLIENT_API_KEY
+FAL_LATENTSYNC_MODEL = "fal-ai/latentsync"
+
 
 class LipsyncService:
     """Service for synchronizing audio with video using fal.ai latentsync API"""
