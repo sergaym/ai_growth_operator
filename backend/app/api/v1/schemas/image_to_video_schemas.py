@@ -33,89 +33,11 @@ class GenerateVideoRequest(BaseModel):
             raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
         return v
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "image_url": "https://example.com/images/portrait.jpg",
-                "prompt": "Realistic, cinematic movement, person talking",
-                "duration": "5",
-                "aspect_ratio": "16:9"
-            }
-        }
-
-
-class GenerateVideoFromBase64Request(BaseModel):
-    """Request model for generating video from base64 image data"""
-    image_base64: str = Field(..., description="Base64-encoded image data")
-    prompt: str = Field(
-        "Realistic, cinematic movement, high quality", 
-        description="Text description to guide the video generation"
-    )
-    duration: str = Field(
-        "5", 
-        description="Video duration in seconds ('5' or '10')"
-    )
-    aspect_ratio: str = Field(
-        "16:9", 
-        description="Aspect ratio of the output video ('16:9', '9:16', '1:1')"
-    )
-    negative_prompt: str = Field(
-        "blur, distort, and low quality", 
-        description="What to avoid in the video"
-    )
-    cfg_scale: float = Field(
-        0.5, 
-        ge=0.0, 
-        le=1.0, 
-        description="How closely to follow the prompt (0.0-1.0)"
-    )
-    save_video: bool = Field(
-        True, 
-        description="Whether to save the video to disk"
-    )
-    upload_to_blob: bool = Field(
-        True,
-        description="Whether to upload the video to blob storage"
-    )
-    user_id: Optional[str] = Field(
-        None,
-        description="User ID to associate with the video"
-    )
-    workspace_id: Optional[str] = Field(
-        None,
-        description="Workspace ID to associate with the video"
-    )
-    
-    @validator('duration')
-    def validate_duration(cls, v):
-        if v not in ["5", "10"]:
-            raise ValueError("Duration must be '5' or '10'")
+    @validator('cfg_scale')
+    def validate_cfg_scale(cls, v):
+        if v < 0.0 or v > 1.0:
+            raise ValueError("cfg_scale must be between 0.0 and 1.0")
         return v
-    
-    @validator('aspect_ratio')
-    def validate_aspect_ratio(cls, v):
-        if v not in ["16:9", "9:16", "1:1"]:
-            raise ValueError("Aspect ratio must be '16:9', '9:16', or '1:1'")
-        return v
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "image_base64": "data:image/jpeg;base64,/9j/4AAQSkZJRgABAQE...",
-                "prompt": "Realistic, cinematic movement, person nodding",
-                "duration": "5",
-                "aspect_ratio": "16:9"
-            }
-        }
-
-
-class VideoGenerationParameters(BaseModel):
-    """Parameters used for video generation"""
-    duration: str = Field(..., description="Video duration in seconds")
-    aspect_ratio: str = Field(..., description="Aspect ratio of the video")
-    cfg_scale: float = Field(..., description="How closely the prompt was followed")
-    prompt: str = Field(..., description="Text prompt used for generation")
-    negative_prompt: Optional[str] = Field(None, description="Negative prompt used")
 
 
 class VideoGenerationResponse(BaseModel):
