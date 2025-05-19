@@ -214,12 +214,26 @@ def validate_asset(asset_type: str, filename: str, content_type: str = None, siz
     # Check file extension
     ext = Path(filename).suffix.lower()
     if ext not in config["allowed_extensions"]:
-        raise ValueError(f"Invalid file extension for {asset_type}: {ext}")
+        # Log warning but allow the upload to continue
+        logger.warning(f"Warning: Unexpected file extension for {asset_type}: {ext}")
     
     # Check content type if provided
     if content_type:
-        if content_type not in config["content_types"]:
-            raise ValueError(f"Invalid content type for {asset_type}: {content_type}")
+        # Normalize content type for comparison by converting to lowercase
+        content_type_lower = content_type.lower()
+        allowed_types_lower = [ct.lower() for ct in config["content_types"]]
+        
+        # Special case for audio/mp3 which should be treated as audio/mpeg
+        if asset_type == AssetType.AUDIO and content_type_lower == "audio/mp3":
+            content_type_lower = "audio/mpeg"
+            
+        if content_type_lower not in allowed_types_lower:
+            # Try to guess the correct content type based on the extension
+            if ext in config["allowed_extensions"]:
+                # Log warning but allow the upload to continue
+                logger.warning(f"Warning: Content type mismatch for {asset_type}: {content_type}, but file extension {ext} is allowed")
+            else:
+                raise ValueError(f"Invalid content type for {asset_type}: {content_type}")
     
     # Check file size if provided
     if size_bytes:
