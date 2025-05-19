@@ -70,10 +70,38 @@ class LipsyncService:
         try:
             # Upload using fal client
             upload_response = await fal_client.upload_file_async(file_path)
-            return upload_response
+            logger.info(f"File uploaded successfully: {upload_response}")
+            # Ensure we return a string
+            return str(upload_response)
         except Exception as e:
-            print(f"Error uploading file: {str(e)}")
+            logger.error(f"Error uploading file: {str(e)}")
             raise ValueError(f"Failed to upload file: {str(e)}")
+    
+    async def download_file(self, url: str, file_path: str) -> str:
+        """
+        Download a file from a URL.
+        
+        Args:
+            url: URL of the file to download
+            file_path: Path where the file should be saved
+            
+        Returns:
+            Path to the downloaded file
+        """
+        try:
+            logger.info(f"Downloading from {url} to {file_path}")
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            
+            with open(file_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            
+            logger.info(f"Downloaded file to {file_path}")
+            return file_path
+        except Exception as e:
+            logger.error(f"Error downloading file: {str(e)}")
+            raise ValueError(f"Failed to download file: {str(e)}")
     
     async def lipsync(
         self,
