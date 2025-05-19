@@ -41,7 +41,7 @@ export function useAuth() {
 
         // Try to validate the token with the backend
         const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
           {
             credentials: 'include',
             headers: {
@@ -88,7 +88,7 @@ export function useAuth() {
       params.append('username', email);
       params.append('password', password);
       
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/signin', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/v1/auth/signin', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded',
@@ -107,6 +107,9 @@ export function useAuth() {
       // Store access token in memory (refresh token is in httpOnly cookie)
       if (typeof window !== 'undefined' && data.access_token) {
         window.localStorage.setItem('access_token', data.access_token);
+        if (data.refresh_token) {
+          window.localStorage.setItem('refresh_token', data.refresh_token);
+        }
       }
       
       // Update the auth state
@@ -137,6 +140,7 @@ export function useAuth() {
       // Clear client-side auth state
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem('access_token');
+        window.localStorage.removeItem('refresh_token');
         // Clear the auth cookie
         document.cookie = 'auth-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       }
@@ -165,14 +169,17 @@ export function useAuth() {
   // Helper: refresh access token using refresh token (in httpOnly cookie)
   const refreshAccessToken = async (): Promise<string | null> => {
     try {
+      const refreshToken = typeof window !== 'undefined' ? window.localStorage.getItem('refresh_token') : null;
+      
       const response = await fetch(
-        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh`,
         {
           method: 'POST',
           credentials: 'include',
           headers: {
             'Content-Type': 'application/json',
-          }
+          },
+          body: JSON.stringify({ refresh_token: refreshToken }),
         }
       );
 
@@ -190,6 +197,9 @@ export function useAuth() {
       if (data.access_token) {
         if (typeof window !== 'undefined') {
           window.localStorage.setItem('access_token', data.access_token);
+          if (data.refresh_token) {
+            window.localStorage.setItem('refresh_token', data.refresh_token);
+          }
         }
         setUser({ isAuthenticated: true });
         return data.access_token;
