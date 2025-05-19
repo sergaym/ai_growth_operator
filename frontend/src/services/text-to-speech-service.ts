@@ -45,13 +45,69 @@ export async function listVoices(
   return await response.json();
 }
 
+/**
+ * Fetches voice presets for a specific language
+ */
+export async function listVoicePresets(language: string = 'english'): Promise<Record<string, string>> {
+  const response = await fetch(`${API_URL}/api/v1/text-to-speech/voices/presets?language=${language}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Failed to fetch voice presets: ${response.status}`);
   }
-  
-  return {
-    success: true,
-    data: jobId,
-    message: response.data?.message || 'Speech generation started'
-  };
+
+  return await response.json();
+}
+
+/**
+ * Generates speech from text (initiates the job)
+ */
+export async function generateSpeech(request: GenerateSpeechRequest): Promise<JobStatusResponse> {
+  const response = await fetch(`${API_URL}/api/v1/text-to-speech/generate`, {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    body: JSON.stringify(request),
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Failed to generate speech: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Checks the status of a speech generation job
+ */
+export async function checkJobStatus(jobId: string): Promise<JobStatusResponse> {
+  const response = await fetch(`${API_URL}/api/v1/text-to-speech/status/${jobId}`, {
+    method: 'GET',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+  });
+
+  if (!response.ok) {
+    const error = await response.json().catch(() => ({}));
+    throw new Error(error.detail || `Failed to check job status: ${response.status}`);
+  }
+
+  return await response.json();
+}
+
+/**
+ * Gets the full audio URL for a filename
+ */
+export function getAudioUrl(filename: string): string {
+  return `${API_URL}/api/v1/text-to-speech/audio/${filename}`;
 }
 
 /**
