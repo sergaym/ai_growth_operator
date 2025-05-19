@@ -225,3 +225,20 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
     });
   }, [state.voices, state.voicePresets]);
 
+  return {
+    voices: state.voices,
+    voicePresets: state.voicePresets,
+    isLoadingVoices: state.isLoadingVoices,
+    isGenerating: state.isGenerating,
+    currentJobId: state.currentJobId,
+    currentJobStatus: state.currentJobStatus,
+    audioUrl: state.audioUrl,
+    error: state.error,
+    fetchVoices,
+    fetchVoicePresets,
+    generateAudio,
+    playAudio,
+    pauseAudio,
+    reset
+  };
+} 
