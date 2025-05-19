@@ -3,10 +3,29 @@
  */
 
 export interface VoiceSettings {
-  stability?: number;
-  similarity_boost?: number;
+  stability: number;
+  similarity_boost: number;
   style?: number;
   use_speaker_boost?: boolean;
+}
+
+export interface Voice {
+  voice_id: string;
+  name: string;
+  description?: string;
+  preview_url?: string;
+  languages: string[];
+  gender?: string;
+  age?: string;
+  accent?: string;
+  is_cloned: boolean;
+  category?: string;
+  default_settings?: VoiceSettings;
+  labels?: Record<string, string>;
+}
+
+export interface VoicesListResponse {
+  voices: Voice[];
 }
 
 export interface GenerateSpeechRequest {
