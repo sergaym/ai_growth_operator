@@ -42,7 +42,6 @@ export async function POST(request: NextRequest) {
   // Ensure correct API path prefix (/api/v1/...)
   const url = `${API_BASE_URL}/api/v1/${path}`;
 
-  console.log(`[API Proxy] POST to backend URL: ${url}`);
 
   try {
     // Clone request for debugging
@@ -70,13 +69,36 @@ export async function POST(request: NextRequest) {
         }
         console.log('[API Proxy] Form data entries:', formEntries);
         
-        // Convert formData to regular application/x-www-form-urlencoded format
-        // for file upload - this is more reliable than multipart/form-data through proxies
+        // Create a new FormData object to ensure proper file handling
+        const newFormData = new FormData();
+        
+        // Add each entry to the new FormData, handling files specially
+        for (const [key, value] of formData.entries()) {
+          if (value instanceof File) {
+            try {
+              // Read the file into a buffer
+              const buffer = await value.arrayBuffer();
+              // Create a new file with the same properties
+              const newFile = new File([buffer], value.name, { 
+                type: value.type,
+                lastModified: value.lastModified
+              });
+              console.log(`[API Proxy] Processing file: ${value.name}, size: ${value.size}, type: ${value.type}`);
+              newFormData.append(key, newFile, value.name);
+            } catch (fileError) {
+              console.error(`[API Proxy] Error processing file ${value.name}:`, fileError);
+              throw new Error(`Failed to process file ${value.name}: ${fileError instanceof Error ? fileError.message : String(fileError)}`);
+            }
+          } else {
+            newFormData.append(key, value);
+          }
+        }
+        
+        // Use the new FormData for the request
         const requestOptions: ExtendedRequestOptions = {
           method: 'POST',
-          body: formData,
-          // Don't set headers manually for multipart/form-data
-          duplex: 'half', // Required for streaming bodies
+          body: newFormData,
+          duplex: 'half', // Required for streaming bodies in Node.js 18+
         };
         
         const forwardRequest = new Request(url, requestOptions);
