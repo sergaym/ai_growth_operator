@@ -89,3 +89,31 @@ export function TextToSpeechDemo() {
     await generateAudio(request);
   };
 
+  // Toggle play/pause
+  const togglePlayPause = () => {
+    if (isPlaying) {
+      pauseAudio();
+      setIsPlaying(false);
+    } else {
+      playAudio();
+      setIsPlaying(true);
+    }
+  };
+
+  // Render voice selection options
+  const renderVoiceOptions = () => {
+    if (isLoadingVoices) {
+      return <SelectItem value="loading" disabled>Loading voices...</SelectItem>;
+    }
+    
+    if (voices.length === 0) {
+      return <SelectItem value="none" disabled>No voices available</SelectItem>;
+    }
+    
+    return voices.map((voice: Voice) => (
+      <SelectItem key={voice.voice_id} value={voice.voice_id}>
+        {voice.name} {voice.accent ? `(${voice.accent})` : ''}
+      </SelectItem>
+    ));
+  };
+
