@@ -34,7 +34,7 @@ FAL_LATENTSYNC_MODEL = "fal-ai/latentsync"
 
 
 class LipsyncService:
-    """Service for synchronizing audio with video using fal.ai latentsync API"""
+    """Service for synchronizing lip movements in videos with audio using fal.ai latentsync model"""
     
     def __init__(self):
         """Initialize the LipsyncService with API credentials"""
@@ -45,15 +45,17 @@ class LipsyncService:
         # Set the environment variable fal-client expects
         os.environ["FAL_KEY"] = self.api_key
         
-        # Create output directory if it doesn't exist
-        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "lipsync")
+        # Create output directories if they don't exist
+        self.root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        self.output_dir = os.path.join(self.root_dir, "output", "lipsync")
+        
         os.makedirs(self.output_dir, exist_ok=True)
     
     def on_queue_update(self, update):
         """Process queue updates and logs."""
         if isinstance(update, fal_client.InProgress):
             for log in update.logs:
-                print(log["message"])
+                logger.info(f"Lipsync progress: {log['message']}")
     
     async def upload_file(self, file_path: str) -> str:
         """
