@@ -8,12 +8,13 @@ import type {
   GenerateVideoRequest,
   GenerateVideoFromUrlRequest,
   GenerateVideoFromBase64Request,
-  VideoGenerationResponse
+  VideoGenerationResponse,
+  VideoJobStatus
 } from '@/types/image-to-video';
 import type { ApiResponse } from '@/types/api';
 
 /**
- * Generate video from existing image ID
+ * Generate video from existing image ID - returns a job ID immediately
  */
 export async function generateVideo(request: GenerateVideoRequest): Promise<VideoGenerationResponse> {
   const response = await apiClient.post<VideoGenerationResponse>('/image-to-video/generate', request);
@@ -21,7 +22,7 @@ export async function generateVideo(request: GenerateVideoRequest): Promise<Vide
 }
 
 /**
- * Generate video from image URL
+ * Generate video from image URL - returns a job ID immediately
  */
 export async function generateVideoFromUrl(request: GenerateVideoFromUrlRequest): Promise<VideoGenerationResponse> {
   const response = await apiClient.post<VideoGenerationResponse>('/image-to-video/generate-from-url', request);
@@ -29,9 +30,17 @@ export async function generateVideoFromUrl(request: GenerateVideoFromUrlRequest)
 }
 
 /**
- * Generate video from base64 image
+ * Generate video from base64 image - returns a job ID immediately
  */
 export async function generateVideoFromBase64(request: GenerateVideoFromBase64Request): Promise<VideoGenerationResponse> {
   const response = await apiClient.post<VideoGenerationResponse>('/image-to-video/generate-from-base64', request);
   return mapImageToVideoResponse(response);
+}
+
+/**
+ * Get the status of a video generation job
+ */
+export async function getVideoJobStatus(jobId: string): Promise<VideoJobStatus> {
+  const response = await apiClient.get<VideoJobStatus>(`/image-to-video/status/${jobId}`);
+  return response.data;
 } 
