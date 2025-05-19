@@ -85,36 +85,85 @@ def _initialize_client():
         return None
     
     try:
-        # Dynamically import the required client
-        # For now, default to Vercel Blob
+        # Try to import vercel_blob
         try:
-            # Import specific functions, aliasing potential keywords/builtins
-            from vercel_blob import put, get
-            from vercel_blob import list as list_blobs # Alias to avoid conflict
-            from vercel_blob import delete as delete_blob_op # Alias to avoid conflict
             
-            # Simple wrapper to provide a consistent interface
-            class VercelBlobClient:
-                async def upload(self, file_content, file_path, content_type=None):
-                    return await put(file_path, file_content, {"contentType": content_type})
+            # Verify the module is working by testing a simple operation
+            # This will also throw an error if the token is invalid
+            try:
+                # Set the token
+                os.environ['BLOB_READ_WRITE_TOKEN'] = settings.BLOB_READ_WRITE_TOKEN
                 
-                async def download(self, file_path):
-                    return await get(file_path)
+                # Test if we can access the API (will throw if token is invalid)
+                vercel_blob.list({"limit": 1})
                 
-                async def delete(self, file_path):
-                    # Use the aliased delete function
-                    return await delete_blob_op(file_path)
+                # Simple wrapper to provide a consistent interface
+                class VercelBlobClient:
+                    async def upload(self, file_content, file_path, content_type=None):
+                        opts = {}
+                        if content_type:
+                            opts["contentType"] = content_type
+                        
+                        # Convert the file_content to bytes if it's a file-like object
+                        if hasattr(file_content, 'read') and callable(file_content.read):
+                            file_content = file_content.read()
+                        
+                        # Use put with addRandomSuffix=False to preserve filenames
+                        try:
+                            result = vercel_blob.put(file_path, file_content, {
+                                'addRandomSuffix': 'false',
+                                'access': 'public'
+                            })
+                            # Convert to expected format
+                            return type('BlobResponse', (), {
+                                'url': result.get('url', ''),
+                                'pathname': result.get('pathname', '')
+                            })
+                        except Exception as e:
+                            logger.error(f"Error uploading file to Vercel Blob: {str(e)}")
+                            raise ValueError(f"Failed to upload file: {str(e)}")
+                    
+                    async def download(self, file_path):
+                        # Download the file by URL or pathname
+                        try:
+                            content = vercel_blob.download_file(file_path, "")
+                            return content
+                        except Exception as e:
+                            logger.error(f"Error downloading file from Vercel Blob: {str(e)}")
+                            raise ValueError(f"Failed to download file: {str(e)}")
+                    
+                    async def delete(self, file_path):
+                        # Delete the file
+                        try:
+                            result = vercel_blob.delete(file_path)
+                            return result
+                        except Exception as e:
+                            logger.error(f"Error deleting file from Vercel Blob: {str(e)}")
+                            raise ValueError(f"Failed to delete file: {str(e)}")
+                    
+                    async def list_files(self, prefix=None):
+                        # List files with optional prefix
+                        try:
+                            params = {}
+                            if prefix:
+                                params['prefix'] = prefix
+                            
+                            result = vercel_blob.list(params)
+                            return result
+                        except Exception as e:
+                            logger.error(f"Error listing files from Vercel Blob: {str(e)}")
+                            raise ValueError(f"Failed to list files: {str(e)}")
                 
-                async def list_files(self, prefix=None):
-                    # Use the aliased list function
-                    return await list_blobs(prefix)
-            
-            blob_client = VercelBlobClient()
-            logger.info("Vercel Blob client initialized")
-            return blob_client
+                blob_client = VercelBlobClient()
+                logger.info("Vercel Blob client initialized successfully")
+                return blob_client
+            except Exception as e:
+                logger.error(f"Error testing Vercel Blob API: {str(e)}")
+                logger.error("Check your BLOB_READ_WRITE_TOKEN is correct")
+                return None
             
         except ImportError:
-            logger.error("Failed to import Vercel Blob client. Please install with: pip install @vercel/blob")
+            logger.error("Failed to import Vercel Blob client. Please install with: pip install vercel_blob")
             return None
             
     except Exception as e:
