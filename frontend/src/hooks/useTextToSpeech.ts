@@ -20,3 +20,15 @@ interface UseTextToSpeechOptions {
   pollingInterval?: number; // in milliseconds
   defaultLanguage?: string;
 }
+
+interface UseTextToSpeechState {
+  voices: Voice[];
+  voicePresets: Record<string, string>;
+  isLoadingVoices: boolean;
+  isGenerating: boolean;
+  currentJobId: string | null;
+  currentJobStatus: string | null;
+  audioUrl: string | null;
+  error: string | null;
+}
+
