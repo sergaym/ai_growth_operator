@@ -19,6 +19,7 @@ function SignupPageContent() {
     lastName: '',
     email: '',
     role: '',
+    password: '',
     
     // Company
     companyName: '',
@@ -66,22 +67,49 @@ function SignupPageContent() {
 
   const handleSignupComplete = async () => {
     try {
-      // Here you would typically make an API call to create the user
-      // For now, we'll simulate success
-      
+      // POST signup data to backend
+      // Adapt formData to backend expectations
+      const signupPayload = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
+        email: formData.email,
+        role: formData.role,
+        password: formData.password,
+      };
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/signup', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        credentials: 'include',
+        body: JSON.stringify(signupPayload),
+      });
+      const data = await response.json();
+      if (!response.ok) {
+        throw new Error(data.message || 'Signup failed');
+      }
+      // Store access token if provided
+      if (typeof window !== 'undefined' && data.access_token) {
+        window.localStorage.setItem('access_token', data.access_token);
+      }
       // Save user data to sessionStorage for the subscription page
       sessionStorage.setItem('signupData', JSON.stringify({
         firstName: formData.firstName,
         companyName: formData.companyName
       }));
-      
-      // Redirect directly to subscription page
-      router.push('/signup/subscription');
+      // Redirect directly to subscription page or callback URL
+      const callbackUrl = sessionStorage.getItem('signupCallbackUrl');
+      if (callbackUrl) {
+        router.push(callbackUrl);
+      } else {
+        router.push('/signup/subscription');
+      }
     } catch (error) {
       console.error('Signup error:', error);
       // Handle error appropriately
     }
   };
+
 
   const steps = [
     {

@@ -6,11 +6,13 @@ This file contains all SQLAlchemy ORM models for the application database.
 
 import enum
 import uuid
-from datetime import datetime
-from sqlalchemy import Column, String, Integer, Float, DateTime, Text, JSON, ForeignKey, Boolean, Table
-from sqlalchemy.orm import relationship
-
+from datetime import datetime, timedelta
+from sqlalchemy import (
+    Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Table, JSON, Float, ARRAY, event
+)
+from sqlalchemy.orm import relationship, Session
 from app.db.database import Base
+
 
 # ----------------
 # Utility Functions
@@ -242,17 +244,49 @@ class HeygenAvatarVideo(Base):
     
     def __repr__(self):
         """String representation of the Heygen avatar video."""
-        return f"<HeygenAvatarVideo {self.id}: {self.avatar_id}>" 
+        return f"<HeygenAvatarVideo {self.id}: {self.avatar_id}>"
 
 # ----------------
 # User and Workspace Models
 # ----------------
+
+class UserWorkspace(Base):
+    __tablename__ = "user_workspaces"
+    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), primary_key=True)
+    role = Column(String(50), nullable=False, default="member")
+    active = Column(Boolean, nullable=False, default=False)
+    joined_at = Column(DateTime, default=datetime.now, nullable=False)
+
+    user = relationship("User", back_populates="user_workspaces")
+    workspace = relationship("Workspace", back_populates="user_workspaces")
+    
+    def __repr__(self):
+        return f"<UserWorkspace user_id={self.user_id} workspace_id={self.workspace_id} role={self.role}>"
+
 class Workspace(Base):
     __tablename__ = "workspaces"
     id = Column(Integer, primary_key=True, index=True)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)
-    users = relationship("User", back_populates="workspaces", secondary="user_workspaces")
+    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    owner = relationship("User", back_populates="owned_workspaces", foreign_keys=[owner_id])
+    user_workspaces = relationship(
+        "UserWorkspace", 
+        back_populates="workspace", 
+        cascade="all, delete-orphan",
+        overlaps="users,user_workspaces"
+    )
+    users = relationship(
+        "User", 
+        secondary="user_workspaces", 
+        back_populates="workspaces",
+        viewonly=True,
+        overlaps="user_workspaces,workspace"
+    )
 
     def __repr__(self):
         return f"<Workspace {self.id}: {self.name}>"
@@ -263,17 +297,68 @@ class User(Base):
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
-    password = Column(String(255), nullable=False)
+    hashed_password = Column(String(255), nullable=False)
     role = Column(String(50), nullable=True)
-    workspaces = relationship("Workspace", back_populates="users", secondary="user_workspaces")
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    user_workspaces = relationship(
+        "UserWorkspace", 
+        back_populates="user", 
+        cascade="all, delete-orphan",
+        overlaps="workspaces,user_workspaces"
+    )
+    workspaces = relationship(
+        "Workspace", 
+        secondary="user_workspaces", 
+        back_populates="users",
+        viewonly=True,
+        overlaps="user_workspaces,user"
+    )
+    owned_workspaces = relationship(
+        "Workspace", 
+        back_populates="owner", 
+        foreign_keys="[Workspace.owner_id]"
+    )
 
     def __repr__(self):
         return f"<User {self.id}: {self.email}>"
 
-# Association table for many-to-many relationship between users and workspaces
-user_workspaces = Table(
-    "user_workspaces",
-    Base.metadata,
-    Column("user_id", Integer, ForeignKey("users.id"), primary_key=True),
-    Column("workspace_id", Integer, ForeignKey("workspaces.id"), primary_key=True)
-)
+# ----------------
+# Listeners
+# ----------------
+
+def create_personal_workspace(mapper, connection, target):
+    """Create a personal workspace for a new user."""
+    # Use the connection to execute raw SQL to avoid session flushing issues
+    from sqlalchemy.sql import text
+    
+    # Insert workspace with timestamps
+    current_time = datetime.now()
+    result = connection.execute(
+        text("""
+            INSERT INTO workspaces (name, type, owner_id, created_at, updated_at)
+            VALUES (:name, :type, :owner_id, :created_at, :updated_at)
+            RETURNING id
+        """),
+        {
+            "name": "Personal Workspace",
+            "type": "personal",
+            "owner_id": target.id,
+            "created_at": current_time,
+            "updated_at": current_time
+        }
+    )
+    workspace_id = result.fetchone()[0]
+    
+    # Insert user_workspace association
+    connection.execute(
+        text("""
+            INSERT INTO user_workspaces (user_id, workspace_id, role, active, joined_at)
+            VALUES (:user_id, :workspace_id, :role, :active, :joined_at)
+        """),
+        {"user_id": target.id, "workspace_id": workspace_id, "role": "owner", "active": True, "joined_at": current_time}
+    )
+
+# Set up the event listener for after a User is inserted
+event.listen(User, 'after_insert', create_personal_workspace)

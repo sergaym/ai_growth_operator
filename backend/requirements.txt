@@ -18,7 +18,10 @@ python-multipart==0.0.6     # required for form/file uploads
 
 # Data validation & serialization
 pydantic==2.11.3
+email-validator==2.1.1      # required for Pydantic EmailStr
 orjson==3.10.3              # high-performance JSON (FastAPI can auto-use)
+passlib==1.7.4
+python-jose[cryptography]==3.3.0   # for JWT token handling
 
 # Database
 sqlalchemy==2.0.34

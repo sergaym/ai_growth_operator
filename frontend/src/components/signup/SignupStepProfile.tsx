@@ -9,6 +9,7 @@ interface SignupStepProfileProps {
     lastName: string;
     email: string;
     role: string;
+    password: string;
   };
   onUpdate: (data: Partial<SignupStepProfileProps['data']>) => void;
   onNext: () => void;
@@ -79,6 +80,22 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
             onChange={(e) => onUpdate({ email: e.target.value })}
             className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
             placeholder="name@company.com"
+          />
+        </div>
+
+        {/* Password field */}
+        <div>
+          <label className="block text-sm font-medium text-white mb-2">
+            Password
+          </label>
+          <input
+            type="password"
+            required
+            value={data.password}
+            onChange={(e) => onUpdate({ password: e.target.value })}
+            className="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-white/40 focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500"
+            placeholder="Enter a password"
+            minLength={6}
           />
         </div>
 

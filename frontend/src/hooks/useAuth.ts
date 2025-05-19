@@ -12,6 +12,16 @@ interface AuthUser {
   isAuthenticated: boolean;
 }
 
+interface AuthData {
+  user: {
+    id: string;
+    email: string;
+    // Add other user fields as needed
+  };
+  access_token: string;
+  refresh_token: string;
+}
+
 export function useAuth() {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser>({ isAuthenticated: false });
@@ -20,15 +30,36 @@ export function useAuth() {
 
   // Check if the user is authenticated on mount (client side only)
   useEffect(() => {
-    const checkAuth = () => {
+    const checkAuth = async () => {
       try {
-        // Check for auth cookie presence using document.cookie
-        // In a real app, you'd validate the token with your backend
-        const hasAuthCookie = document.cookie
-          .split('; ')
-          .some(cookie => cookie.startsWith('auth-token='));
-        
-        setUser({ isAuthenticated: hasAuthCookie });
+        // First check if we have an access token
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+          setUser({ isAuthenticated: false });
+          return;
+        }
+
+        // Try to validate the token with the backend
+        const response = await fetch(
+          `${process.env.NEXT_PUBLIC_API_URL}/auth/me`,
+          {
+            credentials: 'include',
+            headers: {
+              'Authorization': `Bearer ${accessToken}`
+            }
+          }
+        );
+
+        if (!response.ok) {
+          // If token is invalid, try to refresh it
+          const refreshToken = await refreshAccessToken();
+          if (!refreshToken) {
+            setUser({ isAuthenticated: false });
+            return;
+          }
+        }
+
+        setUser({ isAuthenticated: true });
       } catch (err) {
         console.error('Auth check error:', err);
         setUser({ isAuthenticated: false });
@@ -51,28 +82,41 @@ export function useAuth() {
     try {
       setLoading(true);
       setError(null);
+
+      // Call the backend signin API
+      const params = new URLSearchParams();
+      params.append('username', email);
+      params.append('password', password);
       
-      // Call the login API
-      const response = await fetch('/api/auth/login', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/signin', {
         method: 'POST',
         headers: {
-          'Content-Type': 'application/json',
+          'Content-Type': 'application/x-www-form-urlencoded',
         },
-        body: JSON.stringify({ email, password }),
+        credentials: 'include',  // Important: include cookies in the request
+        body: params.toString(),
       });
       
-      const data: AuthResponse = await response.json();
-      
       if (!response.ok) {
-        throw new Error(data.message || 'Login failed');
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.message || 'Login failed');
+      }
+
+      const data = await response.json();
+      
+      // Store access token in memory (refresh token is in httpOnly cookie)
+      if (typeof window !== 'undefined' && data.access_token) {
+        window.localStorage.setItem('access_token', data.access_token);
       }
       
-      // Update user state
+      // Update the auth state
       setUser({ isAuthenticated: true });
       
-      // Redirect to the callback URL if provided
-      if (callbackUrl) {
-        router.push(callbackUrl);
+      // Force a hard refresh to ensure all auth state is properly set
+      if (typeof window !== 'undefined') {
+        // Redirect to the callback URL or dashboard
+        const redirectUrl = callbackUrl || '/dashboard';
+        window.location.href = redirectUrl;
       }
       
       return true;
@@ -86,31 +130,20 @@ export function useAuth() {
   }, [router]);
 
   // Logout function
-  const logout = useCallback(async (redirectUrl?: string) => {
+  const logout = useCallback((redirectUrl?: string) => {
     try {
       setLoading(true);
       
-      // Call the logout API
-      const response = await fetch('/api/auth/logout', {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-      
-      if (!response.ok) {
-        const data = await response.json();
-        throw new Error(data.message || 'Logout failed');
+      // Clear client-side auth state
+      if (typeof window !== 'undefined') {
+        window.localStorage.removeItem('access_token');
+        // Clear the auth cookie
+        document.cookie = 'auth-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
       }
-      
-      // Update user state
       setUser({ isAuthenticated: false });
-      
-      // Redirect if URL provided
       if (redirectUrl) {
         router.push(redirectUrl);
       }
-      
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
@@ -121,11 +154,61 @@ export function useAuth() {
     }
   }, [router]);
 
+  // Helper: get access token
+  const getAccessToken = () => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('access_token');
+    }
+    return null;
+  };
+
+  // Helper: refresh access token using refresh token (in httpOnly cookie)
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh`,
+        {
+          method: 'POST',
+          credentials: 'include',
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        }
+      );
+
+      if (!response.ok) {
+        // Handle specific error cases
+        if (response.status === 401) {
+          // Token expired or invalid
+          await logout('/login');
+          return null;
+        }
+        throw new Error('Failed to refresh token');
+      }
+
+      const data = await response.json();
+      if (data.access_token) {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem('access_token', data.access_token);
+        }
+        setUser({ isAuthenticated: true });
+        return data.access_token;
+      }
+      return null;
+    } catch (e) {
+      console.error('Token refresh error:', e);
+      await logout('/login');
+      return null;
+    }
+  };
+
   return {
     user,
     loading,
     error,
     login,
     logout,
+    getAccessToken,
+    refreshAccessToken,
   };
 } 

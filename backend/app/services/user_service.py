@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models.user import User, Workspace
+from app.models import User, Workspace
 from app.schemas.user_schemas import UserCreate
 
 class UserService:
@@ -14,14 +14,6 @@ class UserService:
         )
         db.add(user)
         db.flush()  # Get user.id
-        # Create default private workspace
-        workspace = Workspace(
-            name=f"{user.first_name} {user.last_name}'s Private Workspace",
-            type='private',
-            owner_id=user.id
-        )
-        workspace.users.append(user)
-        db.add(workspace)
         db.commit()
         db.refresh(user)
         return user
