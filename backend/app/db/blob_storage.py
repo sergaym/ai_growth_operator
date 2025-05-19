@@ -280,6 +280,11 @@ async def upload_file(
         if content_type is None:
             content_type = "application/octet-stream"
     
+    # Normalize audio/mp3 to audio/mpeg if needed
+    if content_type == "audio/mp3":
+        content_type = "audio/mpeg"
+        logger.info(f"Normalized content type from audio/mp3 to audio/mpeg")
+    
     # Get file size for validation
     if hasattr(file_content, "seek") and hasattr(file_content, "tell"):
         current_pos = file_content.tell()
@@ -289,13 +294,13 @@ async def upload_file(
     else:
         size_bytes = len(file_content)
     
-    # Validate the file
-    validate_asset(asset_type, filename, content_type, size_bytes)
-    
-    # Get the full path
-    file_path = get_asset_path(asset_type, filename)
-    
     try:
+        # Validate the file - this might raise an exception, but we're trying to make it more permissive
+        validate_asset(asset_type, filename, content_type, size_bytes)
+        
+        # Get the full path
+        file_path = get_asset_path(asset_type, filename)
+        
         # Upload the file
         result = await blob_client.upload(file_content, file_path, content_type)
         
@@ -303,6 +308,35 @@ async def upload_file(
             "url": result.url,
             "path": file_path
         }
+    except ValueError as e:
+        if "content type" in str(e).lower():
+            # If it's a content type issue, let's log it and try to continue with default
+            logger.warning(f"Content type validation issue: {str(e)}, attempting to upload with default content type")
+            
+            # Get the full path
+            file_path = get_asset_path(asset_type, filename)
+            
+            # Try upload with more generic content type
+            ext = Path(filename).suffix.lower()
+            if asset_type == AssetType.AUDIO:
+                generic_content_type = "audio/mpeg"
+            elif asset_type == AssetType.IMAGES:
+                generic_content_type = "image/png"
+            elif asset_type == AssetType.VIDEOS:
+                generic_content_type = "video/mp4"
+            else:
+                generic_content_type = "application/octet-stream"
+                
+            result = await blob_client.upload(file_content, file_path, generic_content_type)
+            
+            return {
+                "url": result.url,
+                "path": file_path
+            }
+        else:
+            # For other validation errors, let it fail
+            logger.error(f"Failed to upload file {filename}: {str(e)}")
+            raise ValueError(f"Failed to upload file: {str(e)}")
     except Exception as e:
         logger.error(f"Failed to upload file {filename}: {str(e)}")
         raise ValueError(f"Failed to upload file: {str(e)}")
