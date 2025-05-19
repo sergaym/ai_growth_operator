@@ -181,3 +181,89 @@ export function useImageToVideo() {
       return null;
     }
   }, [toast]);
+
+  // Poll for job status
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    try {
+      console.log(`Polling status for job: ${jobId}`);
+      const response = await fetch(`/api/v1/image-to-video/status/${jobId}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Status polling error: ${errorText}`);
+        throw new Error(`Error checking status: ${response.status}`);
+      }
+      
+      const job: VideoJob = await response.json();
+      console.log(`Job ${jobId} status:`, job.status);
+      setCurrentJobStatus(job.status);
+      
+      if (job.status === 'completed' && job.result?.video_url) {
+        setVideoUrl(job.result.video_url);
+        if (job.result.preview_image_url) {
+          setPreviewUrl(job.result.preview_image_url);
+        }
+        setIsGenerating(false);
+        toast({
+          title: 'Video generation complete',
+          description: 'Your video has been generated successfully.',
+        });
+      } else if (job.status === 'error') {
+        setError(job.error || 'An error occurred during video generation');
+        setIsGenerating(false);
+        toast({
+          title: 'Generation failed',
+          description: job.error || 'An error occurred during video generation',
+          variant: 'destructive',
+        });
+      } else if (job.status === 'pending' || job.status === 'processing') {
+        // Continue polling every 2 seconds
+        setTimeout(() => pollJobStatus(jobId), 2000);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error checking job status';
+      console.error('Status polling error:', message);
+      setError(message);
+      setIsGenerating(false);
+    }
+  }, [toast]);
+
+  // Get job status manually
+  const getJobStatus = useCallback(async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/v1/image-to-video/status/${jobId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Error checking status: ${response.status}`);
+      }
+      
+      return await response.json();
+    } catch (err) {
+      return { error: err instanceof Error ? err.message : 'Error checking job status' };
+    }
+  }, []);
+
+  // Reset state
+  const reset = useCallback(() => {
+    setIsGenerating(false);
+    setCurrentJobId(null);
+    setCurrentJobStatus(null);
+    setVideoUrl(null);
+    setPreviewUrl(null);
+    setError(null);
+  }, []);
+
+  return {
+    isGenerating,
+    currentJobId,
+    currentJobStatus,
+    videoUrl,
+    previewUrl,
+    error,
+    generateFromUrl,
+    generateFromFile,
+    getJobStatus,
+    pollJobStatus,
+    reset,
+  };
+} 
