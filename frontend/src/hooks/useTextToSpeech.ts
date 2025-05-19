@@ -32,3 +32,23 @@ interface UseTextToSpeechState {
   error: string | null;
 }
 
+export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
+  const { 
+    pollingInterval = 2000, 
+    defaultLanguage = 'english' 
+  } = options;
+
+  const [state, setState] = useState<UseTextToSpeechState>({
+    voices: [],
+    voicePresets: {},
+    isLoadingVoices: false,
+    isGenerating: false,
+    currentJobId: null,
+    currentJobStatus: null,
+    audioUrl: null,
+    error: null
+  });
+
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
