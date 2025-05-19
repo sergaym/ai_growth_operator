@@ -25,9 +25,6 @@ from .text_to_speech_schemas import (
 
 from .image_to_video_schemas import (
     GenerateVideoRequest,
-    GenerateVideoFromUrlRequest,
-    GenerateVideoFromBase64Request,
-    VideoGenerationParameters,
     VideoGenerationResponse,
 )
 
@@ -58,9 +55,6 @@ __all__ = [
     
     # Image-to-Video schemas
     "GenerateVideoRequest",
-    "GenerateVideoFromUrlRequest",
-    "GenerateVideoFromBase64Request",
-    "VideoGenerationParameters",
     "VideoGenerationResponse",
     
     # Lipsync schemas
