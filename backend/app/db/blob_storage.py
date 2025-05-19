@@ -8,6 +8,7 @@ services like S3, Vercel Blob, etc.
 import os
 import logging
 import mimetypes
+import vercel_blob
 from pathlib import Path
 from typing import Dict, List, Optional, BinaryIO, Any, Union
 
@@ -43,7 +44,7 @@ ASSET_CONFIGS = {
     AssetType.AUDIO: {
         "allowed_extensions": [".mp3", ".wav", ".ogg"],
         "max_size_mb": 50,
-        "content_types": ["audio/mpeg", "audio/wav", "audio/ogg"]
+        "content_types": ["audio/mpeg", "audio/mp3", "audio/wav", "audio/ogg", "audio/x-wav"]
     },
     AssetType.VIDEOS: {
         "allowed_extensions": [".mp4", ".webm", ".mov"],
