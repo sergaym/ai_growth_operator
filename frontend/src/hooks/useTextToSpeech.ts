@@ -104,3 +104,38 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
       }));
     }
   }, []);
+
+  // Generate speech
+  const generateAudio = useCallback(async (request: GenerateSpeechRequest) => {
+    try {
+      setState(prev => ({
+        ...prev,
+        isGenerating: true,
+        currentJobId: null,
+        currentJobStatus: null,
+        audioUrl: null,
+        error: null
+      }));
+
+      // Start the generation job
+      const jobResponse = await generateSpeech(request);
+
+      // Set the job ID and start polling
+      setState(prev => ({
+        ...prev,
+        currentJobId: jobResponse.job_id,
+        currentJobStatus: jobResponse.status
+      }));
+
+      // Start polling for job status
+      pollJobStatus(jobResponse.job_id);
+    } catch (err) {
+      console.error('Error generating speech:', err);
+      setState(prev => ({
+        ...prev,
+        isGenerating: false,
+        error: err instanceof Error ? err.message : 'Failed to generate speech'
+      }));
+    }
+  }, []);
+
