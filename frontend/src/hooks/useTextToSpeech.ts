@@ -187,3 +187,41 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
     }
   }, [pollingInterval]);
 
+  // Play audio
+  const playAudio = useCallback(() => {
+    if (audioRef.current && state.audioUrl) {
+      audioRef.current.play().catch(err => {
+        console.error('Error playing audio:', err);
+      });
+    }
+  }, [state.audioUrl]);
+
+  // Pause audio
+  const pauseAudio = useCallback(() => {
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+  }, []);
+
+  // Reset state
+  const reset = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearTimeout(pollingTimerRef.current);
+    }
+    
+    if (audioRef.current) {
+      audioRef.current.pause();
+    }
+    
+    setState({
+      voices: state.voices,
+      voicePresets: state.voicePresets,
+      isLoadingVoices: false,
+      isGenerating: false,
+      currentJobId: null,
+      currentJobStatus: null,
+      audioUrl: null,
+      error: null
+    });
+  }, [state.voices, state.voicePresets]);
+
