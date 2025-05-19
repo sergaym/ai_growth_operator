@@ -54,3 +54,38 @@ export function TextToSpeechDemo() {
     reset
   } = useTextToSpeech({ defaultLanguage: language });
 
+  // Handle language change
+  useEffect(() => {
+    fetchVoicePresets(language);
+  }, [language, fetchVoicePresets]);
+
+  // Handle audio play state
+  useEffect(() => {
+    if (!audioUrl) {
+      setIsPlaying(false);
+    }
+  }, [audioUrl]);
+
+  // Handle form submission
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const request: GenerateSpeechRequest = {
+      text,
+      language,
+      voice_settings: {
+        stability,
+        similarity_boost: similarityBoost
+      }
+    };
+    
+    // Set either voice_id or voice_preset based on the selected tab
+    if (selectedTab === 'voice-id' && selectedVoiceId) {
+      request.voice_id = selectedVoiceId;
+    } else if (selectedTab === 'preset' && selectedPreset) {
+      request.voice_preset = selectedPreset;
+    }
+    
+    await generateAudio(request);
+  };
+
