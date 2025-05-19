@@ -20,7 +20,6 @@ from app.services.image_to_video_service import image_to_video_service
 router = APIRouter()
 
 # In-memory job store - in production, use Redis or a database
-# Maps job_id to status information
 job_store = {}
 
 
@@ -35,9 +34,6 @@ async def process_video_generation(
     aspect_ratio: str = "16:9",
     negative_prompt: str = "blur, distort, and low quality",
     cfg_scale: float = 0.5,
-    save_video: bool = True,
-    upload_to_blob: bool = True,
-    source_image_id: Optional[str] = None,
     user_id: Optional[str] = None,
     workspace_id: Optional[str] = None
 ):
@@ -57,9 +53,8 @@ async def process_video_generation(
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
             cfg_scale=cfg_scale,
-            save_video=save_video,
-            upload_to_blob=upload_to_blob,
-            source_image_id=source_image_id,
+            save_video=True,
+            upload_to_blob=True,
             user_id=user_id,
             workspace_id=workspace_id
         )
@@ -128,119 +123,6 @@ async def generate_video(request: GenerateVideoRequest, background_tasks: Backgr
         aspect_ratio=request.aspect_ratio,
         negative_prompt=request.negative_prompt,
         cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
-        source_image_id=request.source_image_id,
-        user_id=request.user_id,
-        workspace_id=request.workspace_id
-    )
-    
-    # Return the job ID and status to the client
-    return {
-        "job_id": job_id,
-        "status": "pending",
-        "message": "Video generation started. Use /status/{job_id} to check status."
-    }
-
-
-@router.post("/from-url", response_model=Dict[str, Any], summary="Generate video from an image URL")
-async def generate_video_from_url(request: GenerateVideoFromUrlRequest, background_tasks: BackgroundTasks):
-    """
-    Generate a video from an image URL.
-    
-    This endpoint immediately returns a job ID and processes the video generation in the background.
-    Use the /status/{job_id} endpoint to check the status of the job.
-    
-    Args:
-        request: Request model containing image URL and video generation parameters
-        background_tasks: FastAPI background tasks
-        
-    Returns:
-        Dictionary with job ID and initial status
-    """
-    # Generate a unique job ID
-    job_id = str(uuid.uuid4())
-    
-    # Create a job record
-    job_store[job_id] = {
-        "status": "pending",
-        "created_at": time.time(),
-        "updated_at": time.time(),
-        "request": {
-            "image_url": request.image_url,
-            "prompt": request.prompt,
-            "duration": request.duration,
-            "aspect_ratio": request.aspect_ratio
-        }
-    }
-    
-    # Add the task to the background tasks
-    background_tasks.add_task(
-        process_video_generation,
-        job_id=job_id,
-        image_url=request.image_url,
-        prompt=request.prompt,
-        duration=request.duration,
-        aspect_ratio=request.aspect_ratio,
-        negative_prompt=request.negative_prompt,
-        cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
-        user_id=request.user_id,
-        workspace_id=request.workspace_id
-    )
-    
-    # Return the job ID and status to the client
-    return {
-        "job_id": job_id,
-        "status": "pending",
-        "message": "Video generation started. Use /status/{job_id} to check status."
-    }
-
-
-@router.post("/from-base64", response_model=Dict[str, Any], summary="Generate video from base64 image data")
-async def generate_video_from_base64(request: GenerateVideoFromBase64Request, background_tasks: BackgroundTasks):
-    """
-    Generate a video from base64-encoded image data.
-    
-    This endpoint immediately returns a job ID and processes the video generation in the background.
-    Use the /status/{job_id} endpoint to check the status of the job.
-    
-    Args:
-        request: Request model containing base64 image data and video generation parameters
-        background_tasks: FastAPI background tasks
-        
-    Returns:
-        Dictionary with job ID and initial status
-    """
-    # Generate a unique job ID
-    job_id = str(uuid.uuid4())
-    
-    # Create a job record
-    job_store[job_id] = {
-        "status": "pending",
-        "created_at": time.time(),
-        "updated_at": time.time(),
-        "request": {
-            "image_base64": "(base64 data)",
-            "prompt": request.prompt,
-            "duration": request.duration,
-            "aspect_ratio": request.aspect_ratio
-        }
-    }
-    
-    # Add the task to the background tasks
-    background_tasks.add_task(
-        process_video_generation,
-        job_id=job_id,
-        image_base64=request.image_base64,
-        prompt=request.prompt,
-        duration=request.duration,
-        aspect_ratio=request.aspect_ratio,
-        negative_prompt=request.negative_prompt,
-        cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
         user_id=request.user_id,
         workspace_id=request.workspace_id
     )
@@ -331,8 +213,6 @@ async def generate_video_from_file(
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
             cfg_scale=cfg_scale,
-            save_video=True,
-            upload_to_blob=True,
             user_id=user_id,
             workspace_id=workspace_id
         )
