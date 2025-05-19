@@ -75,3 +75,32 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
     };
   }, [defaultLanguage]);
 
+  // Fetch voices
+  const fetchVoices = useCallback(async (language?: string, gender?: string, accent?: string) => {
+    try {
+      setState(prev => ({ ...prev, isLoadingVoices: true, error: null }));
+      const result = await listVoices(language, gender, accent);
+      setState(prev => ({ ...prev, voices: result.voices, isLoadingVoices: false }));
+    } catch (err) {
+      console.error('Error fetching voices:', err);
+      setState(prev => ({
+        ...prev,
+        isLoadingVoices: false,
+        error: err instanceof Error ? err.message : 'Failed to fetch voices'
+      }));
+    }
+  }, []);
+
+  // Fetch voice presets for a language
+  const fetchVoicePresets = useCallback(async (language: string = 'english') => {
+    try {
+      const presets = await listVoicePresets(language);
+      setState(prev => ({ ...prev, voicePresets: presets }));
+    } catch (err) {
+      console.error('Error fetching voice presets:', err);
+      setState(prev => ({
+        ...prev,
+        error: err instanceof Error ? err.message : 'Failed to fetch voice presets'
+      }));
+    }
+  }, []);
