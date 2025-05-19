@@ -35,14 +35,18 @@ export function useImageToVideo() {
   // Check if the API is accessible
   const checkApiStatus = useCallback(async (): Promise<boolean> => {
     try {
-      const response = await fetch('/api/v1/image-to-video', {
+      // Use the status endpoint with a non-existing job ID to check if the API is responsive
+      // This will return a 404 for the job, but confirms the API is working
+      const response = await fetch('/api/v1/image-to-video/status/test-connection', {
         method: 'GET',
         headers: {
           'Accept': 'application/json'
         }
       });
       
-      if (!response.ok) {
+      // We consider 404 as success too since it means the API is reachable
+      // but the job ID doesn't exist
+      if (!response.ok && response.status !== 404) {
         console.warn(`Backend API check failed: ${response.status} ${response.statusText}`);
         return false;
       }
@@ -54,6 +58,52 @@ export function useImageToVideo() {
       return false;
     }
   }, []);
+
+  // Poll for job status - define this first so it can be used in the callbacks below
+  const pollJobStatus = useCallback(async (jobId: string) => {
+    try {
+      console.log(`Polling status for job: ${jobId}`);
+      const response = await fetch(`/api/v1/image-to-video/status/${jobId}`);
+      
+      if (!response.ok) {
+        const errorText = await response.text();
+        console.error(`Status polling error: ${errorText}`);
+        throw new Error(`Error checking status: ${response.status}`);
+      }
+      
+      const job: VideoJob = await response.json();
+      console.log(`Job ${jobId} status:`, job.status);
+      setCurrentJobStatus(job.status);
+      
+      if (job.status === 'completed' && job.result?.video_url) {
+        setVideoUrl(job.result.video_url);
+        if (job.result.preview_image_url) {
+          setPreviewUrl(job.result.preview_image_url);
+        }
+        setIsGenerating(false);
+        toast({
+          title: 'Video generation complete',
+          description: 'Your video has been generated successfully.',
+        });
+      } else if (job.status === 'error') {
+        setError(job.error || 'An error occurred during video generation');
+        setIsGenerating(false);
+        toast({
+          title: 'Generation failed',
+          description: job.error || 'An error occurred during video generation',
+          variant: 'destructive',
+        });
+      } else if (job.status === 'pending' || job.status === 'processing') {
+        // Continue polling every 2 seconds
+        setTimeout(() => pollJobStatus(jobId), 2000);
+      }
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Error checking job status';
+      console.error('Status polling error:', message);
+      setError(message);
+      setIsGenerating(false);
+    }
+  }, [toast]);
 
   // Generate video from URL
   const generateFromUrl = useCallback(async (request: VideoGenerationRequest) => {
@@ -80,15 +130,20 @@ export function useImageToVideo() {
       
       const data = await response.json();
       console.log('API success response:', data);
-      setCurrentJobId(data.job_id);
-      setCurrentJobStatus(data.status);
       
-      // Start polling for job status
+      // Immediately store the job ID and start polling
       if (data.job_id) {
+        setCurrentJobId(data.job_id);
+        setCurrentJobStatus(data.status || 'pending');
+        
+        // Start polling for job status immediately
         pollJobStatus(data.job_id);
+        
+        // Return the data to the caller so they have the job ID
+        return data;
+      } else {
+        throw new Error('No job ID returned from the server');
       }
-      
-      return data;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to start video generation';
       console.error('Video generation error:', message);
@@ -101,7 +156,7 @@ export function useImageToVideo() {
       });
       return null;
     }
-  }, [toast]);
+  }, [toast, pollJobStatus]);
 
   // Generate video from file
   const generateFromFile = useCallback(async (
@@ -118,7 +173,15 @@ export function useImageToVideo() {
       // Important: Append the file with the key 'file' as expected by the backend
       // Include the filename to ensure it's properly sent
       formData.append('file', file, file.name);
-     
+      
+      // Log file details for debugging
+      console.log('File being sent:', {
+        name: file.name,
+        size: file.size,
+        type: file.type,
+        lastModified: new Date(file.lastModified).toISOString()
+      });
+      
       // Add optional parameters as string values
       if (options.prompt) formData.append('prompt', options.prompt);
       if (options.duration) formData.append('duration', options.duration);
@@ -127,9 +190,22 @@ export function useImageToVideo() {
       if (options.cfg_scale !== undefined) formData.append('cfg_scale', options.cfg_scale.toString());
       
       // Log detailed information about the request for debugging
+      console.log('Preparing file upload request:', {
+        fileName: file.name,
+        fileSize: file.size,
+        fileType: file.type,
+        formDataEntries: Array.from(formData.entries()).map(([key, value]) => {
+          if (value instanceof File) {
+            return [key, `File: ${value.name} (${value.size} bytes, ${value.type})`];
+          }
+          return [key, value];
+        }),
+        options
+      });
       
       // Using fetch directly with FormData - no need to set Content-Type header
       // The browser will automatically set it with the correct boundary
+      console.log('Sending request to /api/v1/image-to-video/from-file...');
       const response = await fetch('/api/v1/image-to-video/from-file', {
         method: 'POST',
         body: formData
@@ -137,6 +213,7 @@ export function useImageToVideo() {
       });
       
       // Log response status for debugging
+      console.log(`File upload response status: ${response.status} ${response.statusText}`);
       
       // Check for successful response
       if (!response.ok) {
@@ -182,15 +259,20 @@ export function useImageToVideo() {
       // Parse successful response
       const data = await response.json();
       console.log('API success response:', data);
-      setCurrentJobId(data.job_id);
-      setCurrentJobStatus(data.status);
       
-      // Start polling for job status
+      // Immediately store the job ID and start polling
       if (data.job_id) {
+        setCurrentJobId(data.job_id);
+        setCurrentJobStatus(data.status || 'pending');
+        
+        // Start polling for job status immediately
         pollJobStatus(data.job_id);
+        
+        // Return the data to the caller so they have the job ID
+        return data;
+      } else {
+        throw new Error('No job ID returned from the server');
       }
-      
-      return data;
     } catch (err) {
       const message = err instanceof Error ? err.message : 'Failed to upload and process image';
       console.error('File upload error:', err);
@@ -203,53 +285,7 @@ export function useImageToVideo() {
       });
       return null;
     }
-  }, [toast]);
-
-  // Poll for job status
-  const pollJobStatus = useCallback(async (jobId: string) => {
-    try {
-      console.log(`Polling status for job: ${jobId}`);
-      const response = await fetch(`/api/v1/image-to-video/status/${jobId}`);
-      
-      if (!response.ok) {
-        const errorText = await response.text();
-        console.error(`Status polling error: ${errorText}`);
-        throw new Error(`Error checking status: ${response.status}`);
-      }
-      
-      const job: VideoJob = await response.json();
-      console.log(`Job ${jobId} status:`, job.status);
-      setCurrentJobStatus(job.status);
-      
-      if (job.status === 'completed' && job.result?.video_url) {
-        setVideoUrl(job.result.video_url);
-        if (job.result.preview_image_url) {
-          setPreviewUrl(job.result.preview_image_url);
-        }
-        setIsGenerating(false);
-        toast({
-          title: 'Video generation complete',
-          description: 'Your video has been generated successfully.',
-        });
-      } else if (job.status === 'error') {
-        setError(job.error || 'An error occurred during video generation');
-        setIsGenerating(false);
-        toast({
-          title: 'Generation failed',
-          description: job.error || 'An error occurred during video generation',
-          variant: 'destructive',
-        });
-      } else if (job.status === 'pending' || job.status === 'processing') {
-        // Continue polling every 2 seconds
-        setTimeout(() => pollJobStatus(jobId), 2000);
-      }
-    } catch (err) {
-      const message = err instanceof Error ? err.message : 'Error checking job status';
-      console.error('Status polling error:', message);
-      setError(message);
-      setIsGenerating(false);
-    }
-  }, [toast]);
+  }, [toast, pollJobStatus]);
 
   // Get job status manually
   const getJobStatus = useCallback(async (jobId: string) => {
