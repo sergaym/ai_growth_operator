@@ -1,116 +1,65 @@
 """
-Schemas for the Lipsync API endpoints.
-This module provides Pydantic models for request validation and response formatting.
+Schemas for Lipsync API endpoints in v1.
 """
 
-from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field, HttpUrl, validator
-from enum import Enum
+from typing import Optional, Dict, Any
+from pydantic import BaseModel, Field, validator, AnyHttpUrl
 
 
 class LipsyncRequest(BaseModel):
-    """
-    Request model for lipsync generation.
-    Either file paths or URLs must be provided for both video and audio.
-    """
-    video_path: Optional[str] = Field(
-        None,
-        description="Path to the local video file"
-    )
-    video_url: Optional[HttpUrl] = Field(
-        None,
-        description="URL to a hosted video file"
-    )
-    audio_path: Optional[str] = Field(
-        None,
-        description="Path to the local audio file"
-    )
-    audio_url: Optional[HttpUrl] = Field(
-        None,
-        description="URL to a hosted audio file"
-    )
-    save_result: bool = Field(
-        True,
-        description="Whether to save the result to disk"
-    )
+    """Request model for generating a lip-synced video."""
+    video_url: Optional[str] = Field(None, description="URL of the source video")
+    audio_url: Optional[str] = Field(None, description="URL of the audio to synchronize with")
+    video_path: Optional[str] = Field(None, description="Path to local video file (server-side only)")
+    audio_path: Optional[str] = Field(None, description="Path to local audio file (server-side only)")
+    save_result: bool = Field(True, description="Whether to save the result to disk")
+    user_id: Optional[str] = Field(None, description="ID of the user making the request")
+    workspace_id: Optional[str] = Field(None, description="ID of the workspace for the request")
     
-    @validator('video_path', 'video_url', 'audio_path', 'audio_url')
-    def validate_sources(cls, v, values, **kwargs):
-        # Get field name safely
-        field = kwargs.get('field')
-        field_name = getattr(field, 'name', None)
-        
-        # If we can't determine the field name, just return the value
-        if not field_name:
-            return v
-            
-        # Perform validation based on field name
-        if field_name == 'video_url' and not v and not values.get('video_path'):
-            raise ValueError("Either video_path or video_url must be provided")
-        
-        if field_name == 'audio_url' and not v and not values.get('audio_path'):
-            raise ValueError("Either audio_path or audio_url must be provided")
-            
+    @validator('video_url', 'audio_url')
+    def validate_urls(cls, v):
+        """Validate URLs while keeping them as strings for JSON serialization"""
+        if v is not None:
+            try:
+                # Try to construct an AnyHttpUrl to validate, but return original string
+                AnyHttpUrl(v)
+                return v
+            except Exception as e:
+                raise ValueError(f"Invalid URL: {str(e)}")
         return v
-    
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "video_url": "https://example.com/video.mp4",
-                "audio_url": "https://example.com/audio.mp3",
-                "save_result": True
-            }
-        }
 
 
 class LipsyncResponse(BaseModel):
-    """Response model for lipsync generation."""
-    request_id: str = Field(..., description="Unique ID for this request")
-    status: str = Field(..., description="Status of the request (completed or error)")
-    timestamp: int = Field(..., description="Unix timestamp when the request was processed")
-    output_video_url: Optional[HttpUrl] = Field(None, description="URL to the generated synchronized video")
-    output_video_path: Optional[str] = Field(None, description="Local path to the generated synchronized video if saved")
-    local_video_url: Optional[str] = Field(None, description="Local file URL scheme for the generated video if saved")
-    input: Dict[str, Any] = Field(..., description="Input parameters used for generation")
-    error: Optional[str] = Field(None, description="Error message if the request failed")
+    """Response model for lipsync generation requests."""
+    status: str = Field(..., description="Status of the operation (completed, error)")
+    video_url: Optional[str] = Field(None, description="URL to access the generated video")
+    preview_image_url: Optional[str] = Field(None, description="URL to a preview image of the video")
+    duration: Optional[float] = Field(None, description="Duration of the generated video in seconds")
+    error: Optional[str] = Field(None, description="Error message if status is 'error'")
+    created_at: Optional[float] = Field(None, description="Timestamp when the video was created")
+    local_path: Optional[str] = Field(None, description="Local path to saved video file")
+    blob_url: Optional[str] = Field(None, description="URL to video in blob storage if uploaded")
     
     class Config:
-        json_schema_extra = {
-            "example": {
-                "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-                "status": "completed",
-                "timestamp": 1620000000,
-                "output_video_url": "https://example.com/results/lipsync_result.mp4",
-                "output_video_path": "/path/to/output/lipsync_result.mp4",
-                "local_video_url": "file:///path/to/output/lipsync_result.mp4",
-                "input": {
-                    "video_url": "https://example.com/video.mp4",
-                    "audio_url": "https://example.com/audio.mp3"
-                }
-            }
-        }
+        """Pydantic config."""
+        extra = "allow"  # Allow additional fields that are not defined in the schema
 
 
 class LipsyncDocumentationExample(BaseModel):
-    """Example for API documentation."""
-    url_example: LipsyncRequest = Field(
-        default_factory=lambda: LipsyncRequest(
-            video_url="https://example.com/video.mp4",
-            audio_url="https://example.com/audio.mp3"
-        ),
-        description="Example using URLs"
+    """Examples for documentation and testing."""
+    url_example: Dict[str, Any] = Field(
+        {
+            "video_url": "https://example.com/source-video.mp4",
+            "audio_url": "https://example.com/audio-file.mp3",
+            "save_result": True
+        },
+        description="Example of using URLs for video and audio"
     )
-    path_example: LipsyncRequest = Field(
-        default_factory=lambda: LipsyncRequest(
-            video_path="/path/to/video.mp4",
-            audio_path="/path/to/audio.mp3"
-        ),
-        description="Example using file paths"
-    )
-    mixed_example: LipsyncRequest = Field(
-        default_factory=lambda: LipsyncRequest(
-            video_url="https://example.com/video.mp4",
-            audio_path="/path/to/audio.mp3"
-        ),
-        description="Example using mixed sources"
+    path_example: Dict[str, Any] = Field(
+        {
+            "video_path": "/path/to/local/video.mp4",
+            "audio_path": "/path/to/local/audio.mp3",
+            "save_result": True
+        },
+        description="Example of using local file paths (server-side only)"
     ) 
