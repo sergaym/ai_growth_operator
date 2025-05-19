@@ -41,37 +41,14 @@ class GenerateVideoRequest(BaseModel):
 
 
 class VideoGenerationResponse(BaseModel):
-    """Response model for video generation"""
-    request_id: str = Field(..., description="Unique ID for the request")
-    prompt: str = Field(..., description="Text prompt used for generation")
-    status: str = Field(..., description="Status of the generation (completed/error)")
-    timestamp: int = Field(..., description="Timestamp of the request")
-    parameters: VideoGenerationParameters = Field(..., description="Parameters used for generation")
-    video_url: Optional[str] = Field(None, description="URL to the generated video")
-    video_path: Optional[str] = Field(None, description="Local path to the saved video file")
-    preview_image_url: Optional[str] = Field(None, description="URL to the preview image")
-    blob_url: Optional[str] = Field(None, description="Blob storage URL to the video")
-    db_id: Optional[str] = Field(None, description="Database ID of the video record")
-    source_image_id: Optional[str] = Field(None, description="ID of the source image used")
-    error: Optional[str] = Field(None, description="Error message if generation failed")
+    """Response model for video generation requests."""
+    job_id: str = Field(..., description="Unique ID for this job")
+    status: str = Field(..., description="Status of the job (pending, processing, completed, error)")
     
-    class Config:
-        json_schema_extra = {
-            "example": {
-                "request_id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
-                "prompt": "Realistic, cinematic movement, high quality",
-                "status": "completed",
-                "timestamp": 1620000000,
-                "parameters": {
-                    "duration": "5",
-                    "aspect_ratio": "16:9",
-                    "cfg_scale": 0.5,
-                    "prompt": "Realistic, cinematic movement, high quality",
-                    "negative_prompt": "blur, distort, and low quality"
-                },
-                "video_url": "https://example.com/videos/generated.mp4",
-                "preview_image_url": "https://example.com/videos/preview.jpg",
-                "blob_url": "https://example.blob.core.windows.net/videos/generated.mp4",
-                "db_id": "550e8400-e29b-41d4-a716-446655440000"
-            }
-        } 
+    # Optional fields that may be present depending on the status
+    message: Optional[str] = Field(None, description="Information message")
+    error: Optional[str] = Field(None, description="Error message if status is 'error'")
+    video_url: Optional[str] = Field(None, description="URL to the generated video if available")
+    preview_image_url: Optional[str] = Field(None, description="URL to a preview image of the video")
+    created_at: Optional[float] = Field(None, description="Timestamp when the job was created")
+    updated_at: Optional[float] = Field(None, description="Timestamp when the job was last updated") 
