@@ -35,39 +35,26 @@ export interface GenerateSpeechRequest {
   language?: string;
   model_id?: string;
   voice_settings?: VoiceSettings;
+  output_format?: string;
   user_id?: string;
   workspace_id?: string;
 }
 
 export interface SpeechGenerationResponse {
-  audio_url: string;
-  duration_seconds?: number;
-  text: string;
-  voice_id: string;
-  voice_name?: string;
-  model_id: string;
-  
-  // Frontend-specific fields for backward compatibility
-  request_id?: string;
+  audio_url?: string;
   blob_url?: string;
-  local_path?: string;
-  status?: string;
+  status: string;
   error?: string;
-  format?: string;
+  request_id: string;
+  file_name?: string;
 }
 
-export interface VoiceResponse {
-  voice_id: string;
-  name: string;
-  description?: string;
-  preview_url?: string;
-  languages: string[];
-  gender?: string;
-  age?: string;
-  accent?: string;
-  is_cloned: boolean;
-}
-
-export interface VoicesListResponse {
-  voices: VoiceResponse[];
+export interface JobStatusResponse {
+  job_id: string;
+  status: "pending" | "processing" | "completed" | "error";
+  created_at: number;
+  updated_at: number;
+  message?: string;
+  result?: SpeechGenerationResponse;
+  error?: string;
 } 
