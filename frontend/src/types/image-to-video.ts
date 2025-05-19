@@ -45,6 +45,19 @@ export interface GenerateVideoFromBase64Request {
   workspace_id?: string;
 }
 
+export interface VideoJobStatus {
+  job_id: string;
+  status: 'pending' | 'processing' | 'completed' | 'error';
+  created_at?: number;
+  updated_at?: number;
+  result?: {
+    video_url?: string;
+    preview_image_url?: string;
+    [key: string]: any;
+  };
+  error?: string;
+}
+
 export interface VideoGenerationResponse {
   request_id: string;
   prompt: string;
