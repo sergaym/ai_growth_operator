@@ -19,3 +19,38 @@ import { Loader2, Volume2, AlertCircle, Pause, Play, RefreshCw, Info } from 'luc
 import { Badge } from '@/components/ui/badge';
 import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 
+export function TextToSpeechDemo() {
+  // Voice selection state
+  const [selectedVoiceId, setSelectedVoiceId] = useState<string>('');
+  const [selectedPreset, setSelectedPreset] = useState<string>('');
+  const [selectedTab, setSelectedTab] = useState<string>('voice-id');
+  const [language, setLanguage] = useState<string>('english');
+  
+  // Text input state
+  const [text, setText] = useState<string>('');
+  
+  // Voice settings
+  const [stability, setStability] = useState<number>(0.5);
+  const [similarityBoost, setSimilarityBoost] = useState<number>(0.75);
+  
+  // Player state
+  const [isPlaying, setIsPlaying] = useState<boolean>(false);
+  
+  // Use our custom hook
+  const {
+    voices,
+    voicePresets,
+    isLoadingVoices,
+    isGenerating,
+    currentJobId,
+    currentJobStatus,
+    audioUrl,
+    error,
+    fetchVoices,
+    fetchVoicePresets,
+    generateAudio,
+    playAudio,
+    pauseAudio,
+    reset
+  } = useTextToSpeech({ defaultLanguage: language });
+
