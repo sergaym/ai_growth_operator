@@ -9,7 +9,7 @@ import time
 from typing import Optional, Dict, Any
 
 from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoRequest,
@@ -165,19 +165,60 @@ async def generate_video_from_file(
     Returns:
         Dictionary with job ID and initial status
     """
-    # Validate parameters
+    # Manual validation to prevent FastAPI validation errors with binary data
+    if not file:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "No file provided"}
+        )
+        
+    # Validate parameters before FastAPI tries to validate
     if duration not in ["5", "10"]:
-        raise HTTPException(status_code=400, detail="Duration must be '5' or '10'")
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Duration must be '5' or '10'"}
+        )
     
     if aspect_ratio not in ["16:9", "9:16", "1:1"]:
-        raise HTTPException(status_code=400, detail="Aspect ratio must be '16:9', '9:16', or '1:1'")
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Aspect ratio must be '16:9', '9:16', or '1:1'"}
+        )
     
-    if cfg_scale < 0.0 or cfg_scale > 1.0:
-        raise HTTPException(status_code=400, detail="cfg_scale must be between 0.0 and 1.0")
+    try:
+        cfg_value = float(cfg_scale)
+        if cfg_value < 0.0 or cfg_value > 1.0:
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "cfg_scale must be between 0.0 and 1.0"}
+            )
+    except (ValueError, TypeError):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "cfg_scale must be a valid number"}
+        )
     
     try:
         # Read the file content
         file_content = await file.read()
+        
+        # Check if the file is empty
+        if not file_content:
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Uploaded file is empty"}
+            )
+            
+        # Check file type by magic numbers/signatures
+        # PNG signature starts with bytes [137, 80, 78, 71]
+        # JPEG signature starts with bytes [255, 216]
+        if not (file_content.startswith(b'\x89PNG') or 
+                file_content.startswith(b'\xff\xd8') or
+                file_content.startswith(b'RIFF') and b'WEBP' in file_content[:12]):  # WEBP
+            return JSONResponse(
+                status_code=415,
+                content={"detail": "File must be a valid PNG, JPEG, or WEBP image"}
+            )
         
         # Save to temporary file
         temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "temp")
@@ -212,7 +253,7 @@ async def generate_video_from_file(
             duration=duration,
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
-            cfg_scale=cfg_scale,
+            cfg_scale=cfg_value,
             user_id=user_id,
             workspace_id=workspace_id
         )
@@ -224,10 +265,11 @@ async def generate_video_from_file(
             "message": "Video generation started. Use /status/{job_id} to check status."
         }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process image upload: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Failed to process image upload: {str(e)}"}
+        )
 
 
 @router.get("/status/{job_id}", response_model=Dict[str, Any], summary="Get status of a video generation job")
