@@ -5,21 +5,17 @@ These endpoints handle video generation from images.
 
 import os
 import uuid
-import json
 import time
 from typing import Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Query, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
 from fastapi.responses import FileResponse
 
 from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoRequest,
-    GenerateVideoFromUrlRequest,
-    GenerateVideoFromBase64Request,
     VideoGenerationResponse
 )
 from app.services.image_to_video_service import image_to_video_service
-from app.db import get_db
 
 router = APIRouter()
 
