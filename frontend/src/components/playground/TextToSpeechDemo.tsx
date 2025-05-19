@@ -117,3 +117,16 @@ export function TextToSpeechDemo() {
     ));
   };
 
+  // Render preset options
+  const renderPresetOptions = () => {
+    if (Object.keys(voicePresets).length === 0) {
+      return <SelectItem value="none" disabled>No presets available</SelectItem>;
+    }
+    
+    return Object.entries(voicePresets).map(([name, id]) => (
+      <SelectItem key={id} value={name}>
+        {name}
+      </SelectItem>
+    ));
+  };
+
