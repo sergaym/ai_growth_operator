@@ -52,3 +52,26 @@ export function useTextToSpeech(options: UseTextToSpeechOptions = {}) {
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Load voices when component mounts
+  useEffect(() => {
+    fetchVoices();
+    fetchVoicePresets(defaultLanguage);
+    
+    // Create audio element
+    if (typeof window !== 'undefined') {
+      audioRef.current = new Audio();
+    }
+    
+    // Cleanup polling and audio on unmount
+    return () => {
+      if (pollingTimerRef.current) {
+        clearTimeout(pollingTimerRef.current);
+      }
+      
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, [defaultLanguage]);
+
