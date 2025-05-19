@@ -9,7 +9,13 @@ export * from './api-utils';
 export * from './text-to-image-service';
 
 // Export text-to-speech services
-export * from './text-to-speech-service';
+export {
+  listVoices,
+  listVoicePresets,
+  generateSpeech,
+  checkJobStatus,
+  getAudioUrl
+} from './text-to-speech-service';
 
 // Export image-to-video services
 export * from './image-to-video-service';
