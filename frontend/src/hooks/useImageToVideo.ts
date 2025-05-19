@@ -32,6 +32,29 @@ export function useImageToVideo() {
   const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
 
+  // Check if the API is accessible
+  const checkApiStatus = useCallback(async (): Promise<boolean> => {
+    try {
+      const response = await fetch('/api/v1/image-to-video', {
+        method: 'GET',
+        headers: {
+          'Accept': 'application/json'
+        }
+      });
+      
+      if (!response.ok) {
+        console.warn(`Backend API check failed: ${response.status} ${response.statusText}`);
+        return false;
+      }
+      
+      console.log('Backend API is accessible');
+      return true;
+    } catch (err) {
+      console.error('Failed to connect to backend API:', err);
+      return false;
+    }
+  }, []);
+
   // Generate video from URL
   const generateFromUrl = useCallback(async (request: VideoGenerationRequest) => {
     setError(null);
@@ -265,5 +288,6 @@ export function useImageToVideo() {
     getJobStatus,
     pollJobStatus,
     reset,
+    checkApiStatus,
   };
 } 
