@@ -13,6 +13,7 @@ import type { SpeechGenerationResponse } from '@/types/text-to-speech';
 import type { VideoGenerationResponse } from '@/types/image-to-video';
 import type { LipsyncResponse, LipsyncRequest } from '@/types/lipsync';
 import type { ApiResponse } from '@/types/api';
+import { apiClient } from './apiClient';
 
 /**
  * Helper function for making API requests
@@ -24,30 +25,10 @@ async function fetchFromAPI<T>(
   url: string, 
   options: RequestInit = {}
 ): Promise<T> {
-  const defaultHeaders = {
-    'Content-Type': 'application/json',
-  };
-  
   try {
-    console.log(`Calling API: ${url}`, options);
+    // Use the apiClient with automatic token refresh
+    const responseData = await apiClient<T>(url, options);
     
-    const response = await fetch(url, {
-      ...options,
-      headers: {
-        ...defaultHeaders,
-        ...options.headers,
-      },
-    });
-  
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({}));
-      const errorMessage = errorData.detail || `API Error: ${response.status} - ${response.statusText}`;
-      console.error(`API error for ${url}:`, errorMessage);
-      throw new Error(errorMessage);
-    }
-    
-    const responseData = await response.json();
-    console.log(`API response from ${url}:`, responseData);
     return responseData;
   } catch (error) {
     // Enhanced error handling for network issues

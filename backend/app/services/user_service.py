@@ -1,5 +1,5 @@
 from sqlalchemy.orm import Session
-from app.models import User, Workspace
+from app.models import User, Workspace, UserWorkspace
 from app.schemas.user_schemas import UserCreate
 
 class UserService:
@@ -25,3 +25,7 @@ class UserService:
     @staticmethod
     def get_user_by_id(db: Session, user_id: int) -> User:
         return db.query(User).filter(User.id == user_id).first()
+
+    @staticmethod
+    def get_user_workspaces(db: Session, user_id: int) -> list:
+        return db.query(Workspace).join(UserWorkspace).filter(UserWorkspace.user_id == user_id).all()

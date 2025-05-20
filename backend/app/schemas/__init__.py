@@ -13,6 +13,26 @@ from app.api.v1.schemas.text_to_image_schemas import (
     ImageGenerationResponse,
 )
 
+# Workspace schemas
+from app.schemas.models import (
+    WorkspaceResponse,
+    # Asset schemas
+    BaseAsset,
+    Image,
+    Video,
+    Audio,
+    LipsyncVideo,
+    # Video generation schemas
+    VideoStatus,
+    VideoGeneration,
+    # Heygen avatar video schemas
+    HeygenAvatarVideo,
+    # User and workspace schemas
+    UserWorkspace,
+    Workspace,
+    User,
+)
+
 # Legacy schemas (re-export from v0)
 from app.api.v0.schemas import (
     # Idea generation schemas

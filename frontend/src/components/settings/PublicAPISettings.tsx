@@ -9,7 +9,11 @@ import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/components/ui/use-toast";
 import { cn } from "@/lib/utils";
 
-export function PublicAPISettings() {
+interface PublicAPISettingsProps {
+  workspaceId?: string;
+}
+
+export function PublicAPISettings({ workspaceId }: PublicAPISettingsProps) {
   const [apiKeyEnabled, setApiKeyEnabled] = useState(true);
   const [apiKey, setApiKey] = useState('sk_live_34SikJFAJi29FAJSFikafj392fji392');
   const [showApiKey, setShowApiKey] = useState(false);
