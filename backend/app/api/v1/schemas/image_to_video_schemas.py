@@ -71,4 +71,50 @@ class VideoGenerationResponse(BaseModel):
     video_url: Optional[str] = Field(None, description="URL to the generated video if available")
     preview_image_url: Optional[str] = Field(None, description="URL to a preview image of the video")
     created_at: Optional[float] = Field(None, description="Timestamp when the job was created")
-    updated_at: Optional[float] = Field(None, description="Timestamp when the job was last updated") 
+    updated_at: Optional[float] = Field(None, description="Timestamp when the job was last updated")
+
+class VideoResponse(BaseModel):
+    """Response model for single video information."""
+    id: str = Field(..., description="Unique ID of the video")
+    prompt: Optional[str] = Field(None, description="Text prompt used to generate the video")
+    duration: Optional[str] = Field(None, description="Duration of the video")
+    aspect_ratio: Optional[str] = Field(None, description="Aspect ratio of the video")
+    
+    video_url: Optional[str] = Field(None, description="URL to the video file")
+    local_url: Optional[str] = Field(None, description="Local URL to the video file")
+    blob_url: Optional[str] = Field(None, description="Blob storage URL to the video file")
+    
+    preview_image_url: Optional[str] = Field(None, description="URL to a preview image of the video")
+    
+    status: str = Field(..., description="Status of the video generation")
+    
+    user_id: Optional[str] = Field(None, description="ID of the user who created the video")
+    workspace_id: Optional[str] = Field(None, description="ID of the workspace the video belongs to")
+    
+    source_image_id: Optional[str] = Field(None, description="ID of the source image used to generate the video")
+    
+    created_at: Optional[str] = Field(None, description="Timestamp when the video was created")
+    updated_at: Optional[str] = Field(None, description="Timestamp when the video was last updated")
+    
+    metadata_json: Optional[Dict[str, Any]] = Field(None, description="Additional metadata about the video")
+    
+    @model_validator(mode='before')
+    @classmethod
+    def convert_datetime_to_str(cls, data: Dict[str, Any]) -> Dict[str, Any]:
+        """Convert datetime objects to strings."""
+        if not isinstance(data, dict):
+            return data
+            
+        # Convert created_at from datetime to string if present
+        if data.get('created_at') and isinstance(data['created_at'], datetime):
+            data['created_at'] = data['created_at'].isoformat()
+            
+        # Convert updated_at from datetime to string if present
+        if data.get('updated_at') and isinstance(data['updated_at'], datetime):
+            data['updated_at'] = data['updated_at'].isoformat()
+            
+        return data
+    
+    class Config:
+        """Pydantic config."""
+        from_attributes = True
