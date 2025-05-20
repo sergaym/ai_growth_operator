@@ -55,7 +55,7 @@ export function NavUser({
   React.useEffect(() => {
     const fetchUserProfileIfNeeded = async () => {
       // Only fetch if authenticated and we haven't fetched before
-      if (authUser.isAuthenticated && !profileFetchedRef.current && !authUser.first_name) {
+      if (authUser.isAuthenticated && !profileFetchedRef.current && !authUser.user?.first_name) {
         profileFetchedRef.current = true
         const token = getAccessToken()
         if (token) {
@@ -65,25 +65,27 @@ export function NavUser({
     }
     
     fetchUserProfileIfNeeded()
-  }, [getAccessToken, getUserProfile])
+  }, [getAccessToken, getUserProfile, authUser])
   
   // Update local user state when auth user changes (separate from fetching)
   React.useEffect(() => {
-    if (authUser.isAuthenticated && (authUser.first_name || authUser.email)) {
+    const userProfile = authUser.user;
+    if (authUser.isAuthenticated && userProfile && (userProfile.first_name || userProfile.email)) {
       setUser(prevUser => ({
-        name: authUser.first_name && authUser.last_name 
-          ? `${authUser.first_name} ${authUser.last_name}` 
+        name: userProfile.first_name && userProfile.last_name 
+          ? `${userProfile.first_name} ${userProfile.last_name}` 
           : prevUser.name,
-        email: authUser.email || prevUser.email,
+        email: userProfile.email || prevUser.email,
         avatar: prevUser.avatar // Keep existing avatar
       }))
     }
-  }, [authUser.isAuthenticated, authUser.first_name, authUser.last_name, authUser.email])
+  }, [authUser.isAuthenticated, authUser.user])
   
   // Get initials for avatar fallback
   const getInitials = () => {
-    if (authUser.first_name && authUser.last_name) {
-      return `${authUser.first_name[0]}${authUser.last_name[0]}`.toUpperCase()
+    const userProfile = authUser.user;
+    if (userProfile?.first_name && userProfile?.last_name) {
+      return `${userProfile.first_name[0]}${userProfile.last_name[0]}`.toUpperCase()
     }
     if (user.name) {
       return user.name.split(' ')

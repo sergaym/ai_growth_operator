@@ -8,6 +8,7 @@ import { MembersSettings } from "@/components/settings/MembersSettings";
 import { PublicAPISettings } from "@/components/settings/PublicAPISettings";
 import { Badge } from "@/components/ui/badge";
 import { useWorkspaces } from '@/hooks/useWorkspace';
+import { Alert, AlertDescription } from "@/components/ui/alert";
 
 export default function WorkspaceSettingsPage() {
   const params = useParams();
@@ -19,63 +20,53 @@ export default function WorkspaceSettingsPage() {
   // Find the current workspace based on the URL parameter
   const currentWorkspace = workspaces.find(ws => ws.id.toString() == workspaceId);
 
-  // Show loading state while fetching workspaces
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  // Create a safe workspace object with default values if currentWorkspace is not found
+  const workspace = currentWorkspace 
+    ? currentWorkspace
+    : { id: workspaceId, name: "Workspace" };
 
-  // If the workspace isn't found in the user's workspaces, show an error
-  if (!loading && workspaces.length > 0 && !currentWorkspace) {
-    console.log("SHOWING ERROR")
-    console.log(workspaces)
-    console.log(workspaceId)
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 rounded-lg p-6 text-center">
-          <h2 className="text-red-600 text-lg font-semibold mb-2">Workspace Not Found</h2>
-          <p className="text-red-500">The workspace you're trying to access doesn't exist or you don't have permission to view it.</p>
-        </div>
-      </div>
-    );
-  }
-
-  if (!currentWorkspace) return null; // type guard for PlaygroundLayout
+  // Error message if workspace not found
+  const workspaceError = !loading && workspaces.length > 0 && !currentWorkspace 
+    ? "The workspace you're trying to access doesn't exist or you don't have permission to view it."
+    : null;
 
   return (
     <PlaygroundLayout
-      title={`${currentWorkspace.name} Settings`}
+      title={`${workspace.name} Settings`}
       description="Configure your workspace, team members, and application settings."
-      currentWorkspace={currentWorkspace}
+      currentWorkspace={workspace}
     >
       <div className="space-y-8">
-        <Tabs defaultValue="general" className="w-full">
-          <TabsList className="grid w-full grid-cols-3 max-w-md mb-4">
-            <TabsTrigger value="general">Workspace</TabsTrigger>
-            <TabsTrigger value="members">Team Members</TabsTrigger>
-            <TabsTrigger value="api" disabled className="relative">
-              Public API
-              <Badge variant="outline" className="ml-2 bg-zinc-100 text-zinc-500 text-[10px] py-0 px-1.5 absolute -top-2 -right-2">
-                Soon
-              </Badge>
-            </TabsTrigger>
-          </TabsList>
-          
-          <TabsContent value="general">
-            <GeneralSettings workspaceId={workspaceId} />
-          </TabsContent>
-          
-          <TabsContent value="members">
-            <MembersSettings workspaceId={workspaceId} />
-          </TabsContent>
-          
-          <TabsContent value="api">
-            <PublicAPISettings workspaceId={workspaceId} />
-          </TabsContent>
-        </Tabs>
+        {workspaceError ? (
+          <Alert variant="destructive">
+            <AlertDescription>{workspaceError}</AlertDescription>
+          </Alert>
+        ) : (
+          <Tabs defaultValue="general" className="w-full">
+            <TabsList className="grid w-full grid-cols-3 max-w-md mb-4">
+              <TabsTrigger value="general">Workspace</TabsTrigger>
+              <TabsTrigger value="members">Team Members</TabsTrigger>
+              <TabsTrigger value="api" disabled className="relative">
+                Public API
+                <Badge variant="outline" className="ml-2 bg-zinc-100 text-zinc-500 text-[10px] py-0 px-1.5 absolute -top-2 -right-2">
+                  Soon
+                </Badge>
+              </TabsTrigger>
+            </TabsList>
+            
+            <TabsContent value="general">
+              <GeneralSettings workspaceId={workspaceId} />
+            </TabsContent>
+            
+            <TabsContent value="members">
+              <MembersSettings workspaceId={workspaceId} />
+            </TabsContent>
+            
+            <TabsContent value="api">
+              <PublicAPISettings workspaceId={workspaceId} />
+            </TabsContent>
+          </Tabs>
+        )}
       </div>
     </PlaygroundLayout>
   );

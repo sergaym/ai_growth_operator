@@ -21,11 +21,15 @@ from .text_to_speech_schemas import (
     VoiceResponse,
     VoicesListResponse,
     JobStatusResponse,
+    AudioResponse,
+    AudioListResponse,
 )
 
 from .image_to_video_schemas import (
     GenerateVideoRequest,
     VideoGenerationResponse,
+    VideoResponse,
+    VideoListResponse,
 )
 
 from .lipsync_schemas import (
@@ -52,10 +56,14 @@ __all__ = [
     "VoiceResponse",
     "VoicesListResponse",
     "JobStatusResponse",
+    "AudioResponse",
+    "AudioListResponse",
     
     # Image-to-Video schemas
     "GenerateVideoRequest",
     "VideoGenerationResponse",
+    "VideoResponse",
+    "VideoListResponse",
     
     # Lipsync schemas
     "LipsyncRequest",

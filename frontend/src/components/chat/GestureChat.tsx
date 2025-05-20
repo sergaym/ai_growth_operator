@@ -22,19 +22,45 @@ interface Actor {
   pro?: boolean;
 }
 
-export function GestureChat() {
+interface GestureChatProps {
+  projectId?: string;
+  onVideoGenerated?: (url: string) => void;
+}
+
+export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
   const [gesture, setGesture] = useState('');
   const [messageType, setMessageType] = useState<MessageType>('gesture');
   const [speechType, setSpeechType] = useState<SpeechType>('tts');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
   const [selectedActors, setSelectedActors] = useState<Actor[]>([]);
-
+  const [isGenerating, setIsGenerating] = useState(false);
 
   const handleSend = () => {
     if (inputValue.trim()) {
       // Handle send message here
-      console.log('Sending:', { type: messageType, speechType, gesture, message: inputValue, selectedActors });
+      console.log('Sending:', { 
+        projectId,
+        type: messageType, 
+        speechType, 
+        gesture, 
+        message: inputValue, 
+        selectedActors 
+      });
+      
+      // Simulate video generation
+      if (onVideoGenerated) {
+        setIsGenerating(true);
+        
+        // Mock API call - replace with real API call
+        setTimeout(() => {
+          // Example video URL - in a real app this would come from the API
+          const mockVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+          onVideoGenerated(mockVideoUrl);
+          setIsGenerating(false);
+        }, 2000);
+      }
+      
       setInputValue('');
     }
   };
@@ -99,7 +125,8 @@ export function GestureChat() {
               />
               <SendButton
                 onClick={handleSend}
-                disabled={!inputValue.trim()}
+                disabled={!inputValue.trim() || isGenerating}
+                loading={isGenerating}
                 className="absolute bottom-0 right-0"
               />
             </div>
@@ -146,6 +173,7 @@ export function GestureChat() {
               <button 
                 onClick={handleAddActors}
                 className={buttonStyles}
+                disabled={isGenerating}
               >
                 <UserPlus className="h-4 w-4" />
                 Add actors

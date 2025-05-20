@@ -240,4 +240,80 @@ class VoicesListResponse(BaseModel):
                     }
                 ]
             }
+        }
+
+
+class AudioResponse(BaseModel):
+    """Response model for audio information"""
+    id: str = Field(..., description="Unique ID of the audio")
+    text: str = Field(..., description="Text used to generate the speech")
+    voice_id: str = Field(..., description="Voice ID used for generation")
+    voice_name: Optional[str] = Field(None, description="Name of the voice used")
+    model_id: str = Field(..., description="Model ID used for generation")
+    language: Optional[str] = Field(None, description="Language used for generation")
+    status: str = Field(..., description="Status of the generation (e.g., 'completed', 'failed')")
+    audio_format: Optional[str] = Field(None, description="Audio format (e.g., 'mp3', 'wav')")
+    duration_seconds: Optional[float] = Field(None, description="Duration of the audio in seconds")
+    file_path: Optional[str] = Field(None, description="Path to the audio file on the server")
+    local_url: Optional[str] = Field(None, description="Local URL to the audio file")
+    blob_url: Optional[str] = Field(None, description="URL to the audio file in blob storage")
+    user_id: Optional[str] = Field(None, description="ID of the user who generated the audio")
+    workspace_id: Optional[str] = Field(None, description="ID of the workspace the audio belongs to")
+    created_at: Optional[str] = Field(None, description="Timestamp when the audio was created")
+    updated_at: Optional[str] = Field(None, description="Timestamp when the audio was last updated")
+    metadata_json: Optional[Dict[str, Any]] = Field(None, description="Additional metadata")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                "text": "Hello, welcome to our platform. How can I help you today?",
+                "voice_id": "EXAVITQu4vr4xnSDxMaL",
+                "voice_name": "Bella",
+                "model_id": "eleven_multilingual_v2",
+                "language": "english",
+                "status": "completed",
+                "audio_format": "mp3",
+                "duration_seconds": 5.2,
+                "blob_url": "https://storage.example.com/audio/speech_123456.mp3",
+                "created_at": "2023-05-10T15:30:45Z",
+                "updated_at": "2023-05-10T15:30:50Z"
+            }
+        }
+
+
+class AudioListResponse(BaseModel):
+    """Response model for listing audio files"""
+    items: List[AudioResponse] = Field(..., description="List of audio files")
+    total: int = Field(..., description="Total number of audio files matching query parameters")
+    skip: int = Field(..., description="Number of items skipped (for pagination)")
+    limit: int = Field(..., description="Maximum number of items per page")
+    
+    class Config:
+        json_schema_extra = {
+            "example": {
+                "items": [
+                    {
+                        "id": "f47ac10b-58cc-4372-a567-0e02b2c3d479",
+                        "text": "Hello, welcome to our platform. How can I help you today?",
+                        "voice_id": "EXAVITQu4vr4xnSDxMaL",
+                        "voice_name": "Bella",
+                        "model_id": "eleven_multilingual_v2",
+                        "status": "completed",
+                        "created_at": "2023-05-10T15:30:45Z"
+                    },
+                    {
+                        "id": "e26b7c6a-4e2d-4b5c-8d9f-1a3b5c7d9e2f",
+                        "text": "Thank you for using our service. Have a great day!",
+                        "voice_id": "ErXwobaYiN019PkySvjV",
+                        "voice_name": "Antoni",
+                        "model_id": "eleven_multilingual_v2",
+                        "status": "completed",
+                        "created_at": "2023-05-10T14:25:30Z"
+                    }
+                ],
+                "total": 42,
+                "skip": 0,
+                "limit": 10
+            }
         } 

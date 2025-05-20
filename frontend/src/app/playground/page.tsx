@@ -65,6 +65,28 @@ interface Workspace {
   type?: string;
 }
 
+// Skeleton loader component for workspace cards
+function WorkspaceSkeleton() {
+  return (
+    <Card className="overflow-hidden border border-gray-200">
+      <CardContent className="p-0">
+        <div className="h-32 bg-gradient-to-r from-gray-100 to-gray-50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/60 to-transparent animate-shimmer-slow" style={{ backgroundSize: '200% 100%' }}></div>
+          <div className="absolute inset-0 flex items-center justify-center">
+            <div className="w-16 h-16 rounded-full bg-white/80 flex items-center justify-center">
+              <div className="w-8 h-4 bg-gray-200 rounded"></div>
+            </div>
+          </div>
+        </div>
+        <div className="p-4">
+          <div className="h-5 bg-gray-200 rounded w-2/3 mb-2"></div>
+          <div className="h-4 bg-gray-100 rounded w-1/2"></div>
+        </div>
+      </CardContent>
+    </Card>
+  );
+}
+
 export default function PlaygroundOverview() {
   const { workspaces, loading, error } = useWorkspaces();
   const [searchQuery, setSearchQuery] = useState("");
@@ -82,57 +104,55 @@ export default function PlaygroundOverview() {
     alert('Create new workspace - to be implemented');
   };
 
-  // Show loading spinner while fetching workspaces
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
-
-  // Show error message if there's an error fetching workspaces
-  if (error) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 rounded-lg p-6 text-center">
-          <h2 className="text-red-600 text-lg font-semibold mb-2">Error</h2>
-          <p className="text-red-500">{error}</p>
-        </div>
-      </div>
-    );
-  }
-
   return (
     <PlaygroundLayout
       title="Workspaces"
       description="Select a workspace or create a new one to get started."
       currentWorkspace={{ id: '', name: 'Select a workspace' }}
     >
-
-        {/* Search and Action Bar */}
-        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-          <div className="relative flex-1 max-w-md">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-            <Input
-              type="text"
-              placeholder="Search workspaces..."
-              className="pl-9 pr-4"
-              value={searchQuery}
-              onChange={(e) => setSearchQuery(e.target.value)}
-            />
-          </div>
-          <div className="flex gap-2">
-            <Button size="sm" className="gap-1" onClick={handleNewWorkspace}>
-              <PlusCircle className="h-4 w-4" />
-              <span>New Workspace</span>
-            </Button>
-          </div>
+      {/* Top loading bar - visible only during loading */}
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-0.5 z-50">
+          <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
         </div>
+      )}
 
-        {/* Workspaces Grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredWorkspaces && filteredWorkspaces.length > 0 ? filteredWorkspaces.map((workspace: Workspace) => (
+      {/* Search and Action Bar */}
+      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+        <div className="relative flex-1 max-w-md">
+          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+          <Input
+            type="text"
+            placeholder="Search workspaces..."
+            className="pl-9 pr-4"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+          />
+        </div>
+        <div className="flex gap-2">
+          <Button size="sm" className="gap-1" onClick={handleNewWorkspace}>
+            <PlusCircle className="h-4 w-4" />
+            <span>New Workspace</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* Error state */}
+      {error && (
+        <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+          <p className="font-medium text-sm">Error: {error}</p>
+        </div>
+      )}
+
+      {/* Workspaces Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {loading ? (
+          // Skeleton loaders for workspaces
+          Array(6).fill(0).map((_, index) => (
+            <WorkspaceSkeleton key={`skeleton-${index}`} />
+          ))
+        ) : filteredWorkspaces && filteredWorkspaces.length > 0 ? (
+          filteredWorkspaces.map((workspace: Workspace) => (
             <Card key={workspace.id} className="overflow-hidden border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer">
               <CardContent className="p-0">
                 <a href={`/playground/${workspace.id}`} className="block">
@@ -166,19 +186,20 @@ export default function PlaygroundOverview() {
                 </a>
               </CardContent>
             </Card>
-          )) : (
-            <div className="col-span-3 bg-gray-50 rounded-lg p-8 text-center">
-              <div className="mb-4">
-                <FolderPlus className="h-12 w-12 text-gray-300 mx-auto" />
-              </div>
-              <h3 className="text-lg font-medium text-gray-700">No workspaces found</h3>
-              <p className="text-sm text-gray-500 mt-1">Create your first workspace to get started.</p>
-              <Button className="mt-4" onClick={handleNewWorkspace}>
-                Create Workspace
-              </Button>
+          ))
+        ) : (
+          <div className="col-span-3 bg-gray-50 rounded-lg p-8 text-center">
+            <div className="mb-4">
+              <FolderPlus className="h-12 w-12 text-gray-300 mx-auto" />
             </div>
-          )}
-        </div>
+            <h3 className="text-lg font-medium text-gray-700">No workspaces found</h3>
+            <p className="text-sm text-gray-500 mt-1">Create your first workspace to get started.</p>
+            <Button className="mt-4" onClick={handleNewWorkspace}>
+              Create Workspace
+            </Button>
+          </div>
+        )}
+      </div>
     </PlaygroundLayout>
   );
 } 

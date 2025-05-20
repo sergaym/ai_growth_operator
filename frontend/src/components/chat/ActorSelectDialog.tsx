@@ -1,14 +1,9 @@
-import React, { useState } from 'react';
-import { X, Search } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Search, AlertCircle } from 'lucide-react';
+import { useActors, Actor, isValidVideoUrl } from '@/hooks/useActors';
 
-interface Actor {
-  id: string;
-  name: string;
-  image: string;
-  tags: string[];
-  hd?: boolean;
-  pro?: boolean;
-}
+// API base URL for assets
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 interface ActorSelectDialogProps {
   isOpen: boolean;
@@ -23,20 +18,92 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [ageFilter, setAgeFilter] = useState<'all' | 'young' | 'adult' | 'kid'>('all');
   const [hdFilter, setHdFilter] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  // Track loading state for each actor
+  const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
 
-  // Sample actor data - in a real app this would come from an API
-  const actors: Actor[] = [
-    { id: '1', name: 'Helen', image: '/actors/helen.jpg', tags: ['female', 'adult'], hd: true },
-    { id: '2', name: 'Lauren', image: '/actors/lauren.jpg', tags: ['female', 'adult'], pro: true, hd: true },
-    { id: '3', name: 'Thomas', image: '/actors/thomas.jpg', tags: ['male', 'adult'], hd: true },
-    { id: '4', name: 'Charles', image: '/actors/charles.jpg', tags: ['male', 'adult'], hd: true },
-    { id: '5', name: 'Violet', image: '/actors/violet.jpg', tags: ['female', 'adult'], pro: true, hd: true },
-    { id: '6', name: 'Alicia', image: '/actors/alicia.jpg', tags: ['female', 'adult'] },
-    { id: '7', name: 'Rebecca', image: '/actors/rebecca.jpg', tags: ['female', 'adult'] },
-    { id: '8', name: 'Mia', image: '/actors/mia.jpg', tags: ['female', 'adult'] },
-    { id: '9', name: 'Marcus', image: '/actors/marcus.jpg', tags: ['male', 'adult'] },
-    { id: '10', name: 'David', image: '/actors/david.jpg', tags: ['male', 'adult'] },
-  ];
+  // Function to resolve relative API URLs
+  const resolveApiUrl = (relativeUrl?: string) => {
+    if (!relativeUrl) return '/placeholder-avatar.jpg';
+    
+    // If it's already an absolute URL, return it as is
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    
+    // Make sure the path starts with a slash
+    const path = relativeUrl.startsWith('/') ? relativeUrl : `/${relativeUrl}`;
+    return `${API_BASE_URL}/api/v1${path}`;
+  };
+
+  // Helper to get a safe image URL (with fallback)
+  const getSafeImageUrl = (url?: string) => {
+    return url ? resolveApiUrl(url) : '/placeholder-avatar.jpg';
+  };
+
+  // Use our custom hook to fetch actors (videos) from the API
+  const { actors, isLoading, error } = useActors({ 
+    limit: 20, 
+    status: 'completed' 
+  });
+
+  // Initialize loading states for all actors when they're fetched
+  useEffect(() => {
+    if (actors.length > 0) {
+      const initialLoadingStates: { [key: string]: boolean } = {};
+      actors.forEach(actor => {
+        if (actor.videoUrl) {  // URLs are already validated in the useActors hook
+          initialLoadingStates[actor.id] = true;
+        }
+      });
+      setLoadingStates(initialLoadingStates);
+    }
+  }, [actors]);
+
+  // Function to set loading state for a specific actor
+  const setActorLoadingState = (actorId: string, isLoading: boolean) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [actorId]: isLoading
+    }));
+  };
+
+  // Clean up videos when dialog closes
+  useEffect(() => {
+    // When the dialog opens, reset state
+    if (isOpen) {
+      setPlayingVideo(null);
+    }
+    
+    // Clean up when dialog closes
+    return () => {
+      // Clean up all running videos
+      Object.values(videoRefs.current).forEach(video => {
+        try {
+          if (video) {
+            // Remove event listeners first
+            const clonedVideo = video.cloneNode(true);
+            if (video.parentNode) {
+              video.parentNode.replaceChild(clonedVideo, video);
+            }
+            
+            // Then stop the video
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+          }
+        } catch (err) {
+          console.error('Error cleaning up video:', err);
+        }
+      });
+      
+      // Clear the refs
+      videoRefs.current = {};
+      setPlayingVideo(null);
+      setLoadingStates({});
+    };
+  }, [isOpen]);
 
   // Filter actors based on search and filters
   const filteredActors = actors.filter(actor => {
@@ -67,6 +134,27 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
       setSelectedActors(selectedActors.filter(a => a.id !== actor.id));
     } else {
       setSelectedActors([...selectedActors, actor]);
+    }
+  };
+
+  // This now toggles sound rather than playback
+  const toggleVideoSound = (actorId: string) => {
+    const video = videoRefs.current[actorId];
+    if (!video) return;
+    
+    // If this video is currently unmuted, mute it
+    if (playingVideo === actorId) {
+      video.muted = true;
+      setPlayingVideo(null);
+    } else {
+      // Mute any other playing video first
+      if (playingVideo && videoRefs.current[playingVideo]) {
+        videoRefs.current[playingVideo].muted = true;
+      }
+      
+      // Unmute this video
+      video.muted = false;
+      setPlayingVideo(actorId);
     }
   };
 
@@ -200,36 +288,147 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
           {/* Actor grid */}
           <div className="flex-1 p-4 overflow-y-auto">
-            <div className="grid grid-cols-5 gap-4">
-              {filteredActors.map(actor => (
-                <div 
-                  key={actor.id} 
-                  className="group relative cursor-pointer"
-                  onClick={() => toggleActorSelection(actor)}
-                >
-                  <div className={`relative aspect-[3/4] overflow-hidden rounded-md ${
-                    selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
-                  }`}>
-                    <img 
-                      src={actor.image} 
-                      alt={actor.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {actor.pro && (
-                      <div className="absolute top-2 left-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
-                        PRO
-                      </div>
-                    )}
-                    {actor.hd && (
-                      <div className="absolute bottom-2 right-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
-                        HD
-                      </div>
-                    )}
+            {isLoading ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : error ? (
+              <div className="w-full h-full flex flex-col items-center justify-center text-red-500">
+                <AlertCircle className="h-8 w-8 mb-2" />
+                <p className="text-sm">{error}</p>
+              </div>
+            ) : filteredActors.length === 0 ? (
+              <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                <p>No actors match your criteria</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 gap-4">
+                {filteredActors.map(actor => (
+                  <div 
+                    key={actor.id} 
+                    className="group relative cursor-pointer"
+                  >
+                    <div 
+                      className={`relative aspect-[3/4] overflow-hidden rounded-md ${
+                        selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
+                      }`}
+                      onClick={() => toggleActorSelection(actor)}
+                      style={{
+                        backgroundImage: `url(${getSafeImageUrl(actor.image)})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
+                    >
+                      {actor.videoUrl ? (
+                        <>
+                          {/* Only show loading spinner if actor is in loading state */}
+                          {loadingStates[actor.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/20 z-10">
+                              <div className="w-8 h-8 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                          <video
+                            ref={(el) => {
+                              if (el) {
+                                videoRefs.current[actor.id] = el;
+                                
+                                // Add event listener to hide loading spinner when video starts playing
+                                el.addEventListener('playing', () => {
+                                  setActorLoadingState(actor.id, false);
+                                });
+                                
+                                // Add a timeout to hide spinner if video doesn't load within 5 seconds
+                                setTimeout(() => {
+                                  setActorLoadingState(actor.id, false);
+                                }, 5000);
+                              }
+                            }}
+                            src={getSafeImageUrl(actor.videoUrl)}
+                            className="w-full h-full object-cover z-0"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                            preload="auto"
+                            onLoadStart={() => {
+                              setActorLoadingState(actor.id, true);
+                            }}
+                            onCanPlay={() => {
+                              setActorLoadingState(actor.id, false);
+                            }}
+                            onError={(e) => {
+                              console.error(`Error loading video for ${actor.name || actor.id}`, e);
+                              setActorLoadingState(actor.id, false);
+                              
+                              // If video fails to load, use the fallback image
+                              try {
+                                const target = e.target as HTMLVideoElement;
+                                if (target) {
+                                  target.style.display = 'none'; // Hide the video element
+                                }
+                              } catch (err) {
+                                console.error('Error handling video failure:', err);
+                              }
+                            }}
+                          />
+                        </>
+                      ) : (
+                        <img 
+                          src={getSafeImageUrl(actor.image)}
+                          alt={actor.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-avatar.jpg';
+                          }}
+                        />
+                      )}
+                      
+                      {/* Control overlay - now just for sound control */}
+                      {actor.videoUrl && (
+                        <button
+                          className="absolute bottom-2 left-2 flex items-center justify-center bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent triggering selection
+                            toggleVideoSound(actor.id);
+                          }}
+                        >
+                          {playingVideo === actor.id ? (
+                            <span className="text-white text-xs px-1">🔊</span>
+                          ) : (
+                            <span className="text-white text-xs px-1">🔇</span>
+                          )}
+                        </button>
+                      )}
+                      
+                      {actor.pro && (
+                        <div className="absolute top-2 left-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          PRO
+                        </div>
+                      )}
+                      {actor.hd && (
+                        <div className="absolute bottom-2 right-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          HD
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-1 flex justify-between items-center">
+                      <p className="text-sm truncate">{actor.name}</p>
+                      {actor.videoUrl && (
+                        <button 
+                          className="text-xs text-blue-500 hover:text-blue-700"
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleVideoSound(actor.id);
+                          }}
+                        >
+                          {playingVideo === actor.id ? 'Mute' : 'Unmute'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-center">{actor.name}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 

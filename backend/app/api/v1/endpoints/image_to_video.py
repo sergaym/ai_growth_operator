@@ -1,21 +1,29 @@
 """
 Image-to-Video endpoints for the AI Growth Operator API v1.
 These endpoints handle video generation from images.
+
+Note: The heygen_avatar_videos and video_generations tables have been removed
+by migration '31ba90da303b_remove_legacy_video_tables.py'. All video data is now
+consolidated in the 'videos' table.
 """
 
 import os
 import uuid
 import time
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Query, Path, Depends
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoRequest,
-    VideoGenerationResponse
+    VideoGenerationResponse,
+    VideoResponse,
+    VideoListResponse
 )
 from app.services.image_to_video_service import image_to_video_service
+from app.db import get_db, video_repository
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -328,4 +336,106 @@ async def get_video_file(filename: str):
         path=file_path,
         media_type="video/mp4",
         filename=filename
-    ) 
+    )
+
+
+@router.get("/videos", response_model=VideoListResponse, summary="List all generated videos")
+async def list_videos(
+    db: Session = Depends(get_db),
+    skip: int = Query(0, description="Number of videos to skip"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of videos to return"),
+    user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    workspace_id: Optional[str] = Query(None, description="Filter by workspace ID"),
+    status: Optional[str] = Query(None, description="Filter by status (e.g., 'completed', 'error')"),
+    sort_by: str = Query("created_at", description="Field to sort by"),
+    sort_order: str = Query("desc", description="Sort order ('asc' or 'desc')")
+):
+    """
+    Get a list of generated videos with pagination, filtering, and sorting options.
+    
+    This endpoint retrieves videos from the database, allowing you to filter by user, workspace, or status.
+    Results can be sorted and paginated.
+    
+    Args:
+        skip: Number of videos to skip (for pagination)
+        limit: Maximum number of videos to return
+        user_id: Filter videos by user ID
+        workspace_id: Filter videos by workspace ID
+        status: Filter videos by status
+        sort_by: Field to sort by (e.g., 'created_at', 'prompt')
+        sort_order: Sort order ('asc' for ascending, 'desc' for descending)
+        
+    Returns:
+        List of videos matching the criteria
+    """
+    # Get videos from repository
+    videos = video_repository.get_all(
+        db=db,
+        skip=skip,
+        limit=limit,
+        user_id=user_id,
+        workspace_id=workspace_id,
+        status=status,
+        sort_by=sort_by,
+        sort_order=sort_order
+    )
+    
+    # Get total count for pagination info
+    total = video_repository.count(
+        db=db,
+        user_id=user_id,
+        workspace_id=workspace_id,
+        status=status
+    )
+    
+    # Convert video objects to dictionaries with string dates
+    processed_videos = []
+    for video in videos:
+        # Convert SQLAlchemy model to dict
+        video_dict = {c.name: getattr(video, c.name) for c in video.__table__.columns}
+        
+        # Convert datetime objects to strings
+        if video_dict.get('created_at'):
+            video_dict['created_at'] = video_dict['created_at'].isoformat()
+        if video_dict.get('updated_at'):
+            video_dict['updated_at'] = video_dict['updated_at'].isoformat()
+            
+        processed_videos.append(video_dict)
+    
+    # Construct response with processed videos
+    return VideoListResponse(
+        items=processed_videos,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
+
+
+@router.get("/videos/{video_id}", response_model=VideoResponse, summary="Get video by ID")
+async def get_video(
+    video_id: str = Path(..., description="ID of the video to retrieve"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed information about a specific video by its ID.
+    
+    Args:
+        video_id: ID of the video to retrieve
+        
+    Returns:
+        Detailed video information
+    """
+    video = video_repository.get_by_id(video_id, db)
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    # Convert SQLAlchemy model to dict
+    video_dict = {c.name: getattr(video, c.name) for c in video.__table__.columns}
+    
+    # Convert datetime objects to strings
+    if video_dict.get('created_at'):
+        video_dict['created_at'] = video_dict['created_at'].isoformat()
+    if video_dict.get('updated_at'):
+        video_dict['updated_at'] = video_dict['updated_at'].isoformat()
+    
+    return video_dict 

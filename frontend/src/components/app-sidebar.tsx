@@ -25,8 +25,9 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { nanoid } from 'nanoid'
-import { useRouter, useParams } from 'next/navigation';
+import { useRouter, useParams, usePathname } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth'
+import { useEffect, useState } from 'react'
 
 interface User {
   name: string;
@@ -38,16 +39,20 @@ interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
 
 export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
   const { user: authState } = useAuth();
+  const pathname = usePathname();
+  const [currentWorkspaceId, setCurrentWorkspaceId] = useState<string | null>(null);
+  
+  // Extract workspace ID from pathname using regex, but do it in useEffect
+  useEffect(() => {
+    const workspaceMatch = pathname.match(/\/playground\/([^\/]+)/);
+    setCurrentWorkspaceId(workspaceMatch ? workspaceMatch[1] : null);
+  }, [pathname]);
+  
   const user = {
     name: authState?.user?.first_name,
     email: authState?.user?.email,
     avatar: "/avatars/default.jpg"
   } as User;
-
-  // Get the current URL path to determine if we're in a workspace
-  const pathname = window.location.pathname;
-  const workspaceMatch = pathname.match(/\/playground\/([^\/]+)/);
-  const currentWorkspaceId = workspaceMatch ? workspaceMatch[1] : null;
   
   // Create different menu items based on whether we're at the workspace selection page
   // or within a specific workspace
@@ -76,10 +81,6 @@ export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
           {
             title: "Overview",
             url: `/playground/${currentWorkspaceId}`,
-          },
-          {
-            title: "Legacy",
-            url: `/playground/${currentWorkspaceId}/legacy`,
           }
         ],
       },
@@ -124,9 +125,10 @@ export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
     ],
   };
 
+  const router = useRouter();
   const handleNewProject = () => {
     const projectId = nanoid(10);
-    window.location.href = `/playground/${currentWorkspaceId}/projects/${projectId}`;
+    router.push(`/playground/${currentWorkspaceId}/projects/${projectId}`);
   };
 
   return (
