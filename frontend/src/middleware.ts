@@ -11,12 +11,30 @@ const PROTECTED_ROUTES = [
 const PUBLIC_ROUTES = [
   '/login',
   '/register',
+  '/signup',
   '/reset-password',
   '/api/auth',
 ];
 
+// Define auth endpoints that should always be allowed for token refresh
+const AUTH_ENDPOINTS = [
+  '/auth/refresh',
+  '/auth/signin',
+  '/auth/signup',
+];
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
+  
+  // Check if this is an authentication endpoint that should always be allowed
+  const isAuthEndpoint = AUTH_ENDPOINTS.some(endpoint => 
+    pathname.includes(endpoint)
+  );
+  
+  // Always allow auth-specific endpoints (like token refresh)
+  if (isAuthEndpoint) {
+    return NextResponse.next();
+  }
   
   // Check if the route is protected
   const isProtectedRoute = PROTECTED_ROUTES.some(route => 
@@ -33,23 +51,38 @@ export function middleware(request: NextRequest) {
     return NextResponse.next();
   }
   
-  // Check for auth token in cookies for protected routes
-  const authToken = request.cookies.get('auth-token')?.value;
+  // Check for auth token from multiple sources
+  // 1. First check cookies (for server-side auth)
+  let authToken = request.cookies.get('auth-token')?.value;
+  
+  // 2. If no cookie, check Authorization header (for client-side auth)
+  if (!authToken) {
+    const authHeader = request.headers.get('Authorization');
+    if (authHeader?.startsWith('Bearer ')) {
+      authToken = authHeader.substring(7);
+    }
+  }
   
   if (isProtectedRoute && !authToken) {
-    // Redirect to login with callback URL
+    // For API requests, return 401 instead of redirecting
+    if (pathname.startsWith('/api/')) {
+      return new Response(JSON.stringify({ error: 'Authentication required' }), {
+        status: 401,
+        headers: { 'Content-Type': 'application/json' }
+      });
+    }
+    
+    // For UI routes, redirect to login with callback URL
     const url = new URL('/login', request.url);
     url.searchParams.set('callbackUrl', pathname);
     return NextResponse.redirect(url);
   }
   
   // For API routes, handle authentication via header
-  if (pathname.startsWith('/api/') && isProtectedRoute) {
+  if (pathname.startsWith('/api/') && isProtectedRoute && authToken) {
     // Forward the auth token to the backend
     const requestHeaders = new Headers(request.headers);
-    if (authToken) {
-      requestHeaders.set('Authorization', `Bearer ${authToken}`);
-    }
+    requestHeaders.set('Authorization', `Bearer ${authToken}`);
     
     return NextResponse.next({
       request: {

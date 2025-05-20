@@ -44,16 +44,32 @@ async def signin(response: Response, form_data: OAuth2PasswordRequestForm = Depe
 
 @router.post('/refresh', response_model=TokenResponse)
 def refresh_token_endpoint(refresh_token: str, db: Session = Depends(get_db)):
-    payload = decode_token(refresh_token)
-    if payload is None or "sub" not in payload:
-        raise HTTPException(status_code=401, detail="Invalid refresh token")
+    # decode_token returns a tuple (payload, error_type)
+    payload, error = decode_token(refresh_token)
+    
+    # Check if token is valid
+    if payload is None:
+        if error == "expired":
+            raise HTTPException(status_code=401, detail="Refresh token has expired")
+        else:
+            raise HTTPException(status_code=401, detail="Invalid refresh token")
+    
+    # Verify the payload has a subject
+    if "sub" not in payload:
+        raise HTTPException(status_code=401, detail="Invalid token content")
+    
+    # Get the user from the database
     user = UserService.get_user_by_email(db, payload["sub"])
     if user is None:
         raise HTTPException(status_code=401, detail="User not found")
+    
+    # Generate new tokens
     access_token = create_access_token({"sub": user.email})
     new_refresh_token = create_refresh_token({"sub": user.email})
+    
     return {"user": user, "access_token": access_token, "refresh_token": new_refresh_token}
 
 @router.get('/me', response_model=UserOut)
-def get_me(current_user=Depends(get_current_user)):
+def get_me(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    current_user.workspaces = UserService.get_user_workspaces(db, current_user.id)
     return current_user

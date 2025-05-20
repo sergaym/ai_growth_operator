@@ -5,6 +5,7 @@ import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Clock, Filter, FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
+import { useWorkspaces } from "@/hooks/useWorkspace";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -57,154 +58,127 @@ const projectsData = [
   },
 ];
 
+// Define the Workspace type
+interface Workspace {
+  id: string;
+  name: string;
+  type?: string;
+}
+
 export default function PlaygroundOverview() {
+  const { workspaces, loading, error } = useWorkspaces();
   const [searchQuery, setSearchQuery] = useState("");
-  const [projects, setProjects] = useState(projectsData);
 
-  // Filter projects based on search query
-  const filteredProjects = searchQuery
-    ? projects.filter(project => 
-        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase())
+  // Filter workspaces based on search query
+  const filteredWorkspaces = searchQuery && workspaces
+    ? workspaces.filter((workspace: Workspace) => 
+        workspace.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
-    : projects;
+    : workspaces;
 
-  const getStatusBadge = (status: string) => {
-    switch (status) {
-      case "completed":
-        return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
-      case "in-progress":
-        return <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">In Progress</span>;
-      case "draft":
-        return <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-1 rounded-full">Draft</span>;
-      default:
-        return null;
-    }
+  const handleNewWorkspace = () => {
+    // This would typically create a new workspace via API call
+    // For now, just show an alert
+    alert('Create new workspace - to be implemented');
   };
 
-  const handleNewProject = () => {
-    const projectId = nanoid(10);
-    window.location.href = `/playground/${projectId}`;
-  };
+  // Show loading spinner while fetching workspaces
+  if (loading) {
+    return (
+      <div className="min-h-screen flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
+      </div>
+    );
+  }
+
+  // Show error message if there's an error fetching workspaces
+  if (error) {
+    return (
+      <div className="min-h-screen flex items-center justify-center p-4">
+        <div className="bg-red-50 rounded-lg p-6 text-center">
+          <h2 className="text-red-600 text-lg font-semibold mb-2">Error</h2>
+          <p className="text-red-500">{error}</p>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <PlaygroundLayout
-      title="Projects"
-      description="Create and manage your AI-generated content projects."
+      title="Workspaces"
+      description="Select a workspace or create a new one to get started."
+      currentWorkspace={{ id: '', name: 'Select a workspace' }}
     >
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            type="text"
-            placeholder="Search projects..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        <div className="flex gap-2 items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Filter className="h-4 w-4" />
-                <span>Filter</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
-                Completed
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
-                In Progress
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
-                Drafts
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button onClick={handleNewProject} className="gap-1.5">
-            <PlusCircle className="h-4 w-4" />
-            <span>New Project</span>
-          </Button>
-        </div>
-      </div>
 
-      {/* Featured Card */}
-      <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
-        <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
-          <div className="mb-4 sm:mb-0">
-            <h3 className="text-xl font-semibold mb-2">API Playground</h3>
-            <p className="text-sm text-gray-500 max-w-md">
-              Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
-            </p>
+        {/* Search and Action Bar */}
+        <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+          <div className="relative flex-1 max-w-md">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+            <Input
+              type="text"
+              placeholder="Search workspaces..."
+              className="pl-9 pr-4"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
           </div>
-          <Button 
-            onClick={() => window.location.href = '/playground/api-demo'} 
-            variant="default" 
-            className="min-w-[120px]"
-          >
-            Try Now
-          </Button>
-        </CardContent>
-      </Card>
+          <div className="flex gap-2">
+            <Button size="sm" className="gap-1" onClick={handleNewWorkspace}>
+              <PlusCircle className="h-4 w-4" />
+              <span>New Workspace</span>
+            </Button>
+          </div>
+        </div>
 
-      {/* Project Grid */}
-      {filteredProjects.length === 0 ? (
-        <div className="text-center py-12">
-          <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
-          {createElement('h3', { className: "mt-4 text-lg font-medium" }, "No projects found")}
-          <p className="mt-1 text-gray-500">Get started by creating a new project.</p>
-          <Button onClick={handleNewProject} className="mt-4">Create Project</Button>
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-          {filteredProjects.map((project) => (
-            <Card key={project.id} className="overflow-hidden group">
-              <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                {/* Placeholder for thumbnail */}
-                <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                  <div className="text-xl font-bold text-white/70">{project.name.substring(0, 2).toUpperCase()}</div>
-                </div>
-                {/* Hover overlay with actions */}
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                  <Button size="sm" variant="secondary" onClick={() => window.location.href = `/playground/${project.id}`}>
-                    Edit
-                  </Button>
-                </div>
-              </div>
-              
-              <div className="p-4">
-                <div className="flex justify-between items-start mb-2">
-                  {createElement('h3', { className: "font-medium truncate mr-2" }, project.name)}
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon" className="h-8 w-8">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                      <DropdownMenuItem>Rename</DropdownMenuItem>
-                      <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                </div>
-                <p className="text-sm text-gray-500 mb-3 truncate">{project.description}</p>
-                <div className="flex items-center justify-between">
-                  <div className="flex items-center text-xs text-gray-500">
-                    <Clock className="h-3 w-3 mr-1" />
-                    {project.lastEdited}
+        {/* Workspaces Grid */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+          {filteredWorkspaces && filteredWorkspaces.length > 0 ? filteredWorkspaces.map((workspace: Workspace) => (
+            <Card key={workspace.id} className="overflow-hidden border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer">
+              <CardContent className="p-0">
+                <a href={`/playground/${workspace.id}`} className="block">
+                  <div className="h-32 bg-gradient-to-r from-blue-50 to-indigo-50 relative">
+                    <div className="absolute inset-0 flex items-center justify-center">
+                      <div className="w-16 h-16 rounded-full bg-white/90 flex items-center justify-center shadow-sm">
+                        <span className="text-2xl font-bold text-indigo-500">
+                          {workspace.name.substring(0, 2).toUpperCase()}
+                        </span>
+                      </div>
+                    </div>
+                    <div className="absolute top-2 right-2">
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8 bg-white/80 backdrop-blur-sm">
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem>Rename</DropdownMenuItem>
+                          <DropdownMenuItem>Settings</DropdownMenuItem>
+                          <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    </div>
                   </div>
-                  {getStatusBadge(project.status)}
-                </div>
-              </div>
+                  <div className="p-4">
+                    <h3 className="font-medium text-lg">{workspace.name}</h3>
+                    <p className="text-sm text-gray-500 mt-1">Type: {workspace.type || 'Default'}</p>
+                  </div>
+                </a>
+              </CardContent>
             </Card>
-          ))}
+          )) : (
+            <div className="col-span-3 bg-gray-50 rounded-lg p-8 text-center">
+              <div className="mb-4">
+                <FolderPlus className="h-12 w-12 text-gray-300 mx-auto" />
+              </div>
+              <h3 className="text-lg font-medium text-gray-700">No workspaces found</h3>
+              <p className="text-sm text-gray-500 mt-1">Create your first workspace to get started.</p>
+              <Button className="mt-4" onClick={handleNewWorkspace}>
+                Create Workspace
+              </Button>
+            </div>
+          )}
         </div>
-      )}
     </PlaygroundLayout>
   );
 } 

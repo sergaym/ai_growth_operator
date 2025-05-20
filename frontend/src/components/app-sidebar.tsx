@@ -25,70 +25,108 @@ import {
 } from "@/components/ui/sidebar"
 import { Button } from "@/components/ui/button"
 import { nanoid } from 'nanoid'
+import { useRouter, useParams } from 'next/navigation';
+import { useAuth } from '@/hooks/useAuth'
 
-const data = {
-  user: {
-    name: "AI UGC",
-    email: "demo@example.com",
-    avatar: "/avatars/default.jpg",
-  },
-  projects: [
-    {
-      name: "Playground",
-      url: "/playground",
-      icon: SquareTerminal,
-      isActive: true,
-      items: [
-        {
-          title: "Overview",
-          url: "/playground",
-        },
-        {
-          title: "Legacy",
-          url: "/playground/legacy",
-        }
-      ],
-    },
-    {
-      name: "Settings",
-      url: "/playground/settings",
-      icon: Settings,
-      items: [
-        {
-          title: "Workspace",
-          url: "/playground/settings",
-        },
-        {
-          title: "Account",
-          url: "/playground/settings/account",
-        }
-      ],
-    },
-    {
-      name: "Avatars",
-      url: "#",
-      icon: Bot,
-      disabled: true,
-    }
-  ],
-  navSecondary: [
-    {
-      title: "Support",
-      url: "https://help.aiugc.com",
-      icon: LifeBuoy,
-    },
-    {
-      title: "Feedback",
-      url: "https://feedback.aiugc.com",
-      icon: Send,
-    },
-  ],
+interface User {
+  name: string;
+  email: string;
+  avatar: string;
 }
 
-export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+interface AppSidebarProps extends React.ComponentProps<typeof Sidebar> {}
+
+export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
+  const { user: authState } = useAuth();
+  const user = {
+    name: authState?.user?.first_name,
+    email: authState?.user?.email,
+    avatar: "/avatars/default.jpg"
+  } as User;
+
+  // Get the current URL path to determine if we're in a workspace
+  const pathname = window.location.pathname;
+  const workspaceMatch = pathname.match(/\/playground\/([^\/]+)/);
+  const currentWorkspaceId = workspaceMatch ? workspaceMatch[1] : null;
+  
+  // Create different menu items based on whether we're at the workspace selection page
+  // or within a specific workspace
+  const getProjectsMenu = () => {
+    // At the workspace selection page
+    if (!currentWorkspaceId) {
+      return [
+        {
+          name: "Workspaces",
+          url: "/playground",
+          icon: SquareTerminal,
+          isActive: true,
+          items: [],
+        }
+      ];
+    }
+
+    // When a workspace is selected, show normal menu
+    return [
+      {
+        name: "Playground",
+        url: `/playground/${currentWorkspaceId}`,
+        icon: SquareTerminal,
+        isActive: true,
+        items: [
+          {
+            title: "Overview",
+            url: `/playground/${currentWorkspaceId}`,
+          },
+          {
+            title: "Legacy",
+            url: `/playground/${currentWorkspaceId}/legacy`,
+          }
+        ],
+      },
+      {
+        name: "Settings",
+        url: `/playground/${currentWorkspaceId}/settings`,
+        icon: Settings,
+        items: [
+          {
+            title: "Overview",
+            url: `/playground/${currentWorkspaceId}/settings`,
+          },
+          {
+            title: "Account",
+            url: `/playground/${currentWorkspaceId}/settings/account`,
+          }
+        ],
+      },
+      {
+        name: "Avatars",
+        url: "#",
+        icon: Bot,
+        disabled: true,
+      }
+    ];
+  };
+
+  const data = {
+    user,
+    projects: getProjectsMenu(),
+    navSecondary: [
+      {
+        title: "Support",
+        url: "https://help.aiugc.com",
+        icon: LifeBuoy,
+      },
+      {
+        title: "Feedback",
+        url: "https://feedback.aiugc.com",
+        icon: Send,
+      },
+    ],
+  };
+
   const handleNewProject = () => {
-    const projectId = nanoid(10); // Generate a 10-character unique ID
-    window.location.href = `/playground/${projectId}`;
+    const projectId = nanoid(10);
+    window.location.href = `/playground/${currentWorkspaceId}/projects/${projectId}`;
   };
 
   return (
@@ -102,7 +140,7 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
                   <Command className="size-4" />
                 </div>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-semibold">AI UGC</span>
+                  <span className="truncate font-semibold">{user.name}</span>
                   <span className="truncate text-xs">Enterprise</span>
                 </div>
               </a>
@@ -111,15 +149,17 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <div className="px-4">
-          <Button 
-            variant="outline"
-            className="w-full"
-            onClick={handleNewProject}
-          >
-            New Project
-          </Button>
-        </div>
+        {currentWorkspaceId && (
+          <div className="px-4">
+            <Button 
+              variant="outline"
+              className="w-full"
+              onClick={handleNewProject}
+            >
+              New Project
+            </Button>
+          </div>
+        )}
         <NavProjects projects={data.projects} />
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>

@@ -76,7 +76,7 @@ function SignupPageContent() {
         role: formData.role,
         password: formData.password,
       };
-      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/signup', {
+      const response = await fetch(process.env.NEXT_PUBLIC_API_URL + '/api/v1/auth/signup', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
