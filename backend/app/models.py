@@ -167,11 +167,17 @@ class LipsyncVideo(BaseAsset):
     audio = relationship("Audio", foreign_keys=[audio_id], back_populates="lipsync_videos")
 
 # ----------------
-# Video Generation Models
+# Video Generation Models (DEPRECATED)
 # ----------------
 
+# NOTE: The following models are deprecated and will be removed in a future update.
+# The videos table (Video model) should be used instead for all video generation.
+
 class VideoGeneration(Base):
-    """Video generation model."""
+    """
+    DEPRECATED: Video generation model.
+    This model is deprecated and will be removed. Use the Video model instead.
+    """
     
     __tablename__ = "video_generations"
     
@@ -204,7 +210,10 @@ class VideoGeneration(Base):
 
 
 class HeygenAvatarVideo(Base):
-    """Heygen avatar video model for tracking avatar video generations."""
+    """
+    DEPRECATED: Heygen avatar video model for tracking avatar video generations.
+    This model is deprecated and will be removed. Use the Video model instead.
+    """
     
     __tablename__ = "heygen_avatar_videos"
     
