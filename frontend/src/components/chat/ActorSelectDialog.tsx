@@ -37,6 +37,14 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     }
   }, [actors]);
 
+  // Function to set loading state for a specific actor
+  const setActorLoadingState = (actorId: string, isLoading: boolean) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [actorId]: isLoading
+    }));
+  };
+
   // Clean up videos when dialog closes
   useEffect(() => {
     // When the dialog opens, reset state
@@ -48,14 +56,28 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     return () => {
       // Clean up all running videos
       Object.values(videoRefs.current).forEach(video => {
-        if (video) {
-          video.pause();
-          video.src = '';
-          video.load();
+        try {
+          if (video) {
+            // Remove event listeners first
+            const clonedVideo = video.cloneNode(true);
+            if (video.parentNode) {
+              video.parentNode.replaceChild(clonedVideo, video);
+            }
+            
+            // Then stop the video
+            video.pause();
+            video.removeAttribute('src');
+            video.load();
+          }
+        } catch (err) {
+          console.error('Error cleaning up video:', err);
         }
       });
+      
+      // Clear the refs
       videoRefs.current = {};
       setPlayingVideo(null);
+      setLoadingStates({});
     };
   }, [isOpen]);
 
