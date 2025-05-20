@@ -1,7 +1,11 @@
 "use client";
 
+import React, { useState } from "react";
 import { useParams } from "next/navigation";
+import { useWorkspaces } from "@/hooks/useWorkspace";
 import PlaygroundLayout from "@/components/playground/Layout";
+import { GestureChat } from "@/components/chat/GestureChat";
+import { Film } from "lucide-react";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
