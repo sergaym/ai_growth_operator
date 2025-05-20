@@ -268,37 +268,67 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                       }`}
                       onClick={() => toggleActorSelection(actor)}
                       style={{
-                        backgroundImage: `url(${actor.image})`,
+                        backgroundImage: `url(${getSafeImageUrl(actor.image)})`,
                         backgroundSize: 'cover',
                         backgroundPosition: 'center'
                       }}
                     >
                       {actor.videoUrl ? (
-                        // Always show video with autoplay and loop
-                        <video
-                          ref={(el) => {
-                            if (el) videoRefs.current[actor.id] = el;
-                          }}
-                          src={actor.videoUrl}
-                          className="w-full h-full object-cover"
-                          muted
-                          playsInline
-                          loop
-                          autoPlay
-                          onError={(e) => {
-                            console.error(`Error loading video for ${actor.name || actor.id}`, e);
-                            // If video fails to load, the fallback is handled in the CSS background
-                            try {
-                              const target = e.target as HTMLVideoElement;
-                              target.style.display = 'none'; // Hide the video element
-                            } catch (err) {
-                              console.error('Error handling video failure:', err);
-                            }
-                          }}
-                        />
+                        <>
+                          {/* Only show loading spinner if actor is in loading state */}
+                          {loadingStates[actor.id] && (
+                            <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/20 z-10">
+                              <div className="w-8 h-8 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin"></div>
+                            </div>
+                          )}
+                          <video
+                            ref={(el) => {
+                              if (el) {
+                                videoRefs.current[actor.id] = el;
+                                
+                                // Add event listener to hide loading spinner when video starts playing
+                                el.addEventListener('playing', () => {
+                                  setActorLoadingState(actor.id, false);
+                                });
+                                
+                                // Add a timeout to hide spinner if video doesn't load within 5 seconds
+                                setTimeout(() => {
+                                  setActorLoadingState(actor.id, false);
+                                }, 5000);
+                              }
+                            }}
+                            src={getSafeImageUrl(actor.videoUrl)}
+                            className="w-full h-full object-cover z-0"
+                            muted
+                            playsInline
+                            loop
+                            autoPlay
+                            preload="auto"
+                            onLoadStart={() => {
+                              setActorLoadingState(actor.id, true);
+                            }}
+                            onCanPlay={() => {
+                              setActorLoadingState(actor.id, false);
+                            }}
+                            onError={(e) => {
+                              console.error(`Error loading video for ${actor.name || actor.id}`, e);
+                              setActorLoadingState(actor.id, false);
+                              
+                              // If video fails to load, use the fallback image
+                              try {
+                                const target = e.target as HTMLVideoElement;
+                                if (target) {
+                                  target.style.display = 'none'; // Hide the video element
+                                }
+                              } catch (err) {
+                                console.error('Error handling video failure:', err);
+                              }
+                            }}
+                          />
+                        </>
                       ) : (
                         <img 
-                          src={actor.image} 
+                          src={getSafeImageUrl(actor.image)}
                           alt={actor.name}
                           className="w-full h-full object-cover"
                           onError={(e) => {
