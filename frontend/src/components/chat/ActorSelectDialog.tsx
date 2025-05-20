@@ -15,20 +15,14 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [ageFilter, setAgeFilter] = useState<'all' | 'young' | 'adult' | 'kid'>('all');
   const [hdFilter, setHdFilter] = useState(false);
+  const [playingVideo, setPlayingVideo] = useState<string | null>(null);
+  const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
 
-  // Sample actor data - in a real app this would come from an API
-  const actors: Actor[] = [
-    { id: '1', name: 'Helen', image: '/actors/helen.jpg', tags: ['female', 'adult'], hd: true },
-    { id: '2', name: 'Lauren', image: '/actors/lauren.jpg', tags: ['female', 'adult'], pro: true, hd: true },
-    { id: '3', name: 'Thomas', image: '/actors/thomas.jpg', tags: ['male', 'adult'], hd: true },
-    { id: '4', name: 'Charles', image: '/actors/charles.jpg', tags: ['male', 'adult'], hd: true },
-    { id: '5', name: 'Violet', image: '/actors/violet.jpg', tags: ['female', 'adult'], pro: true, hd: true },
-    { id: '6', name: 'Alicia', image: '/actors/alicia.jpg', tags: ['female', 'adult'] },
-    { id: '7', name: 'Rebecca', image: '/actors/rebecca.jpg', tags: ['female', 'adult'] },
-    { id: '8', name: 'Mia', image: '/actors/mia.jpg', tags: ['female', 'adult'] },
-    { id: '9', name: 'Marcus', image: '/actors/marcus.jpg', tags: ['male', 'adult'] },
-    { id: '10', name: 'David', image: '/actors/david.jpg', tags: ['male', 'adult'] },
-  ];
+  // Use our custom hook to fetch actors (videos) from the API
+  const { actors, isLoading, error } = useActors({ 
+    limit: 20, 
+    status: 'completed' 
+  });
 
   // Filter actors based on search and filters
   const filteredActors = actors.filter(actor => {
@@ -59,6 +53,29 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
       setSelectedActors(selectedActors.filter(a => a.id !== actor.id));
     } else {
       setSelectedActors([...selectedActors, actor]);
+    }
+  };
+
+  const toggleVideoPlay = (actorId: string, videoUrl?: string) => {
+    if (!videoUrl) return;
+    
+    if (playingVideo === actorId) {
+      // Stop current video
+      if (videoRefs.current[actorId]) {
+        videoRefs.current[actorId].pause();
+      }
+      setPlayingVideo(null);
+    } else {
+      // Stop any playing video first
+      if (playingVideo && videoRefs.current[playingVideo]) {
+        videoRefs.current[playingVideo].pause();
+      }
+      
+      // Play the new video
+      if (videoRefs.current[actorId]) {
+        videoRefs.current[actorId].play();
+      }
+      setPlayingVideo(actorId);
     }
   };
 
