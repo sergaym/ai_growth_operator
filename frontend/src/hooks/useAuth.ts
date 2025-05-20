@@ -34,6 +34,34 @@ export function useAuth() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
+  // Get user profile data
+  const getUserProfile = useCallback(async (accessToken: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
+        {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser({
+          isAuthenticated: true,
+          id: userData.id,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching user profile:', err);
+    }
+  }, []);
+
   // Check if the user is authenticated on mount (client side only)
   useEffect(() => {
     const checkAuth = async () => {
