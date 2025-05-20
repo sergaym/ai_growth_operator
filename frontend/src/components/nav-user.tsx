@@ -40,8 +40,60 @@ export function NavUser({
   }
 }) {
   const { isMobile } = useSidebar()
-  const { logout } = useAuth()
+  const { user: authUser, logout, getAccessToken, getUserProfile } = useAuth()
   const [isLoggingOut, setIsLoggingOut] = React.useState(false)
+  const profileFetchedRef = React.useRef(false)
+  
+  // Local user state with fallback to prop values
+  const [user, setUser] = React.useState(() => ({
+    name: initialUser?.name || "",
+    email: initialUser?.email || "",
+    avatar: initialUser?.avatar || "",
+  }))
+  
+  // Fetch user profile once on mount if we're authenticated but don't have profile data
+  React.useEffect(() => {
+    const fetchUserProfileIfNeeded = async () => {
+      // Only fetch if authenticated and we haven't fetched before
+      if (authUser.isAuthenticated && !profileFetchedRef.current && !authUser.first_name) {
+        profileFetchedRef.current = true
+        const token = getAccessToken()
+        if (token) {
+          await getUserProfile(token)
+        }
+      }
+    }
+    
+    fetchUserProfileIfNeeded()
+  }, [getAccessToken, getUserProfile])
+  
+  // Update local user state when auth user changes (separate from fetching)
+  React.useEffect(() => {
+    if (authUser.isAuthenticated && (authUser.first_name || authUser.email)) {
+      setUser(prevUser => ({
+        name: authUser.first_name && authUser.last_name 
+          ? `${authUser.first_name} ${authUser.last_name}` 
+          : prevUser.name,
+        email: authUser.email || prevUser.email,
+        avatar: prevUser.avatar // Keep existing avatar
+      }))
+    }
+  }, [authUser.isAuthenticated, authUser.first_name, authUser.last_name, authUser.email])
+  
+  // Get initials for avatar fallback
+  const getInitials = () => {
+    if (authUser.first_name && authUser.last_name) {
+      return `${authUser.first_name[0]}${authUser.last_name[0]}`.toUpperCase()
+    }
+    if (user.name) {
+      return user.name.split(' ')
+        .map(part => part[0])
+        .slice(0, 2)
+        .join('')
+        .toUpperCase()
+    }
+    return 'U'
+  }
 
   const handleLogout = async () => {
     if (isLoggingOut) return // Prevent double clicks
