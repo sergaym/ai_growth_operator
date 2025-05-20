@@ -1,6 +1,6 @@
 "use client";
 import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
@@ -59,8 +59,30 @@ const projectsData = [
   },
 ];
 
+// Project card skeleton component
+function ProjectCardSkeleton() {
+  return (
+    <Card className="overflow-hidden">
+      <div className="relative aspect-video bg-gray-100 overflow-hidden">
+        <div className="absolute inset-0 bg-gradient-to-r from-gray-100 to-gray-50 relative overflow-hidden">
+          <div className="absolute inset-0 bg-gradient-to-r from-transparent via-gray-200/60 to-transparent animate-shimmer-slow" style={{ backgroundSize: '200% 100%' }}></div>
+        </div>
+      </div>
+      <div className="p-4">
+        <div className="h-5 bg-gray-200 rounded w-3/4 mb-2"></div>
+        <div className="h-4 bg-gray-100 rounded w-1/2 mb-3"></div>
+        <div className="flex items-center justify-between">
+          <div className="h-3 bg-gray-100 rounded w-1/4"></div>
+          <div className="h-5 bg-gray-100 rounded-full w-1/4"></div>
+        </div>
+      </div>
+    </Card>
+  );
+}
+
 export default function WorkspaceProjects() {
   const params = useParams();
+  const router = useRouter();
   const workspaceId = params.workspaceId as string;
   
   // Get workspace data from API
