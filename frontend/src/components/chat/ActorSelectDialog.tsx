@@ -267,8 +267,14 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                         selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
                       }`}
                       onClick={() => toggleActorSelection(actor)}
+                      style={{
+                        backgroundImage: `url(${actor.image})`,
+                        backgroundSize: 'cover',
+                        backgroundPosition: 'center'
+                      }}
                     >
-                      {actor.videoUrl && playingVideo === actor.id ? (
+                      {actor.videoUrl ? (
+                        // Always show video with autoplay and loop
                         <video
                           ref={(el) => {
                             if (el) videoRefs.current[actor.id] = el;
@@ -278,6 +284,17 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                           muted
                           playsInline
                           loop
+                          autoPlay
+                          onError={(e) => {
+                            console.error(`Error loading video for ${actor.name || actor.id}`, e);
+                            // If video fails to load, the fallback is handled in the CSS background
+                            try {
+                              const target = e.target as HTMLVideoElement;
+                              target.style.display = 'none'; // Hide the video element
+                            } catch (err) {
+                              console.error('Error handling video failure:', err);
+                            }
+                          }}
                         />
                       ) : (
                         <img 
