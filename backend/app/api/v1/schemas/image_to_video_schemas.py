@@ -3,8 +3,21 @@ Schemas for Image-to-Video API endpoints in v1.
 """
 
 from typing import Optional, List, Dict, Any
-from pydantic import BaseModel, Field, validator
+from enum import Enum
+from datetime import datetime
+from pydantic import BaseModel, Field, validator, model_validator
 
+
+class AspectRatio(str, Enum):
+    """Valid aspect ratios for video generation."""
+    LANDSCAPE = "16:9"
+    PORTRAIT = "9:16"
+    SQUARE = "1:1"
+
+class Duration(str, Enum):
+    """Valid durations for video generation."""
+    SHORT = "5"
+    LONG = "10"
 
 class GenerateVideoRequest(BaseModel):
     """Request model for generating a video from an image."""
