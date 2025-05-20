@@ -138,8 +138,18 @@ export function useAuth() {
         }
       }
       
-      // Update the auth state
-      setUser({ isAuthenticated: true });
+      // Update the auth state with user data
+      if (data.user) {
+        setUser({
+          isAuthenticated: true,
+          id: data.user.id,
+          email: data.user.email,
+          first_name: data.user.first_name,
+          last_name: data.user.last_name
+        });
+      } else {
+        setUser({ isAuthenticated: true });
+      }
       
       // Force a hard refresh to ensure all auth state is properly set
       if (typeof window !== 'undefined') {
