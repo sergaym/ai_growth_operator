@@ -307,19 +307,19 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                         />
                       )}
                       
-                      {/* Video play/pause button */}
+                      {/* Control overlay - now just for sound control */}
                       {actor.videoUrl && (
                         <button
-                          className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute bottom-2 left-2 flex items-center justify-center bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent triggering selection
-                            toggleVideoPlay(actor.id, actor.videoUrl);
+                            toggleVideoSound(actor.id);
                           }}
                         >
                           {playingVideo === actor.id ? (
-                            <Pause className="h-10 w-10 text-white" />
+                            <span className="text-white text-xs px-1">🔊</span>
                           ) : (
-                            <Play className="h-10 w-10 text-white" />
+                            <span className="text-white text-xs px-1">🔇</span>
                           )}
                         </button>
                       )}
@@ -340,9 +340,12 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                       {actor.videoUrl && (
                         <button 
                           className="text-xs text-blue-500 hover:text-blue-700"
-                          onClick={() => toggleVideoPlay(actor.id, actor.videoUrl)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            toggleVideoSound(actor.id);
+                          }}
                         >
-                          {playingVideo === actor.id ? 'Pause' : 'Play'}
+                          {playingVideo === actor.id ? 'Mute' : 'Unmute'}
                         </button>
                       )}
                     </div>
