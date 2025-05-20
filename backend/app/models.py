@@ -172,6 +172,8 @@ class LipsyncVideo(BaseAsset):
 
 # NOTE: The following models are deprecated and will be removed in a future update.
 # The videos table (Video model) should be used instead for all video generation.
+# These models are only kept for reference and compatibility with existing code.
+# DEPRECATED: These tables are removed by migration '31ba90da303b_remove_legacy_video_tables.py'
 
 class VideoGeneration(Base):
     """
