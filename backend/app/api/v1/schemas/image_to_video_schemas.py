@@ -118,3 +118,14 @@ class VideoResponse(BaseModel):
     class Config:
         """Pydantic config."""
         from_attributes = True
+
+class VideoListResponse(BaseModel):
+    """Response model for listing videos."""
+    items: List[VideoResponse] = Field(..., description="List of videos")
+    total: int = Field(..., description="Total number of videos matching the query")
+    skip: int = Field(..., description="Number of videos skipped")
+    limit: int = Field(..., description="Maximum number of videos returned")
+    
+    class Config:
+        """Pydantic config."""
+        from_attributes = True 
