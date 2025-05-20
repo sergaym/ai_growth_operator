@@ -10,13 +10,19 @@ interface AuthResponse {
 
 interface AuthUser {
   isAuthenticated: boolean;
+  id?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthData {
   user: {
     id: string;
     email: string;
-    // Add other user fields as needed
+    first_name: string;
+    last_name: string;
+    role?: string;
   };
   access_token: string;
   refresh_token: string;
@@ -27,6 +33,34 @@ export function useAuth() {
   const [user, setUser] = useState<AuthUser>({ isAuthenticated: false });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+
+  // Get user profile data
+  const getUserProfile = useCallback(async (accessToken: string): Promise<void> => {
+    try {
+      const response = await fetch(
+        `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
+        {
+          credentials: 'include',
+          headers: {
+            'Authorization': `Bearer ${accessToken}`
+          }
+        }
+      );
+
+      if (response.ok) {
+        const userData = await response.json();
+        setUser({
+          isAuthenticated: true,
+          id: userData.id,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name
+        });
+      }
+    } catch (err) {
+      console.error('Error fetching user profile:', err);
+    }
+  }, []);
 
   // Check if the user is authenticated on mount (client side only)
   useEffect(() => {
@@ -40,26 +74,18 @@ export function useAuth() {
         }
 
         // Try to validate the token with the backend
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
-          {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        );
-
-        if (!response.ok) {
+        try {
+          await getUserProfile(accessToken);
+        } catch (err) {
           // If token is invalid, try to refresh it
           const refreshToken = await refreshAccessToken();
           if (!refreshToken) {
             setUser({ isAuthenticated: false });
             return;
           }
+          // Try to get profile with the new token
+          await getUserProfile(refreshToken);
         }
-
-        setUser({ isAuthenticated: true });
       } catch (err) {
         console.error('Auth check error:', err);
         setUser({ isAuthenticated: false });
@@ -75,7 +101,7 @@ export function useAuth() {
       // In SSR, just set loading to false
       setLoading(false);
     }
-  }, []);
+  }, [getUserProfile]);
 
   // Login function
   const login = useCallback(async (email: string, password: string, callbackUrl?: string) => {
@@ -112,8 +138,18 @@ export function useAuth() {
         }
       }
       
-      // Update the auth state
-      setUser({ isAuthenticated: true });
+      // Update the auth state with user data
+      if (data.user) {
+        setUser({
+          isAuthenticated: true,
+          id: data.user.id,
+          email: data.user.email,
+          first_name: data.user.first_name,
+          last_name: data.user.last_name
+        });
+      } else {
+        setUser({ isAuthenticated: true });
+      }
       
       // Force a hard refresh to ensure all auth state is properly set
       if (typeof window !== 'undefined') {
@@ -201,7 +237,20 @@ export function useAuth() {
             window.localStorage.setItem('refresh_token', data.refresh_token);
           }
         }
-        setUser({ isAuthenticated: true });
+        
+        // Update the auth state with user data
+        if (data.user) {
+          setUser({
+            isAuthenticated: true,
+            id: data.user.id,
+            email: data.user.email,
+            first_name: data.user.first_name,
+            last_name: data.user.last_name
+          });
+        } else {
+          setUser({ isAuthenticated: true });
+        }
+        
         return data.access_token;
       }
       return null;
@@ -220,5 +269,6 @@ export function useAuth() {
     logout,
     getAccessToken,
     refreshAccessToken,
+    getUserProfile
   };
 } 
