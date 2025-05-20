@@ -38,30 +38,18 @@ export default function PlaygroundLayout({
   const currentWorkspaceId = params.workspaceId as string | null;
   const { workspaces, loading: workspaceLoading, error: workspaceError } = useWorkspaces();
   const currentWorkspace = workspaces.find(ws => ws.id == currentWorkspaceId);
-  // Wait for workspace data before rendering
-  if (workspaceLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
 
-  if (workspaceError) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 rounded-lg p-6 text-center">
-          <h2 className="text-red-600 text-lg font-semibold mb-2">Error</h2>
-          <p className="text-red-500">{workspaceError}</p>
-          <p className="text-red-400 text-sm mt-2">Please select a valid workspace from the sidebar.</p>
-        </div>
-      </div>
-    );
-  }
   return (
     <SidebarProvider>
       <AppSidebar className="hidden lg:flex" />
       <SidebarInset className="bg-background">
+        {/* Subtle top loading bar - visible only during loading */}
+        {workspaceLoading && (
+          <div className="fixed top-0 left-0 w-full h-0.5 z-50">
+            <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
+          </div>
+        )}
+        
         <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
           <SidebarTrigger />
           <Separator orientation="vertical" className="h-6" />
@@ -76,7 +64,11 @@ export default function PlaygroundLayout({
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink href={`/playground/${currentWorkspaceId}`}>
-                      {currentWorkspace?.name || 'Workspace'}
+                      {workspaceLoading ? (
+                        <span className="w-24 h-5 bg-gray-200 rounded animate-pulse inline-block" />
+                      ) : (
+                        currentWorkspace?.name || 'Workspace'
+                      )}
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </>
@@ -92,6 +84,13 @@ export default function PlaygroundLayout({
 
         <div className="flex-1 overflow-auto">
           <div className="container max-w-5xl mx-auto p-6">
+            {workspaceError && (
+              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+                <p className="font-medium text-sm">Error: {workspaceError}</p>
+                <p className="text-sm mt-1">Please select a valid workspace from the sidebar.</p>
+              </div>
+            )}
+            
             {error && (
               <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
                 <p className="font-medium text-sm">Error: {error}</p>
