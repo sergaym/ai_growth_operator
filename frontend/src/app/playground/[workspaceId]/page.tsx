@@ -129,95 +129,104 @@ export default function WorkspaceProjects() {
   };
 
   const navigateToWorkspaces = () => {
-
-  // If the workspace isn't found in the user's workspaces, show an error
-  if (!loading && !currentWorkspace) {
-    return (
-      <div className="min-h-screen flex items-center justify-center p-4">
-        <div className="bg-red-50 rounded-lg p-6 text-center">
-          <h2 className="text-red-600 text-lg font-semibold mb-2">Workspace Not Found</h2>
-          <p className="text-red-500">The workspace you're trying to access doesn't exist or you don't have permission to view it.</p>
-          <Button 
-            variant="outline" 
-            className="mt-4"
-            onClick={() => window.location.href = "/playground"}
-          >
-            Return to Workspaces
-          </Button>
-        </div>
-      </div>
-    );
-  }
-  
-  const workspace = {
-    id: currentWorkspace!.id,
-    name: currentWorkspace!.name
+    router.push("/playground");
   };
+  
+  // Create a safe workspace object with default values if currentWorkspace is not found
+  const workspace = !loading && currentWorkspace 
+    ? { id: currentWorkspace.id, name: currentWorkspace.name }
+    : { id: workspaceId, name: "Workspace" };
+
+  // Render error inside the layout instead of a fullscreen message
+  const workspaceError = !loading && !currentWorkspace 
+    ? "The workspace you're trying to access doesn't exist or you don't have permission to view it."
+    : null;
 
   return (
     <PlaygroundLayout
       title="Projects"
       description="Create and manage your AI-generated content projects."
       currentWorkspace={workspace}
+      error={workspaceError}
     >
-      {/* Search and Filter Bar */}
-      <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
-        <div className="relative flex-1 max-w-md">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
-          <Input
-            type="text"
-            placeholder="Search projects..."
-            className="pl-10"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
+      {/* Top loading bar - visible only during loading */}
+      {loading && (
+        <div className="fixed top-0 left-0 w-full h-0.5 z-50">
+          <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
         </div>
-        <div className="flex gap-2 items-center">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="sm" className="gap-1.5">
-                <Filter className="h-4 w-4" />
-                <span>Filter</span>
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end">
-              <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
-                Completed
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
-                In Progress
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
-                Drafts
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-          <Button onClick={handleNewProject} className="gap-1.5">
-            <PlusCircle className="h-4 w-4" />
-            <span>New Project</span>
-          </Button>
-        </div>
-      </div>
+      )}
 
-      {/* Featured Card */}
-      <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
-        <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
-          <div className="mb-4 sm:mb-0">
-            <h3 className="text-xl font-semibold mb-2">API Playground</h3>
-            <p className="text-sm text-gray-500 max-w-md">
-              Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
-            </p>
-          </div>
+      {/* If workspace not found, show error and return button */}
+      {workspaceError ? (
+        <div className="text-center py-12">
           <Button 
-            onClick={() => window.location.href = `/playground/${workspaceId}/api-demo`} 
-            variant="default" 
-            className="min-w-[120px]"
+            variant="outline" 
+            className="mt-4"
+            onClick={navigateToWorkspaces}
           >
-            Try Now
+            Return to Workspaces
           </Button>
-        </CardContent>
-      </Card>
+        </div>
+      ) : (
+        <>
+          {/* Search and Filter Bar */}
+          <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
+            <div className="relative flex-1 max-w-md">
+              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
+              <Input
+                type="text"
+                placeholder="Search projects..."
+                className="pl-10"
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+              />
+            </div>
+            <div className="flex gap-2 items-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm" className="gap-1.5">
+                    <Filter className="h-4 w-4" />
+                    <span>Filter</span>
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
+                    Completed
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
+                    In Progress
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
+                    Drafts
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+              <Button onClick={handleNewProject} className="gap-1.5">
+                <PlusCircle className="h-4 w-4" />
+                <span>New Project</span>
+              </Button>
+            </div>
+          </div>
+
+          {/* Featured Card */}
+          <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
+            <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
+              <div className="mb-4 sm:mb-0">
+                <h3 className="text-xl font-semibold mb-2">API Playground</h3>
+                <p className="text-sm text-gray-500 max-w-md">
+                  Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
+                </p>
+              </div>
+              <Button 
+                onClick={navigateToApiDemo} 
+                variant="default" 
+                className="min-w-[120px]"
+              >
+                Try Now
+              </Button>
+            </CardContent>
+          </Card>
 
       {/* Project Grid */}
       {filteredProjects.length === 0 ? (
