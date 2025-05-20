@@ -8,7 +8,7 @@ import os
 import time
 import uuid
 
-from fastapi import APIRouter, HTTPException, Depends, Query, BackgroundTasks
+from fastapi import APIRouter, HTTPException, Depends, Query, BackgroundTasks, Path
 from fastapi.responses import FileResponse
 
 from app.api.v1.schemas import (
@@ -16,9 +16,13 @@ from app.api.v1.schemas import (
     SpeechGenerationResponse,
     VoiceResponse,
     VoicesListResponse,
-    JobStatusResponse
+    JobStatusResponse,
+    AudioResponse,
+    AudioListResponse
 )
 from app.services.text_to_speech_service import text_to_speech_service, VOICE_PRESETS
+from app.db import get_db, audio_repository
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
@@ -373,3 +377,32 @@ async def list_audios(
         limit=limit
     )
 
+
+@router.get("/audios/{audio_id}", response_model=AudioResponse, summary="Get audio by ID")
+async def get_audio(
+    audio_id: str = Path(..., description="ID of the audio to retrieve"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed information about a specific audio by its ID.
+    
+    Args:
+        audio_id: ID of the audio to retrieve
+        
+    Returns:
+        Detailed audio information
+    """
+    audio = audio_repository.get_by_id(audio_id, db)
+    if not audio:
+        raise HTTPException(status_code=404, detail="Audio not found")
+    
+    # Convert SQLAlchemy model to dict
+    audio_dict = {c.name: getattr(audio, c.name) for c in audio.__table__.columns}
+    
+    # Convert datetime objects to strings
+    if audio_dict.get('created_at'):
+        audio_dict['created_at'] = audio_dict['created_at'].isoformat()
+    if audio_dict.get('updated_at'):
+        audio_dict['updated_at'] = audio_dict['updated_at'].isoformat()
+    
+    return audio_dict 
