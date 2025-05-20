@@ -237,7 +237,20 @@ export function useAuth() {
             window.localStorage.setItem('refresh_token', data.refresh_token);
           }
         }
-        setUser({ isAuthenticated: true });
+        
+        // Update the auth state with user data
+        if (data.user) {
+          setUser({
+            isAuthenticated: true,
+            id: data.user.id,
+            email: data.user.email,
+            first_name: data.user.first_name,
+            last_name: data.user.last_name
+          });
+        } else {
+          setUser({ isAuthenticated: true });
+        }
+        
         return data.access_token;
       }
       return null;
@@ -256,5 +269,6 @@ export function useAuth() {
     logout,
     getAccessToken,
     refreshAccessToken,
+    getUserProfile
   };
 } 
