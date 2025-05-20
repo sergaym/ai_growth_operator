@@ -42,96 +42,76 @@ interface UseActorsOptions {
 
 // Helper to create proper URLs for videos
 function getVideoUrl(video: VideoResponse): string | undefined {
- 
   // Function to validate a URL is properly formed
   const isValidUrl = (url: string): boolean => {
     try {
-      // Check if it's a well-formed URL
       new URL(url);
       return true;
     } catch (e) {
-      // URL constructor throws if the URL is invalid
       return false;
     }
   };
   
-  // Try blob URL first (external storage)
+  // Skip invalid inputs
+  if (!video) return undefined;
+  
+  // For cloud-stored videos (blob storage), use the URL directly
   if (video.blob_url && isValidUrl(video.blob_url)) {
     return video.blob_url;
   }
   
-  // Then video_url (could be external or relative)
-  if (video.video_url) {
-    // Skip file:// URLs as they won't work in the browser due to security restrictions
-    if (video.video_url.startsWith('file://')) {
-      console.log('Skipping file:// URL:', video.video_url);
-      
-      // Try to extract filename from file:// URL to use with the videos endpoint
-      const match = video.video_url.match(/\/videos\/([^/]+)$/);
-      if (match && match[1]) {
-        const filename = match[1];
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
-        console.log('Extracted filename:', filename);
-        console.log('Using videos endpoint instead');
-        return `${apiBase}/api/v1/image-to-video/videos/${filename}`;
-      }
-      
-      return undefined;
-    }
-    
-    // Check if it's a full URL or a relative path
-    if (video.video_url.startsWith('http') && isValidUrl(video.video_url)) {
-      return video.video_url;
-    } else {
-      // For relative paths, we need to construct the proper URL
-      const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
-      // Check if it's a path to a video file
-      if (video.video_url.includes('/videos/')) {
-        // Extract just the filename for use with the videos endpoint
-        const parts = video.video_url.split('/');
-        const filename = parts[parts.length - 1];
-        return `${apiBase}/api/v1/image-to-video/videos/${filename}`;
-      }
-      const fullUrl = `${apiBase}/api/v1/image-to-video${video.video_url}`;
-      return isValidUrl(fullUrl) ? fullUrl : undefined;
-    }
+  // For direct video URLs that are absolute, use them directly
+  if (video.video_url && video.video_url.startsWith('http') && isValidUrl(video.video_url)) {
+    return video.video_url;
   }
   
-  // Finally try local_url
-  if (video.local_url) {
-    // Skip file:// URLs as they won't work in the browser
-    if (video.local_url.startsWith('file://')) {
-      console.log('Skipping file:// URL:', video.local_url);
-      
-      // Try to extract filename from file:// URL to use with the videos endpoint
-      const match = video.local_url.match(/\/videos\/([^/]+)$/);
+  // For relative paths, handle based on path pattern
+  
+  // Path pattern 1: Extract filename from /videos/ paths
+  // This works with the video_url or local_url
+  let relativePath = video.video_url || video.local_url;
+  if (relativePath) {
+    // Skip file:// URLs
+    if (relativePath.startsWith('file://')) {
+      // Try to extract filename for the videos endpoint
+      const match = relativePath.match(/\/videos\/([^/]+)$/);
       if (match && match[1]) {
-        const filename = match[1];
-        const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
-        console.log('Extracted filename:', filename);
-        console.log('Using videos endpoint instead');
-        return `${apiBase}/api/v1/image-to-video/videos/${filename}`;
+        // Use the videos/{filename} endpoint directly
+        return `/image-to-video/videos/${match[1]}`;
       }
-      
       return undefined;
     }
     
-    // Local URLs are typically relative paths
-    const apiBase = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
-    
-    // Check if it's a path to a video file
-    if (video.local_url.includes('/videos/')) {
-      // Extract just the filename for use with the videos endpoint
-      const parts = video.local_url.split('/');
+    // For /videos/ paths, extract filename for direct access through videos endpoint
+    if (relativePath.includes('/videos/')) {
+      const parts = relativePath.split('/');
       const filename = parts[parts.length - 1];
-      return `${apiBase}/api/v1/image-to-video/videos/${filename}`;
+      return `/image-to-video/videos/${filename}`;
     }
     
-    const fullUrl = `${apiBase}/api/v1/image-to-video${video.local_url}`;
-    return isValidUrl(fullUrl) ? fullUrl : undefined;
+    // For other relative paths, use the path directly with the API prefix
+    if (relativePath.startsWith('/')) {
+      return `/image-to-video${relativePath}`;
+    }
+    
+    return `/image-to-video/${relativePath}`;
   }
   
   return undefined;
+}
+
+// Check if a URL is likely a valid video URL (simplified check)
+export function isValidVideoUrl(url?: string): boolean {
+  if (!url) return false;
+  
+  // Skip URLs with file:// protocol that browser can't load
+  if (url.startsWith('file://')) return false;
+  
+  // Simple check for common video file extensions
+  const hasVideoExtension = /\.(mp4|webm|mov|avi)$/i.test(url);
+  const isBlobUrl = url.includes('blob') || url.includes('video');
+  
+  return hasVideoExtension || isBlobUrl;
 }
 
 export function useActors(options: UseActorsOptions = {}) {
@@ -212,6 +192,9 @@ export function useActors(options: UseActorsOptions = {}) {
               console.log(`Video ${video.id} has URL: ${videoUrl}`);
             }
             
+            // Only include valid video URLs that can be played in the browser
+            const validatedVideoUrl = videoUrl && isValidVideoUrl(videoUrl) ? videoUrl : undefined;
+            
             return {
               id: video.id,
               name,
@@ -219,7 +202,7 @@ export function useActors(options: UseActorsOptions = {}) {
               tags,
               hd: video.aspect_ratio === '16:9', // Example logic
               pro: false, // Can set based on any criteria in your system
-              videoUrl
+              videoUrl: validatedVideoUrl
             };
           });
           
