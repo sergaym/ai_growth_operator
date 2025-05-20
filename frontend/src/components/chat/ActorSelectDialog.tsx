@@ -91,25 +91,23 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     }
   };
 
-  const toggleVideoPlay = (actorId: string, videoUrl?: string) => {
-    if (!videoUrl) return;
+  // This now toggles sound rather than playback
+  const toggleVideoSound = (actorId: string) => {
+    const video = videoRefs.current[actorId];
+    if (!video) return;
     
+    // If this video is currently unmuted, mute it
     if (playingVideo === actorId) {
-      // Stop current video
-      if (videoRefs.current[actorId]) {
-        videoRefs.current[actorId].pause();
-      }
+      video.muted = true;
       setPlayingVideo(null);
     } else {
-      // Stop any playing video first
+      // Mute any other playing video first
       if (playingVideo && videoRefs.current[playingVideo]) {
-        videoRefs.current[playingVideo].pause();
+        videoRefs.current[playingVideo].muted = true;
       }
       
-      // Play the new video
-      if (videoRefs.current[actorId]) {
-        videoRefs.current[actorId].play();
-      }
+      // Unmute this video
+      video.muted = false;
       setPlayingVideo(actorId);
     }
   };
