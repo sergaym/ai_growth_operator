@@ -299,4 +299,77 @@ async def get_audio_file(filename: str):
         path=file_path,
         media_type="audio/mpeg",
         filename=filename
-    ) 
+    )
+
+
+@router.get("/audios", response_model=AudioListResponse, summary="List all generated audios")
+async def list_audios(
+    db: Session = Depends(get_db),
+    skip: int = Query(0, description="Number of audios to skip"),
+    limit: int = Query(50, ge=1, le=100, description="Maximum number of audios to return"),
+    user_id: Optional[str] = Query(None, description="Filter by user ID"),
+    workspace_id: Optional[str] = Query(None, description="Filter by workspace ID"),
+    status: Optional[str] = Query(None, description="Filter by status (e.g., 'completed', 'failed')"),
+    sort_by: str = Query("created_at", description="Field to sort by"),
+    sort_order: str = Query("desc", description="Sort order ('asc' or 'desc')")
+):
+    """
+    Get a list of generated audio files with pagination, filtering, and sorting options.
+    
+    This endpoint retrieves audios from the database, allowing you to filter by user, workspace, or status.
+    Results can be sorted and paginated.
+    
+    Args:
+        skip: Number of audios to skip (for pagination)
+        limit: Maximum number of audios to return
+        user_id: Filter audios by user ID
+        workspace_id: Filter audios by workspace ID
+        status: Filter audios by status
+        sort_by: Field to sort by (e.g., 'created_at', 'text')
+        sort_order: Sort order ('asc' for ascending, 'desc' for descending)
+        
+    Returns:
+        List of audios matching the criteria
+    """
+    # Get audios from repository
+    audios = audio_repository.get_all(
+        db=db,
+        skip=skip,
+        limit=limit,
+        user_id=user_id,
+        workspace_id=workspace_id,
+        status=status,
+        sort_by=sort_by,
+        sort_order=sort_order
+    )
+    
+    # Get total count for pagination info
+    total = audio_repository.count(
+        db=db,
+        user_id=user_id,
+        workspace_id=workspace_id,
+        status=status
+    )
+    
+    # Convert audio objects to dictionaries with string dates
+    processed_audios = []
+    for audio in audios:
+        # Convert SQLAlchemy model to dict
+        audio_dict = {c.name: getattr(audio, c.name) for c in audio.__table__.columns}
+        
+        # Convert datetime objects to strings
+        if audio_dict.get('created_at'):
+            audio_dict['created_at'] = audio_dict['created_at'].isoformat()
+        if audio_dict.get('updated_at'):
+            audio_dict['updated_at'] = audio_dict['updated_at'].isoformat()
+            
+        processed_audios.append(audio_dict)
+    
+    # Construct response with processed audios
+    return AudioListResponse(
+        items=processed_audios,
+        total=total,
+        skip=skip,
+        limit=limit
+    )
+
