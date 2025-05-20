@@ -1,6 +1,6 @@
 """
 Lipsync service integration for the AI Growth Operator.
-This module provides interactions with the fal.ai latentsync API for synchronizing audio with video.
+This module provides integration with fal.ai latentsync model for lip synchronization.
 """
 
 import os
@@ -9,27 +9,32 @@ import uuid
 import asyncio
 import requests
 from pathlib import Path
-from typing import Dict, List, Any, Optional, Union
+from typing import Dict, Any, Optional, Union
+import logging
 
+# Import fal client for API access
 import fal_client
 from dotenv import load_dotenv
 
 # Import settings
 from app.core.config import settings
 
-# Import database components
-from app.db import get_db, lipsync_repository, video_repository, audio_repository
+# Import database components if needed for storage
 from app.db.blob_storage import upload_file, AssetType
+
+# Configure logging
+logger = logging.getLogger(__name__)
 
 # Load environment variables
 load_dotenv()
 
 # Constants
-FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or os.getenv("FAL_CLIENT_API_KEY") or settings.FAL_CLIENT_API_KEY
-FAL_LIPSYNC_MODEL = "fal-ai/latentsync"
+FAL_KEY = os.getenv("FAL_KEY") or os.getenv("FAL_API_KEY") or settings.FAL_CLIENT_API_KEY
+FAL_LATENTSYNC_MODEL = "fal-ai/latentsync"
+
 
 class LipsyncService:
-    """Service for synchronizing audio with video using fal.ai latentsync API"""
+    """Service for synchronizing lip movements in videos with audio using fal.ai latentsync model"""
     
     def __init__(self):
         """Initialize the LipsyncService with API credentials"""
@@ -40,15 +45,17 @@ class LipsyncService:
         # Set the environment variable fal-client expects
         os.environ["FAL_KEY"] = self.api_key
         
-        # Create output directory if it doesn't exist
-        self.output_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "lipsync")
+        # Create output directories if they don't exist
+        self.root_dir = os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))
+        self.output_dir = os.path.join(self.root_dir, "output", "lipsync")
+        
         os.makedirs(self.output_dir, exist_ok=True)
     
     def on_queue_update(self, update):
         """Process queue updates and logs."""
         if isinstance(update, fal_client.InProgress):
             for log in update.logs:
-                print(log["message"])
+                logger.info(f"Lipsync progress: {log['message']}")
     
     async def upload_file(self, file_path: str) -> str:
         """
@@ -63,271 +70,234 @@ class LipsyncService:
         try:
             # Upload using fal client
             upload_response = await fal_client.upload_file_async(file_path)
-            return upload_response
+            logger.info(f"File uploaded successfully: {upload_response}")
+            # Ensure we return a string
+            return str(upload_response)
         except Exception as e:
-            print(f"Error uploading file: {str(e)}")
+            logger.error(f"Error uploading file: {str(e)}")
             raise ValueError(f"Failed to upload file: {str(e)}")
+    
+    async def download_file(self, url: str, file_path: str) -> str:
+        """
+        Download a file from a URL.
+        
+        Args:
+            url: URL of the file to download
+            file_path: Path where the file should be saved
+            
+        Returns:
+            Path to the downloaded file
+        """
+        try:
+            logger.info(f"Downloading from {url} to {file_path}")
+            response = requests.get(url, stream=True)
+            response.raise_for_status()
+            
+            with open(file_path, "wb") as f:
+                for chunk in response.iter_content(chunk_size=8192):
+                    f.write(chunk)
+            
+            logger.info(f"Downloaded file to {file_path}")
+            return file_path
+        except Exception as e:
+            logger.error(f"Error downloading file: {str(e)}")
+            raise ValueError(f"Failed to download file: {str(e)}")
     
     async def lipsync(
         self,
-        video_path: Optional[str] = None,
         video_url: Optional[str] = None,
-        audio_path: Optional[str] = None,
+        video_path: Optional[str] = None,
         audio_url: Optional[str] = None,
-        save_result: bool = True,
-        upload_to_blob: bool = False,
-        video_id: Optional[str] = None,
-        audio_id: Optional[str] = None,
-        user_id: Optional[str] = None,
-        workspace_id: Optional[str] = None
+        audio_path: Optional[str] = None,
+        save_result: bool = True
     ) -> Dict[str, Any]:
         """
-        Synchronize audio with video.
+        Generate a lip-synced video from the provided video and audio sources.
         
         Args:
+            video_url: URL to the source video
             video_path: Path to local video file
-            video_url: URL to hosted video
+            audio_url: URL to the audio file
             audio_path: Path to local audio file
-            audio_url: URL to hosted audio
             save_result: Whether to save the result to disk
-            upload_to_blob: Whether to upload the result to blob storage
-            video_id: Optional ID of a video record to link
-            audio_id: Optional ID of an audio record to link
-            user_id: Optional user ID to associate with the lipsync video
-            workspace_id: Optional workspace ID to associate with the lipsync video
             
         Returns:
             Dictionary containing the lipsync results
         """
-        # Validate input - need both video and audio
-        if not ((video_path or video_url) and (audio_path or audio_url)):
-            raise ValueError("Both video source (path or URL) and audio source (path or URL) must be provided")
-        
-        # Generate a unique ID for this request
+        # Generate a unique ID for this request and timestamp
         request_id = str(uuid.uuid4())
         timestamp = int(time.time())
         
-        # Upload files if paths are provided but not URLs
-        if video_path and not video_url:
-            print(f"Uploading video from path: {video_path}")
-            video_url = await self.upload_file(video_path)
-            print(f"Video uploaded to: {video_url}")
-        
-        if audio_path and not audio_url:
-            print(f"Uploading audio from path: {audio_path}")
-            audio_url = await self.upload_file(audio_path)
-            print(f"Audio uploaded to: {audio_url}")
-        
-        print("Starting lipsync process...")
+        # Prepare local paths and URLs
+        temp_video_path = None
+        temp_audio_path = None
+        uploaded_video_url = None
+        uploaded_audio_url = None
         
         try:
-            # Prepare arguments for the API
+            # Log request
+            logger.info(f"Processing lipsync request: video_url={video_url}, video_path={video_path}, audio_url={audio_url}, audio_path={audio_path}")
+            
+            # Handle video source
+            if video_path and os.path.exists(video_path):
+                # Upload local video file
+                logger.info(f"Uploading video from path: {video_path}")
+                uploaded_video_url = await self.upload_file(video_path)
+            elif video_url:
+                # Use provided video URL - ensure it's a string
+                uploaded_video_url = str(video_url)
+            else:
+                raise ValueError("No valid video source provided")
+            
+            # Handle audio source
+            if audio_path and os.path.exists(audio_path):
+                # Upload local audio file
+                logger.info(f"Uploading audio from path: {audio_path}")
+                uploaded_audio_url = await self.upload_file(audio_path)
+            elif audio_url:
+                # Use provided audio URL - ensure it's a string
+                uploaded_audio_url = str(audio_url)
+            else:
+                raise ValueError("No valid audio source provided")
+            
+            # Ensure both URLs are strings
+            if not isinstance(uploaded_video_url, str):
+                uploaded_video_url = str(uploaded_video_url)
+            if not isinstance(uploaded_audio_url, str):
+                uploaded_audio_url = str(uploaded_audio_url)
+                
+            logger.info(f"Using video URL: {uploaded_video_url}")
+            logger.info(f"Using audio URL: {uploaded_audio_url}")
+                
+            # Prepare arguments for the latentsync API - ensure all values are JSON serializable
             arguments = {
-                "video_url": video_url,
-                "audio_url": audio_url
+                "video_url": uploaded_video_url,
+                "audio_url": uploaded_audio_url,
+                "sync_lip_movements": True
             }
             
-            print("Submitting request to latentsync API...")
+            logger.info(f"Submitting lipsync request with arguments: {arguments}")
             
+            # Submit the request with progress updates
             try:
-                # Submit the request with progress updates
                 result = fal_client.subscribe(
-                    FAL_LIPSYNC_MODEL,
+                    FAL_LATENTSYNC_MODEL,
                     arguments=arguments,
                     with_logs=True,
                     on_queue_update=self.on_queue_update
                 )
-                print("Lipsync completed!")
+                logger.info("Lipsync generation completed!")
             except Exception as e:
-                print(f"Subscribe method failed, falling back to submit/result: {str(e)}")
+                logger.error(f"Subscribe method failed, falling back to submit/result: {str(e)}")
                 
-                # Method 2: Submit and then get result (non-blocking initially)
+                # Alternative: Submit and then get result
                 handler = fal_client.submit(
-                    FAL_LIPSYNC_MODEL,
+                    FAL_LATENTSYNC_MODEL,
                     arguments=arguments
                 )
                 
                 req_id = handler.request_id
-                print(f"Request ID: {req_id}")
+                logger.info(f"Request ID: {req_id}")
                 
                 # Wait for the result
-                print("Waiting for result...")
-                result = fal_client.result(FAL_LIPSYNC_MODEL, req_id)
-                print("Lipsync completed!")
+                logger.info("Waiting for lipsync result...")
+                result = fal_client.result(FAL_LATENTSYNC_MODEL, req_id)
+                logger.info("Lipsync generation completed!")
             
-            # Extract video URL and prepare response
+            # Extract video URL from the result
             response = {
-                "request_id": request_id,
                 "status": "completed",
-                "timestamp": timestamp,
-                "input": {
-                    "video_url": video_url,
-                    "audio_url": audio_url
-                }
+                "created_at": timestamp
             }
             
-            # If IDs were provided, add them to response
-            if video_id:
-                response["video_id"] = video_id
-            if audio_id:
-                response["audio_id"] = audio_id
-            
-            # Save the video if requested and URL is available
-            output_video_path = None
-            blob_url = None
-            
+            # Get result URL - check for the nested video object structure
             if "video" in result and "url" in result["video"]:
-                output_video_url = result["video"]["url"]
-                response["output_video_url"] = output_video_url
+                result_url = result["video"]["url"]
+                response["video_url"] = result_url
                 
-                # Save to disk if requested
+                # Download and save the result if requested
                 if save_result:
-                    video_filename = f"lipsync_{timestamp}_{request_id[:8]}.mp4"
-                    output_video_path = os.path.join(self.output_dir, video_filename)
+                    output_filename = f"lipsync_{timestamp}_{request_id[:8]}.mp4"
+                    output_path = os.path.join(self.output_dir, output_filename)
                     
-                    # Download the video
-                    print(f"Downloading synchronized video from {output_video_url}...")
-                    download_response = requests.get(output_video_url)
-                    if download_response.status_code == 200:
-                        with open(output_video_path, "wb") as f:
-                            f.write(download_response.content)
-                        print(f"Saved synchronized video to: {output_video_path}")
-                        
-                        # Add file path to response
-                        response["output_video_path"] = str(output_video_path)
-                        response["local_video_url"] = f"file://{output_video_path}"
-                        
-                        # Upload to blob storage if requested
-                        if upload_to_blob and settings.BLOB_READ_WRITE_TOKEN:
-                            try:
-                                with open(output_video_path, "rb") as video_file:
-                                    blob_result = await upload_file(
-                                        file_content=video_file.read(),
-                                        asset_type=AssetType.VIDEOS,
-                                        filename=video_filename,
-                                        content_type="video/mp4"
-                                    )
-                                blob_url = blob_result.get("url")
-                                response["blob_url"] = blob_url
-                                print(f"Uploaded video to blob storage: {blob_url}")
-                            except Exception as e:
-                                print(f"Error uploading to blob storage: {str(e)}")
-                    else:
-                        print(f"Failed to download video: HTTP {download_response.status_code}")
+                    await self.download_file(result_url, output_path)
+                    response["local_path"] = output_path
+                    
+                    # Upload to blob storage if configured
+                    if settings.BLOB_READ_WRITE_TOKEN:
+                        try:
+                            with open(output_path, "rb") as video_file:
+                                blob_result = await upload_file(
+                                    file_content=video_file.read(),
+                                    asset_type=AssetType.VIDEOS,
+                                    filename=output_filename,
+                                    content_type="video/mp4"
+                                )
+                            blob_url = blob_result.get("url")
+                            response["blob_url"] = blob_url
+                            logger.info(f"Uploaded lipsync video to blob storage: {blob_url}")
+                        except Exception as e:
+                            logger.error(f"Error uploading to blob storage: {str(e)}")
+            # Also check for direct URL at top level (for backward compatibility)
+            elif "url" in result:
+                result_url = result["url"]
+                response["video_url"] = result_url
+                
+                # Same download and storage logic as above
+                if save_result:
+                    output_filename = f"lipsync_{timestamp}_{request_id[:8]}.mp4"
+                    output_path = os.path.join(self.output_dir, output_filename)
+                    
+                    await self.download_file(result_url, output_path)
+                    response["local_path"] = output_path
+                    
+                    # Upload to blob storage if configured
+                    if settings.BLOB_READ_WRITE_TOKEN:
+                        try:
+                            with open(output_path, "rb") as video_file:
+                                blob_result = await upload_file(
+                                    file_content=video_file.read(),
+                                    asset_type=AssetType.VIDEOS,
+                                    filename=output_filename,
+                                    content_type="video/mp4"
+                                )
+                            blob_url = blob_result.get("url")
+                            response["blob_url"] = blob_url
+                            logger.info(f"Uploaded lipsync video to blob storage: {blob_url}")
+                        except Exception as e:
+                            logger.error(f"Error uploading to blob storage: {str(e)}")
+            else:
+                # Log the full response structure for debugging
+                logger.error(f"No result URL found in response structure: {result}")
+                raise ValueError("No video URL found in service response. Response structure: " + str(result))
             
-            # Save to database
-            try:
-                # Prepare database data
-                db_data = {
-                    "status": "completed",
-                    "metadata_json": {
-                        "request_id": request_id,
-                        "timestamp": timestamp,
-                        "input": {
-                            "video_url": video_url,
-                            "audio_url": audio_url
-                        },
-                        "result": result
-                    }
-                }
-                
-                # Link to video and audio if IDs were provided
-                if video_id:
-                    db_data["video_id"] = video_id
-                
-                if audio_id:
-                    db_data["audio_id"] = audio_id
-                
-                # Add file paths if available
-                if output_video_path:
-                    db_data["file_path"] = output_video_path
-                    db_data["local_url"] = f"file://{output_video_path}"
-                
-                if output_video_url:
-                    db_data["file_url"] = output_video_url
-                
-                if blob_url:
-                    db_data["blob_url"] = blob_url
-                
-                # Add user and workspace IDs if provided
-                if user_id:
-                    db_data["user_id"] = user_id
-                
-                if workspace_id:
-                    db_data["workspace_id"] = workspace_id
-                
-                # Get a database session and save the lipsync video
-                db = next(get_db())
-                db_lipsync = lipsync_repository.create(db_data, db)
-                
-                if db_lipsync:
-                    response["db_id"] = db_lipsync.id
-            except Exception as e:
-                print(f"Error saving to database: {str(e)}")
+            # Get duration if available
+            if "duration" in result:
+                response["duration"] = result["duration"]
+            
+            # Clean up temporary files
+            if temp_video_path and os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+            if temp_audio_path and os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
             
             return response
             
         except Exception as e:
             error_message = str(e)
-            print(f"Error in lipsync process: {error_message}")
+            logger.error(f"Error in lipsync generation: {error_message}")
             
-            error_response = {
-                "request_id": request_id,
+            # Clean up temporary files
+            if temp_video_path and os.path.exists(temp_video_path):
+                os.remove(temp_video_path)
+            if temp_audio_path and os.path.exists(temp_audio_path):
+                os.remove(temp_audio_path)
+            
+            return {
                 "status": "error",
                 "error": error_message,
-                "timestamp": timestamp,
-                "input": {
-                    "video_url": video_url,
-                    "audio_url": audio_url
-                }
+                "created_at": timestamp
             }
-            
-            # If IDs were provided, add them to response
-            if video_id:
-                error_response["video_id"] = video_id
-            if audio_id:
-                error_response["audio_id"] = audio_id
-            
-            # Save error to database
-            try:
-                # Prepare error data for database
-                error_db_data = {
-                    "status": "failed",
-                    "metadata_json": {
-                        "request_id": request_id,
-                        "timestamp": timestamp,
-                        "error": error_message,
-                        "input": {
-                            "video_url": video_url,
-                            "audio_url": audio_url
-                        }
-                    }
-                }
-                
-                # Link to video and audio if IDs were provided
-                if video_id:
-                    error_db_data["video_id"] = video_id
-                
-                if audio_id:
-                    error_db_data["audio_id"] = audio_id
-                
-                # Add user and workspace IDs if provided
-                if user_id:
-                    error_db_data["user_id"] = user_id
-                
-                if workspace_id:
-                    error_db_data["workspace_id"] = workspace_id
-                
-                # Get a database session and save the error
-                db = next(get_db())
-                db_lipsync = lipsync_repository.create(error_db_data, db)
-                
-                if db_lipsync:
-                    error_response["db_id"] = db_lipsync.id
-            except Exception as db_error:
-                print(f"Error saving failed request to database: {str(db_error)}")
-            
-            return error_response
 
 
 # Create a singleton instance of the service

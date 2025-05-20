@@ -29,6 +29,10 @@ The **AI Growth Operator** is a sophisticated AI agent that automates and optimi
 - **Adaptive Learning**: Continuously improves based on campaign performance
 - **Dynamic Content Generation**: Creates new ad variants based on performance data
 - **Interactive Playground**: Experiment with AI capabilities directly in your browser
+- **Text-to-Image Generation**: Create images from text descriptions
+- **Text-to-Speech**: Convert text to realistic speech audio
+- **Image-to-Video**: Transform static images into dynamic videos
+- **Lipsync**: Synchronize lip movements in videos with audio tracks
 
 ## 🚀 Getting Started
 

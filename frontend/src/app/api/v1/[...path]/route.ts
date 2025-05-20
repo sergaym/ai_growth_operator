@@ -1,19 +1,34 @@
 // Correctly typed route handler for dynamic API routes in Next.js App Router
 import { NextRequest } from 'next/server';
 
-const API_URL = process.env.API_URL || 'http://localhost:80/api/v1';
+// Fixed API base URL - remove any path component
+const API_BASE_URL = process.env.API_URL || 'http://localhost:80';
+
+// Extended RequestInit type that includes the duplex option
+interface ExtendedRequestInit extends RequestInit {
+  duplex?: 'half';
+}
+
+// Extended Request init options for the Request constructor
+interface ExtendedRequestOptions extends RequestInit {
+  duplex?: 'half';
+}
 
 export async function GET(request: NextRequest) {
   const pathSegments = request.nextUrl.pathname.split('/').slice(3);
   const path = pathSegments.join('/');
   const searchParams = request.nextUrl.searchParams.toString();
-  const url = `${API_URL}/${path}${searchParams ? `?${searchParams}` : ''}`;
+  // Ensure correct API path prefix (/api/v1/...)
+  const url = `${API_BASE_URL}/api/v1/${path}${searchParams ? `?${searchParams}` : ''}`;
+
+  console.log(`[API Proxy] GET ${url}`);
 
   try {
     const headers = new Headers(request.headers);
     const response = await fetch(url, { headers });
     return response;
   } catch (error) {
+    console.error('[API Proxy] GET Error:', error);
     return new Response(JSON.stringify({ error: 'Failed to proxy request' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -24,21 +39,136 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   const pathSegments = request.nextUrl.pathname.split('/').slice(3);
   const path = pathSegments.join('/');
-  const url = `${API_URL}/${path}`;
+  // Ensure correct API path prefix (/api/v1/...)
+  const url = `${API_BASE_URL}/api/v1/${path}`;
+
 
   try {
-    const headers = new Headers(request.headers);
-    headers.set('Content-Type', 'application/json');
+    // Clone request for debugging
+    const requestClone = request.clone();
+    const contentType = requestClone.headers.get('content-type') || '';
     
-    const response = await fetch(url, {
-      method: 'POST',
-      headers,
-      body: request.body,
-    });
+    console.log('[API Proxy] Content-Type:', contentType);
     
-    return response;
+    // For multipart/form-data requests (file uploads)
+    if (contentType.includes('multipart/form-data')) {
+      console.log('[API Proxy] Handling multipart/form-data request');
+      
+      try {
+        // Get the form data
+        const formData = await requestClone.formData();
+        
+        // Log form data entries for debugging
+        const formEntries: Record<string, string> = {};
+        for (const [key, value] of formData.entries()) {
+          if (value instanceof File) {
+            formEntries[key] = `File: ${value.name} (${value.size} bytes)`;
+          } else {
+            formEntries[key] = String(value);
+          }
+        }
+        console.log('[API Proxy] Form data entries:', formEntries);
+        
+        // Create a new FormData object to ensure proper file handling
+        const newFormData = new FormData();
+        
+        // Add each entry to the new FormData, handling files specially
+        for (const [key, value] of formData.entries()) {
+          if (value instanceof File) {
+            try {
+              // Read the file into a buffer
+              const buffer = await value.arrayBuffer();
+              // Create a new file with the same properties
+              const newFile = new File([buffer], value.name, { 
+                type: value.type,
+                lastModified: value.lastModified
+              });
+              console.log(`[API Proxy] Processing file: ${value.name}, size: ${value.size}, type: ${value.type}`);
+              newFormData.append(key, newFile, value.name);
+            } catch (fileError) {
+              console.error(`[API Proxy] Error processing file ${value.name}:`, fileError);
+              throw new Error(`Failed to process file ${value.name}: ${fileError instanceof Error ? fileError.message : String(fileError)}`);
+            }
+          } else {
+            newFormData.append(key, value);
+          }
+        }
+        
+        // Use the new FormData for the request
+        const requestOptions: ExtendedRequestOptions = {
+          method: 'POST',
+          body: newFormData,
+          duplex: 'half', // Required for streaming bodies in Node.js 18+
+        };
+        
+        const forwardRequest = new Request(url, requestOptions);
+        
+        console.log(`[API Proxy] Forwarding file upload to: ${url}`);
+        const response = await fetch(forwardRequest);
+        
+        console.log(`[API Proxy] Response status: ${response.status} ${response.statusText}`);
+        
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('[API Proxy] Backend error response:', errorText);
+          
+          // Forward the error response
+          return new Response(errorText, {
+            status: response.status,
+            headers: {
+              'Content-Type': response.headers.get('Content-Type') || 'text/plain'
+            }
+          });
+        }
+        
+        // Forward the success response
+        const responseData = await response.text();
+        console.log('[API Proxy] Backend success response:', responseData.substring(0, 100) + '...');
+        
+        return new Response(responseData, {
+          status: response.status,
+          headers: {
+            'Content-Type': response.headers.get('Content-Type') || 'application/json'
+          }
+        });
+      } catch (uploadError) {
+        console.error('[API Proxy] File upload error:', uploadError);
+        return new Response(JSON.stringify({ 
+          error: 'Failed to proxy file upload request',
+          details: uploadError instanceof Error ? uploadError.message : String(uploadError)
+        }), {
+          status: 500,
+          headers: { 'Content-Type': 'application/json' },
+        });
+      }
+    } 
+    // For JSON and other content types
+    else {
+      // Forward the headers and body directly
+      const headers = new Headers();
+      for (const [key, value] of requestClone.headers.entries()) {
+        // Only copy safe headers
+        if (key.toLowerCase() !== 'host' && key.toLowerCase() !== 'connection') {
+          headers.set(key, value);
+        }
+      }
+      
+      const fetchOptions: ExtendedRequestInit = {
+        method: 'POST',
+        headers,
+        body: requestClone.body,
+        duplex: 'half', // Required when sending a ReadableStream body in Node.js 18+
+      };
+      
+      const response = await fetch(url, fetchOptions);
+      return response;
+    }
   } catch (error) {
-    return new Response(JSON.stringify({ error: 'Failed to proxy request' }), {
+    console.error('[API Proxy] POST Error:', error);
+    return new Response(JSON.stringify({ 
+      error: 'Failed to proxy request',
+      details: error instanceof Error ? error.message : String(error)
+    }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
     });
@@ -48,20 +178,27 @@ export async function POST(request: NextRequest) {
 export async function PUT(request: NextRequest) {
   const pathSegments = request.nextUrl.pathname.split('/').slice(3);
   const path = pathSegments.join('/');
-  const url = `${API_URL}/${path}`;
+  // Ensure correct API path prefix (/api/v1/...)
+  const url = `${API_BASE_URL}/api/v1/${path}`;
+
+  console.log(`[API Proxy] PUT ${url}`);
 
   try {
     const headers = new Headers(request.headers);
     headers.set('Content-Type', 'application/json');
     
-    const response = await fetch(url, {
+    const fetchOptions: ExtendedRequestInit = {
       method: 'PUT',
       headers,
       body: request.body,
-    });
+      duplex: 'half', // Required when sending a ReadableStream body in Node.js 18+
+    };
+    
+    const response = await fetch(url, fetchOptions);
     
     return response;
   } catch (error) {
+    console.error('[API Proxy] PUT Error:', error);
     return new Response(JSON.stringify({ error: 'Failed to proxy request' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },
@@ -72,7 +209,10 @@ export async function PUT(request: NextRequest) {
 export async function DELETE(request: NextRequest) {
   const pathSegments = request.nextUrl.pathname.split('/').slice(3);
   const path = pathSegments.join('/');
-  const url = `${API_URL}/${path}`;
+  // Ensure correct API path prefix (/api/v1/...)
+  const url = `${API_BASE_URL}/api/v1/${path}`;
+
+  console.log(`[API Proxy] DELETE ${url}`);
 
   try {
     const headers = new Headers(request.headers);
@@ -84,6 +224,7 @@ export async function DELETE(request: NextRequest) {
     
     return response;
   } catch (error) {
+    console.error('[API Proxy] DELETE Error:', error);
     return new Response(JSON.stringify({ error: 'Failed to proxy request' }), {
       status: 500,
       headers: { 'Content-Type': 'application/json' },

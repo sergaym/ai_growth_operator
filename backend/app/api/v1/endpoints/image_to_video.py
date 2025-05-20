@@ -5,26 +5,21 @@ These endpoints handle video generation from images.
 
 import os
 import uuid
-import json
 import time
 from typing import Optional, Dict, Any
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, Depends, Query, BackgroundTasks
-from fastapi.responses import FileResponse
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoRequest,
-    GenerateVideoFromUrlRequest,
-    GenerateVideoFromBase64Request,
     VideoGenerationResponse
 )
 from app.services.image_to_video_service import image_to_video_service
-from app.db import get_db
 
 router = APIRouter()
 
 # In-memory job store - in production, use Redis or a database
-# Maps job_id to status information
 job_store = {}
 
 
@@ -39,9 +34,6 @@ async def process_video_generation(
     aspect_ratio: str = "16:9",
     negative_prompt: str = "blur, distort, and low quality",
     cfg_scale: float = 0.5,
-    save_video: bool = True,
-    upload_to_blob: bool = True,
-    source_image_id: Optional[str] = None,
     user_id: Optional[str] = None,
     workspace_id: Optional[str] = None
 ):
@@ -61,9 +53,8 @@ async def process_video_generation(
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
             cfg_scale=cfg_scale,
-            save_video=save_video,
-            upload_to_blob=upload_to_blob,
-            source_image_id=source_image_id,
+            save_video=True,
+            upload_to_blob=True,
             user_id=user_id,
             workspace_id=workspace_id
         )
@@ -132,119 +123,6 @@ async def generate_video(request: GenerateVideoRequest, background_tasks: Backgr
         aspect_ratio=request.aspect_ratio,
         negative_prompt=request.negative_prompt,
         cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
-        source_image_id=request.source_image_id,
-        user_id=request.user_id,
-        workspace_id=request.workspace_id
-    )
-    
-    # Return the job ID and status to the client
-    return {
-        "job_id": job_id,
-        "status": "pending",
-        "message": "Video generation started. Use /status/{job_id} to check status."
-    }
-
-
-@router.post("/from-url", response_model=Dict[str, Any], summary="Generate video from an image URL")
-async def generate_video_from_url(request: GenerateVideoFromUrlRequest, background_tasks: BackgroundTasks):
-    """
-    Generate a video from an image URL.
-    
-    This endpoint immediately returns a job ID and processes the video generation in the background.
-    Use the /status/{job_id} endpoint to check the status of the job.
-    
-    Args:
-        request: Request model containing image URL and video generation parameters
-        background_tasks: FastAPI background tasks
-        
-    Returns:
-        Dictionary with job ID and initial status
-    """
-    # Generate a unique job ID
-    job_id = str(uuid.uuid4())
-    
-    # Create a job record
-    job_store[job_id] = {
-        "status": "pending",
-        "created_at": time.time(),
-        "updated_at": time.time(),
-        "request": {
-            "image_url": request.image_url,
-            "prompt": request.prompt,
-            "duration": request.duration,
-            "aspect_ratio": request.aspect_ratio
-        }
-    }
-    
-    # Add the task to the background tasks
-    background_tasks.add_task(
-        process_video_generation,
-        job_id=job_id,
-        image_url=request.image_url,
-        prompt=request.prompt,
-        duration=request.duration,
-        aspect_ratio=request.aspect_ratio,
-        negative_prompt=request.negative_prompt,
-        cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
-        user_id=request.user_id,
-        workspace_id=request.workspace_id
-    )
-    
-    # Return the job ID and status to the client
-    return {
-        "job_id": job_id,
-        "status": "pending",
-        "message": "Video generation started. Use /status/{job_id} to check status."
-    }
-
-
-@router.post("/from-base64", response_model=Dict[str, Any], summary="Generate video from base64 image data")
-async def generate_video_from_base64(request: GenerateVideoFromBase64Request, background_tasks: BackgroundTasks):
-    """
-    Generate a video from base64-encoded image data.
-    
-    This endpoint immediately returns a job ID and processes the video generation in the background.
-    Use the /status/{job_id} endpoint to check the status of the job.
-    
-    Args:
-        request: Request model containing base64 image data and video generation parameters
-        background_tasks: FastAPI background tasks
-        
-    Returns:
-        Dictionary with job ID and initial status
-    """
-    # Generate a unique job ID
-    job_id = str(uuid.uuid4())
-    
-    # Create a job record
-    job_store[job_id] = {
-        "status": "pending",
-        "created_at": time.time(),
-        "updated_at": time.time(),
-        "request": {
-            "image_base64": "(base64 data)",
-            "prompt": request.prompt,
-            "duration": request.duration,
-            "aspect_ratio": request.aspect_ratio
-        }
-    }
-    
-    # Add the task to the background tasks
-    background_tasks.add_task(
-        process_video_generation,
-        job_id=job_id,
-        image_base64=request.image_base64,
-        prompt=request.prompt,
-        duration=request.duration,
-        aspect_ratio=request.aspect_ratio,
-        negative_prompt=request.negative_prompt,
-        cfg_scale=request.cfg_scale,
-        save_video=request.save_video,
-        upload_to_blob=request.upload_to_blob,
         user_id=request.user_id,
         workspace_id=request.workspace_id
     )
@@ -287,19 +165,60 @@ async def generate_video_from_file(
     Returns:
         Dictionary with job ID and initial status
     """
-    # Validate parameters
+    # Manual validation to prevent FastAPI validation errors with binary data
+    if not file:
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "No file provided"}
+        )
+        
+    # Validate parameters before FastAPI tries to validate
     if duration not in ["5", "10"]:
-        raise HTTPException(status_code=400, detail="Duration must be '5' or '10'")
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Duration must be '5' or '10'"}
+        )
     
     if aspect_ratio not in ["16:9", "9:16", "1:1"]:
-        raise HTTPException(status_code=400, detail="Aspect ratio must be '16:9', '9:16', or '1:1'")
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "Aspect ratio must be '16:9', '9:16', or '1:1'"}
+        )
     
-    if cfg_scale < 0.0 or cfg_scale > 1.0:
-        raise HTTPException(status_code=400, detail="cfg_scale must be between 0.0 and 1.0")
+    try:
+        cfg_value = float(cfg_scale)
+        if cfg_value < 0.0 or cfg_value > 1.0:
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "cfg_scale must be between 0.0 and 1.0"}
+            )
+    except (ValueError, TypeError):
+        return JSONResponse(
+            status_code=400,
+            content={"detail": "cfg_scale must be a valid number"}
+        )
     
     try:
         # Read the file content
         file_content = await file.read()
+        
+        # Check if the file is empty
+        if not file_content:
+            return JSONResponse(
+                status_code=400,
+                content={"detail": "Uploaded file is empty"}
+            )
+            
+        # Check file type by magic numbers/signatures
+        # PNG signature starts with bytes [137, 80, 78, 71]
+        # JPEG signature starts with bytes [255, 216]
+        if not (file_content.startswith(b'\x89PNG') or 
+                file_content.startswith(b'\xff\xd8') or
+                file_content.startswith(b'RIFF') and b'WEBP' in file_content[:12]):  # WEBP
+            return JSONResponse(
+                status_code=415,
+                content={"detail": "File must be a valid PNG, JPEG, or WEBP image"}
+            )
         
         # Save to temporary file
         temp_dir = os.path.join(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(os.path.dirname(__file__))))), "output", "temp")
@@ -334,9 +253,7 @@ async def generate_video_from_file(
             duration=duration,
             aspect_ratio=aspect_ratio,
             negative_prompt=negative_prompt,
-            cfg_scale=cfg_scale,
-            save_video=True,
-            upload_to_blob=True,
+            cfg_scale=cfg_value,
             user_id=user_id,
             workspace_id=workspace_id
         )
@@ -348,10 +265,11 @@ async def generate_video_from_file(
             "message": "Video generation started. Use /status/{job_id} to check status."
         }
         
-    except HTTPException:
-        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Failed to process image upload: {str(e)}")
+        return JSONResponse(
+            status_code=500,
+            content={"detail": f"Failed to process image upload: {str(e)}"}
+        )
 
 
 @router.get("/status/{job_id}", response_model=Dict[str, Any], summary="Get status of a video generation job")
