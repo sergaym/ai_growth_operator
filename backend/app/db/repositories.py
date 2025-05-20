@@ -168,6 +168,42 @@ class VideoRepository:
         query = query.offset(skip).limit(limit)
         
         return query.all()
+        
+    def count(
+        self, 
+        db: Session, 
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+        status: Optional[str] = None
+    ) -> int:
+        """
+        Count videos with optional filtering.
+        
+        Args:
+            db: Database session
+            user_id: Filter by user ID
+            workspace_id: Filter by workspace ID
+            status: Filter by status
+            
+        Returns:
+            Total count of videos matching the filters
+        """
+        # Import here to avoid circular import
+        from app.models import Video
+        
+        # Start with base query
+        query = db.query(Video)
+        
+        # Apply filters if provided
+        if user_id:
+            query = query.filter(Video.user_id == user_id)
+        if workspace_id:
+            query = query.filter(Video.workspace_id == workspace_id)
+        if status:
+            query = query.filter(Video.status == status)
+        
+        return query.count()
+
 
 class AudioRepository:
     """Repository for Audio model operations."""
