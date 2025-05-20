@@ -2,8 +2,9 @@
 Image-to-Video endpoints for the AI Growth Operator API v1.
 These endpoints handle video generation from images.
 
-Note: The heygen_avatar_videos and video_generations tables will be removed in a future update
-as they have been consolidated into the videos table.
+Note: The heygen_avatar_videos and video_generations tables have been removed
+by migration '31ba90da303b_remove_legacy_video_tables.py'. All video data is now
+consolidated in the 'videos' table.
 """
 
 import os
