@@ -1,6 +1,9 @@
 import React, { useState, useRef, useEffect } from 'react';
 import { X, Search, AlertCircle } from 'lucide-react';
-import { useActors, Actor } from '@/hooks/useActors';
+import { useActors, Actor, isValidVideoUrl } from '@/hooks/useActors';
+
+// API base URL for assets
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
 
 interface ActorSelectDialogProps {
   isOpen: boolean;
@@ -17,6 +20,27 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   const [hdFilter, setHdFilter] = useState(false);
   const [playingVideo, setPlayingVideo] = useState<string | null>(null);
   const videoRefs = useRef<{ [key: string]: HTMLVideoElement }>({});
+  // Track loading state for each actor
+  const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
+
+  // Function to resolve relative API URLs
+  const resolveApiUrl = (relativeUrl?: string) => {
+    if (!relativeUrl) return '/placeholder-avatar.jpg';
+    
+    // If it's already an absolute URL, return it as is
+    if (relativeUrl.startsWith('http')) {
+      return relativeUrl;
+    }
+    
+    // Make sure the path starts with a slash
+    const path = relativeUrl.startsWith('/') ? relativeUrl : `/${relativeUrl}`;
+    return `${API_BASE_URL}/api/v1${path}`;
+  };
+
+  // Helper to get a safe image URL (with fallback)
+  const getSafeImageUrl = (url?: string) => {
+    return url ? resolveApiUrl(url) : '/placeholder-avatar.jpg';
+  };
 
   // Use our custom hook to fetch actors (videos) from the API
   const { actors, isLoading, error } = useActors({ 
@@ -24,16 +48,16 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     status: 'completed' 
   });
 
-  // Log available videos for debugging
+  // Initialize loading states for all actors when they're fetched
   useEffect(() => {
     if (actors.length > 0) {
-      console.log('Available actors with videos:', 
-        actors.filter(a => a.videoUrl).map(a => ({ 
-          id: a.id, 
-          name: a.name, 
-          videoUrl: a.videoUrl 
-        }))
-      );
+      const initialLoadingStates: { [key: string]: boolean } = {};
+      actors.forEach(actor => {
+        if (actor.videoUrl) {  // URLs are already validated in the useActors hook
+          initialLoadingStates[actor.id] = true;
+        }
+      });
+      setLoadingStates(initialLoadingStates);
     }
   }, [actors]);
 
