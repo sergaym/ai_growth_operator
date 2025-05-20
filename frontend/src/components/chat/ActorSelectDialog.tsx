@@ -1,14 +1,6 @@
-import React, { useState } from 'react';
-import { X, Search } from 'lucide-react';
-
-interface Actor {
-  id: string;
-  name: string;
-  image: string;
-  tags: string[];
-  hd?: boolean;
-  pro?: boolean;
-}
+import React, { useState, useRef } from 'react';
+import { X, Search, AlertCircle, Play, Pause } from 'lucide-react';
+import { useActors, Actor } from '@/hooks/useActors';
 
 interface ActorSelectDialogProps {
   isOpen: boolean;
