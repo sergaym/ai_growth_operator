@@ -116,7 +116,58 @@ class VideoRepository:
         from app.models import Video
         
         return db.query(Video).filter(Video.id == video_id).first()
-
+        
+    def get_all(
+        self, 
+        db: Session, 
+        skip: int = 0, 
+        limit: int = 100, 
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+        status: Optional[str] = None,
+        sort_by: str = "created_at",
+        sort_order: str = "desc"
+    ) -> List[Any]:
+        """
+        Get all videos with optional filtering and pagination.
+        
+        Args:
+            db: Database session
+            skip: Number of records to skip
+            limit: Maximum number of records to return
+            user_id: Filter by user ID
+            workspace_id: Filter by workspace ID
+            status: Filter by status
+            sort_by: Field to sort by
+            sort_order: Sort order ('asc' or 'desc')
+            
+        Returns:
+            List of Video objects
+        """
+        # Import here to avoid circular import
+        from app.models import Video
+        from sqlalchemy import desc, asc
+        
+        # Start with base query
+        query = db.query(Video)
+        
+        # Apply filters if provided
+        if user_id:
+            query = query.filter(Video.user_id == user_id)
+        if workspace_id:
+            query = query.filter(Video.workspace_id == workspace_id)
+        if status:
+            query = query.filter(Video.status == status)
+        
+        # Apply sorting
+        if hasattr(Video, sort_by):
+            sort_func = desc if sort_order.lower() == 'desc' else asc
+            query = query.order_by(sort_func(getattr(Video, sort_by)))
+        
+        # Apply pagination
+        query = query.offset(skip).limit(limit)
+        
+        return query.all()
 
 class AudioRepository:
     """Repository for Audio model operations."""
