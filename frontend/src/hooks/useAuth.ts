@@ -74,26 +74,18 @@ export function useAuth() {
         }
 
         // Try to validate the token with the backend
-        const response = await fetch(
-          `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`,
-          {
-            credentials: 'include',
-            headers: {
-              'Authorization': `Bearer ${accessToken}`
-            }
-          }
-        );
-
-        if (!response.ok) {
+        try {
+          await getUserProfile(accessToken);
+        } catch (err) {
           // If token is invalid, try to refresh it
           const refreshToken = await refreshAccessToken();
           if (!refreshToken) {
             setUser({ isAuthenticated: false });
             return;
           }
+          // Try to get profile with the new token
+          await getUserProfile(refreshToken);
         }
-
-        setUser({ isAuthenticated: true });
       } catch (err) {
         console.error('Auth check error:', err);
         setUser({ isAuthenticated: false });
@@ -109,7 +101,7 @@ export function useAuth() {
       // In SSR, just set loading to false
       setLoading(false);
     }
-  }, []);
+  }, [getUserProfile]);
 
   // Login function
   const login = useCallback(async (email: string, password: string, callbackUrl?: string) => {
