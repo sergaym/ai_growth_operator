@@ -117,17 +117,18 @@ export default function WorkspaceProjects() {
 
   const handleNewProject = () => {
     const projectId = nanoid(10);
-    window.location.href = `/playground/${workspaceId}/projects/${projectId}`;
+    router.push(`/playground/${workspaceId}/projects/${projectId}`);
   };
 
-  // Show loading state while fetching workspaces
-  if (loading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500"></div>
-      </div>
-    );
-  }
+  const navigateToApiDemo = () => {
+    router.push(`/playground/${workspaceId}/api-demo`);
+  };
+
+  const navigateToProject = (projectId: string) => {
+    router.push(`/playground/${workspaceId}/projects/${projectId}`);
+  };
+
+  const navigateToWorkspaces = () => {
 
   // If the workspace isn't found in the user's workspaces, show an error
   if (!loading && !currentWorkspace) {
