@@ -76,10 +76,6 @@ export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
           {
             title: "Overview",
             url: `/playground/${currentWorkspaceId}`,
-          },
-          {
-            title: "Legacy",
-            url: `/playground/${currentWorkspaceId}/legacy`,
           }
         ],
       },
