@@ -24,6 +24,41 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     status: 'completed' 
   });
 
+  // Log available videos for debugging
+  useEffect(() => {
+    if (actors.length > 0) {
+      console.log('Available actors with videos:', 
+        actors.filter(a => a.videoUrl).map(a => ({ 
+          id: a.id, 
+          name: a.name, 
+          videoUrl: a.videoUrl 
+        }))
+      );
+    }
+  }, [actors]);
+
+  // Clean up videos when dialog closes
+  useEffect(() => {
+    // When the dialog opens, reset state
+    if (isOpen) {
+      setPlayingVideo(null);
+    }
+    
+    // Clean up when dialog closes
+    return () => {
+      // Clean up all running videos
+      Object.values(videoRefs.current).forEach(video => {
+        if (video) {
+          video.pause();
+          video.src = '';
+          video.load();
+        }
+      });
+      videoRefs.current = {};
+      setPlayingVideo(null);
+    };
+  }, [isOpen]);
+
   // Filter actors based on search and filters
   const filteredActors = actors.filter(actor => {
     // Search filter
