@@ -31,12 +31,12 @@ import {
 import { useAuth } from "@/hooks/useAuth"
 
 export function NavUser({
-  user,
+  user: initialUser,
 }: {
-  user: {
-    name: string
-    email: string
-    avatar: string
+  user?: {
+    name: string;
+    email: string;
+    avatar: string;
   }
 }) {
   const { isMobile } = useSidebar()
