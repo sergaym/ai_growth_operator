@@ -408,3 +408,33 @@ async def list_videos(
         skip=skip,
         limit=limit
     )
+
+
+@router.get("/videos/{video_id}", response_model=VideoResponse, summary="Get video by ID")
+async def get_video(
+    video_id: str = Path(..., description="ID of the video to retrieve"),
+    db: Session = Depends(get_db)
+):
+    """
+    Get detailed information about a specific video by its ID.
+    
+    Args:
+        video_id: ID of the video to retrieve
+        
+    Returns:
+        Detailed video information
+    """
+    video = video_repository.get_by_id(video_id, db)
+    if not video:
+        raise HTTPException(status_code=404, detail="Video not found")
+    
+    # Convert SQLAlchemy model to dict
+    video_dict = {c.name: getattr(video, c.name) for c in video.__table__.columns}
+    
+    # Convert datetime objects to strings
+    if video_dict.get('created_at'):
+        video_dict['created_at'] = video_dict['created_at'].isoformat()
+    if video_dict.get('updated_at'):
+        video_dict['updated_at'] = video_dict['updated_at'].isoformat()
+    
+    return video_dict 
