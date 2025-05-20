@@ -167,7 +167,7 @@ export async function refreshAccessToken(): Promise<string | null> {
       return null;
     }
     // The backend expects refresh_token as a query parameter, not in the body
-    const refreshEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/auth/refresh?refresh_token=${encodeURIComponent(refreshToken)}`;
+    const refreshEndpoint = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/refresh?refresh_token=${encodeURIComponent(refreshToken)}`;
       
     // Prepare request options - making sure to include cookies
     const requestOptions: RequestInit = {

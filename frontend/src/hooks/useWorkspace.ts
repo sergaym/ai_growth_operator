@@ -33,7 +33,7 @@ export function useWorkspaces() {
     const fetchWorkspaces = async () => {
       try {
         // Use apiClient for automatic token refresh
-        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/workspaces`);
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces`);
         
         if (Array.isArray(data)) {
           setWorkspaces(data);

@@ -135,7 +135,7 @@ async function fetchApi<T>(
     // Use the central apiClient to trigger a token refresh
     try {
       // Make a simple request to trigger the refresh mechanism
-      await coreApiClient(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+      await coreApiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`);
       
       // If successful, retry the original request with new token
       headers = createHeaders(fetchOptions.headers);

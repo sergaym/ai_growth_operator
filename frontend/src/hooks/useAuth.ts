@@ -46,7 +46,7 @@ export function useAuth() {
 
   const getUserProfile = useCallback(async (accessToken: string): Promise<void> => {
     try {
-      const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`, {
+      const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, {
         headers: {
           'Authorization': `Bearer ${accessToken}`
         }
@@ -122,7 +122,7 @@ export function useAuth() {
       formData.append('username', email);
       formData.append('password', password);
       
-      const data = await apiClient<AuthData>(`${process.env.NEXT_PUBLIC_API_URL}/auth/signin`, {
+      const data = await apiClient<AuthData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signin`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/x-www-form-urlencoded'
@@ -224,7 +224,7 @@ export function useAuth() {
         // After successful token refresh, try to get user data
         try {
           // Get user profile with the new token
-          const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+          const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`);
           
           // Update the user state
           setUser({

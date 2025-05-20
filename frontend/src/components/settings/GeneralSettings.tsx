@@ -83,7 +83,7 @@ export function GeneralSettings({ workspaceId }: GeneralSettingsProps) {
 
     try {
       setIsSaving(true);
-      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspace.id}/name?new_name=${encodeURIComponent(workspaceName)}`, {
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${currentWorkspace.id}/name?new_name=${encodeURIComponent(workspaceName)}`, {
         method: 'PUT'
       });
       
