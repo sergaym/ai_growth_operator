@@ -10,13 +10,19 @@ interface AuthResponse {
 
 interface AuthUser {
   isAuthenticated: boolean;
+  id?: string;
+  email?: string;
+  first_name?: string;
+  last_name?: string;
 }
 
 interface AuthData {
   user: {
     id: string;
     email: string;
-    // Add other user fields as needed
+    first_name: string;
+    last_name: string;
+    role?: string;
   };
   access_token: string;
   refresh_token: string;
