@@ -26,6 +26,8 @@ from .text_to_speech_schemas import (
 from .image_to_video_schemas import (
     GenerateVideoRequest,
     VideoGenerationResponse,
+    VideoResponse,
+    VideoListResponse,
 )
 
 from .lipsync_schemas import (
@@ -56,6 +58,8 @@ __all__ = [
     # Image-to-Video schemas
     "GenerateVideoRequest",
     "VideoGenerationResponse",
+    "VideoResponse",
+    "VideoListResponse",
     
     # Lipsync schemas
     "LipsyncRequest",
