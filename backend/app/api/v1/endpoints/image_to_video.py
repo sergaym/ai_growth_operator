@@ -1,21 +1,28 @@
 """
 Image-to-Video endpoints for the AI Growth Operator API v1.
 These endpoints handle video generation from images.
+
+Note: The heygen_avatar_videos and video_generations tables will be removed in a future update
+as they have been consolidated into the videos table.
 """
 
 import os
 import uuid
 import time
-from typing import Optional, Dict, Any
+from typing import Optional, Dict, Any, List
 
-from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks
+from fastapi import APIRouter, HTTPException, UploadFile, File, Form, BackgroundTasks, Query, Path, Depends
 from fastapi.responses import FileResponse, JSONResponse
 
 from app.api.v1.schemas.image_to_video_schemas import (
     GenerateVideoRequest,
-    VideoGenerationResponse
+    VideoGenerationResponse,
+    VideoResponse,
+    VideoListResponse
 )
 from app.services.image_to_video_service import image_to_video_service
+from app.db import get_db, video_repository
+from sqlalchemy.orm import Session
 
 router = APIRouter()
 
