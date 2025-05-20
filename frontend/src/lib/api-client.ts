@@ -126,10 +126,22 @@ async function fetchApi<T>(
   });
   // If unauthorized, try to refresh access token and retry once
   if (response.status === 401) {
-    // Attempt to refresh access token using refresh token (httpOnly cookie)
+    // Attempt to refresh access token using refresh token
+    // Get the refresh token from localStorage or any storage you're using
+    const storedRefreshToken = typeof window !== 'undefined' ? 
+      window.localStorage.getItem('refresh_token') : null;
+    
+    if (!storedRefreshToken) {
+      throw new Error('No refresh token available');
+    }
+    
     const refreshResp = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/refresh', {
       method: 'POST',
       credentials: 'include',
+      headers: {
+        'Content-Type': 'application/json'
+      },
+      body: JSON.stringify({ refresh_token: storedRefreshToken })
     });
     const refreshData = await refreshResp.json();
     if (refreshResp.ok && refreshData.access_token) {

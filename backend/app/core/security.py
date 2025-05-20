@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.db.database import get_db
 from app.models import User
-from sqlalchemy.orm import Session
+from sqlalchemy.orm import Session, joinedload
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -57,7 +57,8 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    user = db.query(User).filter(User.email == payload["sub"]).first()
+    # Get user with their workspaces
+    user = db.query(User).options(joinedload(User.workspaces)).filter(User.email == payload["sub"]).first()
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

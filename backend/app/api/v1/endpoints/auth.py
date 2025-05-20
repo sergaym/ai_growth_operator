@@ -55,5 +55,6 @@ def refresh_token_endpoint(refresh_token: str, db: Session = Depends(get_db)):
     return {"user": user, "access_token": access_token, "refresh_token": new_refresh_token}
 
 @router.get('/me', response_model=UserOut)
-def get_me(current_user=Depends(get_current_user)):
+def get_me(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+    current_user.workspaces = UserService.get_user_workspaces(db, current_user.id)
     return current_user
