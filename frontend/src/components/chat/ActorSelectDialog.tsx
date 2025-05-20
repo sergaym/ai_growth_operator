@@ -1,5 +1,5 @@
-import React, { useState, useRef } from 'react';
-import { X, Search, AlertCircle, Play, Pause } from 'lucide-react';
+import React, { useState, useRef, useEffect } from 'react';
+import { X, Search, AlertCircle } from 'lucide-react';
 import { useActors, Actor } from '@/hooks/useActors';
 
 interface ActorSelectDialogProps {
