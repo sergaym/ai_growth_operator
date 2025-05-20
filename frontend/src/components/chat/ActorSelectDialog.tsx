@@ -209,36 +209,97 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
           {/* Actor grid */}
           <div className="flex-1 p-4 overflow-y-auto">
-            <div className="grid grid-cols-5 gap-4">
-              {filteredActors.map(actor => (
-                <div 
-                  key={actor.id} 
-                  className="group relative cursor-pointer"
-                  onClick={() => toggleActorSelection(actor)}
-                >
-                  <div className={`relative aspect-[3/4] overflow-hidden rounded-md ${
-                    selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
-                  }`}>
-                    <img 
-                      src={actor.image} 
-                      alt={actor.name}
-                      className="w-full h-full object-cover"
-                    />
-                    {actor.pro && (
-                      <div className="absolute top-2 left-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
-                        PRO
-                      </div>
-                    )}
-                    {actor.hd && (
-                      <div className="absolute bottom-2 right-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
-                        HD
-                      </div>
-                    )}
+            {isLoading ? (
+              <div className="w-full h-full flex items-center justify-center">
+                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
+              </div>
+            ) : error ? (
+              <div className="w-full h-full flex flex-col items-center justify-center text-red-500">
+                <AlertCircle className="h-8 w-8 mb-2" />
+                <p className="text-sm">{error}</p>
+              </div>
+            ) : filteredActors.length === 0 ? (
+              <div className="w-full h-full flex items-center justify-center text-zinc-500">
+                <p>No actors match your criteria</p>
+              </div>
+            ) : (
+              <div className="grid grid-cols-5 gap-4">
+                {filteredActors.map(actor => (
+                  <div 
+                    key={actor.id} 
+                    className="group relative cursor-pointer"
+                  >
+                    <div 
+                      className={`relative aspect-[3/4] overflow-hidden rounded-md ${
+                        selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
+                      }`}
+                      onClick={() => toggleActorSelection(actor)}
+                    >
+                      {actor.videoUrl && playingVideo === actor.id ? (
+                        <video
+                          ref={(el) => {
+                            if (el) videoRefs.current[actor.id] = el;
+                          }}
+                          src={actor.videoUrl}
+                          className="w-full h-full object-cover"
+                          muted
+                          playsInline
+                          loop
+                        />
+                      ) : (
+                        <img 
+                          src={actor.image} 
+                          alt={actor.name}
+                          className="w-full h-full object-cover"
+                          onError={(e) => {
+                            (e.target as HTMLImageElement).src = '/placeholder-avatar.jpg';
+                          }}
+                        />
+                      )}
+                      
+                      {/* Video play/pause button */}
+                      {actor.videoUrl && (
+                        <button
+                          className="absolute inset-0 flex items-center justify-center bg-black/30 opacity-0 group-hover:opacity-100 transition-opacity"
+                          onClick={(e) => {
+                            e.stopPropagation(); // Prevent triggering selection
+                            toggleVideoPlay(actor.id, actor.videoUrl);
+                          }}
+                        >
+                          {playingVideo === actor.id ? (
+                            <Pause className="h-10 w-10 text-white" />
+                          ) : (
+                            <Play className="h-10 w-10 text-white" />
+                          )}
+                        </button>
+                      )}
+                      
+                      {actor.pro && (
+                        <div className="absolute top-2 left-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          PRO
+                        </div>
+                      )}
+                      {actor.hd && (
+                        <div className="absolute bottom-2 right-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                          HD
+                        </div>
+                      )}
+                    </div>
+                    <div className="mt-1 flex justify-between items-center">
+                      <p className="text-sm truncate">{actor.name}</p>
+                      {actor.videoUrl && (
+                        <button 
+                          className="text-xs text-blue-500 hover:text-blue-700"
+                          onClick={() => toggleVideoPlay(actor.id, actor.videoUrl)}
+                        >
+                          {playingVideo === actor.id ? 'Pause' : 'Play'}
+                        </button>
+                      )}
+                    </div>
                   </div>
-                  <p className="mt-1 text-sm text-center">{actor.name}</p>
-                </div>
-              ))}
-            </div>
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
