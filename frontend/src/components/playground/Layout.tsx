@@ -37,7 +37,7 @@ export default function PlaygroundLayout({
   const params = useParams();
   const currentWorkspaceId = params.workspaceId as string | null;
   const { workspaces, loading: workspaceLoading, error: workspaceError } = useWorkspaces();
-  const currentWorkspace = workspaces.find(ws => ws.id === currentWorkspaceId);
+  const currentWorkspace = workspaces.find(ws => ws.id == currentWorkspaceId);
   // Wait for workspace data before rendering
   if (workspaceLoading) {
     return (

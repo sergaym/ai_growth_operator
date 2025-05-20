@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
+import { apiClient } from '../services/apiClient';
 
 interface Workspace {
   id: string;
@@ -12,7 +13,9 @@ interface Workspace {
 
 export function useWorkspaces() {
   const router = useRouter();
-  const { user: authState, loading: authLoading } = useAuth();
+  const auth = useAuth();
+  const authState = auth.user;
+  const authLoading = auth.loading;
   const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -29,20 +32,9 @@ export function useWorkspaces() {
 
     const fetchWorkspaces = async () => {
       try {
-        const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces`, {
-          headers: {
-            'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('Failed to fetch workspaces');
-        }
-
-        const data = await response.json();
-
-        console.log(data)
-
+        // Use apiClient for automatic token refresh
+        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/workspaces`);
+        
         if (Array.isArray(data)) {
           setWorkspaces(data);
         } else {

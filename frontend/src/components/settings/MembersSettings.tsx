@@ -42,7 +42,11 @@ interface TeamMember {
   role: Role;
 }
 
-export function MembersSettings() {
+interface MembersSettingsProps {
+  workspaceId?: string;
+}
+
+export function MembersSettings({ workspaceId }: MembersSettingsProps) {
   const [members, setMembers] = useState<TeamMember[]>([
     {
       id: '1',

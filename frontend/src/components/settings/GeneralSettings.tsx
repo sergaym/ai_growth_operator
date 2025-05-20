@@ -9,19 +9,32 @@ import { CloudUpload, Camera, Save } from "lucide-react";
 import { useToast } from "@/components/ui/use-toast";
 import { useWorkspaces } from '@/hooks/useWorkspace';
 import { useAuth } from '@/hooks/useAuth';
+import { apiClient } from '@/services/apiClient';
 
-export function GeneralSettings() {
+interface GeneralSettingsProps {
+  workspaceId?: string;
+}
+
+export function GeneralSettings({ workspaceId }: GeneralSettingsProps) {
   const params = useParams();
-  const currentWorkspaceId = params.workspaceId as string | null;
+  // Use provided workspaceId prop or fall back to the URL param
+  const currentWorkspaceId = workspaceId || (params.workspaceId as string | null);
   const { workspaces, loading: workspaceLoading, error: workspaceError } = useWorkspaces();
-  const currentWorkspace = workspaces.find(ws => ws.id === currentWorkspaceId);
+  const currentWorkspace = workspaces.find(ws => ws.id == currentWorkspaceId);
 
   // If no workspace is found and we have a workspace ID, show error
-  if (currentWorkspaceId && !currentWorkspace) {
+  if (workspaces.length > 0 && currentWorkspaceId && !currentWorkspace) {
     throw new Error('Workspace not found');
   }
 
-  const [workspaceName, setWorkspaceName] = useState<string>(currentWorkspace?.name || "My AI UGC Workspace");
+  const [workspaceName, setWorkspaceName] = useState<string>(currentWorkspace?.name || "");
+
+  React.useEffect(() => {
+    if (currentWorkspace?.name) {
+      setWorkspaceName(currentWorkspace.name);
+    }
+  }, [currentWorkspace]);
+  
   const [isUploading, setIsUploading] = useState<boolean>(false);
   const [isSaving, setIsSaving] = useState<boolean>(false);
   const [iconPreview, setIconPreview] = useState<string | null>(null);
@@ -70,17 +83,9 @@ export function GeneralSettings() {
 
     try {
       setIsSaving(true);
-      const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspace.id}/name`, {
-        method: 'PUT',
-        headers: {
-          'Authorization': `Bearer ${localStorage.getItem('access_token')}`
-        },
-        body: JSON.stringify({ new_name: workspaceName })
+      await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/workspaces/${currentWorkspace.id}/name?new_name=${encodeURIComponent(workspaceName)}`, {
+        method: 'PUT'
       });
-      
-      if (!response.ok) {
-        throw new Error('Failed to update workspace name');
-      }
       
       toast({
         title: "Success",

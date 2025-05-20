@@ -49,10 +49,6 @@ export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
   const workspaceMatch = pathname.match(/\/playground\/([^\/]+)/);
   const currentWorkspaceId = workspaceMatch ? workspaceMatch[1] : null;
   
-  // Debug
-  console.log('Current path:', pathname);
-  console.log('Detected workspace ID:', currentWorkspaceId);
-
   // Create different menu items based on whether we're at the workspace selection page
   // or within a specific workspace
   const getProjectsMenu = () => {

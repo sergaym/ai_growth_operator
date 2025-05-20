@@ -1,9 +1,12 @@
 /**
  * API Client for interacting with the AI-UGC backend endpoints
  * Uses Next.js native fetch capabilities
+ * 
+ * NOTE: Token refresh is handled by the central apiClient in /services/apiClient.ts
  */
 
 import type { ApiResponse } from '@/types/api';
+import { apiClient as coreApiClient } from '@/services/apiClient';
 
 // Get the API base URL from environment variable with fallback
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:80';
@@ -124,45 +127,35 @@ async function fetchApi<T>(
     headers,
     credentials: 'include', // always include cookies for refresh
   });
-  // If unauthorized, try to refresh access token and retry once
+  // If unauthorized, we want coreApiClient to handle token refresh
+  // This will route through the centralized token refresh logic
   if (response.status === 401) {
-    // Attempt to refresh access token using refresh token
-    // Get the refresh token from localStorage or any storage you're using
-    const storedRefreshToken = typeof window !== 'undefined' ? 
-      window.localStorage.getItem('refresh_token') : null;
+    console.log('Unauthorized response, delegating to central apiClient for token refresh');
     
-    if (!storedRefreshToken) {
-      throw new Error('No refresh token available');
-    }
-    
-    const refreshResp = await fetch(process.env.NEXT_PUBLIC_API_URL + '/auth/refresh', {
-      method: 'POST',
-      credentials: 'include',
-      headers: {
-        'Content-Type': 'application/json'
-      },
-      body: JSON.stringify({ refresh_token: storedRefreshToken })
-    });
-    const refreshData = await refreshResp.json();
-    if (refreshResp.ok && refreshData.access_token) {
-      if (typeof window !== 'undefined') {
-        window.localStorage.setItem('access_token', refreshData.access_token);
-      }
-      // Retry original request with new token
+    // Use the central apiClient to trigger a token refresh
+    try {
+      // Make a simple request to trigger the refresh mechanism
+      await coreApiClient(`${process.env.NEXT_PUBLIC_API_URL}/auth/me`);
+      
+      // If successful, retry the original request with new token
       headers = createHeaders(fetchOptions.headers);
       response = await fetch(url, {
         ...fetchOptions,
         headers,
         credentials: 'include',
       });
-    } else {
-      // If refresh fails, clear token and reject
+    } catch (error) {
+      // If refresh fails through central mechanism, log out
+      console.error('Token refresh failed:', error);
       if (typeof window !== 'undefined') {
         window.localStorage.removeItem('access_token');
+        window.localStorage.removeItem('refresh_token');
       }
       throw new Error('Session expired. Please sign in again.');
     }
   }
+  
+  // Process the response
   return handleResponse<T>(response);
 }
 
