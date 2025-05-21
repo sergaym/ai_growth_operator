@@ -40,7 +40,8 @@ export async function apiClient<T>(
   
   // Create a new headers object
   const newHeaders: HeadersInit = {
-    'Content-Type': 'application/json'
+    'Content-Type': 'application/json',
+    'Accept': 'application/json'
   };
 
   // Merge with existing headers if they exist
@@ -59,12 +60,19 @@ export async function apiClient<T>(
     newHeaders['Authorization'] = `Bearer ${accessToken}`;
   }
 
+  // Use absolute URL if the provided URL is relative
+  const absoluteUrl = url.startsWith('http') 
+    ? url 
+    : `${process.env.NEXT_PUBLIC_API_URL}${url.startsWith('/') ? url : `/${url}`}`;
+
   // First attempt with current token
   try {
-    const response = await fetch(url, {
+    console.log('Making API request to:', absoluteUrl);
+    const response = await fetch(absoluteUrl, {
       ...options,
       headers: newHeaders,
       credentials: 'include', // Always include credentials
+      mode: 'cors'
     });
 
     // If the response is OK, return the data
