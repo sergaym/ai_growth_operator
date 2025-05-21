@@ -3,7 +3,7 @@ AI Growth Operator - Main Application File
 This is the main entry point for the API service.
 """
 
-from fastapi import FastAPI
+from fastapi import FastAPI, Request, Response
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 import logging
@@ -31,22 +31,26 @@ app = FastAPI(
 # Explicitly define origins for CORS
 origins = [
     "http://localhost:3000",
-    "https://localhost:3000", 
+    "https://localhost:3000",
+    "https://localhost:80",
     "http://127.0.0.1:3000",
     "https://ai-ugc.vercel.app",
     "https://ai-growth-operator.vercel.app",
     "https://ai-ugc-git-main.vercel.app",
-    "https://ai-api-growth-op-sw9m9.ondigitalocean.app"
+    "https://ai-api-growth-op-sw9m9.ondigitalocean.app",
+    "https://*.vercel.app"
 ]
 
-# Add CORS middleware with more specific configuration
+# Add CORS middleware with more permissive configuration for troubleshooting
 app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
+    allow_origin_regex=r"https://.*\.vercel\.app",
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS", "HEAD"],
-    allow_headers=["*"],  # Allow all headers to simplify preflight handling
-    expose_headers=["Content-Type", "Content-Length", "Authorization"],
+    allow_methods=["*"],  # Allow all methods for simplicity during debugging
+    allow_headers=["*"],  # Allow all headers for simplicity
+    expose_headers=["*"],
+    max_age=86400,  # Cache preflight requests for 24 hours
 )
 
 # Add trusted host middleware
