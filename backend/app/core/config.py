@@ -30,7 +30,7 @@ class Settings(BaseSettings):
         "https://localhost:3000",
         "http://127.0.0.1:3000",
         "https://ai-ugc.vercel.app",
-        "https://ai-growth-operator.vercel.app"
+        "https://ai-growth-operator.vercel.app",
         "https://ai-ugc-git-main.vercel.app",
         "https://*.vercel.app"
     ]
