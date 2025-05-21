@@ -5,12 +5,18 @@ This is the main entry point for the API service.
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.middleware.trustedhost import TrustedHostMiddleware
+import logging
 
 # Import configuration
 from app.core.config import settings
 
 # Import API router
 from app.api import api_router
+
+# Set up logging
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # Create FastAPI app
 app = FastAPI(
@@ -22,14 +28,36 @@ app = FastAPI(
     redoc_url=f"{settings.API_V1_STR}/redoc"
 )
 
-# Add CORS middleware to allow requests from frontend
+# Explicitly define origins for CORS
+origins = [
+    "http://localhost:3000",
+    "https://localhost:3000", 
+    "http://127.0.0.1:3000",
+    "https://ai-ugc.vercel.app",
+    "https://ai-growth-operator.vercel.app",
+    "https://ai-ugc-git-main.vercel.app",
+    "https://ai-api-growth-op-sw9m9.ondigitalocean.app"
+]
+
+# Add CORS middleware with more specific configuration
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.BACKEND_CORS_ORIGINS,
+    allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-    expose_headers=["*"],
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
+    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
+    expose_headers=["Content-Type", "Content-Length"]
+)
+
+# Add trusted host middleware
+app.add_middleware(
+    TrustedHostMiddleware,
+    allowed_hosts=[
+        "localhost",
+        "127.0.0.1",
+        "*.vercel.app",
+        "*.ondigitalocean.app",
+    ],
 )
 
 # Include API router
@@ -47,8 +75,3 @@ async def root():
         "status": "running"
     }
 
-# Run the application
-if __name__ == "__main__":
-    import uvicorn
-    # Run the server on 0.0.0.0 to make it accessible from other machines
-    uvicorn.run("app.main:app", host="0.0.0.0", port=80, reload=True) 
