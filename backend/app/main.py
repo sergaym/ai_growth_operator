@@ -44,9 +44,9 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=origins,
     allow_credentials=True,
-    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS"],
-    allow_headers=["Authorization", "Content-Type", "Accept", "X-Requested-With"],
-    expose_headers=["Content-Type", "Content-Length"]
+    allow_methods=["GET", "POST", "PATCH", "PUT", "DELETE", "OPTIONS", "HEAD"],
+    allow_headers=["*"],  # Allow all headers to simplify preflight handling
+    expose_headers=["Content-Type", "Content-Length", "Authorization"],
 )
 
 # Add trusted host middleware
