@@ -1,14 +1,16 @@
-import React, { useState, useRef, useEffect } from 'react';
+import React, { useState, useRef, useEffect, useCallback } from 'react';
 import { Search, Sparkles, Command, Zap, ArrowUp, ArrowDown } from 'lucide-react';
 
-// AI Search Component
+// Types
 interface AISearchProps {
   onSearch: (query: string) => void;
   className?: string;
   placeholder?: string;
   searchSuggestions?: string[];
+  disabled?: boolean;
 }
 
+// Main component
 export function AISearch({ 
   onSearch, 
   className = '',
@@ -19,32 +21,42 @@ export function AISearch({
     "Male actor with glasses and beard",
     "Young professional in business attire",
     "Friendly face for customer service video"
-  ]
+  ],
+  disabled = false
 }: AISearchProps) {
   const [query, setQuery] = useState('');
   const [isActive, setIsActive] = useState(false);
   const [isSearching, setIsSearching] = useState(false);
-  const [selectedIndex, setSelectedIndex] = useState(-1);
   const [showDropdown, setShowDropdown] = useState(false);
+  const [selectedIndex, setSelectedIndex] = useState(-1);
+  
   const inputRef = useRef<HTMLInputElement>(null);
   const dropdownRef = useRef<HTMLDivElement>(null);
 
+  // Handle clicks outside dropdown
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
+        setShowDropdown(false);
+        if (query.length === 0) setIsActive(false);
+      }
+    };
+
+    document.addEventListener('mousedown', handleClickOutside);
+    return () => document.removeEventListener('mousedown', handleClickOutside);
+  }, [query.length]);
+
+  // Global keyboard shortcuts
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
-      // Ctrl+K or Command+K to focus search
       if ((e.ctrlKey || e.metaKey) && e.key === 'k') {
         e.preventDefault();
         inputRef.current?.focus();
-        setIsActive(true);
-        setShowDropdown(true);
       }
-      
-      // Escape to blur and close
       if (e.key === 'Escape') {
-        inputRef.current?.blur();
         setIsActive(false);
         setShowDropdown(false);
-        setSelectedIndex(-1);
+        inputRef.current?.blur();
       }
     };
     
@@ -52,50 +64,29 @@ export function AISearch({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Handle clicks outside to close dropdown
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setShowDropdown(false);
-        setSelectedIndex(-1);
-        if (query.length === 0) {
-          setIsActive(false);
-        }
-      }
-    };
-
-    document.addEventListener('mousedown', handleClickOutside);
-    return () => document.removeEventListener('mousedown', handleClickOutside);
-  }, [query]);
-  
-  const executeSearch = (searchQuery: string) => {
-    if (!searchQuery.trim()) return;
+  const executeSearch = useCallback((searchQuery: string) => {
+    const trimmed = searchQuery.trim();
+    if (!trimmed || disabled) return;
     
     setIsSearching(true);
     setShowDropdown(false);
-    setSelectedIndex(-1);
     
-    // Simulate search delay
     setTimeout(() => {
-      onSearch(searchQuery);
+      onSearch(trimmed);
       setIsSearching(false);
     }, 600);
-  };
+  }, [onSearch, disabled]);
 
-  const handleSuggestionSelect = (suggestion: string) => {
+  const handleSuggestionSelect = useCallback((suggestion: string) => {
     setQuery(suggestion);
     setShowDropdown(false);
     setSelectedIndex(-1);
-    
-    // Keep focus and execute search immediately
-    setTimeout(() => {
-      executeSearch(suggestion);
-    }, 50);
-  };
+    executeSearch(suggestion);
+  }, [executeSearch]);
 
   const handleKeyDown = (e: React.KeyboardEvent) => {
     if (!showDropdown || searchSuggestions.length === 0) {
-      if (e.key === 'Enter' && !e.shiftKey) {
+      if (e.key === 'Enter') {
         e.preventDefault();
         executeSearch(query);
       }
@@ -105,9 +96,7 @@ export function AISearch({
     switch (e.key) {
       case 'ArrowDown':
         e.preventDefault();
-        setSelectedIndex(prev => 
-          prev < searchSuggestions.length - 1 ? prev + 1 : prev
-        );
+        setSelectedIndex(prev => prev < searchSuggestions.length - 1 ? prev + 1 : prev);
         break;
       case 'ArrowUp':
         e.preventDefault();
@@ -115,14 +104,14 @@ export function AISearch({
         break;
       case 'Enter':
         e.preventDefault();
-        if (selectedIndex >= 0 && selectedIndex < searchSuggestions.length) {
+        if (selectedIndex >= 0) {
           handleSuggestionSelect(searchSuggestions[selectedIndex]);
         } else {
           executeSearch(query);
         }
         break;
       case 'Tab':
-        if (selectedIndex >= 0 && selectedIndex < searchSuggestions.length) {
+        if (selectedIndex >= 0) {
           e.preventDefault();
           setQuery(searchSuggestions[selectedIndex]);
           setSelectedIndex(-1);
@@ -130,18 +119,36 @@ export function AISearch({
         break;
     }
   };
-  
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const value = e.target.value;
+    setQuery(value);
+    setSelectedIndex(-1);
+    
+    if (value.length === 0 && isActive) {
+      setShowDropdown(true);
+    } else {
+      setShowDropdown(false);
+    }
+  };
+
+  const handleFocus = () => {
+    if (disabled) return;
+    setIsActive(true);
+    if (query.length === 0) setShowDropdown(true);
+  };
+
   return (
     <div className={`relative ${className}`} ref={dropdownRef}>
       <div 
         className={`flex items-center gap-2 px-3 py-2.5 rounded-lg border transition-all duration-200 ${
-          isActive 
-            ? 'border-blue-300 bg-white shadow-sm ring-1 ring-blue-100' 
-            : 'border-gray-200 hover:border-gray-300'
+          disabled 
+            ? 'bg-gray-50 border-gray-200 cursor-not-allowed' 
+            : isActive 
+              ? 'border-blue-300 bg-white shadow-sm ring-1 ring-blue-100' 
+              : 'border-gray-200 hover:border-gray-300'
         }`}
-        onClick={() => {
-          inputRef.current?.focus();
-        }}
+        onClick={() => !disabled && inputRef.current?.focus()}
       >
         <div className="flex items-center gap-1.5 text-gray-400">
           {isSearching ? (
@@ -156,36 +163,21 @@ export function AISearch({
         <input
           ref={inputRef}
           type="text"
-          className="flex-1 bg-transparent border-none outline-none text-sm placeholder-gray-400"
+          className="flex-1 bg-transparent border-none outline-none text-sm placeholder-gray-400 disabled:cursor-not-allowed"
           placeholder={isActive ? placeholder : "Search with AI..."}
           value={query}
-          onChange={(e) => {
-            setQuery(e.target.value);
-            setSelectedIndex(-1);
-            
-            // Show suggestions when typing is cleared
-            if (e.target.value.length === 0 && isActive) {
-              setShowDropdown(true);
-            } else if (e.target.value.length > 0) {
-              setShowDropdown(false);
-            }
-          }}
-          onFocus={() => {
-            setIsActive(true);
-            if (query.length === 0) {
-              setShowDropdown(true);
-            }
-          }}
+          onChange={handleInputChange}
+          onFocus={handleFocus}
           onKeyDown={handleKeyDown}
+          disabled={disabled}
         />
         
-        {isActive && !isSearching && (
+        {isActive && !isSearching && !disabled && (
           <div className="flex items-center gap-2">
             {showDropdown && searchSuggestions.length > 0 && (
               <div className="flex items-center gap-1 text-xs text-gray-400">
                 <ArrowUp className="h-3 w-3" />
                 <ArrowDown className="h-3 w-3" />
-                <span className="text-xs">Navigate</span>
               </div>
             )}
             <div className="flex items-center gap-1.5 text-xs text-gray-400 bg-gray-100 px-1.5 py-0.5 rounded">
@@ -196,9 +188,9 @@ export function AISearch({
         )}
       </div>
       
-      {/* Search suggestions dropdown */}
-      {showDropdown && isActive && !isSearching && query.length === 0 && (
-        <div className="absolute top-full left-0 w-full mt-1.5 bg-white rounded-lg border border-gray-200 shadow-lg z-50 overflow-hidden animate-in slide-in-from-top-1 duration-200">
+      {/* Suggestions dropdown */}
+      {showDropdown && isActive && !isSearching && query.length === 0 && !disabled && (
+        <div className="absolute top-full left-0 w-full mt-1.5 bg-white rounded-lg border border-gray-200 shadow-lg z-50 overflow-hidden">
           <div className="p-3 border-b border-gray-100">
             <div className="flex items-center gap-2 mb-1.5">
               <Zap className="h-3.5 w-3.5 text-blue-500" />
@@ -213,7 +205,7 @@ export function AISearch({
             <div className="text-xs font-medium text-gray-500 px-3 py-2">SUGGESTIONS</div>
             {searchSuggestions.map((suggestion, i) => (
               <button
-                key={i}
+                key={suggestion}
                 className={`w-full text-left px-3 py-2 text-sm transition-colors rounded-md mx-1 ${
                   selectedIndex === i
                     ? 'bg-blue-50 text-blue-700 border border-blue-200'
@@ -247,7 +239,7 @@ export function AISearch({
       
       {/* Loading state */}
       {isSearching && (
-        <div className="absolute top-full left-0 w-full mt-1.5 bg-white rounded-lg border border-gray-200 shadow-lg z-50 p-4 animate-in slide-in-from-top-1 duration-200">
+        <div className="absolute top-full left-0 w-full mt-1.5 bg-white rounded-lg border border-gray-200 shadow-lg z-50 p-4">
           <div className="flex flex-col items-center justify-center">
             <div className="flex items-center gap-2 mb-2">
               <div className="animate-spin rounded-full h-5 w-5 border-2 border-blue-500 border-t-transparent" />
