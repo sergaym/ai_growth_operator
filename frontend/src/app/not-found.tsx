@@ -25,31 +25,52 @@ export default function NotFound() {
           transition={{ duration: 0.5 }}
           className="relative"
         >
-          {/* Logo */}
+          {/* 404 Badge */}
           <div className="mx-auto mb-6 relative w-20 h-20">
-            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-red-500 to-amber-500"></div>
-            <div className="absolute inset-[4px] bg-[#030712] rounded-xl flex items-center justify-center text-white font-bold text-3xl">
+            <div className="absolute inset-0 rounded-2xl bg-gradient-to-r from-blue-500 to-purple-500"></div>
+            <div className="absolute inset-[4px] bg-[#070b1a] rounded-xl flex items-center justify-center text-white font-bold text-3xl">
               404
             </div>
           </div>
           
-          <h1 className="text-4xl font-bold mb-4 tracking-tight text-white">
-            Page Not Found
-          </h1>
+          <motion.h1 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.2 }}
+            className="text-4xl font-bold mb-4 tracking-tight"
+          >
+            <span className="inline-block bg-gradient-to-r from-blue-400 via-purple-400 to-indigo-500 bg-clip-text text-transparent pb-1">
+              Page Not Found
+            </span>
+          </motion.h1>
           
-          <p className="text-zinc-400 mb-8">
+          <motion.p 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.4 }}
+            className="text-zinc-400 mb-8"
+          >
             The page you're looking for doesn't exist or has been moved.
-          </p>
+          </motion.p>
           
-          <div className="flex flex-col gap-4">
+          <motion.div 
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ duration: 0.5, delay: 0.6 }}
+            className="flex flex-col gap-4"
+          >
             <Link href="/" className="relative block">
               <Button 
-                className="w-full bg-gradient-to-r from-red-500 to-amber-500 text-white hover:from-red-600 hover:to-amber-600 transition-all shadow-lg shadow-red-500/20 hover:shadow-red-500/30 hover:translate-y-[-2px]"
+                variant="gradient" 
+                gradient="purple-blue" 
+                size="lg"
+                className="w-full font-medium rounded-xl group"
               >
                 Return to Home
+                <ArrowRight className="ml-2 h-5 w-5 group-hover:translate-x-1 transition-transform" />
               </Button>
             </Link>
-          </div>
+          </motion.div>
           
           {/* Decorative elements */}
           <div className="mt-12 flex justify-center space-x-1">
