@@ -187,8 +187,38 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     setAiQueryResult(query);
     setIsAiResultVisible(true);
     
-    // In a real implementation, this would update the filtered actors based on AI analysis
-    // For now, we're just displaying the query that would be processed
+    // Show loading state during search for visual feedback
+    setLoadingStates(prev => {
+      const newState = { ...prev };
+      actors.forEach(actor => {
+        if (actor.videoUrl) {
+          newState[actor.id] = true;
+        }
+      });
+      return newState;
+    });
+    
+    // Simulate AI processing with realistic timing
+    setTimeout(() => {
+      // Reset loading states after "search" completes
+      setLoadingStates(prev => {
+        const newState = { ...prev };
+        actors.forEach(actor => {
+          newState[actor.id] = false;
+        });
+        return newState;
+      });
+      
+      // In a real implementation, this would filter actors based on AI analysis
+      // For now we're showing the search query and updating the text filter
+      setSearchQuery(query.toLowerCase());
+      
+      // Auto-scroll to results if we have any
+      const resultsElement = document.querySelector('[data-actor-grid]');
+      if (resultsElement) {
+        resultsElement.scrollIntoView({ behavior: 'smooth', block: 'start' });
+      }
+    }, 1200); // Slightly longer to feel more realistic
   };
 
   if (!isOpen) return null;
