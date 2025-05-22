@@ -81,7 +81,7 @@ export default function NotFound() {
                 animate={{ opacity: 1, y: 0 }}
                 transition={{ duration: 0.5, delay: i * 0.1 }}
                 className={`w-2 h-2 rounded-full ${
-                  i === 2 ? 'bg-red-500' : 'bg-zinc-600'
+                  i === 2 ? 'bg-purple-500' : 'bg-zinc-600'
                 }`}
               ></motion.div>
             ))}
