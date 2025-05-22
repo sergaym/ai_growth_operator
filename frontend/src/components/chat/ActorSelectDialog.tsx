@@ -1,6 +1,7 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Search, AlertCircle, Users, Star, User, UserRound, UserCircle, Filter, Baby, UserCheck, Clock, Crown, SlidersHorizontal, Check, ChevronDown, ChevronRight } from 'lucide-react';
+import { X, AlertCircle, Users, Star, User, UserRound, UserCircle, Filter, Baby, UserCheck, Clock, Crown, SlidersHorizontal, Check, ChevronDown, ChevronRight, Sparkles } from 'lucide-react';
 import { useActors, Actor, isValidVideoUrl } from '@/hooks/useActors';
+import { AISearch } from '@/components/ui/AISearch';
 
 // API base URL for assets
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || '';
