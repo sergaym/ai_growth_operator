@@ -692,7 +692,7 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                       )}
                     </div>
                     <div className="mt-2 flex justify-between items-center">
-                      <p className="text-sm font-medium truncate">{actor.name}</p>
+                      <p className="text-sm font-medium truncate">{actor.name || 'Unknown Actor'}</p>
                       {actor.videoUrl && (
                         <button 
                           className="text-sm text-blue-500 hover:text-blue-700"
