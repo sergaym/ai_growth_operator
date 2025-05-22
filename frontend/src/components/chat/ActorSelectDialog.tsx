@@ -197,35 +197,42 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
         <div className="flex flex-1 overflow-hidden">
           {/* Sidebar filters */}
           <div className="w-48 border-r p-4 space-y-6 overflow-y-auto">
-            {/* Actor type filter */}
-            <div className="space-y-2">
-              <div className="flex items-center gap-2">
-                <input 
-                  type="radio" 
-                  id="all-actors" 
-                  checked={activeFilter === 'all'} 
-                  onChange={() => setActiveFilter('all')}
-                />
-                <label htmlFor="all-actors" className="text-sm">All actors</label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="radio" 
-                  id="favorites" 
-                  checked={activeFilter === 'favorites'} 
-                  onChange={() => setActiveFilter('favorites')}
-                />
-                <label htmlFor="favorites" className="text-sm">Favorites</label>
-              </div>
-              <div className="flex items-center gap-2">
-                <input 
-                  type="radio" 
-                  id="my-actors" 
-                  checked={activeFilter === 'my'} 
-                  onChange={() => setActiveFilter('my')}
-                />
-                <label htmlFor="my-actors" className="text-sm">My actors</label>
-              </div>
+            {/* Actor type filter - Notion-style */}
+            <div className="space-y-1">
+              <h3 className="font-medium mb-2 text-sm text-zinc-500">View</h3>
+              <button 
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                  activeFilter === 'all' 
+                    ? 'bg-blue-50 text-blue-700' 
+                    : 'hover:bg-zinc-100 text-zinc-700'
+                }`}
+                onClick={() => setActiveFilter('all')}
+              >
+                <Users size={16} className={activeFilter === 'all' ? 'text-blue-700' : 'text-zinc-500'} />
+                <span>All actors</span>
+              </button>
+              <button 
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                  activeFilter === 'favorites' 
+                    ? 'bg-blue-50 text-blue-700' 
+                    : 'hover:bg-zinc-100 text-zinc-700'
+                }`}
+                onClick={() => setActiveFilter('favorites')}
+              >
+                <Star size={16} className={activeFilter === 'favorites' ? 'text-blue-700' : 'text-zinc-500'} />
+                <span>Favorites</span>
+              </button>
+              <button 
+                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                  activeFilter === 'my' 
+                    ? 'bg-blue-50 text-blue-700' 
+                    : 'hover:bg-zinc-100 text-zinc-700'
+                }`}
+                onClick={() => setActiveFilter('my')}
+              >
+                <User size={16} className={activeFilter === 'my' ? 'text-blue-700' : 'text-zinc-500'} />
+                <span>My actors</span>
+              </button>
             </div>
 
             <div className="border-t pt-4">
