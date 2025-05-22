@@ -253,11 +253,14 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
         </div>
       </div>
 
-      <ActorSelectDialog 
-        isOpen={isActorDialogOpen}
-        onClose={() => setIsActorDialogOpen(false)}
-        onSelectActors={handleSelectActors}
-      />
+      {/* Wrap ActorSelectDialog in error boundary-like handling */}
+      {isActorDialogOpen && (
+        <ActorSelectDialog 
+          isOpen={isActorDialogOpen}
+          onClose={handleCloseActorDialog}
+          onSelectActors={handleSelectActors}
+        />
+      )}
     </>
   );
 } 
