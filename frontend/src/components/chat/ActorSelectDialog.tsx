@@ -295,7 +295,30 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
           {/* Actor grid */}
           <div className="flex-1 p-6 overflow-y-auto">
-            {isLoading ? (
+            {activeFilter === 'favorites' ? (
+              <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-4">
+                  <Star className="h-6 w-6 text-amber-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No favorites yet</h3>
+                <p className="text-sm text-gray-500 max-w-xs">
+                  Click the star icon on any actor to add them to your favorites for quick access.
+                </p>
+              </div>
+            ) : activeFilter === 'my' ? (
+              <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
+                <div className="w-12 h-12 rounded-full bg-blue-50 flex items-center justify-center mb-4">
+                  <User className="h-6 w-6 text-blue-500" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">Create your own actors</h3>
+                <p className="text-sm text-gray-500 max-w-xs">
+                  Upgrade to Pro to create and customize your own AI actors for your videos.
+                </p>
+                <button className="mt-4 px-4 py-2 bg-blue-600 text-white rounded-md text-sm hover:bg-blue-700">
+                  Upgrade to Pro
+                </button>
+              </div>
+            ) : isLoading ? (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
               </div>
