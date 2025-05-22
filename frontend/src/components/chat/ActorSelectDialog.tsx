@@ -31,6 +31,10 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     features: true
   });
 
+  // AI search states
+  const [aiQueryResult, setAiQueryResult] = useState<string | null>(null);
+  const [isAiResultVisible, setIsAiResultVisible] = useState(false);
+
   const toggleSection = (section: 'gender' | 'age' | 'features') => {
     setExpandedSections(prev => ({
       ...prev,
@@ -176,6 +180,15 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   const handleConfirm = () => {
     onSelectActors(selectedActors);
     onClose();
+  };
+
+  // Handle AI search
+  const handleAiSearch = (query: string) => {
+    setAiQueryResult(query);
+    setIsAiResultVisible(true);
+    
+    // In a real implementation, this would update the filtered actors based on AI analysis
+    // For now, we're just displaying the query that would be processed
   };
 
   if (!isOpen) return null;
