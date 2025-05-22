@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect } from 'react';
-import { X, Search, AlertCircle, Users, Star, User } from 'lucide-react';
+import { X, Search, AlertCircle, Users, Star, User, UserRound, UserCircle, Filter, Baby, UserCheck, Clock, Crown, SlidersHorizontal, Check, ChevronDown, ChevronRight } from 'lucide-react';
 import { useActors, Actor, isValidVideoUrl } from '@/hooks/useActors';
 
 // API base URL for assets
