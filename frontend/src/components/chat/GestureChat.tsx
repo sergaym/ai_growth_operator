@@ -36,8 +36,42 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const [selectedActors, setSelectedActors] = useState<Actor[]>([]);
   const [isGenerating, setIsGenerating] = useState(false);
 
-  const handleSend = () => {
-    if (inputValue.trim()) {
+  // Add error boundary-like error handling
+  useEffect(() => {
+    const handleError = (event: ErrorEvent) => {
+      // Prevent video loading errors from breaking the UI
+      if (event.error && event.error.message && event.error.message.includes('video')) {
+        console.warn('Video loading error caught and handled:', event.error);
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
+      // Handle promise rejections that might come from video loading
+      if (event.reason && typeof event.reason === 'string' && event.reason.includes('video')) {
+        console.warn('Promise rejection caught and handled:', event.reason);
+        event.preventDefault();
+        return false;
+      }
+    };
+
+    window.addEventListener('error', handleError);
+    window.addEventListener('unhandledrejection', handleUnhandledRejection);
+
+    return () => {
+      window.removeEventListener('error', handleError);
+      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
+    };
+  }, []);
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    try {
+      // Validate selected actors before sending
+      const validActors = selectedActors.filter(actor => actor && actor.id && actor.name);
+      
       // Handle send message here
       console.log('Sending:', { 
         projectId,
@@ -45,7 +79,7 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
         speechType, 
         gesture, 
         message: inputValue, 
-        selectedActors 
+        selectedActors: validActors
       });
       
       // Simulate video generation
