@@ -695,6 +695,17 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                           HD
                         </div>
                       )}
+                      
+                      {/* Selection indicator overlay */}
+                      {selectedActor?.id === actor.id && (
+                        <div className="absolute inset-0 bg-blue-500/10 flex items-center justify-center">
+                          <div className="w-12 h-12 bg-white rounded-full shadow-lg flex items-center justify-center">
+                            <div className="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center">
+                              <span className="text-white text-sm font-bold">✓</span>
+                            </div>
+                          </div>
+                        </div>
+                      )}
                     </div>
                     <div className="mt-2 flex justify-between items-center">
                       <p className="text-sm font-medium truncate">{actor.name || 'Unknown Actor'}</p>
@@ -719,20 +730,33 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
         {/* Footer */}
         <div className="border-t p-4 flex justify-between items-center">
-          <div className="text-sm">
-            {selectedActors.length} {selectedActors.length === 1 ? 'actor' : 'actors'} selected
+          <div className="text-sm text-gray-600">
+            {selectedActor ? (
+              <div className="flex items-center gap-2">
+                <div className="w-6 h-6 rounded bg-green-50 flex items-center justify-center">
+                  <span className="text-green-600 text-xs">✓</span>
+                </div>
+                <span className="font-medium">{selectedActor.name}</span> selected
+              </div>
+            ) : (
+              'Select an actor to continue'
+            )}
           </div>
           <div className="flex gap-3">
             <button 
               onClick={onClose}
-              className="px-5 py-2 border border-zinc-200 rounded text-sm hover:bg-zinc-50"
+              className="px-5 py-2 border border-zinc-200 rounded text-sm hover:bg-zinc-50 transition-colors"
             >
               Cancel
             </button>
             <button 
               onClick={handleConfirm}
-              className="px-5 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
-              disabled={selectedActors.length === 0}
+              className={`px-5 py-2 rounded text-sm transition-colors ${
+                selectedActor 
+                  ? 'bg-blue-600 text-white hover:bg-blue-700' 
+                  : 'bg-gray-100 text-gray-400 cursor-not-allowed'
+              }`}
+              disabled={!selectedActor}
             >
               Confirm
             </button>
