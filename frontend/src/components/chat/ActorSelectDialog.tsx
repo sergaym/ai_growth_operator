@@ -182,7 +182,9 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   };
 
   const handleConfirm = () => {
-    onSelectActors(selectedActors);
+    if (selectedActor) {
+      onSelectActors([selectedActor]);
+    }
     onClose();
   };
 
@@ -564,10 +566,12 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                     className="group relative cursor-pointer"
                   >
                     <div 
-                      className={`relative aspect-[3/4] overflow-hidden rounded-lg shadow-md ${
-                        selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
+                      className={`relative aspect-[3/4] overflow-hidden rounded-lg shadow-md cursor-pointer transition-all duration-200 ${
+                        selectedActor?.id === actor.id 
+                          ? 'ring-2 ring-blue-500 scale-[1.02] shadow-lg' 
+                          : 'hover:shadow-lg hover:scale-[1.01]'
                       }`}
-                      onClick={() => toggleActorSelection(actor)}
+                      onClick={() => selectActor(actor)}
                       style={{
                         backgroundImage: `url(${getSafeImageUrl(actor.image)})`,
                         backgroundSize: 'cover',
