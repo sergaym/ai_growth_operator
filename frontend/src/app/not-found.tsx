@@ -4,12 +4,19 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { motion } from "framer-motion";
 import { PageBackground } from "@/components/ui/PageBackground";
+import { ArrowRight } from "lucide-react";
 
 export default function NotFound() {
   return (
-    <div className="min-h-screen bg-[#030712] text-white overflow-x-hidden">
+    <div className="min-h-screen bg-[#070b1a] text-white overflow-x-hidden">
       {/* Background component */}
       <PageBackground />
+      
+      {/* Background effects */}
+      <div className="absolute inset-0 z-0">
+        <div className="absolute top-0 right-0 w-2/3 h-2/3 bg-gradient-to-b from-indigo-500/10 via-purple-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+        <div className="absolute -bottom-32 -left-32 w-2/3 h-2/3 bg-gradient-to-t from-blue-500/10 via-indigo-500/5 to-transparent blur-3xl opacity-30 rounded-full"></div>
+      </div>
       
       <div className="container max-w-md mx-auto px-6 py-12 text-center relative z-10">
         <motion.div
