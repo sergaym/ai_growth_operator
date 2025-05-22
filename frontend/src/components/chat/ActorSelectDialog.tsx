@@ -194,63 +194,113 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
           </div>
         </div>
 
-        <div className="flex flex-1 overflow-hidden">
-          {/* Sidebar filters */}
-          <div className="w-48 border-r p-4 space-y-6 overflow-y-auto">
-            {/* Actor type filter - Notion-style */}
-            <div className="space-y-1">
-              <h3 className="font-medium mb-2 text-sm text-zinc-500">View</h3>
-              <button 
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                  activeFilter === 'all' 
-                    ? 'bg-blue-50 text-blue-700' 
-                    : 'hover:bg-zinc-100 text-zinc-700'
-                }`}
-                onClick={() => setActiveFilter('all')}
-              >
-                <Users size={16} className={activeFilter === 'all' ? 'text-blue-700' : 'text-zinc-500'} />
-                <span>All actors</span>
-              </button>
-              <button 
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                  activeFilter === 'favorites' 
-                    ? 'bg-blue-50 text-blue-700' 
-                    : 'hover:bg-zinc-100 text-zinc-700'
-                }`}
-                onClick={() => setActiveFilter('favorites')}
-              >
-                <Star size={16} className={activeFilter === 'favorites' ? 'text-blue-700' : 'text-zinc-500'} />
-                <span>Favorites</span>
-              </button>
-              <button 
-                className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
-                  activeFilter === 'my' 
-                    ? 'bg-blue-50 text-blue-700' 
-                    : 'hover:bg-zinc-100 text-zinc-700'
-                }`}
-                onClick={() => setActiveFilter('my')}
-              >
-                <User size={16} className={activeFilter === 'my' ? 'text-blue-700' : 'text-zinc-500'} />
-                <span>My actors</span>
-              </button>
-            </div>
-
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2 text-sm">Gender</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <button 
-                  className={filterButtonClass(genderFilter === 'male')}
-                  onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
-                >
-                  Male
-                </button>
-                <button 
-                  className={filterButtonClass(genderFilter === 'female')}
-                  onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
-                >
-                  Female
-                </button>
+        {/* View Tabs - Top Navigation */}
+        <div className="border-b">
+          <div className="flex">
+            <button
+              className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                activeFilter === 'all'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('all')}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Users size={18} />
+                <span>All Actors</span>
               </div>
+            </button>
+
+            <button
+              className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                activeFilter === 'favorites'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('favorites')}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <Star size={18} />
+                <span>Favorites</span>
+              </div>
+            </button>
+
+            <button
+              className={`flex-1 py-3 px-4 text-sm font-medium border-b-2 transition-colors ${
+                activeFilter === 'my'
+                  ? 'border-blue-600 text-blue-600'
+                  : 'border-transparent text-gray-500 hover:text-gray-700 hover:border-gray-300'
+              }`}
+              onClick={() => setActiveFilter('my')}
+            >
+              <div className="flex items-center justify-center gap-2">
+                <User size={18} />
+                <span>My Actors</span>
+              </div>
+            </button>
+          </div>
+        </div>
+
+        <div className="flex flex-1 overflow-hidden">
+          {/* Sidebar filters - now as collapsible sections */}
+          <div className="w-56 border-r p-2 space-y-1 overflow-y-auto bg-gray-50">
+            {/* Collapsible Gender Filter */}
+            <div className="rounded-md overflow-hidden">
+              <button 
+                className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-gray-100 transition-colors"
+                onClick={() => toggleSection('gender')}
+              >
+                <div className="flex items-center gap-2">
+                  <Filter size={16} className="text-gray-500" />
+                  <span>Gender</span>
+                </div>
+                {expandedSections.gender ? (
+                  <ChevronDown size={16} className="text-gray-500" />
+                ) : (
+                  <ChevronRight size={16} className="text-gray-500" />
+                )}
+              </button>
+              
+              {expandedSections.gender && (
+                <div className="space-y-1 px-2 pb-2">
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      genderFilter === 'all' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setGenderFilter('all')}
+                  >
+                    <Users size={16} className={genderFilter === 'all' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>All genders</span>
+                    {genderFilter === 'all' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      genderFilter === 'male' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setGenderFilter(genderFilter === 'male' ? 'all' : 'male')}
+                  >
+                    <UserRound size={16} className={genderFilter === 'male' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>Male</span>
+                    {genderFilter === 'male' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      genderFilter === 'female' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setGenderFilter(genderFilter === 'female' ? 'all' : 'female')}
+                  >
+                    <UserCircle size={16} className={genderFilter === 'female' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>Female</span>
+                    {genderFilter === 'female' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                </div>
+              )}
             </div>
 
             <div className="border-t pt-4">
