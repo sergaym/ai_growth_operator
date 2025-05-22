@@ -485,7 +485,7 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
           </div>
 
           {/* Actor grid */}
-          <div className="flex-1 p-6 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto" data-actor-grid>
             {/* AI search results indicator */}
             {isAiResultVisible && aiQueryResult && (
               <div className="mb-6 animate-fadeIn">
@@ -493,12 +493,19 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                   <div className="flex items-start gap-3">
                     <Sparkles className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
                     <div>
-                      <p className="text-sm font-medium text-blue-700 mb-1">AI-powered search results</p>
-                      <p className="text-sm text-blue-600">"{aiQueryResult}"</p>
+                      <p className="text-sm font-medium text-blue-700 mb-1">AI search results</p>
+                      <p className="text-sm text-blue-600">Showing results for: "{aiQueryResult}"</p>
+                      {filteredActors.length > 0 && (
+                        <p className="text-xs text-blue-500 mt-1">Found {filteredActors.length} matching actors</p>
+                      )}
                     </div>
                     <button 
-                      className="ml-auto text-blue-400 hover:text-blue-600" 
-                      onClick={() => setIsAiResultVisible(false)}
+                      className="ml-auto text-blue-400 hover:text-blue-600 transition-colors" 
+                      onClick={() => {
+                        setIsAiResultVisible(false);
+                        setSearchQuery('');
+                        setAiQueryResult(null);
+                      }}
                     >
                       <X size={16} />
                     </button>
