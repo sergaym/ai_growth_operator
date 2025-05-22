@@ -127,8 +127,28 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   };
 
   const handleSelectActors = (actors: Actor[]) => {
-    setSelectedActors(actors);
-    console.log('Selected actors:', actors);
+    try {
+      // Validate actors before setting them
+      const validActors = (actors || []).filter(actor => {
+        return actor && typeof actor === 'object' && actor.id && actor.name;
+      });
+      
+      setSelectedActors(validActors);
+      console.log('Selected actors:', validActors);
+    } catch (error) {
+      console.error('Error selecting actors:', error);
+      setSelectedActors([]);
+    }
+  };
+
+  const handleCloseActorDialog = () => {
+    try {
+      setIsActorDialogOpen(false);
+    } catch (error) {
+      console.error('Error closing actor dialog:', error);
+      // Force close anyway
+      setIsActorDialogOpen(false);
+    }
   };
 
   // Shared select styles for consistency
