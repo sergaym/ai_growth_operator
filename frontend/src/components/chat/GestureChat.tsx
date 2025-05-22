@@ -33,7 +33,7 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const [messageType, setMessageType] = useState<MessageType>('gesture');
   const [speechType, setSpeechType] = useState<SpeechType>('tts');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
-  const [selectedActors, setSelectedActors] = useState<Actor[]>([]);
+  const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
   const [isGenerating, setIsGenerating] = useState(false);
 
   // Add error boundary-like error handling
