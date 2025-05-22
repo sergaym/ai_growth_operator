@@ -151,12 +151,13 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     return true;
   });
 
-  const toggleActorSelection = (actor: Actor) => {
-    if (selectedActors.some(a => a.id === actor.id)) {
-      setSelectedActors(selectedActors.filter(a => a.id !== actor.id));
-    } else {
-      setSelectedActors([...selectedActors, actor]);
-    }
+  const selectActor = (actor: Actor) => {
+    setSelectedActor(actor);
+    // Auto-close after selection for smooth UX
+    setTimeout(() => {
+      onSelectActors([actor]);
+      onClose();
+    }, 150);
   };
 
   // This now toggles sound rather than playback
