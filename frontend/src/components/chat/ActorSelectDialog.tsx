@@ -170,7 +170,7 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
   return (
     <div className="fixed inset-0 flex items-center justify-center bg-black/50 z-50">
-      <div className="bg-white rounded-lg w-full max-w-3xl max-h-[90vh] overflow-hidden flex flex-col">
+      <div className="bg-white rounded-lg w-full max-w-5xl max-h-[90vh] overflow-hidden flex flex-col">
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h2 className="text-lg font-medium">Select actors</h2>
@@ -287,7 +287,7 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
           </div>
 
           {/* Actor grid */}
-          <div className="flex-1 p-4 overflow-y-auto">
+          <div className="flex-1 p-6 overflow-y-auto">
             {isLoading ? (
               <div className="w-full h-full flex items-center justify-center">
                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500"></div>
@@ -302,14 +302,14 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                 <p>No actors match your criteria</p>
               </div>
             ) : (
-              <div className="grid grid-cols-5 gap-4">
+              <div className="grid grid-cols-3 gap-6">
                 {filteredActors.map(actor => (
                   <div 
                     key={actor.id} 
                     className="group relative cursor-pointer"
                   >
                     <div 
-                      className={`relative aspect-[3/4] overflow-hidden rounded-md ${
+                      className={`relative aspect-[3/4] overflow-hidden rounded-lg shadow-md ${
                         selectedActors.some(a => a.id === actor.id) ? 'ring-2 ring-blue-500' : ''
                       }`}
                       onClick={() => toggleActorSelection(actor)}
@@ -324,7 +324,7 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                           {/* Only show loading spinner if actor is in loading state */}
                           {loadingStates[actor.id] && (
                             <div className="absolute inset-0 flex items-center justify-center bg-zinc-900/20 z-10">
-                              <div className="w-8 h-8 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin"></div>
+                              <div className="w-10 h-10 border-2 border-zinc-200 border-t-blue-500 rounded-full animate-spin"></div>
                             </div>
                           )}
                           <video
@@ -386,36 +386,36 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                       {/* Control overlay - now just for sound control */}
                       {actor.videoUrl && (
                         <button
-                          className="absolute bottom-2 left-2 flex items-center justify-center bg-black/50 p-1 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
+                          className="absolute bottom-3 left-3 flex items-center justify-center bg-black/50 p-1.5 rounded-full opacity-0 group-hover:opacity-100 transition-opacity"
                           onClick={(e) => {
                             e.stopPropagation(); // Prevent triggering selection
                             toggleVideoSound(actor.id);
                           }}
                         >
                           {playingVideo === actor.id ? (
-                            <span className="text-white text-xs px-1">🔊</span>
+                            <span className="text-white text-sm px-1">🔊</span>
                           ) : (
-                            <span className="text-white text-xs px-1">🔇</span>
+                            <span className="text-white text-sm px-1">🔇</span>
                           )}
                         </button>
                       )}
                       
                       {actor.pro && (
-                        <div className="absolute top-2 left-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                        <div className="absolute top-3 left-3 bg-zinc-800 text-white text-xs px-2 py-0.5 rounded">
                           PRO
                         </div>
                       )}
                       {actor.hd && (
-                        <div className="absolute bottom-2 right-2 bg-zinc-800 text-white text-[10px] px-1.5 py-0.5 rounded">
+                        <div className="absolute bottom-3 right-3 bg-zinc-800 text-white text-xs px-2 py-0.5 rounded">
                           HD
                         </div>
                       )}
                     </div>
-                    <div className="mt-1 flex justify-between items-center">
-                      <p className="text-sm truncate">{actor.name}</p>
+                    <div className="mt-2 flex justify-between items-center">
+                      <p className="text-sm font-medium truncate">{actor.name}</p>
                       {actor.videoUrl && (
                         <button 
-                          className="text-xs text-blue-500 hover:text-blue-700"
+                          className="text-sm text-blue-500 hover:text-blue-700"
                           onClick={(e) => {
                             e.stopPropagation();
                             toggleVideoSound(actor.id);
@@ -433,20 +433,20 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
         </div>
 
         {/* Footer */}
-        <div className="border-t p-3 flex justify-between items-center">
+        <div className="border-t p-4 flex justify-between items-center">
           <div className="text-sm">
             {selectedActors.length} {selectedActors.length === 1 ? 'actor' : 'actors'} selected
           </div>
-          <div className="flex gap-2">
+          <div className="flex gap-3">
             <button 
               onClick={onClose}
-              className="px-4 py-1.5 border border-zinc-200 rounded text-sm hover:bg-zinc-50"
+              className="px-5 py-2 border border-zinc-200 rounded text-sm hover:bg-zinc-50"
             >
               Cancel
             </button>
             <button 
               onClick={handleConfirm}
-              className="px-4 py-1.5 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
+              className="px-5 py-2 bg-blue-600 text-white rounded text-sm hover:bg-blue-700"
               disabled={selectedActors.length === 0}
             >
               Confirm
