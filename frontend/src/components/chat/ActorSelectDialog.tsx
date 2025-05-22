@@ -69,10 +69,10 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
   // Initialize loading states for all actors when they're fetched
   useEffect(() => {
-    if (actors.length > 0) {
+    if (actors && actors.length > 0) {
       const initialLoadingStates: { [key: string]: boolean } = {};
       actors.forEach(actor => {
-        if (actor.videoUrl) {  // URLs are already validated in the useActors hook
+        if (actor?.id && actor?.videoUrl) {  // URLs are already validated in the useActors hook
           initialLoadingStates[actor.id] = true;
         }
       });
@@ -125,20 +125,23 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   }, [isOpen]);
 
   // Filter actors based on search and filters
-  const filteredActors = actors.filter(actor => {
-    // Search filter
-    if (searchQuery && !actor.name.toLowerCase().includes(searchQuery.toLowerCase())) {
+  const filteredActors = (actors || []).filter(actor => {
+    // Ensure actor has required properties
+    if (!actor || !actor.id) return false;
+    
+    // Search filter - safely check if name exists
+    if (searchQuery && actor.name && !actor.name.toLowerCase().includes(searchQuery.toLowerCase())) {
       return false;
     }
     
-    // Gender filter
-    if (genderFilter !== 'all') {
+    // Gender filter - safely check if tags exist
+    if (genderFilter !== 'all' && actor.tags) {
       if (genderFilter === 'male' && !actor.tags.includes('male')) return false;
       if (genderFilter === 'female' && !actor.tags.includes('female')) return false;
     }
     
-    // Age filter
-    if (ageFilter !== 'all') {
+    // Age filter - safely check if tags exist
+    if (ageFilter !== 'all' && actor.tags) {
       if (!actor.tags.includes(ageFilter)) return false;
     }
     
