@@ -193,8 +193,8 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
     // Show loading state during search for visual feedback
     setLoadingStates(prev => {
       const newState = { ...prev };
-      actors.forEach(actor => {
-        if (actor.videoUrl) {
+      (actors || []).forEach(actor => {
+        if (actor?.id && actor?.videoUrl) {
           newState[actor.id] = true;
         }
       });
@@ -206,8 +206,10 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
       // Reset loading states after "search" completes
       setLoadingStates(prev => {
         const newState = { ...prev };
-        actors.forEach(actor => {
-          newState[actor.id] = false;
+        (actors || []).forEach(actor => {
+          if (actor?.id) {
+            newState[actor.id] = false;
+          }
         });
         return newState;
       });
