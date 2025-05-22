@@ -202,24 +202,28 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-3 border-b">
           <h2 className="text-lg font-medium">Select actors</h2>
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-zinc-400" />
-              <input 
-                type="text" 
-                placeholder="Search..." 
-                className="pl-9 pr-3 py-1.5 border border-zinc-200 rounded-lg w-60 text-sm"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-              />
-            </div>
-            <button 
-              onClick={onClose}
-              className="text-zinc-500 hover:text-zinc-700"
-            >
-              <X className="h-5 w-5" />
-            </button>
-          </div>
+          <button 
+            onClick={onClose}
+            className="text-zinc-500 hover:text-zinc-700"
+          >
+            <X className="h-5 w-5" />
+          </button>
+        </div>
+        
+        {/* AI Search Bar */}
+        <div className="border-b border-gray-100 px-4 py-2.5">
+          <AISearch 
+            onSearch={handleAiSearch}
+            className="w-full"
+            placeholder="Describe the actor you're looking for..."
+            searchSuggestions={[
+              "Male actor with brown hair and beard",
+              "Female actor with professional appearance",
+              "Young adult with casual style",
+              "Actor who looks trustworthy for finance ads",
+              "Cheerful person for lifestyle commercial"
+            ]}
+          />
         </div>
 
         {/* View Tabs - Top Navigation */}
@@ -452,6 +456,27 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
 
           {/* Actor grid */}
           <div className="flex-1 p-6 overflow-y-auto">
+            {/* AI search results indicator */}
+            {isAiResultVisible && aiQueryResult && (
+              <div className="mb-6 animate-fadeIn">
+                <div className="bg-blue-50 border border-blue-100 rounded-lg p-3 mb-4">
+                  <div className="flex items-start gap-3">
+                    <Sparkles className="h-5 w-5 text-blue-500 mt-0.5 flex-shrink-0" />
+                    <div>
+                      <p className="text-sm font-medium text-blue-700 mb-1">AI-powered search results</p>
+                      <p className="text-sm text-blue-600">"{aiQueryResult}"</p>
+                    </div>
+                    <button 
+                      className="ml-auto text-blue-400 hover:text-blue-600" 
+                      onClick={() => setIsAiResultVisible(false)}
+                    >
+                      <X size={16} />
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
+            
             {activeFilter === 'favorites' ? (
               <div className="flex flex-col items-center justify-center h-full py-12 px-4 text-center">
                 <div className="w-12 h-12 rounded-full bg-amber-50 flex items-center justify-center mb-4">
