@@ -8,7 +8,7 @@ import enum
 import uuid
 from datetime import datetime, timedelta
 from sqlalchemy import (
-    Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Table, JSON, Float, ARRAY, event
+    Boolean, Column, DateTime, ForeignKey, Integer, String, Text, Table, JSON, Float, ARRAY, event, Numeric
 )
 from sqlalchemy.orm import relationship, Session
 from app.db.database import Base
@@ -166,96 +166,7 @@ class LipsyncVideo(BaseAsset):
     video = relationship("Video", foreign_keys=[video_id], back_populates="lipsync_videos")
     audio = relationship("Audio", foreign_keys=[audio_id], back_populates="lipsync_videos")
 
-# ----------------
-# Video Generation Models (DEPRECATED)
-# ----------------
 
-# NOTE: The following models are deprecated and will be removed in a future update.
-# The videos table (Video model) should be used instead for all video generation.
-# These models are only kept for reference and compatibility with existing code.
-# DEPRECATED: These tables are removed by migration '31ba90da303b_remove_legacy_video_tables.py'
-
-class VideoGeneration(Base):
-    """
-    DEPRECATED: Video generation model.
-    This model is deprecated and will be removed. Use the Video model instead.
-    """
-    
-    __tablename__ = "video_generations"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    generation_id = Column(String(100), unique=True, index=True, nullable=False)
-    prompt = Column(Text, nullable=False)
-    status = Column(String(20), default=VideoStatus.PROCESSING.value, nullable=False)
-    model = Column(String(50), nullable=False)
-    duration = Column(String(20), nullable=False)
-    aspect_ratio = Column(String(10), nullable=False)
-    provider = Column(String(50), nullable=False)
-    
-    # URLs and metadata
-    video_url = Column(String(2000), nullable=True)
-    preview_url = Column(String(2000), nullable=True)
-    thumbnail_url = Column(String(2000), nullable=True)
-    metadata_json = Column(JSON, nullable=True)
-    
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
-    completed_at = Column(DateTime, nullable=True)
-    
-    # Relationship with avatar videos
-    heygen_avatar_videos = relationship("HeygenAvatarVideo", back_populates="video_generation")
-    
-    def __repr__(self):
-        """String representation of the video generation."""
-        return f"<VideoGeneration {self.generation_id}: {self.status}>"
-
-
-class HeygenAvatarVideo(Base):
-    """
-    DEPRECATED: Heygen avatar video model for tracking avatar video generations.
-    This model is deprecated and will be removed. Use the Video model instead.
-    """
-    
-    __tablename__ = "heygen_avatar_videos"
-    
-    id = Column(Integer, primary_key=True, index=True)
-    video_generation_id = Column(Integer, ForeignKey("video_generations.id"), nullable=False)
-    
-    # Avatar details
-    avatar_id = Column(String(100), nullable=False, index=True)
-    avatar_name = Column(String(100), nullable=True)
-    avatar_style = Column(String(50), default="normal", nullable=False)
-    
-    # Voice details
-    voice_id = Column(String(100), nullable=False)
-    voice_speed = Column(Float, default=1.0, nullable=False)
-    voice_pitch = Column(Integer, default=0, nullable=False)
-    
-    # Video settings
-    width = Column(Integer, default=1280, nullable=False)
-    height = Column(Integer, default=720, nullable=False)
-    background_color = Column(String(20), default="#f6f6fc", nullable=False)
-    
-    # Performance metrics
-    processing_time = Column(Float, nullable=True)  # Time taken to generate the video in seconds
-    
-    # Additional metadata
-    gender = Column(String(20), nullable=True)
-    language = Column(String(50), nullable=True)
-    callback_url = Column(String(500), nullable=True)
-    error_details = Column(JSON, nullable=True)  # For storing error information if generation fails
-    
-    # Relationship with base video generation
-    video_generation = relationship("VideoGeneration", back_populates="heygen_avatar_videos")
-    
-    # Timestamps
-    created_at = Column(DateTime, default=datetime.now, nullable=False)
-    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
-    
-    def __repr__(self):
-        """String representation of the Heygen avatar video."""
-        return f"<HeygenAvatarVideo {self.id}: {self.avatar_id}>"
 
 # ----------------
 # User and Workspace Models
@@ -284,6 +195,9 @@ class Workspace(Base):
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     
+    # Subscription related fields
+    stripe_customer_id = Column(String(255), nullable=True)
+    
     owner = relationship("User", back_populates="owned_workspaces", foreign_keys=[owner_id])
     user_workspaces = relationship(
         "UserWorkspace", 
@@ -297,6 +211,15 @@ class Workspace(Base):
         back_populates="workspaces",
         viewonly=True,
         overlaps="user_workspaces,workspace"
+    )
+    # Subscription relationship
+    subscriptions = relationship("Subscription", back_populates="workspace", cascade="all, delete-orphan")
+    # Current active subscription
+    active_subscription = relationship(
+        "Subscription",
+        primaryjoin="and_(Workspace.id==Subscription.workspace_id, Subscription.status=='active')",
+        viewonly=True,
+        uselist=False
     )
 
     def __repr__(self):
@@ -373,3 +296,160 @@ def create_personal_workspace(mapper, connection, target):
 
 # Set up the event listener for after a User is inserted
 event.listen(User, 'after_insert', create_personal_workspace)
+
+
+# ----------------
+# Subscription Models
+# ----------------
+
+class SubscriptionPlan(Base):
+    """Model for subscription plan tiers."""
+    __tablename__ = "subscription_plans"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    name = Column(String(100), nullable=False)
+    description = Column(Text, nullable=True)
+    price = Column(Numeric(10, 2), nullable=False)  # Monthly price
+    currency = Column(String(3), default="USD", nullable=False)
+    billing_interval = Column(String(20), default="month", nullable=False)  # month, year, etc.
+    
+    # Stripe product and price IDs
+    stripe_product_id = Column(String(255), nullable=True)
+    stripe_price_id = Column(String(255), nullable=True)
+    
+    # Plan features/limits - only max_users as per requirements
+    max_users = Column(Integer, nullable=False)  # Main differentiator between tiers
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    # Relationships
+    subscriptions = relationship("Subscription", back_populates="plan")
+    
+    def __repr__(self):
+        return f"<SubscriptionPlan {self.id}: {self.name} (${self.price}/{self.billing_interval})>"
+
+
+class SubscriptionStatus(str, enum.Enum):
+    """Status of a subscription."""
+    ACTIVE = "active"
+    PAST_DUE = "past_due"
+    CANCELED = "canceled"
+    UNPAID = "unpaid"
+    TRIALING = "trialing"
+    EXPIRED = "expired"
+
+
+class Subscription(Base):
+    """Model for workspace subscriptions."""
+    __tablename__ = "subscriptions"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    plan_id = Column(Integer, ForeignKey("subscription_plans.id"), nullable=False)
+    
+    # Current status
+    status = Column(String(20), default=SubscriptionStatus.ACTIVE.value, nullable=False)
+    
+    # Stripe subscription ID
+    stripe_subscription_id = Column(String(255), nullable=True)
+    
+    # Dates
+    start_date = Column(DateTime, default=datetime.now, nullable=False)
+    end_date = Column(DateTime, nullable=True)  # When subscription will end or has ended
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    canceled_at = Column(DateTime, nullable=True)
+    
+    # Metadata
+    metadata_json = Column(JSON, nullable=True)
+    
+    # Relationships
+    workspace = relationship("Workspace", back_populates="subscriptions")
+    plan = relationship("SubscriptionPlan", back_populates="subscriptions")
+    invoices = relationship("Invoice", back_populates="subscription", cascade="all, delete-orphan")
+    
+    def __repr__(self):
+        return f"<Subscription {self.id}: {self.workspace_id} on plan {self.plan_id} ({self.status})>"
+
+
+class PaymentMethod(Base):
+    """Model for stored payment methods."""
+    __tablename__ = "payment_methods"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    
+    # Card details (stored in a PCI-compliant way)
+    type = Column(String(20), nullable=False)  # card, sepa, etc.
+    last4 = Column(String(4), nullable=True)  # Last 4 digits of card
+    brand = Column(String(20), nullable=True)  # visa, mastercard, etc.
+    exp_month = Column(Integer, nullable=True)
+    exp_year = Column(Integer, nullable=True)
+    
+    # Stripe payment method ID
+    stripe_payment_method_id = Column(String(255), nullable=True)
+    is_default = Column(Boolean, default=False, nullable=False)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    # Relationships
+    user = relationship("User")
+    workspace = relationship("Workspace")
+    
+    def __repr__(self):
+        return f"<PaymentMethod {self.id}: {self.type} **** {self.last4} ({self.brand})>"
+
+
+class InvoiceStatus(str, enum.Enum):
+    """Status of an invoice."""
+    DRAFT = "draft"
+    OPEN = "open"
+    PAID = "paid"
+    UNCOLLECTIBLE = "uncollectible"
+    VOID = "void"
+
+
+class Invoice(Base):
+    """Model for subscription invoices."""
+    __tablename__ = "invoices"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
+    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    
+    # Invoice details
+    amount = Column(Numeric(10, 2), nullable=False)
+    currency = Column(String(3), default="USD", nullable=False)
+    status = Column(String(20), default=InvoiceStatus.DRAFT.value, nullable=False)
+    
+    # Stripe invoice ID
+    stripe_invoice_id = Column(String(255), nullable=True)
+    
+    # PDF URL of invoice
+    invoice_pdf_url = Column(String(255), nullable=True)
+    
+    # Dates
+    invoice_date = Column(DateTime, default=datetime.now, nullable=False)
+    due_date = Column(DateTime, nullable=True)
+    paid_date = Column(DateTime, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    
+    # Metadata
+    metadata_json = Column(JSON, nullable=True)
+    
+    # Relationships
+    subscription = relationship("Subscription", back_populates="invoices")
+    workspace = relationship("Workspace")
+    
+    def __repr__(self):
+        return f"<Invoice {self.id}: {self.workspace_id} amount {self.amount} {self.currency} ({self.status})>"
