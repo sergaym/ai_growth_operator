@@ -23,6 +23,20 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
   // Track loading state for each actor
   const [loadingStates, setLoadingStates] = useState<{ [key: string]: boolean }>({});
 
+  // Add state for collapsible sections
+  const [expandedSections, setExpandedSections] = useState({
+    gender: true,
+    age: true,
+    features: true
+  });
+
+  const toggleSection = (section: 'gender' | 'age' | 'features') => {
+    setExpandedSections(prev => ({
+      ...prev,
+      [section]: !prev[section]
+    }));
+  };
+
   // Function to resolve relative API URLs
   const resolveApiUrl = (relativeUrl?: string) => {
     if (!relativeUrl) return '/placeholder-avatar.jpg';
@@ -303,43 +317,122 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
               )}
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2 text-sm">Age</h3>
-              <div className="grid grid-cols-3 gap-2">
-                <button 
-                  className={filterButtonClass(ageFilter === 'young')}
-                  onClick={() => setAgeFilter(ageFilter === 'young' ? 'all' : 'young')}
-                >
-                  Young Adult
-                </button>
-                <button 
-                  className={filterButtonClass(ageFilter === 'adult')}
-                  onClick={() => setAgeFilter(ageFilter === 'adult' ? 'all' : 'adult')}
-                >
-                  Adult
-                </button>
-                <button 
-                  className={filterButtonClass(ageFilter === 'kid')}
-                  onClick={() => setAgeFilter(ageFilter === 'kid' ? 'all' : 'kid')}
-                >
-                  Kid
-                </button>
-              </div>
+            {/* Collapsible Age Filter */}
+            <div className="rounded-md overflow-hidden">
+              <button 
+                className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-gray-100 transition-colors"
+                onClick={() => toggleSection('age')}
+              >
+                <div className="flex items-center gap-2">
+                  <Filter size={16} className="text-gray-500" />
+                  <span>Age Range</span>
+                </div>
+                {expandedSections.age ? (
+                  <ChevronDown size={16} className="text-gray-500" />
+                ) : (
+                  <ChevronRight size={16} className="text-gray-500" />
+                )}
+              </button>
+              
+              {expandedSections.age && (
+                <div className="space-y-1 px-2 pb-2">
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      ageFilter === 'all' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setAgeFilter('all')}
+                  >
+                    <Users size={16} className={ageFilter === 'all' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>All ages</span>
+                    {ageFilter === 'all' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      ageFilter === 'kid' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setAgeFilter(ageFilter === 'kid' ? 'all' : 'kid')}
+                  >
+                    <Baby size={16} className={ageFilter === 'kid' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>Child</span>
+                    {ageFilter === 'kid' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      ageFilter === 'young' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setAgeFilter(ageFilter === 'young' ? 'all' : 'young')}
+                  >
+                    <User size={16} className={ageFilter === 'young' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>Young Adult</span>
+                    {ageFilter === 'young' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      ageFilter === 'adult' 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setAgeFilter(ageFilter === 'adult' ? 'all' : 'adult')}
+                  >
+                    <UserCheck size={16} className={ageFilter === 'adult' ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>Adult</span>
+                    {ageFilter === 'adult' && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                </div>
+              )}
             </div>
 
-            <div className="border-t pt-4">
-              <h3 className="font-medium mb-2 text-sm">Order</h3>
-              <div className="grid grid-cols-2 gap-2">
-                <button className="text-xs px-3 py-1.5 border rounded-md border-zinc-200">
-                  Newly Added
-                </button>
-                <button 
-                  className={filterButtonClass(hdFilter)}
-                  onClick={() => setHdFilter(!hdFilter)}
-                >
-                  HD
-                </button>
-              </div>
+            {/* Collapsible Features Filter */}
+            <div className="rounded-md overflow-hidden">
+              <button 
+                className="w-full flex items-center justify-between p-3 text-sm font-medium hover:bg-gray-100 transition-colors"
+                onClick={() => toggleSection('features')}
+              >
+                <div className="flex items-center gap-2">
+                  <Filter size={16} className="text-gray-500" />
+                  <span>Features</span>
+                </div>
+                {expandedSections.features ? (
+                  <ChevronDown size={16} className="text-gray-500" />
+                ) : (
+                  <ChevronRight size={16} className="text-gray-500" />
+                )}
+              </button>
+              
+              {expandedSections.features && (
+                <div className="space-y-1 px-2 pb-2">
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors ${
+                      hdFilter 
+                        ? 'bg-blue-50 text-blue-700' 
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                    onClick={() => setHdFilter(!hdFilter)}
+                  >
+                    <Crown size={16} className={hdFilter ? 'text-blue-700' : 'text-gray-500'} />
+                    <span>HD Quality</span>
+                    {hdFilter && <Check size={16} className="ml-auto text-blue-700" />}
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors hover:bg-gray-100 text-gray-700`}
+                  >
+                    <Clock size={16} className="text-gray-500" />
+                    <span>Recently Added</span>
+                  </button>
+                  <button 
+                    className={`w-full flex items-center gap-2 px-3 py-2 text-sm rounded-md transition-colors hover:bg-gray-100 text-gray-700`}
+                  >
+                    <SlidersHorizontal size={16} className="text-gray-500" />
+                    <span>More Filters</span>
+                  </button>
+                </div>
+              )}
             </div>
           </div>
 
