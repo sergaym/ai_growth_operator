@@ -86,16 +86,28 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
       if (onVideoGenerated) {
         setIsGenerating(true);
         
-        // Mock API call - replace with real API call
-        setTimeout(() => {
-          // Example video URL - in a real app this would come from the API
-          const mockVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-          onVideoGenerated(mockVideoUrl);
+        try {
+          // Mock API call - replace with real API call
+          await new Promise((resolve) => {
+            setTimeout(() => {
+              // Example video URL - in a real app this would come from the API
+              const mockVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
+              onVideoGenerated(mockVideoUrl);
+              resolve(mockVideoUrl);
+            }, 2000);
+          });
+        } catch (error) {
+          console.error('Error generating video:', error);
+          // Could show user-friendly error message here
+        } finally {
           setIsGenerating(false);
-        }, 2000);
+        }
       }
       
       setInputValue('');
+    } catch (error) {
+      console.error('Error in handleSend:', error);
+      setIsGenerating(false);
     }
   };
 
@@ -107,7 +119,11 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   };
 
   const handleAddActors = () => {
-    setIsActorDialogOpen(true);
+    try {
+      setIsActorDialogOpen(true);
+    } catch (error) {
+      console.error('Error opening actor dialog:', error);
+    }
   };
 
   const handleSelectActors = (actors: Actor[]) => {
