@@ -611,17 +611,43 @@ export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSele
                               setActorLoadingState(actor.id, false);
                             }}
                             onError={(e) => {
-                              console.error(`Error loading video for ${actor.name || actor.id}`, e);
-                              setActorLoadingState(actor.id, false);
+                              // Completely isolate error handling
+                              try {
+                                // Use simple string concatenation instead of template literals
+                                const safeActorName = String(actor?.name || actor?.id || 'unknown');
+                                const safeMessage = 'Error loading video for ' + safeActorName;
+                                console.warn(safeMessage);
+                                
+                                // Log additional details separately if needed
+                                if (process.env.NODE_ENV === 'development') {
+                                  console.warn('Video error details:', {
+                                    actorId: String(actor?.id || 'unknown'),
+                                    videoUrl: String(actor?.videoUrl || 'unknown'),
+                                    errorType: e?.type || 'unknown'
+                                  });
+                                }
+                              } catch (logError) {
+                                // If even logging fails, use the most basic fallback
+                                console.warn('Video loading failed for actor');
+                              }
                               
-                              // If video fails to load, use the fallback image
+                              // Safe loading state update
+                              try {
+                                if (actor?.id) {
+                                  setActorLoadingState(actor.id, false);
+                                }
+                              } catch (stateError) {
+                                // Silent fallback
+                              }
+                              
+                              // Safe DOM manipulation
                               try {
                                 const target = e.target as HTMLVideoElement;
-                                if (target) {
-                                  target.style.display = 'none'; // Hide the video element
+                                if (target?.style) {
+                                  target.style.display = 'none';
                                 }
-                              } catch (err) {
-                                console.error('Error handling video failure:', err);
+                              } catch (domError) {
+                                // Silent fallback
                               }
                             }}
                           />
