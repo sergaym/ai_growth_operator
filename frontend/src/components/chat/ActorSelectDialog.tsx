@@ -14,7 +14,7 @@ interface ActorSelectDialogProps {
 
 export function ActorSelectDialog({ isOpen, onClose, onSelectActors }: ActorSelectDialogProps) {
   const [searchQuery, setSearchQuery] = useState('');
-  const [selectedActors, setSelectedActors] = useState<Actor[]>([]);
+  const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
   const [activeFilter, setActiveFilter] = useState<'all' | 'favorites' | 'my'>('all');
   const [genderFilter, setGenderFilter] = useState<'all' | 'male' | 'female'>('all');
   const [ageFilter, setAgeFilter] = useState<'all' | 'young' | 'adult' | 'kid'>('all');
