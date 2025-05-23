@@ -22,6 +22,7 @@ interface Actor {
   tags: string[];
   hd?: boolean;
   pro?: boolean;
+  videoUrl?: string;
 }
 
 interface GestureChatProps {
@@ -29,19 +30,61 @@ interface GestureChatProps {
   onVideoGenerated?: (url: string) => void;
 }
 
+// Language options for TTS
+const LANGUAGES = [
+  { value: 'english', label: '🇺🇸 English' },
+  { value: 'spanish', label: '🇪🇸 Spanish' },
+  { value: 'french', label: '🇫🇷 French' },
+  { value: 'german', label: '🇩🇪 German' },
+  { value: 'italian', label: '🇮🇹 Italian' },
+  { value: 'portuguese', label: '🇵🇹 Portuguese' },
+  { value: 'polish', label: '🇵🇱 Polish' },
+  { value: 'turkish', label: '🇹🇷 Turkish' },
+  { value: 'russian', label: '🇷🇺 Russian' },
+  { value: 'dutch', label: '🇳🇱 Dutch' },
+  { value: 'czech', label: '🇨🇿 Czech' },
+  { value: 'arabic', label: '🇸🇦 Arabic' },
+  { value: 'chinese', label: '🇨🇳 Chinese' },
+  { value: 'japanese', label: '🇯🇵 Japanese' },
+  { value: 'korean', label: '🇰🇷 Korean' },
+];
+
 export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
-  const [gesture, setGesture] = useState('');
-  const [messageType, setMessageType] = useState<MessageType>('gesture');
+  const [messageType, setMessageType] = useState<MessageType>('talking');
   const [speechType, setSpeechType] = useState<SpeechType>('tts');
+  const [language, setLanguage] = useState('english');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Auth context for user/workspace IDs
+  const { user } = useAuth();
+
+  // Video generation hook
+  const { 
+    generateVideo, 
+    isGenerating, 
+    progress, 
+    currentStep, 
+    result, 
+    error, 
+    cancel, 
+    reset 
+  } = useVideoGeneration({
+    onComplete: (result) => {
+      console.log('Video generation completed:', result);
+      if (onVideoGenerated && result.video_url) {
+        onVideoGenerated(result.video_url);
+      }
+    },
+    onProgress: (progress, step) => {
+      console.log(`Progress: ${progress}% - ${step}`);
+    }
+  });
 
   // Add error boundary-like error handling
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      // Prevent video loading errors from breaking the UI
       if (event.error && event.error.message && event.error.message.includes('video')) {
         console.warn('Video loading error caught and handled:', event.error);
         event.preventDefault();
