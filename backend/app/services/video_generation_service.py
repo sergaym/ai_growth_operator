@@ -182,3 +182,36 @@ class VideoGenerationWorkflowService:
                 "error": str(e)
             })
     
+    async def _generate_audio(self, request: VideoGenerationWorkflowRequest) -> Dict[str, Any]:
+        """Generate audio using text-to-speech service."""
+        tts_request = {
+            "text": request.text,
+            "voice_id": request.voice_id,
+            "voice_preset": request.voice_preset,
+            "language": request.language or "english",
+            "model_id": request.model_id or "eleven_multilingual_v2",
+            "voice_settings": request.voice_settings,
+            "output_format": "mp3",
+            "user_id": request.user_id,
+            "workspace_id": request.workspace_id
+        }
+        
+        result = await text_to_speech_service.generate_speech(
+            text=tts_request["text"],
+            voice_id=tts_request["voice_id"],
+            voice_preset=tts_request["voice_preset"],
+            language=tts_request["language"],
+            model_id=tts_request["model_id"],
+            voice_settings=tts_request["voice_settings"],
+            output_format=tts_request["output_format"],
+            save_to_file=True,
+            upload_to_blob=True,
+            user_id=tts_request["user_id"],
+            workspace_id=tts_request["workspace_id"]
+        )
+        
+        if result.get("status") == "error":
+            raise Exception(result.get("error", "TTS generation failed"))
+        
+        return result
+    
