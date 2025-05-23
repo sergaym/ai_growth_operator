@@ -260,6 +260,37 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
             </div>
           )}
 
+          {/* Progress Display */}
+          {isGenerating && (
+            <div className="px-3 pb-2">
+              <div className="bg-blue-50 border border-blue-200 rounded-lg p-3">
+                <div className="flex items-center justify-between mb-2">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 border-2 border-blue-600 border-t-transparent rounded-full animate-spin"></div>
+                    <span className="text-sm font-medium text-blue-900">
+                      {currentStep === 'text_to_speech' ? '🎙️ Generating Speech...' : 
+                       currentStep === 'lipsync' ? '💋 Syncing Lips...' : 
+                       '🚀 Starting Generation...'}
+                    </span>
+                  </div>
+                  <span className="text-sm text-blue-700 font-medium">{progress}%</span>
+                </div>
+                <div className="w-full bg-blue-200 rounded-full h-2">
+                  <div 
+                    className="bg-blue-600 h-2 rounded-full transition-all duration-300"
+                    style={{ width: `${progress}%` }}
+                  ></div>
+                </div>
+                <button
+                  onClick={cancel}
+                  className="mt-2 text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  Cancel Generation
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Top Input Area */}
           <div className="p-3 space-y-2">
             {/* Message Type Selector */}
