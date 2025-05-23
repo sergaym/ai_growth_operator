@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { VideoPreview } from '@/components/chat/VideoPreview';
-import { EnhancedGestureChat } from '@/components/chat/EnhancedGestureChat';
+import { GestureChat } from '@/components/chat/GestureChat';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Sparkles, Clock, Users } from 'lucide-react';
@@ -68,16 +68,16 @@ export function ImprovedVideoDemo() {
         <div className="text-center mb-12">
           <div className="inline-flex items-center gap-2 bg-white/80 backdrop-blur-sm px-4 py-2 rounded-full border border-slate-200 mb-6">
             <Sparkles className="h-4 w-4 text-purple-500" />
-            <span className="text-sm font-medium text-slate-700">AI Video Platform Demo</span>
+            <span className="text-sm font-medium text-slate-700">AI Video Platform</span>
           </div>
           
           <h1 className="text-4xl md:text-5xl font-bold text-slate-900 mb-4">
-            Improved Video Experience
+            Create Magic with AI
           </h1>
           
           <p className="text-xl text-slate-600 max-w-2xl mx-auto mb-8">
-            See how we've enhanced the user experience with better guidance, 
-            progress indicators, and engaging video presentation.
+            Experience seamless video creation with intuitive guidance, 
+            real-time progress tracking, and professional results.
           </p>
 
           {/* Features Grid */}
@@ -86,7 +86,7 @@ export function ImprovedVideoDemo() {
               <div className="w-12 h-12 bg-blue-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Users className="h-6 w-6 text-blue-600" />
               </div>
-              <h3 className="font-semibold text-slate-800 mb-2">Better Onboarding</h3>
+              <h3 className="font-semibold text-slate-800 mb-2">Guided Experience</h3>
               <p className="text-sm text-slate-600">Clear guidance for first-time users with helpful tips and examples</p>
             </Card>
             
@@ -94,7 +94,7 @@ export function ImprovedVideoDemo() {
               <div className="w-12 h-12 bg-purple-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Clock className="h-6 w-6 text-purple-600" />
               </div>
-              <h3 className="font-semibold text-slate-800 mb-2">Enhanced Progress</h3>
+              <h3 className="font-semibold text-slate-800 mb-2">Real-time Progress</h3>
               <p className="text-sm text-slate-600">Beautiful progress indicators showing each step of video generation</p>
             </Card>
             
@@ -102,7 +102,7 @@ export function ImprovedVideoDemo() {
               <div className="w-12 h-12 bg-emerald-100 rounded-xl flex items-center justify-center mx-auto mb-4">
                 <Sparkles className="h-6 w-6 text-emerald-600" />
               </div>
-              <h3 className="font-semibold text-slate-800 mb-2">Engaging Results</h3>
+              <h3 className="font-semibold text-slate-800 mb-2">Professional Results</h3>
               <p className="text-sm text-slate-600">Interactive video player with smooth controls and sharing options</p>
             </Card>
           </div>
@@ -125,7 +125,7 @@ export function ImprovedVideoDemo() {
           />
 
           {/* Enhanced Chat */}
-          <EnhancedGestureChat
+          <GestureChat
             projectId="demo-project"
             onGenerateVideo={handleGenerateVideo}
             isGenerating={isGenerating}
@@ -136,7 +136,7 @@ export function ImprovedVideoDemo() {
         {/* Bottom Note */}
         <div className="text-center mt-16">
           <Badge variant="secondary" className="bg-white/80 text-slate-600">
-            This is a demonstration of the improved UX patterns
+            Interactive Demo Experience
           </Badge>
         </div>
       </div>
