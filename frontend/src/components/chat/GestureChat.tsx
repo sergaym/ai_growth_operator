@@ -7,12 +7,11 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SendButton } from './SendButton';
-import { UserPlus, Mic, Volume2, Globe } from 'lucide-react';
+import { UserPlus, Volume2, Globe } from 'lucide-react';
 import { ActorSelectDialog } from './ActorSelectDialog';
 import { useAuth } from '@/hooks/useAuth';
 
 type MessageType = 'gesture' | 'talking';
-type SpeechType = 'tts' | 'stt';
 
 interface Actor {
   id: string;
@@ -52,7 +51,6 @@ const LANGUAGES = [
 export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIsGenerating }: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
   const [messageType, setMessageType] = useState<MessageType>('talking');
-  const [speechType, setSpeechType] = useState<SpeechType>('tts');
   const [language, setLanguage] = useState('english');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
@@ -163,7 +161,6 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
 
   // Shared styles
   const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
-  const speechSelectStyles = "w-[190px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
   const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
 
   return (
@@ -286,41 +283,12 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
           {/* Bottom Actions */}
           <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100 bg-zinc-50/50">
             <div className="flex items-center gap-2">
-              {messageType === 'talking' ? (
-                <>
-                  <Select value={speechType} onValueChange={(value) => setSpeechType(value as SpeechType)}>
-                    <SelectTrigger className={speechSelectStyles}>
-                      <SelectValue>
-                        {speechType === 'tts' ? (
-                          <span className="flex items-center gap-1.5">
-                            <Volume2 className="h-4 w-4" />
-                            Text to Speech
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1.5">
-                            <Mic className="h-4 w-4" />
-                            Speech to Speech
-                          </span>
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tts">
-                        <span className="flex items-center gap-1.5">
-                          <Volume2 className="h-4 w-4" />
-                          Text to Speech
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="stt">
-                        <span className="flex items-center gap-1.5">
-                          <Mic className="h-4 w-4" />
-                          Speech to Speech
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              ) : null}
+              {messageType === 'talking' && (
+                <div className="flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 bg-zinc-50/50 border border-zinc-100 rounded-md">
+                  <Volume2 className="h-4 w-4" />
+                  Text to Speech
+                </div>
+              )}
               <button 
                 onClick={handleAddActors}
                 className={buttonStyles}
