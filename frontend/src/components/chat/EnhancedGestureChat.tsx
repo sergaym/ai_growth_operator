@@ -314,3 +314,148 @@ export function EnhancedGestureChat({
               </div>
             )}
 
+            {/* Message Type and Language Selectors */}
+            <div className="flex items-center gap-2 flex-wrap">
+              <Select value={messageType} onValueChange={(value) => setMessageType(value as MessageType)}>
+                <SelectTrigger className="w-[160px] h-9 border border-slate-200 bg-white text-sm text-slate-700">
+                  <SelectValue>
+                    {messageType === 'gesture' ? (
+                      <span className="flex items-center gap-1.5">👋 Gestures</span>
+                    ) : (
+                      <span className="flex items-center gap-1.5">🗣️ Talking</span>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="gesture">👋 Gestures</SelectItem>
+                  <SelectItem value="talking">🗣️ Talking</SelectItem>
+                </SelectContent>
+              </Select>
+
+              {messageType === 'talking' && (
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className="w-[160px] h-9 border border-slate-200 bg-white text-sm text-slate-700">
+                    <SelectValue>
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" />
+                        {LANGUAGES.find(l => l.value === language)?.label || 'Language'}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
+
+              {/* Examples Button */}
+              <button
+                onClick={() => setShowExamples(!showExamples)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors border border-slate-200"
+              >
+                <Sparkles className="h-4 w-4" />
+                Examples
+              </button>
+            </div>
+
+            {/* Example Prompts */}
+            {showExamples && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                  {messageType === 'gesture' ? 'Gesture Ideas' : 'Script Ideas'}
+                </p>
+                <div className="grid gap-2">
+                  {EXAMPLE_PROMPTS[messageType].map((example, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleExampleClick(example)}
+                      className="text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-sm text-slate-700 transition-colors"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Text Input Area */}
+            <div className="relative">
+              <textarea
+                value={inputValue}
+                onChange={(e) => setInputValue(e.target.value)}
+                onKeyDown={handleKeyDown}
+                placeholder={messageType === 'gesture' 
+                  ? "Describe the gesture you want the actor to perform, like 'Wave enthusiastically at the camera'" 
+                  : "Write the script for your actor to speak"}
+                className="w-full min-h-[80px] text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                rows={3}
+                disabled={isGenerating}
+              />
+              
+              {/* Send Button */}
+              <div className="absolute bottom-3 right-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <SendButton
+                        onClick={handleSend}
+                        disabled={isButtonDisabled}
+                        loading={isGenerating}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" sideOffset={8}>
+                    <p>{getTooltipMessage()}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
+            </div>
+          </div>
+
+          {/* Bottom Actions */}
+          <div className="flex items-center justify-between px-3 py-3 border-t border-slate-100 bg-slate-50/50">
+            <div className="flex items-center gap-2">
+              {messageType === 'talking' && (
+                <div className="flex items-center gap-1.5 text-sm text-slate-600 px-3 py-1.5 bg-slate-100 rounded-md">
+                  <Volume2 className="h-4 w-4" />
+                  Text to Speech
+                </div>
+              )}
+              
+              {!selectedActor && (
+                <button 
+                  onClick={handleAddActors}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200"
+                  disabled={isGenerating}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Add Actor
+                </button>
+              )}
+            </div>
+
+            {/* Character count for long inputs */}
+            {inputValue.length > 50 && (
+              <div className="text-xs text-slate-500">
+                {inputValue.length} characters
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+
+      {/* Actor Select Dialog */}
+      {isActorDialogOpen && (
+        <ActorSelectDialog 
+          isOpen={isActorDialogOpen}
+          onClose={handleCloseActorDialog}
+          onSelectActors={handleSelectActors}
+        />
+      )}
+    </>
+  );
+} 
