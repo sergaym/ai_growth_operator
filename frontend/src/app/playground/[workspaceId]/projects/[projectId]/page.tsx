@@ -14,23 +14,76 @@ export default function ProjectPage() {
   const stringWorkspaceId = workspaceId as string || '';
   const stringProjectId = projectId as string || '';
   const { workspaces } = useWorkspaces();
+  const { user } = useAuth();
   const currentWorkspace = workspaces.find(ws => ws.id === stringWorkspaceId);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoLoading, setVideoLoading] = useState(false);
 
   const workspace = currentWorkspace 
     ? { id: currentWorkspace.id, name: currentWorkspace.name }
     : { id: stringWorkspaceId, name: "Workspace" };
 
-  // Handler for when the GestureChat component generates a video
-  const handleVideoGenerated = (url: string) => {
-    setVideoLoading(true);
-    
-    // Simulate video loading with delay
-    setTimeout(() => {
-      setVideoUrl(url);
-      setVideoLoading(false);
-    }, 1000);
+  // Video generation state
+  const { 
+    generateVideo, 
+    isGenerating, 
+    progress, 
+    currentStep, 
+    result, 
+    error, 
+    cancel, 
+    reset 
+  } = useVideoGeneration();
+
+  // Handle video generation request from GestureChat
+  const handleGenerateVideo = async (text: string, actorId: string, actorVideoUrl: string, language: string) => {
+    if (!user?.isAuthenticated || !user?.user) {
+      alert('Please log in to generate videos');
+      return;
+    }
+
+    if (!actorId || !actorVideoUrl) {
+      alert('Please select a valid actor');
+      return;
+    }
+
+    try {
+      await generateVideo({
+        text: text.trim(),
+        actor_id: String(actorId),
+        actor_video_url: actorVideoUrl,
+        language: language,
+        voice_preset: 'professional_male',
+        project_id: stringProjectId,
+        user_id: String(user.user.id),
+        workspace_id: user.user.workspaces?.[0]?.id ? String(user.user.workspaces[0].id) : undefined,
+      });
+    } catch (error) {
+      console.error('Failed to start video generation:', error);
+    }
+  };
+
+  const handlePlayVideo = () => {
+    if (result?.video_url) {
+      window.open(result.video_url, '_blank');
+    }
+  };
+
+  const handleDownloadVideo = () => {
+    if (result?.video_url) {
+      const a = document.createElement('a');
+      a.href = result.video_url;
+      a.download = `generated-video-${Date.now()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  const getStepMessage = (step?: string | null) => {
+    switch (step) {
+      case 'text_to_speech': return '🎙️ Generating Speech...';
+      case 'lipsync': return '💋 Syncing Lips...';
+      default: return '🚀 Starting Generation...';
+    }
   };
 
   return (
