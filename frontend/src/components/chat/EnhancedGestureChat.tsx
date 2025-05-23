@@ -237,7 +237,7 @@ export function EnhancedGestureChat({
         )}
 
         {/* Main Chat Interface */}
-        <div className="bg-white rounded-lg shadow-sm border">
+        <div className="bg-white rounded-xl shadow-sm border">
           {/* Selected Actor Display */}
           {selectedActor ? (
             <div className="px-3 pt-3 pb-2 animate-in slide-in-from-top-2 duration-300">
