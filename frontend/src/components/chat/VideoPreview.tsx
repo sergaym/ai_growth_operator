@@ -206,3 +206,70 @@ export function VideoPreview({
     );
   }
 
+  // Success State - Video Display
+  if (videoUrl) {
+    return (
+      <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg group">
+        <video
+          ref={videoRef}
+          src={videoUrl}
+          className="w-full h-full object-cover"
+          onPlay={() => setIsPlaying(true)}
+          onPause={() => setIsPlaying(false)}
+          onLoadedMetadata={() => {
+            if (videoRef.current) {
+              setDuration(videoRef.current.duration);
+            }
+          }}
+          onTimeUpdate={() => {
+            if (videoRef.current) {
+              setCurrentTime(videoRef.current.currentTime);
+            }
+          }}
+          onClick={togglePlayPause}
+        />
+        
+        {/* Video Controls Overlay */}
+        <div className="absolute inset-0 bg-black/0 group-hover:bg-black/10 transition-all duration-300">
+          {/* Play/Pause Button - Center */}
+          <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              size="lg"
+              onClick={togglePlayPause}
+              className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-white/20"
+            >
+              {isPlaying ? (
+                <Pause className="h-8 w-8 text-white" />
+              ) : (
+                <Play className="h-8 w-8 text-white ml-1" />
+              )}
+            </Button>
+          </div>
+          
+          {/* Top Actions */}
+          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Button
+              size="sm"
+              onClick={() => window.open(videoUrl, '_blank')}
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+            >
+              <ExternalLink className="h-4 w-4" />
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleDownload}
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+            >
+              <Download className="h-4 w-4" />
+            </Button>
+            {'share' in navigator && (
+              <Button
+                size="sm"
+                onClick={handleShare}
+                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+              >
+                <Share2 className="h-4 w-4" />
+              </Button>
+            )}
+          </div>
+          
