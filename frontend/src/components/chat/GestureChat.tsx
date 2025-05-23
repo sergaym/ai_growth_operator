@@ -199,11 +199,25 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
             <div className="px-3 pt-3 pb-2 animate-in slide-in-from-top-2 duration-300">
               <div className="flex items-center gap-3 p-2 bg-blue-50 border border-blue-100 rounded-lg transition-all duration-200 hover:bg-blue-100/50">
                 <div 
-                  className="w-10 h-10 rounded-lg bg-cover bg-center border-2 border-blue-200 flex-shrink-0"
-                  style={{
-                    backgroundImage: `url(${selectedActor.image || '/placeholder-avatar.jpg'})`
-                  }}
-                />
+                  className="w-10 h-10 rounded-lg overflow-hidden border-2 border-blue-200 flex-shrink-0 bg-gray-100"
+                >
+                  {selectedActor.videoUrl ? (
+                    <video
+                      src={selectedActor.videoUrl}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={selectedActor.image || '/placeholder-avatar.jpg'}
+                      alt={selectedActor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
                     <span className="text-sm font-medium text-blue-900">{selectedActor.name}</span>
