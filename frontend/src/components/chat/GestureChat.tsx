@@ -291,6 +291,61 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
             </div>
           )}
 
+          {/* Result Display */}
+          {result && (
+            <div className="px-3 pb-2">
+              <div className="bg-green-50 border border-green-200 rounded-lg p-3">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">✓</span>
+                    </div>
+                    <span className="text-sm font-medium text-green-900">🎬 Video Ready!</span>
+                  </div>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={handlePlayVideo}
+                      className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 border border-green-300 rounded px-2 py-1"
+                    >
+                      <Play className="h-3 w-3" />
+                      Play
+                    </button>
+                    <button
+                      onClick={handleDownloadVideo}
+                      className="inline-flex items-center gap-1 text-xs text-green-700 hover:text-green-900 border border-green-300 rounded px-2 py-1"
+                    >
+                      <Download className="h-3 w-3" />
+                      Download
+                    </button>
+                  </div>
+                </div>
+                {result.processing_time && (
+                  <p className="text-xs text-green-600 mt-1">
+                    Generated in {Math.round(result.processing_time)}s
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* Error Display */}
+          {error && (
+            <div className="px-3 pb-2">
+              <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                <div className="flex items-center gap-2">
+                  <span className="text-sm font-medium text-red-900">❌ Generation Failed</span>
+                </div>
+                <p className="text-xs text-red-600 mt-1">{error}</p>
+                <button
+                  onClick={reset}
+                  className="mt-2 text-xs text-red-600 hover:text-red-800 underline"
+                >
+                  Try Again
+                </button>
+              </div>
+            </div>
+          )}
+
           {/* Top Input Area */}
           <div className="p-3 space-y-2">
             {/* Message Type Selector */}
