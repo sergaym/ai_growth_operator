@@ -98,3 +98,82 @@ export function EnhancedGestureChat({
     setIsFirstTime(!hasUsedBefore);
   }, []);
 
+  // Mark as used when user generates their first video
+  const markAsUsed = () => {
+    localStorage.setItem('ai-video-used-before', 'true');
+    setIsFirstTime(false);
+  };
+
+  const handleSend = async () => {
+    if (!inputValue.trim()) return;
+
+    // Validate actor is selected
+    if (!selectedActor) {
+      alert('Please select an actor first');
+      return;
+    }
+
+    // Validate actor has video URL
+    if (!selectedActor.videoUrl) {
+      alert('Selected actor does not have a video available');
+      return;
+    }
+
+    // Validate user is authenticated
+    if (!user?.isAuthenticated || !user?.user) {
+      alert('Please log in to generate videos');
+      return;
+    }
+
+    // Mark as used on first generation
+    if (isFirstTime) {
+      markAsUsed();
+    }
+
+    // Call parent callback if provided
+    if (onGenerateVideo) {
+      try {
+        await onGenerateVideo(inputValue.trim(), selectedActor.id, selectedActor.videoUrl, language);
+        // Clear input after successful start
+        setInputValue('');
+        setShowExamples(false);
+      } catch (error) {
+        console.error('Failed to start video generation:', error);
+      }
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() && !isGenerating) {
+      e.preventDefault();
+      handleSend();
+    }
+  };
+
+  const handleExampleClick = (example: string) => {
+    setInputValue(example);
+    setShowExamples(false);
+  };
+
+  const handleAddActors = () => {
+    try {
+      setIsActorDialogOpen(true);
+    } catch (error) {
+      console.error('Error opening actor dialog:', error);
+    }
+  };
+
+  const handleSelectActors = (actors: Actor[]) => {
+    try {
+      const validActor = (actors || []).find(actor => {
+        return actor && typeof actor === 'object' && actor.id && actor.name;
+      });
+      
+      setSelectedActor(validActor || null);
+      console.log('Selected actor:', validActor);
+    } catch (error) {
+      console.error('Error selecting actor:', error);
+      setSelectedActor(null);
+    }
+  };
+
