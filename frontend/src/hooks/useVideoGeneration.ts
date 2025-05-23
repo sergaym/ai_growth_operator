@@ -95,3 +95,70 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
 
   const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Start video generation workflow
+  const generateVideo = useCallback(async (request: VideoGenerationRequest) => {
+    try {
+      setState(prev => ({
+        ...prev,
+        isGenerating: true,
+        currentJob: null,
+        currentStep: null,
+        progress: 0,
+        videoUrl: null,
+        audioUrl: null,
+        error: null,
+        steps: []
+      }));
+
+      // Start the workflow
+      console.log('Starting video generation workflow:', request);
+      
+      const response = await fetch('/api/v1/video-generation/generate', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`HTTP ${response.status}: ${errorText}`);
+      }
+
+      const jobData: VideoGenerationJob = await response.json();
+      console.log('Video generation job started:', jobData);
+
+      setState(prev => ({
+        ...prev,
+        currentJob: jobData,
+        currentStep: jobData.current_step || null,
+        progress: jobData.progress_percentage || 0,
+        steps: jobData.steps || []
+      }));
+
+      // Start polling for status updates
+      startPolling(jobData.job_id);
+
+      return jobData;
+
+    } catch (err) {
+      const message = err instanceof Error ? err.message : 'Failed to start video generation';
+      console.error('Error starting video generation:', message);
+      
+      setState(prev => ({
+        ...prev,
+        isGenerating: false,
+        error: message
+      }));
+
+      toast({
+        title: 'Error',
+        description: message,
+        variant: 'destructive',
+      });
+
+      throw err;
+    }
+  }, [toast]);
+
