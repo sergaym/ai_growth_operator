@@ -74,3 +74,24 @@ interface UseVideoGenerationState {
   steps: WorkflowStep[];
 }
 
+export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
+  const { 
+    pollingInterval = 2000,
+    onProgress,
+    onStepComplete
+  } = options;
+
+  const { toast } = useToast();
+  const [state, setState] = useState<UseVideoGenerationState>({
+    isGenerating: false,
+    currentJob: null,
+    currentStep: null,
+    progress: 0,
+    videoUrl: null,
+    audioUrl: null,
+    error: null,
+    steps: []
+  });
+
+  const pollingTimerRef = useRef<NodeJS.Timeout | null>(null);
+
