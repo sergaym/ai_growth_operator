@@ -93,7 +93,6 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      // Handle promise rejections that might come from video loading
       if (event.reason && typeof event.reason === 'string' && event.reason.includes('video')) {
         console.warn('Promise rejection caught and handled:', event.reason);
         event.preventDefault();
@@ -113,42 +112,39 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
+    // Validate actor is selected
+    if (!selectedActor) {
+      alert('Please select an actor first');
+      return;
+    }
+
+    // Validate actor has video URL
+    if (!selectedActor.videoUrl) {
+      alert('Selected actor does not have a video available');
+      return;
+    }
+
+    // Validate user is authenticated
+    if (!user?.isAuthenticated || !user?.user) {
+      alert('Please log in to generate videos');
+      return;
+    }
+
     try {
-      // Validate selected actor before sending
-      const validActor = selectedActor && selectedActor.id && selectedActor.name ? selectedActor : null;
+      const requestData = {
+        text: inputValue.trim(),
+        actor_id: String(selectedActor.id),
+        actor_video_url: selectedActor.videoUrl,
+        language: language,
+        voice_preset: 'professional_male', // Could be dynamic based on actor
+        project_id: projectId,
+        user_id: String(user.user.id),
+        workspace_id: user.user.workspaces?.[0]?.id ? String(user.user.workspaces[0].id) : undefined,
+      };
+
+      console.log('Sending video generation request:', requestData);
       
-      // Handle send message here
-              console.log('Sending:', { 
-          projectId,
-          type: messageType, 
-          speechType, 
-          gesture, 
-          message: inputValue, 
-          selectedActor: validActor
-        });
-      
-      // Simulate video generation
-      if (onVideoGenerated) {
-        setIsGenerating(true);
-        
-        try {
-          // Mock API call - replace with real API call
-          await new Promise((resolve) => {
-            setTimeout(() => {
-              // Example video URL - in a real app this would come from the API
-              const mockVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-              onVideoGenerated(mockVideoUrl);
-              resolve(mockVideoUrl);
-            }, 2000);
-          });
-        } catch (error) {
-          console.error('Error generating video:', error);
-          // Could show user-friendly error message here
-        } finally {
-          setIsGenerating(false);
-        }
-      }
-      
+      await generateVideo(requestData);
       setInputValue('');
     } catch (error) {
       console.error('Error in handleSend:', error);
