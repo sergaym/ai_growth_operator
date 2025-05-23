@@ -6,6 +6,11 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SendButton } from './SendButton';
 import { UserPlus, Volume2, Globe } from 'lucide-react';
 import { ActorSelectDialog } from './ActorSelectDialog';
