@@ -154,36 +154,46 @@ export default function ProjectPage() {
 
             {/* Success State */}
             {result?.video_url ? (
-              <div className="relative w-full h-full">
+              <div className="relative w-full h-full group">
                 <video 
                   src={result.video_url} 
                   className="w-full h-full object-cover" 
                   controls 
                   autoPlay
                 />
-                {/* Success Actions Overlay */}
-                <div className="absolute top-4 right-4 flex gap-2">
+                
+                {/* Elegant Actions Overlay */}
+                <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
                   <button
                     onClick={handlePlayVideo}
-                    className="bg-white/90 hover:bg-white text-green-700 rounded-lg px-3 py-2 text-sm font-medium shadow-sm border flex items-center gap-1"
+                    className="inline-flex items-center gap-2 bg-white/95 backdrop-blur-sm hover:bg-white border border-slate-200/50 text-slate-700 hover:text-slate-900 rounded-lg px-3 py-2 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                   >
-                    <Play className="h-4 w-4" />
-                    Open
+                    <Play className="h-3.5 w-3.5" />
+                    <span>Open</span>
                   </button>
                   <button
                     onClick={handleDownloadVideo}
-                    className="bg-white/90 hover:bg-white text-green-700 rounded-lg px-3 py-2 text-sm font-medium shadow-sm border flex items-center gap-1"
+                    className="inline-flex items-center gap-2 bg-slate-900/90 backdrop-blur-sm hover:bg-slate-900 border border-slate-700/50 text-white rounded-lg px-3 py-2 text-sm font-medium shadow-lg hover:shadow-xl transition-all duration-200 hover:scale-105"
                   >
-                    <Download className="h-4 w-4" />
-                    Download
+                    <Download className="h-3.5 w-3.5" />
+                    <span>Download</span>
                   </button>
                 </div>
-                {/* Processing Time */}
+                
+                {/* Refined Processing Time Badge */}
                 {result.processing_time && (
-                  <div className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                  <div className="absolute bottom-4 left-4 bg-black/60 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full border border-white/20 font-medium">
                     Generated in {Math.round(result.processing_time)}s
                   </div>
                 )}
+                
+                {/* Subtle success indicator */}
+                <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+                  <div className="bg-emerald-500/90 backdrop-blur-sm text-white text-xs px-3 py-1.5 rounded-full flex items-center gap-1.5 font-medium shadow-lg">
+                    <div className="w-1.5 h-1.5 bg-white rounded-full"></div>
+                    Ready
+                  </div>
+                </div>
               </div>
             ) : error ? (
               // Error State
