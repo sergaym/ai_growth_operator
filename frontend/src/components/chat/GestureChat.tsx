@@ -111,27 +111,15 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
       return;
     }
 
-    try {
-      const requestData = {
-        text: inputValue.trim(),
-        actor_id: String(selectedActor.id),
-        actor_video_url: selectedActor.videoUrl,
-        language: language,
-        voice_preset: 'professional_male', // Could be dynamic based on actor
-        project_id: projectId,
-        user_id: String(user.user.id),
-        workspace_id: user.user.workspaces?.[0]?.id ? String(user.user.workspaces[0].id) : undefined,
-      };
-
-      console.log('Sending video generation request:', requestData);
-      
-      await generateVideo(requestData);
-
-      // Clear input after successful start
-      setInputValue('');
-      
-    } catch (error) {
-      console.error('Failed to start video generation:', error);
+    // Call parent callback if provided
+    if (onGenerateVideo) {
+      try {
+        await onGenerateVideo(inputValue.trim(), selectedActor.id, selectedActor.videoUrl, language);
+        // Clear input after successful start
+        setInputValue('');
+      } catch (error) {
+        console.error('Failed to start video generation:', error);
+      }
     }
   };
 
@@ -170,23 +158,6 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
     } catch (error) {
       console.error('Error closing actor dialog:', error);
       setIsActorDialogOpen(false);
-    }
-  };
-
-  const handlePlayVideo = () => {
-    if (result?.video_url) {
-      window.open(result.video_url, '_blank');
-    }
-  };
-
-  const handleDownloadVideo = () => {
-    if (result?.video_url) {
-      const a = document.createElement('a');
-      a.href = result.video_url;
-      a.download = `generated-video-${Date.now()}.mp4`;
-      document.body.appendChild(a);
-      a.click();
-      document.body.removeChild(a);
     }
   };
 
