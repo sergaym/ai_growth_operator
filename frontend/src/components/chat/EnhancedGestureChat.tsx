@@ -236,3 +236,81 @@ export function EnhancedGestureChat({
           </Card>
         )}
 
+        {/* Main Chat Interface */}
+        <div className="bg-white rounded-lg shadow-sm border">
+          {/* Selected Actor Display */}
+          {selectedActor ? (
+            <div className="px-3 pt-3 pb-2 animate-in slide-in-from-top-2 duration-300">
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg transition-all duration-200 hover:from-blue-100 hover:to-purple-100">
+                <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-blue-300 flex-shrink-0 bg-gray-100">
+                  {selectedActor.videoUrl ? (
+                    <video
+                      src={selectedActor.videoUrl}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={selectedActor.image || '/placeholder-avatar.jpg'}
+                      alt={selectedActor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2">
+                    <span className="text-sm font-semibold text-blue-900">{selectedActor.name}</span>
+                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
+                      <span className="text-white text-xs">✓</span>
+                    </div>
+                    {selectedActor.pro && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                        PRO
+                      </Badge>
+                    )}
+                  </div>
+                  <p className="text-xs text-blue-700 mt-1">Ready to create your video</p>
+                </div>
+                <button
+                  onClick={() => setSelectedActor(null)}
+                  className="text-blue-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-100 rounded-lg"
+                  title="Remove actor"
+                >
+                  <span className="text-lg">×</span>
+                </button>
+              </div>
+            </div>
+          ) : (
+            <div className="px-3 pt-3 pb-2">
+              <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  <UserPlus className="h-6 w-6 text-gray-400" />
+                </div>
+                <div className="flex-1 min-w-0">
+                  <p className="text-sm font-medium text-gray-700">Choose your AI actor</p>
+                  <p className="text-xs text-gray-500 mt-1">Select from our gallery of professional AI presenters</p>
+                </div>
+                <button
+                  onClick={handleAddActors}
+                  className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Browse Actors
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Main Input Area */}
+          <div className="p-3 space-y-3">
+            {/* User Authentication Status */}
+            {!user?.isAuthenticated && (
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
+                  ⚠️ Please log in to generate videos
+                </p>
+              </div>
+            )}
+
