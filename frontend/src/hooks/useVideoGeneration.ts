@@ -162,3 +162,119 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
     }
   }, [toast]);
 
+  // Start polling for job status
+  const startPolling = useCallback((jobId: string) => {
+    const poll = async () => {
+      try {
+        const response = await fetch(`/api/v1/video-generation/status/${jobId}`);
+        
+        if (!response.ok) {
+          throw new Error(`Failed to fetch job status: ${response.status}`);
+        }
+
+        const jobData: VideoGenerationJob = await response.json();
+        console.log('Job status update:', jobData);
+
+        setState(prev => {
+          // Check for new completed steps
+          const newSteps = jobData.steps || [];
+          const prevSteps = prev.steps || [];
+          
+          newSteps.forEach(step => {
+            const prevStep = prevSteps.find(s => s.step === step.step);
+            if (!prevStep || (prevStep.status !== 'completed' && step.status === 'completed')) {
+              onStepComplete?.(step);
+            }
+          });
+
+          return {
+            ...prev,
+            currentJob: jobData,
+            currentStep: jobData.current_step || null,
+            progress: jobData.progress_percentage || prev.progress,
+            steps: newSteps,
+            error: jobData.error || null
+          };
+        });
+
+        // Call progress callback
+        if (onProgress && jobData.progress_percentage !== undefined) {
+          onProgress(jobData.progress_percentage, jobData.current_step);
+        }
+
+        // Check if job is complete
+        if (jobData.status === 'completed') {
+          console.log('Video generation completed!', jobData.result);
+          
+          setState(prev => ({
+            ...prev,
+            isGenerating: false,
+            videoUrl: jobData.result?.video_url || null,
+            audioUrl: jobData.result?.audio_url || null,
+            progress: 100
+          }));
+
+          // Stop polling
+          if (pollingTimerRef.current) {
+            clearTimeout(pollingTimerRef.current);
+            pollingTimerRef.current = null;
+          }
+
+          toast({
+            title: 'Video Generated!',
+            description: 'Your lip-synced video has been generated successfully.',
+          });
+
+        } else if (jobData.status === 'error') {
+          console.error('Video generation failed:', jobData.error);
+          
+          setState(prev => ({
+            ...prev,
+            isGenerating: false,
+            error: jobData.error || 'Video generation failed'
+          }));
+
+          // Stop polling
+          if (pollingTimerRef.current) {
+            clearTimeout(pollingTimerRef.current);
+            pollingTimerRef.current = null;
+          }
+
+          toast({
+            title: 'Generation Failed',
+            description: jobData.error || 'Video generation failed',
+            variant: 'destructive',
+          });
+
+        } else {
+          // Continue polling
+          pollingTimerRef.current = setTimeout(poll, pollingInterval);
+        }
+
+      } catch (err) {
+        console.error('Error polling job status:', err);
+        
+        setState(prev => ({
+          ...prev,
+          isGenerating: false,
+          error: err instanceof Error ? err.message : 'Failed to check job status'
+        }));
+
+        // Stop polling on error
+        if (pollingTimerRef.current) {
+          clearTimeout(pollingTimerRef.current);
+          pollingTimerRef.current = null;
+        }
+
+        toast({
+          title: 'Error',
+          description: 'Failed to check generation status',
+          variant: 'destructive',
+        });
+      }
+    };
+
+    // Start first poll immediately
+    poll();
+  }, [onProgress, onStepComplete, pollingInterval, toast]);
+
