@@ -6,8 +6,8 @@ import { useWorkspaces } from "@/hooks/useWorkspace";
 import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
-import { GestureChat } from "@/components/chat/GestureChat";
-import { Film, Play, Download, X } from "lucide-react";
+import { VideoPreview } from "@/components/chat/VideoPreview";
+import { EnhancedGestureChat } from "@/components/chat/EnhancedGestureChat";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
