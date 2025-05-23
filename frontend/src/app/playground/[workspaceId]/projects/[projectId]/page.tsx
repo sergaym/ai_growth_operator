@@ -80,9 +80,9 @@ export default function ProjectPage() {
 
   const getStepMessage = (step?: string | null) => {
     switch (step) {
-      case 'text_to_speech': return '🎙️ Generating Speech...';
-      case 'lipsync': return '💋 Syncing Lips...';
-      default: return '🚀 Starting Generation...';
+      case 'text_to_speech': return 'Generating speech...';
+      case 'lipsync': return 'Syncing lips...';
+      default: return 'Preparing generation...';
     }
   };
 
@@ -99,26 +99,55 @@ export default function ProjectPage() {
             
             {/* Generation Progress Overlay */}
             {isGenerating && (
-              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
-                <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
-                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
-                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
-                    {getStepMessage(currentStep)}
-                  </h3>
-                  <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
-                    <div 
-                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
-                      style={{ width: `${progress}%` }}
-                    ></div>
+              <div className="absolute inset-0 bg-gradient-to-br from-slate-900/80 via-slate-900/70 to-slate-800/80 backdrop-blur-sm flex flex-col items-center justify-center z-10">
+                <div className="relative">
+                  {/* Subtle background glow */}
+                  <div className="absolute inset-0 bg-gradient-to-r from-blue-500/20 via-purple-500/20 to-blue-500/20 rounded-2xl blur-xl"></div>
+                  
+                  {/* Main content card */}
+                  <div className="relative bg-white/95 backdrop-blur-md rounded-2xl p-8 max-w-sm mx-4 text-center shadow-2xl border border-white/20">
+                    
+                    {/* Animated dots instead of spinner */}
+                    <div className="flex justify-center items-center space-x-1 mb-6">
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse"></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.2s' }}></div>
+                      <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" style={{ animationDelay: '0.4s' }}></div>
+                    </div>
+                    
+                    {/* Step message with better typography */}
+                    <h3 className="text-xl font-medium text-slate-800 mb-3 tracking-tight">
+                      {getStepMessage(currentStep)}
+                    </h3>
+                    
+                    {/* Subtle progress indicator */}
+                    <div className="relative mb-6">
+                      <div className="h-1 bg-slate-100 rounded-full overflow-hidden">
+                        <div 
+                          className="h-full bg-gradient-to-r from-blue-500 to-purple-500 rounded-full transition-all duration-700 ease-out"
+                          style={{ width: `${progress}%` }}
+                        ></div>
+                      </div>
+                      <p className="text-sm text-slate-500 mt-2 font-medium">{progress}% complete</p>
+                    </div>
+                    
+                    {/* Step indicator dots */}
+                    <div className="flex justify-center space-x-2 mb-6">
+                      <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentStep === 'text_to_speech' || progress > 0 ? 'bg-blue-500' : 'bg-slate-300'
+                      }`}></div>
+                      <div className={`w-2 h-2 rounded-full transition-all duration-300 ${
+                        currentStep === 'lipsync' || progress > 50 ? 'bg-purple-500' : 'bg-slate-300'
+                      }`}></div>
+                    </div>
+                    
+                    {/* Cancel button with better design */}
+                    <button
+                      onClick={cancel}
+                      className="inline-flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 transition-colors duration-200 font-medium"
+                    >
+                      Cancel
+                    </button>
                   </div>
-                  <p className="text-sm text-gray-600 mb-4">{progress}% complete</p>
-                  <button
-                    onClick={cancel}
-                    className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-800 underline"
-                  >
-                    <X className="h-4 w-4" />
-                    Cancel Generation
-                  </button>
                 </div>
               </div>
             )}
