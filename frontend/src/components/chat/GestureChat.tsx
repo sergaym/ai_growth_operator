@@ -348,7 +348,16 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
 
           {/* Top Input Area */}
           <div className="p-3 space-y-2">
-            {/* Message Type Selector */}
+            {/* User Authentication Status */}
+            {!user?.isAuthenticated && (
+              <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-700">
+                  ⚠️ Please log in to generate videos
+                </p>
+              </div>
+            )}
+
+            {/* Message Type and Language Selectors */}
             <div className="flex items-center gap-2">
               <Select value={messageType} onValueChange={(value) => setMessageType(value as MessageType)}>
                 <SelectTrigger className={selectTriggerStyles}>
@@ -365,7 +374,28 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
                   <SelectItem value="talking">🗣️ Talking Actors</SelectItem>
                 </SelectContent>
               </Select>
+
+              {messageType === 'talking' && (
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className={selectTriggerStyles}>
+                    <SelectValue>
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" />
+                        {LANGUAGES.find(l => l.value === language)?.label || 'Language'}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
+
             <div className="relative flex items-start gap-2 min-h-[60px]">
               <textarea
                 value={inputValue}
@@ -376,10 +406,11 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
                   : "Write dialogue for the actor to speak"}
                 className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
                 rows={2}
+                disabled={isGenerating}
               />
               <SendButton
                 onClick={handleSend}
-                disabled={!inputValue.trim() || isGenerating}
+                disabled={!inputValue.trim() || isGenerating || !selectedActor || !user?.isAuthenticated}
                 loading={isGenerating}
                 className="absolute bottom-0 right-0"
               />
@@ -437,7 +468,7 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
         </div>
       </div>
 
-      {/* Wrap ActorSelectDialog in error boundary-like handling */}
+      {/* Actor Select Dialog */}
       {isActorDialogOpen && (
         <ActorSelectDialog 
           isOpen={isActorDialogOpen}
