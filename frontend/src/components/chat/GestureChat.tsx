@@ -7,9 +7,8 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { SendButton } from './SendButton';
-import { UserPlus, Mic, Volume2, Globe, Play, Download } from 'lucide-react';
+import { UserPlus, Mic, Volume2, Globe } from 'lucide-react';
 import { ActorSelectDialog } from './ActorSelectDialog';
-import { useVideoGeneration } from '@/hooks/useVideoGeneration';
 import { useAuth } from '@/hooks/useAuth';
 
 type MessageType = 'gesture' | 'talking';
