@@ -96,3 +96,76 @@ class VideoGenerationWorkflowResponse(BaseModel):
     steps: List[WorkflowStepStatus] = Field(..., description="Summary of all workflow steps")
 
 
+class VideoGenerationDocumentationExample(BaseModel):
+    """Documentation examples for the video generation workflow API."""
+    
+    @staticmethod
+    def get_request_example() -> Dict[str, Any]:
+        """Get an example request payload."""
+        return {
+            "text": "Hello! Welcome to our amazing product. Let me show you how it works.",
+            "actor_id": "actor_123",
+            "actor_video_url": "https://storage.example.com/actors/actor_123/video.mp4",
+            "project_id": "project_456",
+            "voice_preset": "professional_male",
+            "language": "english",
+            "save_result": True,
+            "user_id": "user_789",
+            "workspace_id": "workspace_101"
+        }
+    
+    @staticmethod
+    def get_job_response_example() -> Dict[str, Any]:
+        """Get an example job response."""
+        return {
+            "job_id": "wf_abc123def456",
+            "status": "pending",
+            "created_at": 1640995200.0,
+            "updated_at": 1640995200.0,
+            "steps": [],
+            "current_step": None,
+            "progress_percentage": 0,
+            "estimated_completion": None
+        }
+    
+    @staticmethod
+    def get_completion_response_example() -> Dict[str, Any]:
+        """Get an example completion response."""
+        return {
+            "job_id": "wf_abc123def456",
+            "status": "completed",
+            "text": "Hello! Welcome to our amazing product. Let me show you how it works.",
+            "actor_id": "actor_123",
+            "project_id": "project_456",
+            "audio_url": "https://storage.example.com/audio/generated_abc123.mp3",
+            "video_url": "https://storage.example.com/videos/lipsync_def456.mp4",
+            "thumbnail_url": "https://storage.example.com/thumbnails/lipsync_def456.jpg",
+            "audio_duration": 8.5,
+            "video_duration": 8.5,
+            "file_size": 2048000,
+            "processing_time": 45.2,
+            "created_at": 1640995200.0,
+            "completed_at": 1640995245.2,
+            "steps": [
+                {
+                    "step": "text_to_speech",
+                    "status": "completed",
+                    "started_at": 1640995201.0,
+                    "completed_at": 1640995220.5,
+                    "result": {
+                        "audio_url": "https://storage.example.com/audio/generated_abc123.mp3",
+                        "duration": 8.5
+                    }
+                },
+                {
+                    "step": "lipsync",
+                    "status": "completed", 
+                    "started_at": 1640995221.0,
+                    "completed_at": 1640995245.2,
+                    "result": {
+                        "video_url": "https://storage.example.com/videos/lipsync_def456.mp4",
+                        "thumbnail_url": "https://storage.example.com/thumbnails/lipsync_def456.jpg"
+                    }
+                }
+            ]
+        } 
