@@ -26,7 +26,8 @@ interface Actor {
 
 interface GestureChatProps {
   projectId?: string;
-  onVideoGenerated?: (url: string) => void;
+  onGenerateVideo?: (text: string, actorId: string, actorVideoUrl: string, language: string) => Promise<void>;
+  isGenerating?: boolean;
 }
 
 // Language options for TTS
@@ -48,7 +49,7 @@ const LANGUAGES = [
   { value: 'korean', label: '🇰🇷 Korean' },
 ];
 
-export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
+export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIsGenerating }: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
   const [messageType, setMessageType] = useState<MessageType>('talking');
   const [speechType, setSpeechType] = useState<SpeechType>('tts');
@@ -59,27 +60,8 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   // Auth context for user/workspace IDs
   const { user } = useAuth();
 
-  // Video generation hook
-  const { 
-    generateVideo, 
-    isGenerating, 
-    progress, 
-    currentStep, 
-    result, 
-    error, 
-    cancel, 
-    reset 
-  } = useVideoGeneration({
-    onComplete: (result) => {
-      console.log('Video generation completed:', result);
-      if (onVideoGenerated && result.video_url) {
-        onVideoGenerated(result.video_url);
-      }
-    },
-    onProgress: (progress, step) => {
-      console.log(`Progress: ${progress}% - ${step}`);
-    }
-  });
+  // Use the parent's isGenerating state
+  const isGenerating = parentIsGenerating || false;
 
   // Add error boundary-like error handling
   useEffect(() => {
