@@ -273,3 +273,105 @@ export function VideoPreview({
             )}
           </div>
           
+          {/* Bottom Info */}
+          <div className="absolute bottom-4 left-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            {processingTime && (
+              <Badge variant="secondary" className="bg-black/60 text-white border-white/20">
+                <Clock className="h-3 w-3 mr-1" />
+                Generated in {Math.round(processingTime)}s
+              </Badge>
+            )}
+            
+            <Button
+              size="sm"
+              variant="ghost"
+              onClick={toggleMute}
+              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20 p-2"
+            >
+              {isMuted ? (
+                <VolumeX className="h-4 w-4" />
+              ) : (
+                <Volume2 className="h-4 w-4" />
+              )}
+            </Button>
+          </div>
+          
+          {/* Success Badge */}
+          <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+            <Badge className="bg-emerald-500/90 backdrop-blur-sm text-white border-0">
+              <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
+              Ready
+            </Badge>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Empty State - Getting Started
+  if (showGettingStarted) {
+    return (
+      <div className="relative aspect-video bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 rounded-xl overflow-hidden">
+        <div className="absolute inset-0 flex items-center justify-center p-6">
+          <div className="text-center space-y-6 max-w-md">
+            {/* Animated Icon */}
+            <div className="relative">
+              <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center">
+                <Film className="h-10 w-10 text-white" />
+              </div>
+              <div className="absolute inset-0 w-20 h-20 mx-auto bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl animate-ping" />
+            </div>
+            
+            {/* Title & Description */}
+            <div className="space-y-3">
+              <h3 className="text-2xl font-semibold text-slate-800">
+                Ready to Create Magic?
+              </h3>
+              <p className="text-slate-600 leading-relaxed">
+                Transform your ideas into engaging AI videos. Select an actor below and describe what you want them to do.
+              </p>
+            </div>
+            
+            {/* Quick Steps */}
+            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 space-y-3 border border-white/50">
+              <h4 className="text-sm font-medium text-slate-700 mb-3">Quick Start:</h4>
+              <div className="space-y-2 text-sm text-slate-600">
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">1</div>
+                  <span>Choose an AI actor from the gallery</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xs font-semibold">2</div>
+                  <span>Write what you want them to say or do</span>
+                </div>
+                <div className="flex items-center gap-3">
+                  <div className="w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-semibold">3</div>
+                  <span>Watch your AI video come to life!</span>
+                </div>
+              </div>
+            </div>
+            
+            {/* Sparkle Animation */}
+            <div className="flex justify-center space-x-2 opacity-60">
+              <Sparkles className="h-4 w-4 text-blue-500 animate-pulse" style={{ animationDelay: '0s' }} />
+              <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
+              <Sparkles className="h-4 w-4 text-indigo-500 animate-pulse" style={{ animationDelay: '1s' }} />
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Minimal Empty State
+  return (
+    <div className="relative aspect-video bg-slate-100 rounded-xl overflow-hidden">
+      <div className="absolute inset-0 flex items-center justify-center">
+        <div className="text-center space-y-3">
+          <Film className="h-12 w-12 mx-auto text-slate-400" />
+          <p className="text-slate-500 text-sm">Your AI video will appear here</p>
+        </div>
+      </div>
+    </div>
+  );
+} 
