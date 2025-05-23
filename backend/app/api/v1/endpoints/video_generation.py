@@ -140,3 +140,67 @@ async def get_workflow_status(job_id: str = Path(..., description="Job ID to che
         logger.error(f"Error getting workflow status for job {job_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get job status: {str(e)}")
 
+
+@router.get(
+    "/result/{job_id}",
+    response_model=VideoGenerationWorkflowResponse,
+    summary="Get completed video generation result",
+    description="""
+    Get the final result of a completed video generation workflow.
+    
+    This endpoint returns detailed information about the generated video
+    including URLs, metadata, and processing statistics.
+    Only works for completed workflows.
+    """
+)
+async def get_workflow_result(job_id: str = Path(..., description="Job ID to get result for")):
+    """
+    Get the final result of a completed workflow.
+    
+    Args:
+        job_id: The workflow job identifier
+        
+    Returns:
+        Complete workflow result with video URLs and metadata
+    """
+    try:
+        job_status = await video_generation_service.get_job_status(job_id)
+        
+        if not job_status:
+            raise HTTPException(status_code=404, detail=f"Job {job_id} not found")
+        
+        if job_status["status"] != "completed":
+            raise HTTPException(
+                status_code=400, 
+                detail=f"Job {job_id} is not completed (status: {job_status['status']})"
+            )
+        
+        result = job_status.get("result")
+        if not result:
+            raise HTTPException(status_code=500, detail="No result available for completed job")
+        
+        return VideoGenerationWorkflowResponse(
+            job_id=job_id,
+            status=job_status["status"],
+            text=result["text"],
+            actor_id=result["actor_id"],
+            project_id=result.get("project_id"),
+            audio_url=result.get("audio_url"),
+            video_url=result["video_url"],
+            thumbnail_url=result.get("thumbnail_url"),
+            audio_duration=result.get("audio_duration"),
+            video_duration=result.get("video_duration"),
+            file_size=result.get("file_size"),
+            processing_time=result.get("processing_time"),
+            created_at=job_status["created_at"],
+            completed_at=job_status["updated_at"],
+            steps=job_status.get("steps", [])
+        )
+        
+    except HTTPException:
+        # Re-raise HTTP exceptions
+        raise
+    except Exception as e:
+        logger.error(f"Error getting workflow result for job {job_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get job result: {str(e)}")
+
