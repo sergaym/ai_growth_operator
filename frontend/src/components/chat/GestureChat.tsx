@@ -12,9 +12,11 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { SendButton } from './SendButton';
-import { UserPlus, Volume2, Globe } from 'lucide-react';
+import { UserPlus, Volume2, Globe, Lightbulb, Zap, Sparkles } from 'lucide-react';
 import { ActorSelectDialog } from './ActorSelectDialog';
 import { useAuth } from '@/hooks/useAuth';
+import { Card } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
 
 type MessageType = 'gesture' | 'talking';
 
@@ -32,6 +34,7 @@ interface GestureChatProps {
   projectId?: string;
   onGenerateVideo?: (text: string, actorId: string, actorVideoUrl: string, language: string) => Promise<void>;
   isGenerating?: boolean;
+  showTips?: boolean;
 }
 
 // Language options for TTS
@@ -53,12 +56,35 @@ const LANGUAGES = [
   { value: 'korean', label: '🇰🇷 Korean' },
 ];
 
-export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIsGenerating }: GestureChatProps) {
+// Example prompts to help users get started
+const EXAMPLE_PROMPTS = {
+  talking: [
+    "Welcome to our AI video platform! I'm excited to show you what we can create together.",
+    "Hello everyone! Let me introduce you to the future of content creation.",
+    "Thanks for watching! Don't forget to subscribe and hit the notification bell.",
+    "In today's video, I'll walk you through the most important features you need to know."
+  ],
+  gesture: [
+    "Wave hello with enthusiasm and smile warmly",
+    "Give a thumbs up and nod approvingly", 
+    "Point to the side as if introducing something new",
+    "Celebrate with raised arms and a big smile"
+  ]
+};
+
+export function GestureChat({ 
+  projectId, 
+  onGenerateVideo, 
+  isGenerating: parentIsGenerating,
+  showTips = true 
+}: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
   const [messageType, setMessageType] = useState<MessageType>('talking');
   const [language, setLanguage] = useState('english');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
+  const [showExamples, setShowExamples] = useState(false);
+  const [isFirstTime, setIsFirstTime] = useState(true);
 
   // Auth context for user/workspace IDs
   const { user } = useAuth();
@@ -66,32 +92,17 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
   // Use the parent's isGenerating state
   const isGenerating = parentIsGenerating || false;
 
-  // Add error boundary-like error handling
+  // Check if this is user's first time (you might want to use localStorage or user data)
   useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      if (event.error && event.error.message && event.error.message.includes('video')) {
-        console.warn('Video loading error caught and handled:', event.error);
-        event.preventDefault();
-        return false;
-      }
-    };
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      if (event.reason && typeof event.reason === 'string' && event.reason.includes('video')) {
-        console.warn('Promise rejection caught and handled:', event.reason);
-        event.preventDefault();
-        return false;
-      }
-    };
-
-    window.addEventListener('error', handleError);
-    window.addEventListener('unhandledrejection', handleUnhandledRejection);
-
-    return () => {
-      window.removeEventListener('error', handleError);
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection);
-    };
+    const hasUsedBefore = localStorage.getItem('ai-video-used-before');
+    setIsFirstTime(!hasUsedBefore);
   }, []);
+
+  // Mark as used when user generates their first video
+  const markAsUsed = () => {
+    localStorage.setItem('ai-video-used-before', 'true');
+    setIsFirstTime(false);
+  };
 
   const handleSend = async () => {
     if (!inputValue.trim()) return;
@@ -114,12 +125,18 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
       return;
     }
 
+    // Mark as used on first generation
+    if (isFirstTime) {
+      markAsUsed();
+    }
+
     // Call parent callback if provided
     if (onGenerateVideo) {
       try {
         await onGenerateVideo(inputValue.trim(), selectedActor.id, selectedActor.videoUrl, language);
         // Clear input after successful start
         setInputValue('');
+        setShowExamples(false);
       } catch (error) {
         console.error('Failed to start video generation:', error);
       }
@@ -131,6 +148,11 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
       e.preventDefault();
       handleSend();
     }
+  };
+
+  const handleExampleClick = (example: string) => {
+    setInputValue(example);
+    setShowExamples(false);
   };
 
   const handleAddActors = () => {
@@ -164,10 +186,6 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
     }
   };
 
-  // Shared styles
-  const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
-  const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
-
   // Get tooltip message based on current state
   const getTooltipMessage = () => {
     if (isGenerating) {
@@ -192,82 +210,131 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
 
   return (
     <>
-      <div className="w-full">
-        <div className="bg-white rounded-lg shadow-sm">
+      <div className="w-full space-y-4">
+        {/* Getting Started Tips - Show for first-time users */}
+        {isFirstTime && showTips && !selectedActor && (
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <h4 className="font-medium text-slate-800">New to AI Videos? Here's how to get started:</h4>
+                  <div className="text-sm text-slate-600 space-y-1">
+                    <p>• <strong>Step 1:</strong> Click "Add actor" below to choose your AI presenter</p>
+                    <p>• <strong>Step 2:</strong> Type what you want them to say or do</p>
+                    <p>• <strong>Step 3:</strong> Watch your video generate in 2-3 minutes!</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Pro tip: Be specific for best results
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
+        {/* Main Chat Interface */}
+        <div className="bg-white rounded-xl shadow-sm border">
           {/* Selected Actor Display */}
           {selectedActor ? (
             <div className="px-3 pt-3 pb-2 animate-in slide-in-from-top-2 duration-300">
-              <div className="flex items-center gap-3 p-2 bg-blue-50 border border-blue-100 rounded-lg transition-all duration-200 hover:bg-blue-100/50">
-                <div 
-                  className="w-10 h-10 rounded-lg bg-cover bg-center border-2 border-blue-200 flex-shrink-0"
-                  style={{
-                    backgroundImage: `url(${selectedActor.image || '/placeholder-avatar.jpg'})`
-                  }}
-                />
+              <div className="flex items-center gap-3 p-3 bg-gradient-to-r from-blue-50 to-purple-50 border border-blue-200 rounded-lg transition-all duration-200 hover:from-blue-100 hover:to-purple-100">
+                <div className="w-12 h-12 rounded-xl overflow-hidden border-2 border-blue-300 flex-shrink-0 bg-gray-100">
+                  {selectedActor.videoUrl ? (
+                    <video
+                      src={selectedActor.videoUrl}
+                      muted
+                      loop
+                      autoPlay
+                      playsInline
+                      className="w-full h-full object-cover"
+                    />
+                  ) : (
+                    <img
+                      src={selectedActor.image || '/placeholder-avatar.jpg'}
+                      alt={selectedActor.name}
+                      className="w-full h-full object-cover"
+                    />
+                  )}
+                </div>
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-2">
-                    <span className="text-sm font-medium text-blue-900">{selectedActor.name}</span>
-                    <div className="w-4 h-4 bg-green-500 rounded-full flex items-center justify-center">
+                    <span className="text-sm font-semibold text-blue-900">{selectedActor.name}</span>
+                    <div className="w-5 h-5 bg-emerald-500 rounded-full flex items-center justify-center">
                       <span className="text-white text-xs">✓</span>
                     </div>
+                    {selectedActor.pro && (
+                      <Badge variant="secondary" className="text-xs bg-purple-100 text-purple-700">
+                        PRO
+                      </Badge>
+                    )}
                   </div>
-                  <p className="text-xs text-blue-600">Active actor for this conversation</p>
+                  <p className="text-xs text-blue-700 mt-1">Ready to create your video</p>
                 </div>
                 <button
                   onClick={() => setSelectedActor(null)}
-                  className="text-blue-400 hover:text-blue-600 transition-colors p-1"
+                  className="text-blue-400 hover:text-blue-600 transition-colors p-2 hover:bg-blue-100 rounded-lg"
                   title="Remove actor"
                 >
-                  <span className="text-sm">×</span>
+                  <span className="text-lg">×</span>
                 </button>
               </div>
             </div>
           ) : (
             <div className="px-3 pt-3 pb-2">
-              <div className="flex items-center gap-3 p-2 bg-gray-50 border border-gray-100 rounded-lg border-dashed">
-                <div className="w-10 h-10 rounded-lg bg-gray-100 flex items-center justify-center flex-shrink-0">
-                  <UserPlus className="h-5 w-5 text-gray-400" />
+              <div className="flex items-center gap-3 p-3 bg-gray-50 border-2 border-dashed border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                <div className="w-12 h-12 rounded-xl bg-gray-100 flex items-center justify-center flex-shrink-0">
+                  <UserPlus className="h-6 w-6 text-gray-400" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <p className="text-sm text-gray-600">No actor selected</p>
-                  <p className="text-xs text-gray-500">Choose an actor to bring your content to life</p>
+                  <p className="text-sm font-medium text-gray-700">Choose your AI actor</p>
+                  <p className="text-xs text-gray-500 mt-1">Select from our gallery of professional AI presenters</p>
                 </div>
+                <button
+                  onClick={handleAddActors}
+                  className="px-4 py-2 bg-blue-500 text-white text-sm font-medium rounded-lg hover:bg-blue-600 transition-colors"
+                >
+                  Browse Actors
+                </button>
               </div>
             </div>
           )}
 
-          {/* Top Input Area */}
-          <div className="p-3 space-y-2">
+          {/* Main Input Area */}
+          <div className="p-3 space-y-3">
             {/* User Authentication Status */}
             {!user?.isAuthenticated && (
-              <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
-                <p className="text-xs text-yellow-700">
+              <div className="p-3 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-sm text-yellow-800">
                   ⚠️ Please log in to generate videos
                 </p>
               </div>
             )}
 
             {/* Message Type and Language Selectors */}
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-2 flex-wrap">
               <Select value={messageType} onValueChange={(value) => setMessageType(value as MessageType)}>
-                <SelectTrigger className={selectTriggerStyles}>
+                <SelectTrigger className="w-[160px] h-9 border border-slate-200 bg-white text-sm text-slate-700">
                   <SelectValue>
                     {messageType === 'gesture' ? (
                       <span className="flex items-center gap-1.5">👋 Gestures</span>
                     ) : (
-                      <span className="flex items-center gap-1.5">🗣️ Talking Actors</span>
+                      <span className="flex items-center gap-1.5">🗣️ Talking</span>
                     )}
                   </SelectValue>
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="gesture">👋 Gestures</SelectItem>
-                  <SelectItem value="talking">🗣️ Talking Actors</SelectItem>
+                  <SelectItem value="talking">🗣️ Talking</SelectItem>
                 </SelectContent>
               </Select>
 
               {messageType === 'talking' && (
                 <Select value={language} onValueChange={setLanguage}>
-                  <SelectTrigger className={selectTriggerStyles}>
+                  <SelectTrigger className="w-[160px] h-9 border border-slate-200 bg-white text-sm text-slate-700">
                     <SelectValue>
                       <span className="flex items-center gap-1.5">
                         <Globe className="h-4 w-4" />
@@ -284,55 +351,99 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
                   </SelectContent>
                 </Select>
               )}
+
+              {/* Examples Button */}
+              <button
+                onClick={() => setShowExamples(!showExamples)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors border border-slate-200"
+              >
+                <Sparkles className="h-4 w-4" />
+                Examples
+              </button>
             </div>
 
-            <div className="relative flex items-start gap-2 min-h-[60px]">
+            {/* Example Prompts */}
+            {showExamples && (
+              <div className="space-y-2 animate-in slide-in-from-top-2 duration-200">
+                <p className="text-xs font-medium text-slate-600 uppercase tracking-wide">
+                  {messageType === 'gesture' ? 'Gesture Ideas' : 'Script Ideas'}
+                </p>
+                <div className="grid gap-2">
+                  {EXAMPLE_PROMPTS[messageType].map((example, index) => (
+                    <button
+                      key={index}
+                      onClick={() => handleExampleClick(example)}
+                      className="text-left p-3 bg-slate-50 hover:bg-slate-100 rounded-lg border border-slate-200 text-sm text-slate-700 transition-colors"
+                    >
+                      {example}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
+            {/* Text Input Area */}
+            <div className="relative">
               <textarea
                 value={inputValue}
                 onChange={(e) => setInputValue(e.target.value)}
                 onKeyDown={handleKeyDown}
                 placeholder={messageType === 'gesture' 
-                  ? "Describe a gesture, like 'Make the actor celebrate'" 
-                  : "Write dialogue for the actor to speak"}
-                className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
-                rows={2}
+                  ? "Describe the gesture you want the actor to perform, like 'Wave enthusiastically at the camera'" 
+                  : "Write the script for your actor to speak"}
+                className="w-full min-h-[80px] text-sm text-slate-900 bg-slate-50 border border-slate-200 rounded-lg px-4 py-3 placeholder:text-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent resize-none"
+                rows={3}
                 disabled={isGenerating}
               />
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <div className="absolute bottom-0 right-0">
-                    <SendButton
-                      onClick={handleSend}
-                      disabled={isButtonDisabled}
-                      loading={isGenerating}
-                    />
-                  </div>
-                </TooltipTrigger>
-                <TooltipContent side="left" sideOffset={8}>
-                  <p>{getTooltipMessage()}</p>
-                </TooltipContent>
-              </Tooltip>
+              
+              {/* Send Button */}
+              <div className="absolute bottom-3 right-3">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <div>
+                      <SendButton
+                        onClick={handleSend}
+                        disabled={isButtonDisabled}
+                        loading={isGenerating}
+                      />
+                    </div>
+                  </TooltipTrigger>
+                  <TooltipContent side="left" sideOffset={8}>
+                    <p>{getTooltipMessage()}</p>
+                  </TooltipContent>
+                </Tooltip>
+              </div>
             </div>
           </div>
 
           {/* Bottom Actions */}
-          <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100 bg-zinc-50/50">
+          <div className="flex items-center justify-between px-3 py-3 border-t border-slate-100 bg-slate-50/50">
             <div className="flex items-center gap-2">
               {messageType === 'talking' && (
-                <div className="flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 bg-zinc-50/50 border border-zinc-100 rounded-md">
+                <div className="flex items-center gap-1.5 text-sm text-slate-600 px-3 py-1.5 bg-slate-100 rounded-md">
                   <Volume2 className="h-4 w-4" />
                   Text to Speech
                 </div>
               )}
-              <button 
-                onClick={handleAddActors}
-                className={buttonStyles}
-                disabled={isGenerating}
-              >
-                <UserPlus className="h-4 w-4" />
-                {selectedActor ? 'Change actor' : 'Add actor'}
-              </button>
+              
+              {!selectedActor && (
+                <button 
+                  onClick={handleAddActors}
+                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200"
+                  disabled={isGenerating}
+                >
+                  <UserPlus className="h-4 w-4" />
+                  Add Actor
+                </button>
+              )}
             </div>
+
+            {/* Character count for long inputs */}
+            {inputValue.length > 50 && (
+              <div className="text-xs text-slate-500">
+                {inputValue.length} characters
+              </div>
+            )}
           </div>
         </div>
       </div>
