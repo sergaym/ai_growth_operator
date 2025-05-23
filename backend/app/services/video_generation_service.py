@@ -215,3 +215,27 @@ class VideoGenerationWorkflowService:
         
         return result
     
+    async def _generate_lipsync(self, request: VideoGenerationWorkflowRequest, audio_url: str) -> Dict[str, Any]:
+        """Generate lipsync using lipsync service."""
+        result = await lipsync_service.lipsync(
+            video_url=request.actor_video_url,
+            audio_url=audio_url,
+            save_result=request.save_result or True
+        )
+        
+        if result.get("status") == "error":
+            raise Exception(result.get("error", "Lipsync generation failed"))
+        
+        return result
+    
+    def _create_step_status(self, step_name: str, status: str) -> Dict[str, Any]:
+        """Create a new step status record."""
+        return {
+            "step": step_name,
+            "status": status,
+            "started_at": time.time(),
+            "completed_at": None,
+            "error": None,
+            "result": None
+        }
+    
