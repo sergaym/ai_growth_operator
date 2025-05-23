@@ -93,22 +93,86 @@ export default function ProjectPage() {
       currentWorkspace={workspace}
     >
       <div className="max-w-5xl mx-auto">
-        {/* Video Preview */}
+        {/* Video Preview with Progress */}
         <div className="mb-6">
-          <div className="aspect-video bg-zinc-100 rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
-            {videoLoading ? (
-              <div className="flex flex-col items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-                <p className="text-sm text-zinc-500">Generating video...</p>
+          <div className="aspect-video bg-zinc-100 rounded-lg flex items-center justify-center overflow-hidden shadow-sm relative">
+            
+            {/* Generation Progress Overlay */}
+            {isGenerating && (
+              <div className="absolute inset-0 bg-black/50 flex flex-col items-center justify-center z-10">
+                <div className="bg-white rounded-lg p-6 max-w-sm mx-4 text-center">
+                  <div className="w-12 h-12 border-4 border-blue-600 border-t-transparent rounded-full animate-spin mx-auto mb-4"></div>
+                  <h3 className="text-lg font-semibold text-gray-900 mb-2">
+                    {getStepMessage(currentStep)}
+                  </h3>
+                  <div className="w-full bg-gray-200 rounded-full h-3 mb-3">
+                    <div 
+                      className="bg-blue-600 h-3 rounded-full transition-all duration-300"
+                      style={{ width: `${progress}%` }}
+                    ></div>
+                  </div>
+                  <p className="text-sm text-gray-600 mb-4">{progress}% complete</p>
+                  <button
+                    onClick={cancel}
+                    className="inline-flex items-center gap-2 text-sm text-red-600 hover:text-red-800 underline"
+                  >
+                    <X className="h-4 w-4" />
+                    Cancel Generation
+                  </button>
+                </div>
               </div>
-            ) : videoUrl ? (
-              <video 
-                src={videoUrl} 
-                className="w-full h-full object-cover" 
-                controls 
-                autoPlay
-              />
+            )}
+
+            {/* Success State */}
+            {result?.video_url ? (
+              <div className="relative w-full h-full">
+                <video 
+                  src={result.video_url} 
+                  className="w-full h-full object-cover" 
+                  controls 
+                  autoPlay
+                />
+                {/* Success Actions Overlay */}
+                <div className="absolute top-4 right-4 flex gap-2">
+                  <button
+                    onClick={handlePlayVideo}
+                    className="bg-white/90 hover:bg-white text-green-700 rounded-lg px-3 py-2 text-sm font-medium shadow-sm border flex items-center gap-1"
+                  >
+                    <Play className="h-4 w-4" />
+                    Open
+                  </button>
+                  <button
+                    onClick={handleDownloadVideo}
+                    className="bg-white/90 hover:bg-white text-green-700 rounded-lg px-3 py-2 text-sm font-medium shadow-sm border flex items-center gap-1"
+                  >
+                    <Download className="h-4 w-4" />
+                    Download
+                  </button>
+                </div>
+                {/* Processing Time */}
+                {result.processing_time && (
+                  <div className="absolute bottom-4 left-4 bg-black/70 text-white text-xs px-2 py-1 rounded">
+                    Generated in {Math.round(result.processing_time)}s
+                  </div>
+                )}
+              </div>
+            ) : error ? (
+              // Error State
+              <div className="text-center p-6">
+                <div className="text-red-500 mb-4">
+                  <X className="h-12 w-12 mx-auto mb-2" />
+                  <h3 className="text-lg font-semibold">Generation Failed</h3>
+                </div>
+                <p className="text-sm text-red-600 mb-4">{error}</p>
+                <button
+                  onClick={reset}
+                  className="text-sm text-red-600 hover:text-red-800 underline"
+                >
+                  Try Again
+                </button>
+              </div>
             ) : (
+              // Empty State
               <div className="text-zinc-400 text-sm text-center p-4">
                 <Film className="h-8 w-8 mx-auto mb-2 opacity-50" />
                 <p>Describe what you want the AI actor to do</p>
