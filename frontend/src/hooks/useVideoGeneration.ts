@@ -16,54 +16,18 @@ interface VideoGenerationRequest {
   workspace_id?: string;
 }
 
-interface WorkflowStep {
-  step: string;
-  status: string;
-  started_at?: number;
-  completed_at?: number;
-  error?: string;
-  result?: any;
-}
-
-interface VideoGenerationJob {
+interface VideoGenerationResult {
   job_id: string;
-  status: 'pending' | 'tts_processing' | 'tts_completed' | 'lipsync_processing' | 'completed' | 'error';
-  created_at: number;
-  updated_at: number;
-  steps: WorkflowStep[];
-  current_step?: string;
-  progress_percentage?: number;
-  estimated_completion?: number;
-  result?: {
-    text: string;
-    actor_id: string;
-    project_id?: string;
-    audio_url?: string;
-    video_url: string;
-    thumbnail_url?: string;
-    audio_duration?: number;
-    video_duration?: number;
-    file_size?: number;
-    processing_time?: number;
-  };
-  error?: string;
+  video_url: string;
+  audio_url?: string;
+  thumbnail_url?: string;
+  processing_time?: number;
 }
 
 interface UseVideoGenerationOptions {
-  pollingInterval?: number; // in milliseconds
-  onProgress?: (progress: number, currentStep?: string) => void;
-  onStepComplete?: (step: WorkflowStep) => void;
-}
-
-interface UseVideoGenerationState {
-  isGenerating: boolean;
-  currentJob: VideoGenerationJob | null;
-  currentStep: string | null;
-  progress: number;
-  videoUrl: string | null;
-  audioUrl: string | null;
-  error: string | null;
-  steps: WorkflowStep[];
+  pollingInterval?: number;
+  onProgress?: (progress: number, step?: string) => void;
+  onComplete?: (result: VideoGenerationResult) => void;
 }
 
 export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
