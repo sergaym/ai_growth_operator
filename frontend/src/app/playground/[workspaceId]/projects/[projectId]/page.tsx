@@ -3,9 +3,11 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useVideoGeneration } from "@/hooks/useVideoGeneration";
+import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { GestureChat } from "@/components/chat/GestureChat";
-import { Film } from "lucide-react";
+import { Film, Play, Download, X } from "lucide-react";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
