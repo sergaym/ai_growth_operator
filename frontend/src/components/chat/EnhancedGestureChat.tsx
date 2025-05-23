@@ -18,3 +18,15 @@ import { useAuth } from '@/hooks/useAuth';
 import { Card } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 
+type MessageType = 'gesture' | 'talking';
+
+interface Actor {
+  id: string;
+  name: string;
+  image: string;
+  tags: string[];
+  hd?: boolean;
+  pro?: boolean;
+  videoUrl?: string;
+}
+
