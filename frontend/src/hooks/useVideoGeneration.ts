@@ -91,10 +91,30 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
 
       if (data.status === 'completed' && data.result) {
         // Success!
+        let videoUrl = data.result.video_url;
+        let audioUrl = data.result.audio_url;
+        
+        // Enhanced blob_url extraction - prioritize blob storage URLs
+        // Check if we can get a better video URL from the lipsync step
+        if (data.steps) {
+          const lipsyncStep = data.steps.find((step: any) => step.step === 'lipsync');
+          if (lipsyncStep?.result?.blob_url) {
+            videoUrl = lipsyncStep.result.blob_url;
+            console.log('Using blob_url from lipsync step:', videoUrl);
+          }
+          
+          // Also check for better audio URL from TTS step
+          const ttsStep = data.steps.find((step: any) => step.step === 'text_to_speech');
+          if (ttsStep?.result?.blob_url) {
+            audioUrl = ttsStep.result.blob_url;
+            console.log('Using blob_url from TTS step:', audioUrl);
+          }
+        }
+        
         const result: VideoGenerationResult = {
           job_id: jobId,
-          video_url: data.result.video_url,
-          audio_url: data.result.audio_url,
+          video_url: videoUrl,
+          audio_url: audioUrl,
           thumbnail_url: data.result.thumbnail_url,
           processing_time: data.result.processing_time
         };
