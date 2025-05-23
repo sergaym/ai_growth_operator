@@ -82,11 +82,12 @@ export default function ProjectPage() {
           showGettingStarted={!result && !error && !isGenerating}
         />
 
-        {/* Chat Input */}
-        <GestureChat 
+        {/* Enhanced Chat Input */}
+        <EnhancedGestureChat 
           projectId={stringProjectId} 
           onGenerateVideo={handleGenerateVideo}
           isGenerating={isGenerating}
+          showTips={true}
         />
       </div>
     </PlaygroundLayout>
