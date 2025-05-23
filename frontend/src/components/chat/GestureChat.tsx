@@ -168,6 +168,28 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
   const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
   const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
 
+  // Get tooltip message based on current state
+  const getTooltipMessage = () => {
+    if (isGenerating) {
+      return "Video generation in progress...";
+    }
+    if (!user?.isAuthenticated) {
+      return "Please log in to generate videos";
+    }
+    if (!selectedActor) {
+      return "Select an actor first";
+    }
+    if (!selectedActor.videoUrl) {
+      return "Selected actor doesn't have a video available";
+    }
+    if (!inputValue.trim()) {
+      return "Write a message to generate video";
+    }
+    return `Generate ${messageType === 'gesture' ? 'gesture' : 'talking'} video`;
+  };
+
+  const isButtonDisabled = !inputValue.trim() || isGenerating || !selectedActor || !user?.isAuthenticated;
+
   return (
     <>
       <div className="w-full">
