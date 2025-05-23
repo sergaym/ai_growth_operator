@@ -23,3 +23,12 @@ interface VideoGenerationRequest {
   user_id?: string;
   workspace_id?: string;
 }
+
+interface WorkflowStep {
+  step: string;
+  status: string;
+  started_at?: number;
+  completed_at?: number;
+  error?: string;
+  result?: any;
+}
