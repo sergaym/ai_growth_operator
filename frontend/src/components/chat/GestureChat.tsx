@@ -298,12 +298,20 @@ export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIs
                 rows={2}
                 disabled={isGenerating}
               />
-              <SendButton
-                onClick={handleSend}
-                disabled={!inputValue.trim() || isGenerating || !selectedActor || !user?.isAuthenticated}
-                loading={isGenerating}
-                className="absolute bottom-0 right-0"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute bottom-0 right-0">
+                    <SendButton
+                      onClick={handleSend}
+                      disabled={isButtonDisabled}
+                      loading={isGenerating}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" sideOffset={8}>
+                  <p>{getTooltipMessage()}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
