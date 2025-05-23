@@ -7,7 +7,7 @@ import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { VideoPreview } from "@/components/chat/VideoPreview";
-import { EnhancedGestureChat } from "@/components/chat/EnhancedGestureChat";
+import { GestureChat } from "@/components/chat/GestureChat";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
@@ -33,7 +33,7 @@ export default function ProjectPage() {
     reset 
   } = useVideoGeneration();
 
-  // Handle video generation request from EnhancedGestureChat
+  // Handle video generation request from GestureChat
   const handleGenerateVideo = async (text: string, actorId: string, actorVideoUrl: string, language: string) => {
     if (!user?.isAuthenticated || !user?.user) {
       alert('Please log in to generate videos');
@@ -82,7 +82,7 @@ export default function ProjectPage() {
         />
 
         {/* Enhanced Chat Input */}
-        <EnhancedGestureChat 
+        <GestureChat 
           projectId={stringProjectId} 
           onGenerateVideo={handleGenerateVideo}
           isGenerating={isGenerating}
