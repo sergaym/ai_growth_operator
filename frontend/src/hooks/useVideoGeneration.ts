@@ -3,6 +3,9 @@
 import { useState, useCallback, useRef, useEffect } from 'react';
 import { useToast } from '@/components/ui/use-toast';
 
+// API Configuration
+const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL;
+
 // Simplified types for easier use
 interface VideoGenerationRequest {
   text: string;
@@ -73,13 +76,17 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
   // Poll job status
   const pollJobStatus = useCallback(async (jobId: string) => {
     try {
-      const response = await fetch(`/api/v1/video-generation/status/${jobId}`);
+      const url = `${API_BASE_URL}/api/v1/video-generation/status/${jobId}`;
+      
+      const response = await fetch(url);
       
       if (!response.ok) {
-        throw new Error(`Failed to fetch status: ${response.status}`);
+        const errorText = await response.text();
+        throw new Error(`Failed to fetch status: ${response.status} - ${errorText}`);
       }
 
       const data = await response.json();
+      console.log('Status poll response:', data);
       
       // Update progress
       const newProgress = data.progress_percentage || 0;
@@ -93,6 +100,8 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
         // Success!
         let videoUrl = data.result.video_url;
         let audioUrl = data.result.audio_url;
+        
+        console.log('Job completed! Initial URLs:', { videoUrl, audioUrl });
         
         // Enhanced blob_url extraction - prioritize blob storage URLs
         // Check if we can get a better video URL from the lipsync step
@@ -110,7 +119,7 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
             console.log('Using blob_url from TTS step:', audioUrl);
           }
         }
-        
+                
         const result: VideoGenerationResult = {
           job_id: jobId,
           video_url: videoUrl,
@@ -134,6 +143,7 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
       } else if (data.status === 'error') {
         // Error occurred
         const errorMsg = data.error || 'Video generation failed';
+        console.error('Job failed:', errorMsg);
         setError(errorMsg);
         setIsGenerating(false);
         currentJobRef.current = null;
@@ -146,6 +156,7 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
 
       } else {
         // Still processing, continue polling
+        console.log(`Job still processing: ${data.status} (${newProgress}%)`);
         pollingRef.current = setTimeout(() => {
           if (currentJobRef.current === jobId) {
             pollJobStatus(jobId);
@@ -178,8 +189,10 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
       setIsGenerating(true);
 
       console.log('Starting video generation:', request);
+      
+      const url = `${API_BASE_URL}/api/v1/video-generation/generate`;
 
-      const response = await fetch('/api/v1/video-generation/generate', {
+      const response = await fetch(url, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
