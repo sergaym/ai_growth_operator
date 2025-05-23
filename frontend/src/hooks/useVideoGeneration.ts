@@ -278,3 +278,82 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
     poll();
   }, [onProgress, onStepComplete, pollingInterval, toast]);
 
+  // Stop polling and reset state
+  const cancelGeneration = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearTimeout(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+
+    setState(prev => ({
+      ...prev,
+      isGenerating: false,
+      error: 'Generation cancelled by user'
+    }));
+
+    toast({
+      title: 'Generation Cancelled',
+      description: 'Video generation has been cancelled.',
+    });
+  }, [toast]);
+
+  // Get detailed result for a completed job
+  const getJobResult = useCallback(async (jobId: string) => {
+    try {
+      const response = await fetch(`/api/v1/video-generation/result/${jobId}`);
+      
+      if (!response.ok) {
+        throw new Error(`Failed to fetch job result: ${response.status}`);
+      }
+
+      const result = await response.json();
+      return result;
+
+    } catch (err) {
+      console.error('Error fetching job result:', err);
+      throw err;
+    }
+  }, []);
+
+  // Clean up polling on unmount
+  const cleanup = useCallback(() => {
+    if (pollingTimerRef.current) {
+      clearTimeout(pollingTimerRef.current);
+      pollingTimerRef.current = null;
+    }
+  }, []);
+
+  // Reset state
+  const reset = useCallback(() => {
+    cleanup();
+    setState({
+      isGenerating: false,
+      currentJob: null,
+      currentStep: null,
+      progress: 0,
+      videoUrl: null,
+      audioUrl: null,
+      error: null,
+      steps: []
+    });
+  }, [cleanup]);
+
+  return {
+    // State
+    isGenerating: state.isGenerating,
+    currentJob: state.currentJob,
+    currentStep: state.currentStep,
+    progress: state.progress,
+    videoUrl: state.videoUrl,
+    audioUrl: state.audioUrl,
+    error: state.error,
+    steps: state.steps,
+
+    // Actions
+    generateVideo,
+    cancelGeneration,
+    getJobResult,
+    reset,
+    cleanup
+  };
+} 
