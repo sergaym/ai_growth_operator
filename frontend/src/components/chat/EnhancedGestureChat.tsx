@@ -177,3 +177,62 @@ export function EnhancedGestureChat({
     }
   };
 
+  const handleCloseActorDialog = () => {
+    try {
+      setIsActorDialogOpen(false);
+    } catch (error) {
+      console.error('Error closing actor dialog:', error);
+      setIsActorDialogOpen(false);
+    }
+  };
+
+  // Get tooltip message based on current state
+  const getTooltipMessage = () => {
+    if (isGenerating) {
+      return "Video generation in progress...";
+    }
+    if (!user?.isAuthenticated) {
+      return "Please log in to generate videos";
+    }
+    if (!selectedActor) {
+      return "Select an actor first";
+    }
+    if (!selectedActor.videoUrl) {
+      return "Selected actor doesn't have a video available";
+    }
+    if (!inputValue.trim()) {
+      return "Write a message to generate video";
+    }
+    return `Generate ${messageType === 'gesture' ? 'gesture' : 'talking'} video`;
+  };
+
+  const isButtonDisabled = !inputValue.trim() || isGenerating || !selectedActor || !user?.isAuthenticated;
+
+  return (
+    <>
+      <div className="w-full space-y-4">
+        {/* Getting Started Tips - Show for first-time users */}
+        {isFirstTime && showTips && !selectedActor && (
+          <Card className="bg-gradient-to-r from-blue-50 to-purple-50 border-blue-200">
+            <div className="p-4">
+              <div className="flex items-start gap-3">
+                <div className="w-10 h-10 bg-gradient-to-r from-blue-500 to-purple-500 rounded-xl flex items-center justify-center flex-shrink-0">
+                  <Lightbulb className="h-5 w-5 text-white" />
+                </div>
+                <div className="flex-1 space-y-2">
+                  <h4 className="font-medium text-slate-800">New to AI Videos? Here's how to get started:</h4>
+                  <div className="text-sm text-slate-600 space-y-1">
+                    <p>• <strong>Step 1:</strong> Click "Add actor" below to choose your AI presenter</p>
+                    <p>• <strong>Step 2:</strong> Type what you want them to say or do</p>
+                    <p>• <strong>Step 3:</strong> Watch your video generate in 2-3 minutes!</p>
+                  </div>
+                  <Badge variant="secondary" className="text-xs">
+                    <Zap className="h-3 w-3 mr-1" />
+                    Pro tip: Be specific for best results
+                  </Badge>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
+
