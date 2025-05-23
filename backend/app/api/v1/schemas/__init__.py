@@ -38,6 +38,14 @@ from .lipsync_schemas import (
     LipsyncDocumentationExample,
 )
 
+from .video_generation_schemas import (
+    VideoGenerationWorkflowRequest,
+    VideoGenerationWorkflowResponse,
+    WorkflowJobResponse,
+    WorkflowStepStatus,
+    VideoGenerationDocumentationExample,
+)
+
 __all__ = [
     # Text-to-Image schemas
     "AvatarParameters",
@@ -69,4 +77,11 @@ __all__ = [
     "LipsyncRequest",
     "LipsyncResponse",
     "LipsyncDocumentationExample",
+    
+    # Video Generation Workflow schemas
+    "VideoGenerationWorkflowRequest",
+    "VideoGenerationWorkflowResponse",
+    "WorkflowJobResponse",
+    "WorkflowStepStatus",
+    "VideoGenerationDocumentationExample",
 ] 

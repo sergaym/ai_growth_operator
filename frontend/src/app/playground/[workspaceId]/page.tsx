@@ -210,6 +210,7 @@ export default function WorkspaceProjects() {
           </div>
 
           {/* Featured Card */}
+          {/* Temporarily hidden API Demo section
           <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
             <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
               <div className="mb-4 sm:mb-0">
@@ -227,6 +228,7 @@ export default function WorkspaceProjects() {
               </Button>
             </CardContent>
           </Card>
+          */}
 
           {/* Project Grid */}
           {loading ? (

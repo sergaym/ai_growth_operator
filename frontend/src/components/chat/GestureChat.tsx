@@ -6,12 +6,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/components/ui/tooltip";
 import { SendButton } from './SendButton';
-import { UserPlus, Mic, Volume2 } from 'lucide-react';
+import { UserPlus, Volume2, Globe } from 'lucide-react';
 import { ActorSelectDialog } from './ActorSelectDialog';
+import { useAuth } from '@/hooks/useAuth';
 
 type MessageType = 'gesture' | 'talking';
-type SpeechType = 'tts' | 'stt';
 
 interface Actor {
   id: string;
@@ -20,26 +25,50 @@ interface Actor {
   tags: string[];
   hd?: boolean;
   pro?: boolean;
+  videoUrl?: string;
 }
 
 interface GestureChatProps {
   projectId?: string;
-  onVideoGenerated?: (url: string) => void;
+  onGenerateVideo?: (text: string, actorId: string, actorVideoUrl: string, language: string) => Promise<void>;
+  isGenerating?: boolean;
 }
 
-export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
+// Language options for TTS
+const LANGUAGES = [
+  { value: 'english', label: '🇺🇸 English' },
+  { value: 'spanish', label: '🇪🇸 Spanish' },
+  { value: 'french', label: '🇫🇷 French' },
+  { value: 'german', label: '🇩🇪 German' },
+  { value: 'italian', label: '🇮🇹 Italian' },
+  { value: 'portuguese', label: '🇵🇹 Portuguese' },
+  { value: 'polish', label: '🇵🇱 Polish' },
+  { value: 'turkish', label: '🇹🇷 Turkish' },
+  { value: 'russian', label: '🇷🇺 Russian' },
+  { value: 'dutch', label: '🇳🇱 Dutch' },
+  { value: 'czech', label: '🇨🇿 Czech' },
+  { value: 'arabic', label: '🇸🇦 Arabic' },
+  { value: 'chinese', label: '🇨🇳 Chinese' },
+  { value: 'japanese', label: '🇯🇵 Japanese' },
+  { value: 'korean', label: '🇰🇷 Korean' },
+];
+
+export function GestureChat({ projectId, onGenerateVideo, isGenerating: parentIsGenerating }: GestureChatProps) {
   const [inputValue, setInputValue] = useState('');
-  const [gesture, setGesture] = useState('');
-  const [messageType, setMessageType] = useState<MessageType>('gesture');
-  const [speechType, setSpeechType] = useState<SpeechType>('tts');
+  const [messageType, setMessageType] = useState<MessageType>('talking');
+  const [language, setLanguage] = useState('english');
   const [isActorDialogOpen, setIsActorDialogOpen] = useState(false);
   const [selectedActor, setSelectedActor] = useState<Actor | null>(null);
-  const [isGenerating, setIsGenerating] = useState(false);
+
+  // Auth context for user/workspace IDs
+  const { user } = useAuth();
+
+  // Use the parent's isGenerating state
+  const isGenerating = parentIsGenerating || false;
 
   // Add error boundary-like error handling
   useEffect(() => {
     const handleError = (event: ErrorEvent) => {
-      // Prevent video loading errors from breaking the UI
       if (event.error && event.error.message && event.error.message.includes('video')) {
         console.warn('Video loading error caught and handled:', event.error);
         event.preventDefault();
@@ -48,7 +77,6 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
     };
 
     const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      // Handle promise rejections that might come from video loading
       if (event.reason && typeof event.reason === 'string' && event.reason.includes('video')) {
         console.warn('Promise rejection caught and handled:', event.reason);
         event.preventDefault();
@@ -68,51 +96,38 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
   const handleSend = async () => {
     if (!inputValue.trim()) return;
 
-    try {
-      // Validate selected actor before sending
-      const validActor = selectedActor && selectedActor.id && selectedActor.name ? selectedActor : null;
-      
-      // Handle send message here
-              console.log('Sending:', { 
-          projectId,
-          type: messageType, 
-          speechType, 
-          gesture, 
-          message: inputValue, 
-          selectedActor: validActor
-        });
-      
-      // Simulate video generation
-      if (onVideoGenerated) {
-        setIsGenerating(true);
-        
-        try {
-          // Mock API call - replace with real API call
-          await new Promise((resolve) => {
-            setTimeout(() => {
-              // Example video URL - in a real app this would come from the API
-              const mockVideoUrl = 'https://storage.googleapis.com/gtv-videos-bucket/sample/BigBuckBunny.mp4';
-              onVideoGenerated(mockVideoUrl);
-              resolve(mockVideoUrl);
-            }, 2000);
-          });
-        } catch (error) {
-          console.error('Error generating video:', error);
-          // Could show user-friendly error message here
-        } finally {
-          setIsGenerating(false);
-        }
+    // Validate actor is selected
+    if (!selectedActor) {
+      alert('Please select an actor first');
+      return;
+    }
+
+    // Validate actor has video URL
+    if (!selectedActor.videoUrl) {
+      alert('Selected actor does not have a video available');
+      return;
+    }
+
+    // Validate user is authenticated
+    if (!user?.isAuthenticated || !user?.user) {
+      alert('Please log in to generate videos');
+      return;
+    }
+
+    // Call parent callback if provided
+    if (onGenerateVideo) {
+      try {
+        await onGenerateVideo(inputValue.trim(), selectedActor.id, selectedActor.videoUrl, language);
+        // Clear input after successful start
+        setInputValue('');
+      } catch (error) {
+        console.error('Failed to start video generation:', error);
       }
-      
-      setInputValue('');
-    } catch (error) {
-      console.error('Error in handleSend:', error);
-      setIsGenerating(false);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() && !isGenerating) {
       e.preventDefault();
       handleSend();
     }
@@ -128,7 +143,6 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
 
   const handleSelectActors = (actors: Actor[]) => {
     try {
-      // Take the first valid actor from the array
       const validActor = (actors || []).find(actor => {
         return actor && typeof actor === 'object' && actor.id && actor.name;
       });
@@ -146,17 +160,35 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
       setIsActorDialogOpen(false);
     } catch (error) {
       console.error('Error closing actor dialog:', error);
-      // Force close anyway
       setIsActorDialogOpen(false);
     }
   };
 
-  // Shared select styles for consistency
+  // Shared styles
   const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
-  const speechSelectStyles = "w-[190px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
-  
-  // Shared button styles with border matching select component
   const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
+
+  // Get tooltip message based on current state
+  const getTooltipMessage = () => {
+    if (isGenerating) {
+      return "Video generation in progress...";
+    }
+    if (!user?.isAuthenticated) {
+      return "Please log in to generate videos";
+    }
+    if (!selectedActor) {
+      return "Select an actor first";
+    }
+    if (!selectedActor.videoUrl) {
+      return "Selected actor doesn't have a video available";
+    }
+    if (!inputValue.trim()) {
+      return "Write a message to generate video";
+    }
+    return `Generate ${messageType === 'gesture' ? 'gesture' : 'talking'} video`;
+  };
+
+  const isButtonDisabled = !inputValue.trim() || isGenerating || !selectedActor || !user?.isAuthenticated;
 
   return (
     <>
@@ -206,7 +238,16 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
 
           {/* Top Input Area */}
           <div className="p-3 space-y-2">
-            {/* Message Type Selector */}
+            {/* User Authentication Status */}
+            {!user?.isAuthenticated && (
+              <div className="mb-2 p-2 bg-yellow-50 border border-yellow-200 rounded-lg">
+                <p className="text-xs text-yellow-700">
+                  ⚠️ Please log in to generate videos
+                </p>
+              </div>
+            )}
+
+            {/* Message Type and Language Selectors */}
             <div className="flex items-center gap-2">
               <Select value={messageType} onValueChange={(value) => setMessageType(value as MessageType)}>
                 <SelectTrigger className={selectTriggerStyles}>
@@ -223,7 +264,28 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
                   <SelectItem value="talking">🗣️ Talking Actors</SelectItem>
                 </SelectContent>
               </Select>
+
+              {messageType === 'talking' && (
+                <Select value={language} onValueChange={setLanguage}>
+                  <SelectTrigger className={selectTriggerStyles}>
+                    <SelectValue>
+                      <span className="flex items-center gap-1.5">
+                        <Globe className="h-4 w-4" />
+                        {LANGUAGES.find(l => l.value === language)?.label || 'Language'}
+                      </span>
+                    </SelectValue>
+                  </SelectTrigger>
+                  <SelectContent>
+                    {LANGUAGES.map((lang) => (
+                      <SelectItem key={lang.value} value={lang.value}>
+                        {lang.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              )}
             </div>
+
             <div className="relative flex items-start gap-2 min-h-[60px]">
               <textarea
                 value={inputValue}
@@ -234,54 +296,34 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
                   : "Write dialogue for the actor to speak"}
                 className="w-full text-sm text-zinc-900 bg-transparent placeholder:text-zinc-400 focus:outline-none resize-none pr-10"
                 rows={2}
+                disabled={isGenerating}
               />
-              <SendButton
-                onClick={handleSend}
-                disabled={!inputValue.trim() || isGenerating}
-                loading={isGenerating}
-                className="absolute bottom-0 right-0"
-              />
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div className="absolute bottom-0 right-0">
+                    <SendButton
+                      onClick={handleSend}
+                      disabled={isButtonDisabled}
+                      loading={isGenerating}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent side="left" sideOffset={8}>
+                  <p>{getTooltipMessage()}</p>
+                </TooltipContent>
+              </Tooltip>
             </div>
           </div>
 
           {/* Bottom Actions */}
           <div className="flex items-center justify-between px-3 py-2 border-t border-zinc-100 bg-zinc-50/50">
             <div className="flex items-center gap-2">
-              {messageType === 'talking' ? (
-                <>
-                  <Select value={speechType} onValueChange={(value) => setSpeechType(value as SpeechType)}>
-                    <SelectTrigger className={speechSelectStyles}>
-                      <SelectValue>
-                        {speechType === 'tts' ? (
-                          <span className="flex items-center gap-1.5">
-                            <Volume2 className="h-4 w-4" />
-                            Text to Speech
-                          </span>
-                        ) : (
-                          <span className="flex items-center gap-1.5">
-                            <Mic className="h-4 w-4" />
-                            Speech to Speech
-                          </span>
-                        )}
-                      </SelectValue>
-                    </SelectTrigger>
-                    <SelectContent>
-                      <SelectItem value="tts">
-                        <span className="flex items-center gap-1.5">
-                          <Volume2 className="h-4 w-4" />
-                          Text to Speech
-                        </span>
-                      </SelectItem>
-                      <SelectItem value="stt">
-                        <span className="flex items-center gap-1.5">
-                          <Mic className="h-4 w-4" />
-                          Speech to Speech
-                        </span>
-                      </SelectItem>
-                    </SelectContent>
-                  </Select>
-                </>
-              ) : null}
+              {messageType === 'talking' && (
+                <div className="flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 bg-zinc-50/50 border border-zinc-100 rounded-md">
+                  <Volume2 className="h-4 w-4" />
+                  Text to Speech
+                </div>
+              )}
               <button 
                 onClick={handleAddActors}
                 className={buttonStyles}
@@ -295,7 +337,7 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
         </div>
       </div>
 
-      {/* Wrap ActorSelectDialog in error boundary-like handling */}
+      {/* Actor Select Dialog */}
       {isActorDialogOpen && (
         <ActorSelectDialog 
           isOpen={isActorDialogOpen}
