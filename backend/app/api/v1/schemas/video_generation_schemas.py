@@ -50,3 +50,49 @@ class VideoGenerationWorkflowRequest(BaseModel):
     user_id: Optional[str] = Field(None, description="User ID for tracking")
     workspace_id: Optional[str] = Field(None, description="Workspace ID for organization")
 
+
+class WorkflowJobResponse(BaseModel):
+    """Response containing job ID and status for workflow tracking."""
+    job_id: str = Field(..., description="Unique identifier for the workflow job")
+    status: WorkflowStatus = Field(..., description="Current status of the workflow")
+    created_at: float = Field(..., description="Timestamp when job was created")
+    updated_at: float = Field(..., description="Timestamp when job was last updated")
+    steps: List[WorkflowStepStatus] = Field(default_factory=list, description="Status of individual workflow steps")
+    current_step: Optional[str] = Field(None, description="Name of the currently executing step")
+    progress_percentage: Optional[int] = Field(None, description="Overall progress percentage (0-100)")
+    estimated_completion: Optional[float] = Field(None, description="Estimated completion timestamp")
+    
+    # Results (populated when completed)
+    result: Optional[Dict[str, Any]] = Field(None, description="Final result when workflow completes")
+    error: Optional[str] = Field(None, description="Error message if workflow failed")
+
+
+class VideoGenerationWorkflowResponse(BaseModel):
+    """Final response when video generation workflow is complete."""
+    job_id: str = Field(..., description="Job ID that generated this result")
+    status: WorkflowStatus = Field(..., description="Final status of the workflow")
+    
+    # Input context
+    text: str = Field(..., description="Original text that was converted")
+    actor_id: str = Field(..., description="Actor ID used")
+    project_id: Optional[str] = Field(None, description="Project ID if provided")
+    
+    # Generated assets
+    audio_url: Optional[str] = Field(None, description="URL of the generated audio")
+    video_url: str = Field(..., description="URL of the final lip-synced video")
+    thumbnail_url: Optional[str] = Field(None, description="URL of video thumbnail if available")
+    
+    # Metadata
+    audio_duration: Optional[float] = Field(None, description="Duration of audio in seconds")
+    video_duration: Optional[float] = Field(None, description="Duration of video in seconds")
+    file_size: Optional[int] = Field(None, description="Size of the final video file in bytes")
+    processing_time: Optional[float] = Field(None, description="Total processing time in seconds")
+    
+    # Timestamps
+    created_at: float = Field(..., description="When the job was created")
+    completed_at: float = Field(..., description="When the job was completed")
+    
+    # Steps summary
+    steps: List[WorkflowStepStatus] = Field(..., description="Summary of all workflow steps")
+
+
