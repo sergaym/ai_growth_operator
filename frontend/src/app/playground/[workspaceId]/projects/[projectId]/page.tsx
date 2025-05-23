@@ -63,8 +63,7 @@ export default function ProjectPage() {
 
   return (
     <PlaygroundLayout
-      title="AI Video Generator"
-      description="Create engaging videos with AI actors"
+      title=""
       currentWorkspace={workspace}
     >
       <div className="max-w-5xl mx-auto space-y-6">
