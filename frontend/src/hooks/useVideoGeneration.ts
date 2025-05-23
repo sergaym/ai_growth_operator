@@ -57,3 +57,20 @@ interface VideoGenerationJob {
   error?: string;
 }
 
+interface UseVideoGenerationOptions {
+  pollingInterval?: number; // in milliseconds
+  onProgress?: (progress: number, currentStep?: string) => void;
+  onStepComplete?: (step: WorkflowStep) => void;
+}
+
+interface UseVideoGenerationState {
+  isGenerating: boolean;
+  currentJob: VideoGenerationJob | null;
+  currentStep: string | null;
+  progress: number;
+  videoUrl: string | null;
+  audioUrl: string | null;
+  error: string | null;
+  steps: WorkflowStep[];
+}
+
