@@ -146,29 +146,36 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
       });
     }
   }, [onProgress, onComplete, pollingInterval, toast]);
+
+  // Main generation function
   const generateVideo = useCallback(async (request: VideoGenerationRequest) => {
     try {
-      setState(prev => ({
-        ...prev,
-        isGenerating: true,
-        currentJob: null,
-        currentStep: null,
-        progress: 0,
-        videoUrl: null,
-        audioUrl: null,
-        error: null,
-        steps: []
-      }));
+      // Reset previous state
+      setError(null);
+      setResult(null);
+      setProgress(0);
+      setCurrentStep(null);
+      setIsGenerating(true);
 
-      // Start the workflow
-      console.log('Starting video generation workflow:', request);
-      
+      console.log('Starting video generation:', request);
+
       const response = await fetch('/api/v1/video-generation/generate', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(request),
+        body: JSON.stringify({
+          text: request.text,
+          actor_id: request.actor_id,
+          actor_video_url: request.actor_video_url,
+          language: request.language || 'english',
+          voice_preset: request.voice_preset,
+          voice_id: request.voice_id,
+          project_id: request.project_id,
+          user_id: request.user_id,
+          workspace_id: request.workspace_id,
+          save_result: true
+        }),
       });
 
       if (!response.ok) {
@@ -176,171 +183,36 @@ export function useVideoGeneration(options: UseVideoGenerationOptions = {}) {
         throw new Error(`HTTP ${response.status}: ${errorText}`);
       }
 
-      const jobData: VideoGenerationJob = await response.json();
-      console.log('Video generation job started:', jobData);
+      const data = await response.json();
+      console.log('Job started:', data);
 
-      setState(prev => ({
-        ...prev,
-        currentJob: jobData,
-        currentStep: jobData.current_step || null,
-        progress: jobData.progress_percentage || 0,
-        steps: jobData.steps || []
-      }));
+      // Store job ID and start polling
+      currentJobRef.current = data.job_id;
+      setCurrentStep(data.current_step);
+      setProgress(data.progress_percentage || 0);
 
-      // Start polling for status updates
-      startPolling(jobData.job_id);
+      // Start polling for updates
+      pollJobStatus(data.job_id);
 
-      return jobData;
+      return data.job_id;
 
     } catch (err) {
-      const message = err instanceof Error ? err.message : 'Failed to start video generation';
-      console.error('Error starting video generation:', message);
+      const errorMsg = err instanceof Error ? err.message : 'Failed to start generation';
+      console.error('Generation error:', errorMsg);
       
-      setState(prev => ({
-        ...prev,
-        isGenerating: false,
-        error: message
-      }));
+      setError(errorMsg);
+      setIsGenerating(false);
+      currentJobRef.current = null;
 
       toast({
-        title: 'Error',
-        description: message,
+        title: "Generation Failed",
+        description: errorMsg,
         variant: 'destructive',
       });
 
       throw err;
     }
-  }, [toast]);
-
-  // Start polling for job status
-  const startPolling = useCallback((jobId: string) => {
-    const poll = async () => {
-      try {
-        const response = await fetch(`/api/v1/video-generation/status/${jobId}`);
-        
-        if (!response.ok) {
-          throw new Error(`Failed to fetch job status: ${response.status}`);
-        }
-
-        const jobData: VideoGenerationJob = await response.json();
-        console.log('Job status update:', jobData);
-
-        setState(prev => {
-          // Check for new completed steps
-          const newSteps = jobData.steps || [];
-          const prevSteps = prev.steps || [];
-          
-          newSteps.forEach(step => {
-            const prevStep = prevSteps.find(s => s.step === step.step);
-            if (!prevStep || (prevStep.status !== 'completed' && step.status === 'completed')) {
-              onStepComplete?.(step);
-            }
-          });
-
-          return {
-            ...prev,
-            currentJob: jobData,
-            currentStep: jobData.current_step || null,
-            progress: jobData.progress_percentage || prev.progress,
-            steps: newSteps,
-            error: jobData.error || null
-          };
-        });
-
-        // Call progress callback
-        if (onProgress && jobData.progress_percentage !== undefined) {
-          onProgress(jobData.progress_percentage, jobData.current_step);
-        }
-
-        // Check if job is complete
-        if (jobData.status === 'completed') {
-          console.log('Video generation completed!', jobData.result);
-          
-          setState(prev => ({
-            ...prev,
-            isGenerating: false,
-            videoUrl: jobData.result?.video_url || null,
-            audioUrl: jobData.result?.audio_url || null,
-            progress: 100
-          }));
-
-          // Stop polling
-          if (pollingTimerRef.current) {
-            clearTimeout(pollingTimerRef.current);
-            pollingTimerRef.current = null;
-          }
-
-          toast({
-            title: 'Video Generated!',
-            description: 'Your lip-synced video has been generated successfully.',
-          });
-
-        } else if (jobData.status === 'error') {
-          console.error('Video generation failed:', jobData.error);
-          
-          setState(prev => ({
-            ...prev,
-            isGenerating: false,
-            error: jobData.error || 'Video generation failed'
-          }));
-
-          // Stop polling
-          if (pollingTimerRef.current) {
-            clearTimeout(pollingTimerRef.current);
-            pollingTimerRef.current = null;
-          }
-
-          toast({
-            title: 'Generation Failed',
-            description: jobData.error || 'Video generation failed',
-            variant: 'destructive',
-          });
-
-        } else {
-          // Continue polling
-          pollingTimerRef.current = setTimeout(poll, pollingInterval);
-        }
-
-      } catch (err) {
-        console.error('Error polling job status:', err);
-        
-        setState(prev => ({
-          ...prev,
-          isGenerating: false,
-          error: err instanceof Error ? err.message : 'Failed to check job status'
-        }));
-
-        // Stop polling on error
-        if (pollingTimerRef.current) {
-          clearTimeout(pollingTimerRef.current);
-          pollingTimerRef.current = null;
-        }
-
-        toast({
-          title: 'Error',
-          description: 'Failed to check generation status',
-          variant: 'destructive',
-        });
-      }
-    };
-
-    // Start first poll immediately
-    poll();
-  }, [onProgress, onStepComplete, pollingInterval, toast]);
-
-  // Stop polling and reset state
-  const cancelGeneration = useCallback(() => {
-    if (pollingTimerRef.current) {
-      clearTimeout(pollingTimerRef.current);
-      pollingTimerRef.current = null;
-    }
-
-    setState(prev => ({
-      ...prev,
-      isGenerating: false,
-      error: 'Generation cancelled by user'
-    }));
-
+  }, [pollJobStatus, toast]);
     toast({
       title: 'Generation Cancelled',
       description: 'Video generation has been cancelled.',
