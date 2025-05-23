@@ -145,15 +145,17 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
       console.log('Sending video generation request:', requestData);
       
       await generateVideo(requestData);
+
+      // Clear input after successful start
       setInputValue('');
+      
     } catch (error) {
-      console.error('Error in handleSend:', error);
-      setIsGenerating(false);
+      console.error('Failed to start video generation:', error);
     }
   };
 
   const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim()) {
+    if (e.key === 'Enter' && !e.shiftKey && inputValue.trim() && !isGenerating) {
       e.preventDefault();
       handleSend();
     }
@@ -169,7 +171,6 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
 
   const handleSelectActors = (actors: Actor[]) => {
     try {
-      // Take the first valid actor from the array
       const validActor = (actors || []).find(actor => {
         return actor && typeof actor === 'object' && actor.id && actor.name;
       });
@@ -187,16 +188,30 @@ export function GestureChat({ projectId, onVideoGenerated }: GestureChatProps) {
       setIsActorDialogOpen(false);
     } catch (error) {
       console.error('Error closing actor dialog:', error);
-      // Force close anyway
       setIsActorDialogOpen(false);
     }
   };
 
-  // Shared select styles for consistency
+  const handlePlayVideo = () => {
+    if (result?.video_url) {
+      window.open(result.video_url, '_blank');
+    }
+  };
+
+  const handleDownloadVideo = () => {
+    if (result?.video_url) {
+      const a = document.createElement('a');
+      a.href = result.video_url;
+      a.download = `generated-video-${Date.now()}.mp4`;
+      document.body.appendChild(a);
+      a.click();
+      document.body.removeChild(a);
+    }
+  };
+
+  // Shared styles
   const selectTriggerStyles = "w-[160px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
   const speechSelectStyles = "w-[190px] h-9 border border-zinc-100 bg-zinc-50/50 text-sm text-zinc-600 px-3 py-1";
-  
-  // Shared button styles with border matching select component
   const buttonStyles = "inline-flex items-center gap-1.5 text-sm text-zinc-600 h-9 px-3 hover:bg-zinc-100 rounded-md transition-colors border border-zinc-100 bg-zinc-50/50";
 
   return (
