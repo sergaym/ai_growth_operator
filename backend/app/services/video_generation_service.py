@@ -239,3 +239,46 @@ class VideoGenerationWorkflowService:
             "result": None
         }
     
+    def _add_step(self, job_id: str, step: Dict[str, Any]):
+        """Add a new step to the job record."""
+        if job_id in self.job_store:
+            self.job_store[job_id]["steps"].append(step)
+            self.job_store[job_id]["updated_at"] = time.time()
+    
+    def _update_step(self, job_id: str, step_name: str, step_data: Dict[str, Any]):
+        """Update an existing step in the job record."""
+        if job_id in self.job_store:
+            steps = self.job_store[job_id]["steps"]
+            for i, step in enumerate(steps):
+                if step.get("step") == step_name:
+                    steps[i].update(step_data)
+                    break
+            self.job_store[job_id]["updated_at"] = time.time()
+    
+    def _update_job_status(self, job_id: str, updates: Dict[str, Any]):
+        """Update job status and metadata."""
+        if job_id in self.job_store:
+            self.job_store[job_id].update(updates)
+            self.job_store[job_id]["updated_at"] = time.time()
+    
+    def _build_final_result(self, request: VideoGenerationWorkflowRequest, 
+                          audio_result: Dict[str, Any], lipsync_result: Dict[str, Any]) -> Dict[str, Any]:
+        """Build the final workflow result."""
+        job = self.job_store.get(request.__dict__.get("job_id", ""))
+        
+        return {
+            "text": request.text,
+            "actor_id": request.actor_id,
+            "project_id": request.project_id,
+            "audio_url": audio_result.get("blob_url") or audio_result.get("file_name"),
+            "video_url": lipsync_result.get("video_url"),
+            "thumbnail_url": lipsync_result.get("thumbnail_url"),
+            "audio_duration": audio_result.get("duration"),
+            "video_duration": lipsync_result.get("duration"),
+            "file_size": lipsync_result.get("file_size"),
+            "processing_time": time.time() - (job.get("created_at", time.time()) if job else time.time())
+        }
+
+
+# Global service instance
+video_generation_service = VideoGenerationWorkflowService() 
