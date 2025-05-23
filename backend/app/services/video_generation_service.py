@@ -266,18 +266,46 @@ class VideoGenerationWorkflowService:
         """Build the final workflow result."""
         job = self.job_store.get(request.__dict__.get("job_id", ""))
         
-        return {
+        # Enhanced blob_url extraction with explicit logging
+        logger.info(f"Building final result. Lipsync result keys: {list(lipsync_result.keys())}")
+        logger.info(f"Lipsync result blob_url: {lipsync_result.get('blob_url')}")
+        logger.info(f"Lipsync result video_url: {lipsync_result.get('video_url')}")
+        
+        # Explicitly prioritize blob_url for video
+        video_url = None
+        if lipsync_result.get("blob_url"):
+            video_url = lipsync_result["blob_url"]
+            logger.info(f"Using blob_url for video: {video_url}")
+        elif lipsync_result.get("video_url"):
+            video_url = lipsync_result["video_url"]
+            logger.info(f"Fallback to video_url: {video_url}")
+        else:
+            logger.warning("No video URL found in lipsync result")
+        
+        # Enhanced blob_url extraction for audio
+        audio_url = None
+        if audio_result.get("blob_url"):
+            audio_url = audio_result["blob_url"]
+            logger.info(f"Using blob_url for audio: {audio_url}")
+        elif audio_result.get("file_name"):
+            audio_url = f"/api/v1/text-to-speech/audio/{audio_result['file_name']}"
+            logger.info(f"Using file_name for audio: {audio_url}")
+        else:
+            logger.warning("No audio URL found in audio result")
+        
+        final_result = {
             "text": request.text,
             "actor_id": request.actor_id,
             "project_id": request.project_id,
-            "audio_url": audio_result.get("blob_url") or audio_result.get("file_name"),
-            "video_url": lipsync_result.get("video_url"),
+            "audio_url": audio_url,
+            "video_url": video_url,
             "thumbnail_url": lipsync_result.get("thumbnail_url"),
             "audio_duration": audio_result.get("duration"),
             "video_duration": lipsync_result.get("duration"),
             "file_size": lipsync_result.get("file_size"),
             "processing_time": time.time() - (job.get("created_at", time.time()) if job else time.time())
         }
+        return final_result
 
 
 # Global service instance
