@@ -184,7 +184,8 @@ export default function ProjectPage() {
         {/* Chat Input */}
         <GestureChat 
           projectId={stringProjectId} 
-          onVideoGenerated={handleVideoGenerated}
+          onGenerateVideo={handleGenerateVideo}
+          isGenerating={isGenerating}
         />
       </div>
     </PlaygroundLayout>
