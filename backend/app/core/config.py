@@ -17,6 +17,8 @@ class Settings(BaseSettings):
     PROJECT_NAME: str = "AI Growth Operator API"
     PROJECT_VERSION: str = "1.0.0"
     PROJECT_DESCRIPTION: str = "Backend API for AI-powered marketing campaign generation"
+
+    FRONTEND_URL: Optional[str] = os.getenv("FRONTEND_URL")
     
     # Security / Auth
     SECRET_KEY: Optional[str] = os.getenv("SECRET_KEY")
@@ -59,6 +61,31 @@ class Settings(BaseSettings):
     BLOB_STORAGE_ENDPOINT: Optional[str] = os.getenv("BLOB_STORAGE_ENDPOINT")
     BLOB_STORAGE_BUCKET: str = os.getenv("BLOB_STORAGE_BUCKET")
     BLOB_STORAGE_REGION: str = os.getenv("BLOB_STORAGE_REGION")
+    
+    # Stripe Configuration
+    # API key used for server-side Stripe API calls (use secret key, not publishable key)
+    STRIPE_API_KEY: Optional[str] = os.getenv("STRIPE_API_KEY")
+    
+    # Webhook secret for verifying Stripe webhook events
+    # Generate this in the Stripe Dashboard > Developers > Webhooks
+    STRIPE_WEBHOOK_SECRET: Optional[str] = os.getenv("STRIPE_WEBHOOK_SECRET")
+        
+    # Public key for client-side Stripe integration (Elements, Checkout, etc.)
+    STRIPE_PUBLISHABLE_KEY: Optional[str] = os.getenv("STRIPE_PUBLISHABLE_KEY")
+    
+    # URL to redirect after successful Stripe checkout
+    # Should point to a success page or back to the billing section
+    STRIPE_SUCCESS_URL: str = os.getenv(
+        "STRIPE_SUCCESS_URL", 
+        "http://localhost:3000/playground?stripe_session_id={CHECKOUT_SESSION_ID}"
+    )
+    
+    # URL to redirect after cancelled Stripe checkout
+    # Should return to pricing or subscription selection page
+    STRIPE_CANCEL_URL: str = os.getenv(
+        "STRIPE_CANCEL_URL", 
+        "http://localhost:3000/playground?stripe_payment_status=cancelled"
+    )
     
     @validator("DATABASE_URL", pre=True)
     def validate_database_url(cls, v: Optional[str]) -> Optional[str]:

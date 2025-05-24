@@ -19,7 +19,7 @@ export function SignupStepComplete({ data, onFinish, onBack }: SignupStepComplet
 
   const handleContinue = () => {
     onFinish();
-    router.push('/signup/subscription');
+    router.push('/pricing?from=signup');
   };
 
   return (
