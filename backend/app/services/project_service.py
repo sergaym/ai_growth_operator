@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func, and_, or_
 
 from app.db.database import get_db
-from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo, ProjectStatus
+from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo
 from app.api.v1.schemas import (
     ProjectCreateRequest,
     ProjectUpdateRequest,
@@ -19,7 +19,8 @@ from app.api.v1.schemas import (
     ProjectAssetSummary,
     ProjectAssetResponse,
     ProjectAssetsResponse,
-    ProjectStatsResponse
+    ProjectStatsResponse,
+    ProjectStatus
 )
 
 logger = logging.getLogger(__name__)
