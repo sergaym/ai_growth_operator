@@ -266,3 +266,44 @@ class ProjectService:
             db.rollback()
             self.logger.error(f"Error updating project {project_id}: {str(e)}")
             raise
+    
+    async def delete_project(
+        self,
+        project_id: str,
+        workspace_id: int,
+        db: Session
+    ) -> bool:
+        """
+        Delete a project and optionally its assets.
+        
+        Args:
+            project_id: Project ID
+            workspace_id: Workspace ID
+            db: Database session
+            
+        Returns:
+            True if deleted, False if not found
+        """
+        try:
+            project = db.query(Project).filter(
+                and_(
+                    Project.id == project_id,
+                    Project.workspace_id == workspace_id
+                )
+            ).first()
+            
+            if not project:
+                return False
+            
+            # Note: We're not deleting associated assets by default
+            # This could be a soft delete or provide option to cascade
+            db.delete(project)
+            db.commit()
+            
+            self.logger.info(f"Deleted project {project_id}")
+            return True
+            
+        except Exception as e:
+            db.rollback()
+            self.logger.error(f"Error deleting project {project_id}: {str(e)}")
+            raise
