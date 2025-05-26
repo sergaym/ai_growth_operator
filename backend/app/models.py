@@ -82,9 +82,9 @@ class BaseAsset(Base):
     local_url = Column(String)
     blob_url = Column(String)
     
-    # Relationship placeholders (nullable for now)
-    user_id = Column(String, nullable=True)
-    workspace_id = Column(String, nullable=True)
+    # Relationship placeholders (with proper foreign key constraints)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=True)
     
     # Status and metadata
     status = Column(String, default="completed")
@@ -173,7 +173,7 @@ class LipsyncVideo(BaseAsset):
 
 class UserWorkspace(Base):
     __tablename__ = "user_workspaces"
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    user_id = Column(String, ForeignKey("users.id"), primary_key=True)
     workspace_id = Column(String, ForeignKey("workspaces.id"), primary_key=True)
     role = Column(String(50), nullable=False, default="member")
     active = Column(Boolean, nullable=False, default=False)
@@ -190,7 +190,7 @@ class Workspace(Base):
     id = Column(String, primary_key=True, index=True, default=generate_uuid)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     
@@ -228,7 +228,7 @@ class Workspace(Base):
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=generate_uuid)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
@@ -320,7 +320,7 @@ class Project(Base):
     name = Column(String(255), nullable=False)
     description = Column(Text, nullable=True)
     workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
-    created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    created_by_user_id = Column(String, ForeignKey("users.id"), nullable=False)
     status = Column(String(20), default=ProjectStatus.DRAFT.value, nullable=False)
     thumbnail_url = Column(String, nullable=True)
     
@@ -423,7 +423,7 @@ class PaymentMethod(Base):
     __tablename__ = "payment_methods"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
     
     # Card details (stored in a PCI-compliant way)
