@@ -382,3 +382,78 @@ class ProjectService:
         except Exception as e:
             self.logger.error(f"Error getting assets for project {project_id}: {str(e)}")
             raise
+    
+    async def get_workspace_stats(
+        self,
+        workspace_id: int,
+        db: Session = None
+    ) -> ProjectStatsResponse:
+        """
+        Get statistics for all projects in a workspace.
+        
+        Args:
+            workspace_id: Workspace ID
+            db: Database session
+            
+        Returns:
+            Project statistics
+        """
+        try:
+            if db is None:
+                db = next(get_db())
+            
+            # Total projects
+            total_projects = db.query(Project).filter(Project.workspace_id == workspace_id).count()
+            
+            # Projects by status
+            status_counts = db.query(
+                Project.status,
+                func.count(Project.id)
+            ).filter(
+                Project.workspace_id == workspace_id
+            ).group_by(Project.status).all()
+            
+            projects_by_status = {status: count for status, count in status_counts}
+            
+            # Total assets across all projects
+            project_ids = [p.id for p in db.query(Project.id).filter(Project.workspace_id == workspace_id)]
+            
+            total_assets = 0
+            if project_ids:
+                total_assets += db.query(Image).filter(Image.project_id.in_(project_ids)).count()
+                total_assets += db.query(Video).filter(Video.project_id.in_(project_ids)).count()
+                total_assets += db.query(Audio).filter(Audio.project_id.in_(project_ids)).count()
+                total_assets += db.query(LipsyncVideo).filter(LipsyncVideo.project_id.in_(project_ids)).count()
+            
+            # Recent activity (last 7 days)
+            week_ago = datetime.utcnow() - timedelta(days=7)
+            recent_activity_count = db.query(Project).filter(
+                and_(
+                    Project.workspace_id == workspace_id,
+                    Project.last_activity_at >= week_ago
+                )
+            ).count()
+            
+            # Most active projects (last 30 days)
+            month_ago = datetime.utcnow() - timedelta(days=30)
+            most_active_projects_orm = db.query(Project).filter(
+                and_(
+                    Project.workspace_id == workspace_id,
+                    Project.last_activity_at >= month_ago
+                )
+            ).order_by(desc(Project.last_activity_at)).limit(5).all()
+            
+            most_active_projects = [ProjectResponse.from_orm(p) for p in most_active_projects_orm]
+            
+            return ProjectStatsResponse(
+                total_projects=total_projects,
+                projects_by_status=projects_by_status,
+                total_assets=total_assets,
+                recent_activity_count=recent_activity_count,
+                most_active_projects=most_active_projects
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error getting workspace stats for {workspace_id}: {str(e)}")
+            raise
+    
