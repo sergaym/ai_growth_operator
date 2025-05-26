@@ -211,3 +211,58 @@ class ProjectService:
             self.logger.error(f"Error listing projects for workspace {workspace_id}: {str(e)}")
             raise
     
+    async def update_project(
+        self,
+        project_id: str,
+        workspace_id: int,
+        request: ProjectUpdateRequest,
+        db: Session
+    ) -> Optional[ProjectResponse]:
+        """
+        Update a project.
+        
+        Args:
+            project_id: Project ID
+            workspace_id: Workspace ID
+            request: Update request
+            db: Database session
+            
+        Returns:
+            Updated project response or None if not found
+        """
+        try:
+            project = db.query(Project).filter(
+                and_(
+                    Project.id == project_id,
+                    Project.workspace_id == workspace_id
+                )
+            ).first()
+            
+            if not project:
+                return None
+            
+            # Update fields
+            if request.name is not None:
+                project.name = request.name
+            if request.description is not None:
+                project.description = request.description
+            if request.status is not None:
+                project.status = request.status.value
+            if request.thumbnail_url is not None:
+                project.thumbnail_url = request.thumbnail_url
+            if request.metadata is not None:
+                project.metadata_json = request.metadata
+            
+            project.update_activity()
+            
+            db.commit()
+            db.refresh(project)
+            
+            self.logger.info(f"Updated project {project_id}")
+            
+            return ProjectResponse.from_orm(project)
+            
+        except Exception as e:
+            db.rollback()
+            self.logger.error(f"Error updating project {project_id}: {str(e)}")
+            raise
