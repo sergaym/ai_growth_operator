@@ -15,7 +15,6 @@ from app.api.v1.schemas import (
     ProjectListResponse,
     ProjectAssetsResponse,
     ProjectStatsResponse,
-    ProjectDocumentationExample
 )
 from app.services.project_service import project_service
 from app.db.database import get_db
