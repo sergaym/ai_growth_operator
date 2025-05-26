@@ -8,6 +8,7 @@ import {
   Send,
   SquareTerminal,
   Settings,
+  CreditCard,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -85,19 +86,24 @@ export function AppSidebar({ ...props }: AppSidebarProps): React.ReactNode {
         ],
       },
       {
+        name: "Billing",
+        url: `/playground/${currentWorkspaceId}/billing`,
+        icon: CreditCard,
+        items: [
+          {
+            title: "Subscription",
+            url: `/playground/${currentWorkspaceId}/billing`,
+          },
+          {
+            title: "Invoices",
+            url: `/playground/${currentWorkspaceId}/billing/invoices`,
+          }
+        ],
+      },
+      {
         name: "Settings",
         url: `/playground/${currentWorkspaceId}/settings`,
         icon: Settings,
-        items: [
-          {
-            title: "Overview",
-            url: `/playground/${currentWorkspaceId}/settings`,
-          },
-          {
-            title: "Account",
-            url: `/playground/${currentWorkspaceId}/settings/account`,
-          }
-        ],
       },
       {
         name: "Avatars",

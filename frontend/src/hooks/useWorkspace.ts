@@ -1,14 +1,13 @@
 "use client";
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 import { apiClient } from '../services/apiClient';
 
-interface Workspace {
+export interface Workspace {
   id: string;
   name: string;
-  // Add other workspace fields as needed
 }
 
 export function useWorkspaces() {
@@ -20,41 +19,45 @@ export function useWorkspaces() {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
 
-  useEffect(() => {
+  const fetchWorkspaces = useCallback(async () => {
     if (authLoading) {
       return;
     }
 
     if (!authState.isAuthenticated) {
-      setError('Not authenticated');
+      setError('User not authenticated. Please log in.');
+      setLoading(false); 
       return;
     }
 
-    const fetchWorkspaces = async () => {
-      try {
-        // Use apiClient for automatic token refresh
-        const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/`);
-        
-        if (Array.isArray(data)) {
-          setWorkspaces(data);
-        } else {
-          setError('Invalid workspace data received');
-        }
-      } catch (err) {
-        setError('Failed to fetch workspaces');
-        console.error('Error fetching workspaces:', err);
-      } finally {
-        setLoading(false);
+    setLoading(true); 
+    try {
+      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/`);
+      
+      if (Array.isArray(data)) {
+        setWorkspaces(data);
+        setError(null); 
+      } else {
+        console.error('Invalid workspace data received:', data);
+        setError('Received invalid data format for workspaces.');
       }
-    };
+    } catch (err) {
+      console.error('Error fetching workspaces:', err);
+      setError('Failed to fetch workspaces. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  }, [authState, authLoading]); 
 
+  useEffect(() => {
     fetchWorkspaces();
-  }, [authState, authLoading]);
+  }, [fetchWorkspaces]); 
 
   return {
     workspaces,
     loading,
-    error
+    error,
+    refetchWorkspaces: fetchWorkspaces 
   };
 }
 

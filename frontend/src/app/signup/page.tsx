@@ -102,7 +102,7 @@ function SignupPageContent() {
       if (callbackUrl) {
         router.push(callbackUrl);
       } else {
-        router.push('/signup/subscription');
+        router.push('/pricing?from=signup');
       }
     } catch (error) {
       console.error('Signup error:', error);

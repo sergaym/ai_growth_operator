@@ -12,6 +12,7 @@ from app.api.v1.endpoints.lipsync import router as lipsync_router
 from app.api.v1.endpoints.video_generation import router as video_generation_router
 from app.api.v1.endpoints.auth import router as auth_router
 from app.api.v1.endpoints.workspaces import router as workspaces_router
+from app.api.v1.endpoints.subscriptions import router as subscriptions_router
 
 # Create main API router for v1
 api_router = APIRouter()
@@ -24,3 +25,4 @@ api_router.include_router(lipsync_router, prefix="/lipsync", tags=["Lipsync Gene
 api_router.include_router(video_generation_router, prefix="/video-generation", tags=["Video Generation"])
 api_router.include_router(auth_router, prefix="/auth", tags=["Auth"])
 api_router.include_router(workspaces_router, prefix="/workspaces", tags=["Workspaces"])
+api_router.include_router(subscriptions_router, prefix="/subscriptions", tags=["Subscriptions"])
