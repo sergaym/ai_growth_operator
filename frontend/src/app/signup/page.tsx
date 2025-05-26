@@ -34,6 +34,7 @@ function SignupPageContent() {
     monthlyBudget: '',
     aiExperience: '',
   });
+  const [signupError, setSignupError] = useState<string | null>(null);
 
   // Handle email from login redirect
   useEffect(() => {
@@ -55,20 +56,16 @@ function SignupPageContent() {
   };
 
   const nextStep = () => {
-    if (step < 3) {
+    if (step < 3) { 
       setStep(prev => prev + 1);
-    } else {
-      // If we're at step 3 (Goals), redirect to subscription
-      handleSignupComplete();
     }
   };
   
   const prevStep = () => setStep(prev => Math.max(prev - 1, 1));
 
   const handleSignupComplete = async () => {
+    setSignupError(null); // Clear previous errors
     try {
-      // POST signup data to backend
-      // Adapt formData to backend expectations
       const signupPayload = {
         first_name: formData.firstName,
         last_name: formData.lastName,
@@ -86,30 +83,26 @@ function SignupPageContent() {
       });
       const data = await response.json();
       if (!response.ok) {
-        throw new Error(data.message || 'Signup failed');
+        throw new Error(data.detail || data.message || 'Signup failed. Please check your details and try again.');
       }
-      // Store access token if provided
       if (typeof window !== 'undefined' && data.access_token) {
         window.localStorage.setItem('access_token', data.access_token);
       }
-      // Save user data to sessionStorage for the subscription page
       sessionStorage.setItem('signupData', JSON.stringify({
         firstName: formData.firstName,
         companyName: formData.companyName
       }));
-      // Redirect directly to subscription page or callback URL
       const callbackUrl = sessionStorage.getItem('signupCallbackUrl');
       if (callbackUrl) {
         router.push(callbackUrl);
       } else {
         router.push('/pricing?from=signup');
       }
-    } catch (error) {
+    } catch (error: any) {
       console.error('Signup error:', error);
-      // Handle error appropriately
+      setSignupError(error.message || 'An unexpected error occurred during signup.');
     }
   };
-
 
   const steps = [
     {
@@ -151,6 +144,13 @@ function SignupPageContent() {
 
         {/* Progress Bar - Updated to 3 steps */}
         <SignupProgress currentStep={step} totalSteps={3} />
+
+        {/* Display Signup Error */}
+        {signupError && (
+          <div className="my-6 text-center text-red-500 bg-red-100 p-3 rounded-md max-w-2xl mx-auto">
+            {signupError}
+          </div>
+        )}
         
         {/* Form Steps */}
         <div className="max-w-2xl mx-auto mt-12">
@@ -177,7 +177,7 @@ function SignupPageContent() {
                 key="step3"
                 data={formData}
                 onUpdate={updateFormData}
-                onNext={nextStep}
+                onNext={handleSignupComplete}
                 onBack={prevStep}
               />
             )}
