@@ -56,7 +56,6 @@ from .project_schemas import (
     ProjectAssetResponse,
     ProjectAssetsResponse,
     ProjectStatsResponse,
-    ProjectDocumentationExample,
 )
 
 __all__ = [
@@ -108,5 +107,4 @@ __all__ = [
     "ProjectAssetResponse",
     "ProjectAssetsResponse",
     "ProjectStatsResponse",
-    "ProjectDocumentationExample",
 ] 

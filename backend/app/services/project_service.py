@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func, and_, or_
 
 from app.db.database import get_db
-from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo, ProjectStatus
+from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo
 from app.api.v1.schemas import (
     ProjectCreateRequest,
     ProjectUpdateRequest,
@@ -19,7 +19,8 @@ from app.api.v1.schemas import (
     ProjectAssetSummary,
     ProjectAssetResponse,
     ProjectAssetsResponse,
-    ProjectStatsResponse
+    ProjectStatsResponse,
+    ProjectStatus
 )
 
 logger = logging.getLogger(__name__)
@@ -33,8 +34,8 @@ class ProjectService:
         
     async def create_project(
         self, 
-        workspace_id: int, 
-        user_id: int, 
+        workspace_id: str,
+        user_id: str, 
         request: ProjectCreateRequest,
         db: Session
     ) -> ProjectResponse:
@@ -91,7 +92,7 @@ class ProjectService:
     async def get_project(
         self, 
         project_id: str, 
-        workspace_id: int,
+        workspace_id: str,
         include_assets: bool = False,
         db: Session = None
     ) -> Optional[ProjectResponse]:
@@ -136,7 +137,7 @@ class ProjectService:
     
     async def list_projects(
         self,
-        workspace_id: int,
+        workspace_id: str,
         page: int = 1,
         per_page: int = 20,
         status_filter: Optional[str] = None,
@@ -214,7 +215,7 @@ class ProjectService:
     async def update_project(
         self,
         project_id: str,
-        workspace_id: int,
+        workspace_id: str,
         request: ProjectUpdateRequest,
         db: Session
     ) -> Optional[ProjectResponse]:
@@ -270,7 +271,7 @@ class ProjectService:
     async def delete_project(
         self,
         project_id: str,
-        workspace_id: int,
+        workspace_id: str,
         db: Session
     ) -> bool:
         """
@@ -311,7 +312,7 @@ class ProjectService:
     async def get_project_assets(
         self,
         project_id: str,
-        workspace_id: int,
+        workspace_id: str,
         asset_type: Optional[str] = None,
         db: Session = None
     ) -> ProjectAssetsResponse:
@@ -385,7 +386,7 @@ class ProjectService:
     
     async def get_workspace_stats(
         self,
-        workspace_id: int,
+        workspace_id: str,
         db: Session = None
     ) -> ProjectStatsResponse:
         """

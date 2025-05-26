@@ -74,16 +74,14 @@ class SubscriptionService:
         return True
     
     @staticmethod
-    def get_workspace_subscriptions(db: Session, workspace_id: int) -> List[Subscription]:
+    def get_workspace_subscriptions(db: Session, workspace_id: str) -> List[Subscription]:
         """
         Get all subscriptions for a workspace.
         """
-        return db.query(Subscription).filter(
-            Subscription.workspace_id == workspace_id
-        ).order_by(Subscription.created_at.desc()).all()
+        return db.query(Subscription).filter(Subscription.workspace_id == workspace_id).all()
     
     @staticmethod
-    def get_active_subscription(db: Session, workspace_id: int) -> Optional[Subscription]:
+    def get_active_subscription(db: Session, workspace_id: str) -> Optional[Subscription]:
         """
         Get the active subscription for a workspace.
         Returns None if no active subscription is found.
@@ -94,7 +92,7 @@ class SubscriptionService:
         ).first()
     
     @staticmethod
-    def is_subscription_active(db: Session, workspace_id: int) -> bool:
+    def is_subscription_active(db: Session, workspace_id: str) -> bool:
         """
         Check if a workspace has an active subscription.
         """
@@ -180,10 +178,17 @@ class SubscriptionService:
         return subscription
         
     @staticmethod
-    def can_add_users_to_workspace(db: Session, workspace_id: int, new_user_count: int = 1) -> bool:
+    def can_add_users_to_workspace(db: Session, workspace_id: str, new_user_count: int = 1) -> bool:
         """
-        Check if more users can be added to a workspace based on the subscription plan.
-        Returns True if users can be added, False otherwise.
+        Check if new users can be added to a workspace based on subscription limits.
+        
+        Args:
+            db: Database session
+            workspace_id: Workspace ID
+            new_user_count: Number of new users to add
+            
+        Returns:
+            True if users can be added, False otherwise
         """
         # Get active subscription
         subscription = SubscriptionService.get_active_subscription(db, workspace_id)
