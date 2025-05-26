@@ -220,6 +220,8 @@ class Workspace(Base):
         viewonly=True,
         uselist=False
     )
+    # Projects relationship
+    projects = relationship("Project", back_populates="workspace", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Workspace {self.id}: {self.name}>"
@@ -253,6 +255,7 @@ class User(Base):
         back_populates="owner", 
         foreign_keys="[Workspace.owner_id]"
     )
+    created_projects = relationship("Project", back_populates="created_by")
 
     def __repr__(self):
         return f"<User {self.id}: {self.email}>"
@@ -295,6 +298,46 @@ def create_personal_workspace(mapper, connection, target):
 
 # Set up the event listener for after a User is inserted
 event.listen(User, 'after_insert', create_personal_workspace)
+
+
+# ----------------
+# Project Models
+# ----------------
+
+class ProjectStatus(str, enum.Enum):
+    """Status of a project."""
+    DRAFT = "draft"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+
+
+class Project(Base):
+    """Model for projects within workspaces."""
+    __tablename__ = "projects"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
+    created_by_user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default=ProjectStatus.DRAFT.value, nullable=False)
+    thumbnail_url = Column(String, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    last_activity_at = Column(DateTime, default=datetime.now, nullable=False)
+    
+    # Metadata
+    metadata_json = Column(JSON, nullable=True)
+    
+    # Relationships
+    workspace = relationship("Workspace", back_populates="projects")
+    created_by = relationship("User", back_populates="created_projects")
+    
+    def __repr__(self):
+        return f"<Project {self.id}: {self.name} ({self.status})>"
 
 
 # ----------------
