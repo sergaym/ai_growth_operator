@@ -67,3 +67,13 @@ class ProjectResponse(BaseModel):
     class Config:
         from_attributes = True
 
+
+class ProjectListResponse(BaseModel):
+    """Response model for listing projects."""
+    projects: List[ProjectResponse] = Field(..., description="List of projects")
+    total: int = Field(..., description="Total number of projects")
+    page: int = Field(..., description="Current page number")
+    per_page: int = Field(..., description="Number of projects per page")
+    total_pages: int = Field(..., description="Total number of pages")
+
+
