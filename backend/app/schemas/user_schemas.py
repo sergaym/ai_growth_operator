@@ -9,7 +9,7 @@ class WorkspaceCreate(WorkspaceBase):
     pass
 
 class WorkspaceOut(WorkspaceBase):
-    id: int
+    id: str
 
 class UserBase(BaseModel):
     first_name: str
@@ -21,7 +21,7 @@ class UserCreate(UserBase):
     password: str
 
 class UserOut(UserBase):
-    id: int
+    id: str
     workspaces: List[WorkspaceOut] = []
 
 class TokenResponse(BaseModel):
