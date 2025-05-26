@@ -7,7 +7,7 @@ from typing import Optional
 # ----------------
 
 class UserWorkspace(BaseModel):
-    user_id: int
+    user_id: str
     workspace_id: str
     role: str
     active: bool
@@ -17,13 +17,13 @@ class Workspace(BaseModel):
     id: str
     name: str
     type: str
-    owner_id: int
+    owner_id: str
     created_at: datetime
     updated_at: datetime
     stripe_customer_id: Optional[str] = None
 
 class User(BaseModel):
-    id: int
+    id: str
     first_name: str
     last_name: str
     email: str
