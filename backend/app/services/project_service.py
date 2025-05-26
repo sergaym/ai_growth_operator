@@ -88,3 +88,49 @@ class ProjectService:
             self.logger.error(f"Error creating project: {str(e)}")
             raise
     
+    async def get_project(
+        self, 
+        project_id: str, 
+        workspace_id: int,
+        include_assets: bool = False,
+        db: Session = None
+    ) -> Optional[ProjectResponse]:
+        """
+        Get a project by ID within a workspace.
+        
+        Args:
+            project_id: Project ID
+            workspace_id: Workspace ID
+            include_assets: Whether to include asset summary
+            db: Database session
+            
+        Returns:
+            Project response or None if not found
+        """
+        try:
+            if db is None:
+                db = next(get_db())
+            
+            query = db.query(Project).filter(
+                and_(
+                    Project.id == project_id,
+                    Project.workspace_id == workspace_id
+                )
+            )
+            
+            project = query.first()
+            if not project:
+                return None
+            
+            project_response = ProjectResponse.from_orm(project)
+            
+            if include_assets:
+                asset_summary = await self._get_project_asset_summary(project_id, db)
+                project_response.asset_summary = asset_summary
+            
+            return project_response
+            
+        except Exception as e:
+            self.logger.error(f"Error getting project {project_id}: {str(e)}")
+            raise
+    
