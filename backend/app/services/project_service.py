@@ -134,3 +134,80 @@ class ProjectService:
             self.logger.error(f"Error getting project {project_id}: {str(e)}")
             raise
     
+    async def list_projects(
+        self,
+        workspace_id: int,
+        page: int = 1,
+        per_page: int = 20,
+        status_filter: Optional[str] = None,
+        search_query: Optional[str] = None,
+        include_assets: bool = False,
+        db: Session = None
+    ) -> ProjectListResponse:
+        """
+        List projects in a workspace with pagination and filtering.
+        
+        Args:
+            workspace_id: Workspace ID
+            page: Page number (1-based)
+            per_page: Number of projects per page
+            status_filter: Filter by project status
+            search_query: Search in project name and description
+            include_assets: Whether to include asset summaries
+            db: Database session
+            
+        Returns:
+            Paginated list of projects
+        """
+        try:
+            if db is None:
+                db = next(get_db())
+            
+            # Build query
+            query = db.query(Project).filter(Project.workspace_id == workspace_id)
+            
+            # Apply filters
+            if status_filter:
+                query = query.filter(Project.status == status_filter)
+            
+            if search_query:
+                search_pattern = f"%{search_query}%"
+                query = query.filter(
+                    or_(
+                        Project.name.ilike(search_pattern),
+                        Project.description.ilike(search_pattern)
+                    )
+                )
+            
+            # Get total count
+            total = query.count()
+            
+            # Apply pagination and ordering
+            offset = (page - 1) * per_page
+            projects = query.order_by(desc(Project.last_activity_at)).offset(offset).limit(per_page).all()
+            
+            # Convert to response objects
+            project_responses = []
+            for project in projects:
+                project_response = ProjectResponse.from_orm(project)
+                
+                if include_assets:
+                    asset_summary = await self._get_project_asset_summary(project.id, db)
+                    project_response.asset_summary = asset_summary
+                
+                project_responses.append(project_response)
+            
+            total_pages = (total + per_page - 1) // per_page
+            
+            return ProjectListResponse(
+                projects=project_responses,
+                total=total,
+                page=page,
+                per_page=per_page,
+                total_pages=total_pages
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error listing projects for workspace {workspace_id}: {str(e)}")
+            raise
+    
