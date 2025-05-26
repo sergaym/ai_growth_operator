@@ -71,7 +71,7 @@ async def get_subscription_plans(
 
 @router.get("/workspaces/{workspace_id}/subscription", response_model=SubscriptionResponse, tags=["subscriptions"])
 async def get_workspace_subscription(
-    workspace_id: int,
+    workspace_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -96,7 +96,7 @@ async def get_workspace_subscription(
 
 @router.post("/workspaces/{workspace_id}/checkout", tags=["subscriptions"])
 async def create_checkout_session(
-    workspace_id: int,
+    workspace_id: str,
     plan_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -125,7 +125,7 @@ async def create_checkout_session(
 
 @router.post("/workspaces/{workspace_id}/portal", tags=["subscriptions"])
 async def create_customer_portal_session(
-    workspace_id: int,
+    workspace_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -153,7 +153,7 @@ async def create_customer_portal_session(
 
 @router.get("/workspaces/{workspace_id}/invoices", response_model=List[InvoiceResponse], tags=["subscriptions"])
 async def get_workspace_invoices(
-    workspace_id: int,
+    workspace_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -325,44 +325,42 @@ async def stripe_webhook(request: Request, response: Response, db: Session = Dep
 
 async def handle_checkout_session_completed(event: Dict[str, Any], db: Session) -> None:
     """Handle checkout.session.completed webhook event."""
-    session = event["data"]["object"]
-    event_id = event.get("id", "unknown_event_id") # Get event ID for logging
+    session = event.get("data", {}).get("object", {})
+    event_id = event.get("id", "unknown_event") # For logging
+    print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Processing event: {event.get('type')}")
 
-    print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Received Checkout Session object: {session}")
+    if not session:
+        print(f"[Webhook handle_checkout_session_completed - ERROR - Event ID: {event_id}] No session data in event.")
+        return
 
-    metadata = session.get("metadata", {})
-    print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Checkout Session metadata: {metadata}")
-    
-    workspace_id_str = metadata.get("workspace_id")
+    metadata = session.get("metadata")
+    if not metadata:
+        print(f"[Webhook handle_checkout_session_completed - ERROR - Event ID: {event_id}] No metadata in session object: {session.get('id')}")
+        return
+
+    workspace_id = metadata.get("workspace_id")
     plan_id_str = metadata.get("plan_id")
 
-    print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Extracted workspace_id_str: '{workspace_id_str}', plan_id_str: '{plan_id_str}'")
-
-    if not workspace_id_str or not plan_id_str:
-        error_msg = f"Missing workspace_id or plan_id in checkout session metadata. Session ID: {session.get('id')}, Event ID: {event_id}"
-        print(f"[Webhook handle_checkout_session_completed - WARNING] {error_msg}")
-        # This is a fallback; if metadata is missing here, it's a problem from checkout creation.
-        # We might not want to raise an error that causes Stripe to retry, but log it clearly.
-        return # Exit if essential metadata is missing
-        
-    try:
-        workspace_id = int(workspace_id_str)
-        plan_id = int(plan_id_str)
-    except ValueError as e:
-        error_msg = f"Could not convert workspace_id or plan_id to int from checkout session metadata. workspace_id_str: '{workspace_id_str}', plan_id_str: '{plan_id_str}'. Error: {e}, Event ID: {event_id}"
-        print(f"[Webhook handle_checkout_session_completed - ERROR] {error_msg}")
-        # Log and return, as this indicates a data issue from checkout creation.
-        return # Exit on conversion error
+    if not workspace_id or not plan_id_str:
+        print(f"[Webhook handle_checkout_session_completed - ERROR - Event ID: {event_id}] Missing workspace_id or plan_id in metadata for session: {session.get('id')}")
+        return
     
-    # Create a subscription record if it doesn't exist yet
-    # (this is a fallback, normally subscription.created webhook will create it)
-    # Check for existing subscription first for idempotency
+    try:
+        plan_id = int(plan_id_str)
+    except ValueError:
+        print(f"[Webhook handle_checkout_session_completed - ERROR - Event ID: {event_id}] Invalid plan_id format in metadata: {plan_id_str} for session: {session.get('id')}")
+        return
+
+    print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Extracted metadata: workspace_id={workspace_id}, plan_id={plan_id}")
+
+    existing_plan = SubscriptionService.get_plan_by_id(db, plan_id)
+    if not existing_plan:
+        print(f"[Webhook handle_checkout_session_completed - ERROR - Event ID: {event_id}] Plan with ID {plan_id} not found. Cannot create subscription.")
+        return
+
     existing_subscription = db.query(DBSubscription).filter(
         DBSubscription.workspace_id == workspace_id,
-        # We might not have stripe_subscription_id yet from checkout session alone, 
-        # so rely on workspace_id and plan_id for this check if it's an active sub.
-        # Or, more robustly, check if the subscription linked in `session.subscription` exists.
-    ).first() # This check might need refinement based on what defines uniqueness before subscription ID is known
+    ).order_by(DBSubscription.created_at.desc()).first()
 
     stripe_subscription_id_from_session = session.get("subscription")
     if stripe_subscription_id_from_session:
@@ -373,7 +371,6 @@ async def handle_checkout_session_completed(event: Dict[str, Any], db: Session) 
             print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] Subscription with Stripe ID {stripe_subscription_id_from_session} (from session.subscription) already exists. Fallback creation skipped.")
             return
     elif existing_subscription and existing_subscription.status == SubscriptionStatus.ACTIVE.value:
-        # A less precise check if we don't have stripe_subscription_id from session yet
         print(f"[Webhook handle_checkout_session_completed - Event ID: {event_id}] An active subscription already exists for workspace {workspace_id}. Fallback creation skipped.")
         return
 

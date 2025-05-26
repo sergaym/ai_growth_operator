@@ -22,7 +22,7 @@ export default function WorkspaceBillingPage() {
       description="Manage your subscription, payment methods, and billing history"
     >
       <div className="container py-4">
-        <BillingSection workspaceId={parseInt(workspaceId)} />
+        <BillingSection workspaceId={workspaceId} />
       </div>
     </PlaygroundLayout>
   );
