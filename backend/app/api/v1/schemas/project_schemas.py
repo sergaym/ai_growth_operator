@@ -33,3 +33,12 @@ class ProjectUpdateRequest(BaseModel):
     thumbnail_url: Optional[str] = Field(None, description="Project thumbnail image URL")
     metadata: Optional[Dict[str, Any]] = Field(None, description="Additional project metadata")
 
+
+class ProjectAssetSummary(BaseModel):
+    """Summary of assets within a project."""
+    total_videos: int = Field(0, description="Total number of videos")
+    total_audio: int = Field(0, description="Total number of audio files")
+    total_images: int = Field(0, description="Total number of images")
+    total_lipsync_videos: int = Field(0, description="Total number of lipsync videos")
+    latest_asset_created_at: Optional[datetime] = Field(None, description="When the most recent asset was created")
+
