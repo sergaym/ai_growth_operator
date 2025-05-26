@@ -77,3 +77,15 @@ class ProjectListResponse(BaseModel):
     total_pages: int = Field(..., description="Total number of pages")
 
 
+class ProjectAssetResponse(BaseModel):
+    """Response model for project assets."""
+    id: str = Field(..., description="Asset unique identifier")
+    type: str = Field(..., description="Asset type (video, audio, image, lipsync_video)")
+    status: str = Field(..., description="Asset status")
+    created_at: datetime = Field(..., description="When the asset was created")
+    updated_at: datetime = Field(..., description="When the asset was last updated")
+    file_url: Optional[str] = Field(None, description="Asset file URL")
+    thumbnail_url: Optional[str] = Field(None, description="Asset thumbnail URL")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Asset metadata")
+
+
