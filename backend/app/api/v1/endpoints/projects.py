@@ -37,7 +37,7 @@ logger = logging.getLogger(__name__)
 async def create_project(
     workspace_id: str = Path(..., description="Workspace ID to create project in"),
     request: ProjectCreateRequest = ...,
-    user_id: int = Query(..., description="ID of the user creating the project"),
+    user_id: str = Query(..., description="ID of the user creating the project"),
     db: Session = Depends(get_db)
 ):
     """
