@@ -21,7 +21,7 @@ async def get_user_workspaces(
 
 @router.get("/{workspace_id}", response_model=WorkspaceWithSubscriptionResponse, tags=["workspaces"])
 async def get_workspace_with_subscription(
-    workspace_id: int,
+    workspace_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -43,7 +43,7 @@ async def get_workspace_with_subscription(
 
 @router.put("/{workspace_id}/name", response_model=WorkspaceResponse, tags=["workspaces"])
 async def update_workspace_name(
-    workspace_id: int,
+    workspace_id: str,
     new_name: str = Query(..., description="New name for the workspace"),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
@@ -62,7 +62,7 @@ async def update_workspace_name(
 
 @router.get("/{workspace_id}/users", response_model=List[UserResponse], tags=["workspaces"])
 async def get_workspace_users(
-    workspace_id: int,
+    workspace_id: str,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
@@ -77,7 +77,7 @@ async def get_workspace_users(
 
 @router.post("/{workspace_id}/users/{user_id}", tags=["workspaces"])
 async def add_user_to_workspace(
-    workspace_id: int,
+    workspace_id: str,
     user_id: int,
     role: str = Query("member", description="User role in the workspace"),
     db: Session = Depends(get_db),
@@ -101,7 +101,7 @@ async def add_user_to_workspace(
 
 @router.delete("/{workspace_id}/users/{user_id}", tags=["workspaces"])
 async def remove_user_from_workspace(
-    workspace_id: int,
+    workspace_id: str,
     user_id: int,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)

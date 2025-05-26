@@ -22,6 +22,15 @@ const formatPrice = (price: number, currency: string) => {
   }).format(price);
 };
 
+// Helper function to determine if a plan is a lower tier than the current subscription
+const isLowerTierPlan = (plan: SubscriptionPlan, currentSubscription: Subscription | null): boolean => {
+  if (!currentSubscription?.plan) return false;
+  const currentPlan = currentSubscription.plan;
+  if (currentPlan.price === -1) return plan.price < currentPlan.price;
+  if (plan.price === -1) return false;
+  return plan.price < currentPlan.price;
+};
+
 // Get features from plan description or use default features if empty
 const getPlanFeatures = (plan: SubscriptionPlan): string[] => {
   const userCapacity = plan.max_users < 1 
@@ -166,15 +175,6 @@ function PricingPlansContent({
       });
   }, [authLoading, user.isAuthenticated, selectedWorkspaceId, toast]);
 
-  // Filter plans based on user authentication status (example)
-  const displayedPlans = useMemo(() => {
-    if (user.isAuthenticated) {
-      return allPlans;
-    } else {
-      return allPlans.filter(plan => plan.price == 0 || plan.price == -1);
-    }
-  }, [user.isAuthenticated, allPlans]);
-
   // Determine the effective current plan ID
   let effectiveCurrentPlanId: number | undefined | null = currentSubscription?.plan_id; // Changed to use plan_id directly
   if (
@@ -183,7 +183,7 @@ function PricingPlansContent({
     !currentSubscription && // No active subscription
     !subscriptionLoading // And we've finished trying to load it
   ) {
-    const firstFreePlan = displayedPlans.find(p => p.price == 0);
+    const firstFreePlan = allPlans.find(p => p.price == 0);
     if (firstFreePlan) {
       effectiveCurrentPlanId = firstFreePlan.id;
     }
@@ -313,11 +313,11 @@ function PricingPlansContent({
           <p className="text-red-500 text-lg font-semibold">Access Error</p>
           <p className="text-red-400 mt-2">{workspaceAccessError}</p>
         </div>
-      ) : displayedPlans.length > 0 ? (
+      ) : allPlans.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-3 gap-8 max-w-6xl mx-auto">
-          {displayedPlans.map((plan, index) => {
+          {allPlans.map((plan, index) => {
             // Determine if this plan is the "popular" mid-tier plan
-            const isPopular = index === 1 || (displayedPlans.length === 3 && plan.price > displayedPlans[0].price && plan.price < displayedPlans[2].price);
+            const isPopular = index === 1 || (allPlans.length === 3 && plan.price > allPlans[0].price && plan.price < allPlans[2].price);
             // Get features for this plan
             const features = getPlanFeatures(plan);
             
@@ -366,7 +366,7 @@ function PricingPlansContent({
                 </ul>
 
                 {plan.id == effectiveCurrentPlanId ? (
-                  <div className="flex items-center justify-center w-full py-3 rounded-xl bg-zinc-700 text-white text-base font-medium min-h-[48px]"> {/* Reverted styling */}
+                  <div className="flex items-center justify-center w-full py-3 rounded-xl bg-zinc-700 text-white text-base font-medium min-h-[48px]">
                     Current plan
                   </div>
                 ) : plan.price == -1 ? (
@@ -379,10 +379,14 @@ function PricingPlansContent({
                   >
                     Contact Us
                   </a>
+                ) : isLowerTierPlan(plan, currentSubscription) ? (
+                  <div className="flex items-center justify-center w-full py-3 rounded-xl bg-zinc-800/50 text-zinc-500 text-base font-medium min-h-[48px] border border-zinc-700">
+                    Not Available
+                  </div>
                 ) : (
                   <Button
                     onClick={() => handlePlanSelection(plan.id)}
-                    disabled={checkoutLoading !== null || (user.isAuthenticated && (!selectedWorkspaceId && (isWorkspaceSelectionRequired || userWorkspaces.length === 0)))} // Disable if auth is loading or workspace selection is required
+                    disabled={checkoutLoading !== null || (user.isAuthenticated && (!selectedWorkspaceId && (isWorkspaceSelectionRequired || userWorkspaces.length === 0)))}
                     className={`w-full py-3 rounded-xl transition-all text-base font-medium min-h-[48px]
                       ${
                         checkoutLoading == plan.id

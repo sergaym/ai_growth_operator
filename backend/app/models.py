@@ -19,8 +19,7 @@ from app.db.database import Base
 # ----------------
 
 def generate_uuid():
-    """Generate a unique UUID for asset identification."""
-    return str(uuid.uuid4())
+    return str(uuid.uuid4().hex)
 
 # ----------------
 # Enum Definitions
@@ -175,7 +174,7 @@ class LipsyncVideo(BaseAsset):
 class UserWorkspace(Base):
     __tablename__ = "user_workspaces"
     user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
-    workspace_id = Column(Integer, ForeignKey("workspaces.id"), primary_key=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), primary_key=True)
     role = Column(String(50), nullable=False, default="member")
     active = Column(Boolean, nullable=False, default=False)
     joined_at = Column(DateTime, default=datetime.now, nullable=False)
@@ -188,7 +187,7 @@ class UserWorkspace(Base):
 
 class Workspace(Base):
     __tablename__ = "workspaces"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=generate_uuid)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)
     owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
@@ -346,7 +345,7 @@ class Subscription(Base):
     __tablename__ = "subscriptions"
     
     id = Column(Integer, primary_key=True, index=True)
-    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
     plan_id = Column(Integer, ForeignKey("subscription_plans.id"), nullable=False)
     
     # Current status
@@ -382,7 +381,7 @@ class PaymentMethod(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
-    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
     
     # Card details (stored in a PCI-compliant way)
     type = Column(String(20), nullable=False)  # card, sepa, etc.
@@ -422,7 +421,7 @@ class Invoice(Base):
     
     id = Column(Integer, primary_key=True, index=True)
     subscription_id = Column(Integer, ForeignKey("subscriptions.id"), nullable=False)
-    workspace_id = Column(Integer, ForeignKey("workspaces.id"), nullable=False)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
     
     # Invoice details
     amount = Column(Numeric(10, 2), nullable=False)
