@@ -3,69 +3,90 @@
 import React, { useState } from "react";
 import { useParams } from "next/navigation";
 import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useVideoGeneration } from "@/hooks/useVideoGeneration";
+import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
+import { VideoPreview } from "@/components/chat/VideoPreview";
 import { GestureChat } from "@/components/chat/GestureChat";
-import { Film } from "lucide-react";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
   const stringWorkspaceId = workspaceId as string || '';
   const stringProjectId = projectId as string || '';
   const { workspaces } = useWorkspaces();
+  const { user } = useAuth();
   const currentWorkspace = workspaces.find(ws => ws.id === stringWorkspaceId);
-  const [videoUrl, setVideoUrl] = useState<string | null>(null);
-  const [videoLoading, setVideoLoading] = useState(false);
 
   const workspace = currentWorkspace 
     ? { id: currentWorkspace.id, name: currentWorkspace.name }
     : { id: stringWorkspaceId, name: "Workspace" };
 
-  // Handler for when the GestureChat component generates a video
-  const handleVideoGenerated = (url: string) => {
-    setVideoLoading(true);
-    
-    // Simulate video loading with delay
-    setTimeout(() => {
-      setVideoUrl(url);
-      setVideoLoading(false);
-    }, 1000);
+  // Video generation state
+  const { 
+    generateVideo, 
+    isGenerating, 
+    progress, 
+    currentStep, 
+    result, 
+    error, 
+    cancel, 
+    reset 
+  } = useVideoGeneration();
+
+  // Handle video generation request from GestureChat
+  const handleGenerateVideo = async (text: string, actorId: string, actorVideoUrl: string, language: string) => {
+    if (!user?.isAuthenticated || !user?.user) {
+      alert('Please log in to generate videos');
+      return;
+    }
+
+    if (!actorId || !actorVideoUrl) {
+      alert('Please select a valid actor');
+      return;
+    }
+
+    try {
+      await generateVideo({
+        text: text.trim(),
+        actor_id: String(actorId),
+        actor_video_url: actorVideoUrl,
+        language: language,
+        voice_preset: 'professional_male',
+        project_id: stringProjectId,
+        user_id: String(user.user.id),
+        workspace_id: user.user.workspaces?.[0]?.id ? String(user.user.workspaces[0].id) : undefined,
+      });
+    } catch (error) {
+      console.error('Failed to start video generation:', error);
+    }
   };
 
   return (
     <PlaygroundLayout
-      title="AI Video Generator"
-      description="Use the chat to generate videos with AI actors"
+      title=""
       currentWorkspace={workspace}
     >
-      <div className="max-w-5xl mx-auto">
+      <div className="max-w-5xl mx-auto space-y-6">
         {/* Video Preview */}
-        <div className="mb-6">
-          <div className="aspect-video bg-zinc-100 rounded-lg flex items-center justify-center overflow-hidden shadow-sm">
-            {videoLoading ? (
-              <div className="flex flex-col items-center justify-center">
-                <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-blue-500 mb-2"></div>
-                <p className="text-sm text-zinc-500">Generating video...</p>
-              </div>
-            ) : videoUrl ? (
-              <video 
-                src={videoUrl} 
-                className="w-full h-full object-cover" 
-                controls 
-                autoPlay
-              />
-            ) : (
-              <div className="text-zinc-400 text-sm text-center p-4">
-                <Film className="h-8 w-8 mx-auto mb-2 opacity-50" />
-                <p>Describe what you want the AI actor to do</p>
-              </div>
-            )}
-          </div>
-        </div>
+        <VideoPreview
+          videoUrl={result?.video_url}
+          isGenerating={isGenerating}
+          progress={progress}
+          currentStep={currentStep ?? undefined}
+          error={error ?? undefined}
+          processingTime={result?.processing_time}
+          onCancel={cancel}
+          onReset={reset}
+          onRetry={reset}
+          showGettingStarted={!result && !error && !isGenerating}
+        />
 
-        {/* Chat Input */}
+        {/* Enhanced Chat Input */}
         <GestureChat 
           projectId={stringProjectId} 
-          onVideoGenerated={handleVideoGenerated}
+          onGenerateVideo={handleGenerateVideo}
+          isGenerating={isGenerating}
+          showTips={true}
         />
       </div>
     </PlaygroundLayout>
