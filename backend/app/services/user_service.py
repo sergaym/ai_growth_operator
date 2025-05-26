@@ -23,9 +23,9 @@ class UserService:
         return db.query(User).filter(User.email == email).first()
 
     @staticmethod
-    def get_user_by_id(db: Session, user_id: int) -> User:
+    def get_user_by_id(db: Session, user_id: str) -> User:
         return db.query(User).filter(User.id == user_id).first()
 
     @staticmethod
-    def get_user_workspaces(db: Session, user_id: int) -> list:
+    def get_user_workspaces(db: Session, user_id: str) -> list:
         return db.query(Workspace).join(UserWorkspace).filter(UserWorkspace.user_id == user_id).all()
