@@ -46,6 +46,19 @@ from .video_generation_schemas import (
     VideoGenerationDocumentationExample,
 )
 
+from .project_schemas import (
+    ProjectStatus,
+    ProjectCreateRequest,
+    ProjectUpdateRequest,
+    ProjectAssetSummary,
+    ProjectResponse,
+    ProjectListResponse,
+    ProjectAssetResponse,
+    ProjectAssetsResponse,
+    ProjectStatsResponse,
+    ProjectDocumentationExample,
+)
+
 __all__ = [
     # Text-to-Image schemas
     "AvatarParameters",
@@ -84,4 +97,16 @@ __all__ = [
     "WorkflowJobResponse",
     "WorkflowStepStatus",
     "VideoGenerationDocumentationExample",
+    
+    # Project schemas
+    "ProjectStatus",
+    "ProjectCreateRequest",
+    "ProjectUpdateRequest",
+    "ProjectAssetSummary",
+    "ProjectResponse",
+    "ProjectListResponse",
+    "ProjectAssetResponse",
+    "ProjectAssetsResponse",
+    "ProjectStatsResponse",
+    "ProjectDocumentationExample",
 ] 

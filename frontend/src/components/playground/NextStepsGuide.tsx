@@ -18,7 +18,7 @@ const steps: Step[] = [
     id: 1,
     title: "Choose Your Plan",
     description: "Select the perfect subscription that matches your needs.",
-    href: "/signup/subscription",
+    href: "/pricing?from=signup",
     completed: true
   },
   {

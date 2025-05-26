@@ -16,6 +16,7 @@ import {
 } from "@/components/ui/sidebar"
 import { useWorkspaces } from '@/hooks/useWorkspace';
 import { useParams } from 'next/navigation';
+import { Toaster } from 'sonner';
 
 interface PlaygroundLayoutProps {
   title: string;
@@ -43,6 +44,7 @@ export default function PlaygroundLayout({
     <SidebarProvider>
       <AppSidebar className="hidden lg:flex" />
       <SidebarInset className="bg-background">
+        <Toaster richColors position="top-right" />
         {/* Subtle top loading bar - visible only during loading */}
         {workspaceLoading && (
           <div className="fixed top-0 left-0 w-full h-0.5 z-50">

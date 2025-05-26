@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, createElement } from "react";
+import React, { useState, createElement, useEffect, useRef, Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
@@ -13,6 +13,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { nanoid } from 'nanoid';
+import { useSearchParams, useRouter } from 'next/navigation';
+import { toast } from 'sonner';
+import { apiClient } from '@/services/apiClient';
 
 // Simulated project data
 const projectsData = [
@@ -87,7 +90,65 @@ function WorkspaceSkeleton() {
   );
 }
 
-export default function PlaygroundOverview() {
+// Component to handle payment redirects and search params
+function PaymentHandler() {
+  const { refetchWorkspaces } = useWorkspaces();
+  const searchParams = useSearchParams();
+  const router = useRouter();
+  const hasHandledRedirect = useRef(false);
+
+  useEffect(() => {
+    const stripeSessionId = searchParams.get('stripe_session_id');
+    const paymentStatus = searchParams.get('payment');
+
+    // Handle success case (redirected from Stripe)
+    if (paymentStatus === 'success') {
+      toast.success('Payment successful! Your subscription is now active.');
+      refetchWorkspaces();
+      return;
+    }
+
+    // Handle legacy Stripe webhook verification if needed
+    const handleStripeRedirect = async () => {
+      if (hasHandledRedirect.current || !stripeSessionId) return;
+      hasHandledRedirect.current = true;
+
+      try {
+        const session = await apiClient<{ session_id: string; status: string; payment_status: string; customer_email?: string | null }>(
+          `/api/v1/subscriptions/stripe/checkout-session/${stripeSessionId}`
+        );
+
+        if (session.status === 'complete') {
+          if (session.payment_status === 'paid') {
+            toast.success('Payment successful! Your subscription is now active.');
+          } else if (session.payment_status === 'no_payment_required') {
+            toast.info('Your subscription is now active.');
+          } else {
+            toast.error('Payment was processed, but the subscription could not be activated immediately. Please contact support.');
+          }
+          await refetchWorkspaces();
+        } else if (session.status === 'open') {
+          toast.info('Your payment is still processing. We will notify you once completed.');
+        } else {
+          toast.warning('Your payment is still being processed. Please check back later.');
+        }
+      } catch (error) {
+        console.error('Error verifying payment:', error);
+        toast.error('There was an error verifying your payment. Please contact support if the issue persists.');
+      }
+    };
+
+    if (stripeSessionId) {
+      handleStripeRedirect();
+    } else if (searchParams.get('stripe_payment_status') === 'cancelled') {
+      toast.info('Payment was cancelled. You can try again if you change your mind.');
+    }
+  }, [searchParams, router, refetchWorkspaces]);
+
+  return null; // This component doesn't render anything
+}
+
+function PlaygroundOverviewContent() {
   const { workspaces, loading, error } = useWorkspaces();
   const [searchQuery, setSearchQuery] = useState("");
 
@@ -99,8 +160,6 @@ export default function PlaygroundOverview() {
     : workspaces;
 
   const handleNewWorkspace = () => {
-    // This would typically create a new workspace via API call
-    // For now, just show an alert
     alert('Create new workspace - to be implemented');
   };
 
@@ -110,14 +169,12 @@ export default function PlaygroundOverview() {
       description="Select a workspace or create a new one to get started."
       currentWorkspace={{ id: '', name: 'Select a workspace' }}
     >
-      {/* Top loading bar - visible only during loading */}
       {loading && (
         <div className="fixed top-0 left-0 w-full h-0.5 z-50">
           <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
         </div>
       )}
 
-      {/* Search and Action Bar */}
       <div className="flex flex-col sm:flex-row justify-between gap-4 mb-6">
         <div className="relative flex-1 max-w-md">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-gray-500" />
@@ -137,17 +194,14 @@ export default function PlaygroundOverview() {
         </div>
       </div>
 
-      {/* Error state */}
       {error && (
         <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
           <p className="font-medium text-sm">Error: {error}</p>
         </div>
       )}
 
-      {/* Workspaces Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
-          // Skeleton loaders for workspaces
           Array(6).fill(0).map((_, index) => (
             <WorkspaceSkeleton key={`skeleton-${index}`} />
           ))
@@ -202,4 +256,13 @@ export default function PlaygroundOverview() {
       </div>
     </PlaygroundLayout>
   );
-} 
+}
+
+export default function PlaygroundOverview() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PaymentHandler />
+      <PlaygroundOverviewContent />
+    </Suspense>
+  );
+}

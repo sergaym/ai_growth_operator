@@ -109,13 +109,13 @@ class HeygenAvatarVideo(BaseModel):
 
 class UserWorkspace(BaseModel):
     user_id: int
-    workspace_id: int
+    workspace_id: str
     role: str
     active: bool
     joined_at: datetime
 
 class Workspace(BaseModel):
-    id: int
+    id: str
     name: str
     type: str
     owner_id: int
@@ -211,7 +211,7 @@ class SubscriptionPlan(BaseModel):
 
 class Subscription(BaseModel):
     id: int
-    workspace_id: int
+    workspace_id: str
     plan_id: int
     status: SubscriptionStatus
     stripe_subscription_id: Optional[str] = None
@@ -226,7 +226,7 @@ class Subscription(BaseModel):
 class PaymentMethod(BaseModel):
     id: int
     user_id: int
-    workspace_id: int
+    workspace_id: str
     type: str
     last4: Optional[str] = None
     brand: Optional[str] = None
@@ -241,7 +241,7 @@ class PaymentMethod(BaseModel):
 class Invoice(BaseModel):
     id: int
     subscription_id: int
-    workspace_id: int
+    workspace_id: str
     amount: Decimal
     currency: str = "USD"
     status: InvoiceStatus

@@ -16,40 +16,40 @@ export interface FAQItem {
 
 const defaultFAQs: FAQItem[] = [
   {
-    question: "¿Puedo ver una demo del producto?",
-    answer: "Puedes ver un video de demostración aquí."
+    question: "How do subscription plans work?",
+    answer: "Our subscription plans are based on the number of users in your workspace. Each plan offers a different maximum user limit, and you can upgrade at any time as your team grows. All plans include our core AI features with varying levels of usage limits."
   },
   {
-    question: "¿Puedo usar los videos creados con fines comerciales?",
-    answer: "Por supuesto. Hemos negociado los derechos para que puedas utilizar los videos generados con fines comerciales."
+    question: "Can I change my subscription plan?",
+    answer: "Yes, you can upgrade, downgrade, or cancel your subscription at any time through the billing section in your workspace settings. When upgrading, the new features and limits are available immediately. When downgrading, changes will take effect at the end of your current billing cycle."
   },
   {
-    question: "¿Los actores de IA otorgan permisos para usar la plataforma?",
-    answer: "Sí, todas las versiones de IA de nuestros actores se desarrollan con pleno consentimiento y cooperación. Están completamente informados y compensados por su trabajo. Nos aseguramos de que todos estén de acuerdo antes de usar su imagen en cualquier creación de IA."
+    question: "How is billing handled?",
+    answer: "We use Stripe for secure payment processing. You'll be billed on a monthly or annual basis depending on the plan you choose. All payment information is securely stored by Stripe and not on our servers."
   },
   {
-    question: "¿Obtengo solo un actor hablando o un video final editado?",
-    answer: "Obtendrás la actuación y el discurso más convincente. Recibes un video en bruto cautivador. Luego puedes transformarlo como quieras con tus propias herramientas de edición. También puedes solicitar una edición en la plataforma."
+    question: "Is there a free trial available?",
+    answer: "Yes, all new workspaces start with a 14-day free trial of our Professional plan. No credit card is required to start your trial, and you can upgrade to a paid plan at any time during or after your trial period."
   },
   {
-    question: "¿Cuánto tiempo tarda en generar mis videos con la plataforma?",
-    answer: "Alrededor de 2 minutos y 30 segundos."
+    question: "What payment methods are accepted?",
+    answer: "We accept all major credit cards (Visa, Mastercard, American Express) through our secure payment processor, Stripe. For enterprise plans, we can also accommodate invoicing and other payment methods - please contact our sales team."
   },
   {
-    question: "¿Funciona en diferentes idiomas?",
-    answer: "Sí, en 35 idiomas incluyendo 🇪🇸 Español (España), 🇲🇽 Español (México), 🇺🇸 Inglés (EE.UU.), 🇬🇧 Inglés (Reino Unido), 🇫🇷 Francés, 🇩🇪 Alemán, 🇮🇹 Italiano, 🇵🇹 Portugués, y muchos más."
+    question: "What happens if I exceed my user limit?",
+    answer: "If you try to add users beyond your plan's limit, you'll be prompted to upgrade to a higher tier plan. We won't automatically charge you for exceeding limits - you'll always have control over when to upgrade."
   },
   {
-    question: "¿Puedo controlar cómo se mueven los actores, cómo hablan y su fondo?",
-    answer: "Hay muchas formas diferentes de controlar los resultados de los videos en la plataforma. Todo suena atractivo y natural sin hacer nada. Pero también puedes cambiar la velocidad del habla y la entonación. Puedes elegir entre una variedad de actores de IA con diferentes fondos, emociones y energías en la biblioteca de actores."
+    question: "Can I get a refund if I'm not satisfied?",
+    answer: "We offer a 30-day money-back guarantee for all new paid subscriptions. If you're not completely satisfied with our service, contact our support team within 30 days of your initial purchase for a full refund."
   },
   {
-    question: "¿Qué sucede si supero el límite mensual de mi plan?",
-    answer: "Los usuarios Starter y Basic no pueden exceder sus límites. Para obtener más créditos inmediatamente, puedes actualizar tu plan. Los usuarios Pro pueden exceder sus límites y se les cobrará por los créditos adicionales utilizados en la factura del próximo mes."
+    question: "Do you offer special pricing for startups or non-profits?",
+    answer: "Yes, we offer special pricing for eligible startups, non-profit organizations, and educational institutions. Please contact our sales team with verification of your status to learn more about our discount programs."
   },
   {
-    question: "¿Los créditos no utilizados se transfieren al mes siguiente?",
-    answer: "Sí. Si no has alcanzado tu límite de créditos al final del período de facturación, los créditos adicionales se transferirán al siguiente. Sin embargo, si cancelas o reduces tu membresía, todos los créditos no utilizados se perderán."
+    question: "What happens to my data if I cancel my subscription?",
+    answer: "Your workspace data remains accessible for 30 days after cancellation, during which time you can export any information you need. After 30 days, your data will be scheduled for deletion in accordance with our data retention policies."
   }
 ];
 
@@ -61,7 +61,7 @@ interface FAQSectionProps {
 }
 
 export function FAQSection({ 
-  title = "Preguntas Frecuentes",
+  title = "Frequently Asked Questions",
   subtitle,
   faqs = defaultFAQs,
   showSupport = true
@@ -112,14 +112,14 @@ export function FAQSection({
           animate={{ opacity: 1, y: 0 }}
           className="mt-20 text-center"
         >
-          <h3 className="text-2xl font-bold mb-4">¿Tienes más preguntas?</h3>
-          <p className="text-zinc-400 mb-6">¡Estamos aquí para ayudarte!</p>
+          <h3 className="text-2xl font-bold mb-4">Have more questions?</h3>
+          <p className="text-zinc-400 mb-6">We're here to help!</p>
           <Button
             variant="gradient"
             gradient="purple-blue"
             className="px-8 py-3 rounded-xl text-base font-medium"
           >
-            Contactar soporte
+            Contact Support
           </Button>
         </motion.div>
       )}
