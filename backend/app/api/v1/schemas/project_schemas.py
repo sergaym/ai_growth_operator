@@ -42,3 +42,28 @@ class ProjectAssetSummary(BaseModel):
     total_lipsync_videos: int = Field(0, description="Total number of lipsync videos")
     latest_asset_created_at: Optional[datetime] = Field(None, description="When the most recent asset was created")
 
+
+class ProjectResponse(BaseModel):
+    """Response model for a project."""
+    id: str = Field(..., description="Project unique identifier")
+    name: str = Field(..., description="Project name")
+    description: Optional[str] = Field(None, description="Project description")
+    workspace_id: int = Field(..., description="ID of the workspace this project belongs to")
+    created_by_user_id: int = Field(..., description="ID of the user who created this project")
+    status: ProjectStatus = Field(..., description="Current project status")
+    thumbnail_url: Optional[str] = Field(None, description="Project thumbnail image URL")
+    
+    # Timestamps
+    created_at: datetime = Field(..., description="When the project was created")
+    updated_at: datetime = Field(..., description="When the project was last updated")
+    last_activity_at: datetime = Field(..., description="When there was last activity in this project")
+    
+    # Asset summary (optional, only included when requested)
+    asset_summary: Optional[ProjectAssetSummary] = Field(None, description="Summary of project assets")
+    
+    # Additional metadata
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional project metadata")
+
+    class Config:
+        from_attributes = True
+
