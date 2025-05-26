@@ -89,3 +89,10 @@ class ProjectAssetResponse(BaseModel):
     metadata: Optional[Dict[str, Any]] = Field(None, description="Asset metadata")
 
 
+class ProjectAssetsResponse(BaseModel):
+    """Response model for project assets list."""
+    assets: List[ProjectAssetResponse] = Field(..., description="List of project assets")
+    total: int = Field(..., description="Total number of assets")
+    asset_summary: ProjectAssetSummary = Field(..., description="Summary of asset types")
+
+
