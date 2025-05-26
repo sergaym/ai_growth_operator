@@ -55,7 +55,7 @@ class Subscription(BaseModel):
 
 class PaymentMethod(BaseModel):
     id: int
-    user_id: int
+    user_id: str
     workspace_id: str
     type: str
     last4: Optional[str] = None
