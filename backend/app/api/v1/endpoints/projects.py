@@ -171,3 +171,54 @@ async def get_project(
         logger.error(f"Error getting project {project_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get project: {str(e)}")
 
+
+@router.put(
+    "/workspaces/{workspace_id}/projects/{project_id}",
+    response_model=ProjectResponse,
+    summary="Update project",
+    description="""
+    Update project information including name, description, status, and metadata.
+    
+    Updating a project automatically updates its last activity timestamp.
+    """
+)
+async def update_project(
+    workspace_id: int = Path(..., description="Workspace ID"),
+    project_id: str = Path(..., description="Project ID"),
+    request: ProjectUpdateRequest = ...,
+    db: Session = Depends(get_db)
+):
+    """
+    Update a project.
+    
+    Args:
+        workspace_id: Workspace ID
+        project_id: Project ID
+        request: Update request
+        db: Database session
+        
+    Returns:
+        Updated project information
+    """
+    try:
+        project = await project_service.update_project(
+            project_id=project_id,
+            workspace_id=workspace_id,
+            request=request,
+            db=db
+        )
+        
+        if not project:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Project {project_id} not found in workspace {workspace_id}"
+            )
+        
+        return project
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error updating project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to update project: {str(e)}")
+
