@@ -271,3 +271,50 @@ async def delete_project(
         raise HTTPException(status_code=500, detail=f"Failed to delete project: {str(e)}")
 
 
+@router.get(
+    "/workspaces/{workspace_id}/projects/{project_id}/assets",
+    response_model=ProjectAssetsResponse,
+    summary="Get project assets",
+    description="""
+    Get all assets (videos, audio, images, lipsync videos) associated with a project.
+    
+    Assets are returned sorted by creation date (newest first).
+    Optionally filter by asset type.
+    """
+)
+async def get_project_assets(
+    workspace_id: int = Path(..., description="Workspace ID"),
+    project_id: str = Path(..., description="Project ID"),
+    asset_type: Optional[str] = Query(
+        None, 
+        description="Filter by asset type (video, audio, image, lipsync_video)"
+    ),
+    db: Session = Depends(get_db)
+):
+    """
+    Get all assets for a project.
+    
+    Args:
+        workspace_id: Workspace ID
+        project_id: Project ID
+        asset_type: Optional asset type filter
+        db: Database session
+        
+    Returns:
+        Project assets and summary
+    """
+    try:
+        assets = await project_service.get_project_assets(
+            project_id=project_id,
+            workspace_id=workspace_id,
+            asset_type=asset_type,
+            db=db
+        )
+        return assets
+        
+    except ValueError as e:
+        raise HTTPException(status_code=404, detail=str(e))
+    except Exception as e:
+        logger.error(f"Error getting assets for project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get project assets: {str(e)}")
+
