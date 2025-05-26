@@ -16,3 +16,11 @@ class ProjectStatus(str, Enum):
     COMPLETED = "completed"
     ARCHIVED = "archived"
 
+
+class ProjectCreateRequest(BaseModel):
+    """Request to create a new project."""
+    name: str = Field(..., min_length=1, max_length=255, description="Project name")
+    description: Optional[str] = Field(None, max_length=1000, description="Project description")
+    thumbnail_url: Optional[str] = Field(None, description="Project thumbnail image URL")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional project metadata")
+
