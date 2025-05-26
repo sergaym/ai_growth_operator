@@ -48,7 +48,7 @@ class ProjectResponse(BaseModel):
     id: str = Field(..., description="Project unique identifier")
     name: str = Field(..., description="Project name")
     description: Optional[str] = Field(None, description="Project description")
-    workspace_id: int = Field(..., description="ID of the workspace this project belongs to")
+    workspace_id: str = Field(..., description="ID of the workspace this project belongs to")
     created_by_user_id: int = Field(..., description="ID of the user who created this project")
     status: ProjectStatus = Field(..., description="Current project status")
     thumbnail_url: Optional[str] = Field(None, description="Project thumbnail image URL")
