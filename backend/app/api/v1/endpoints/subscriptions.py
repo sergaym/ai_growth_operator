@@ -16,7 +16,7 @@ from app.core.config import settings
 from app.db.database import get_db
 from app.core.security import get_current_user
 from app.models import User, Workspace, Subscription as DBSubscription
-from app.schemas.models import (
+from app.schemas.subscription_schemas import (
     Subscription,
     SubscriptionPlanResponse,
     SubscriptionResponse,

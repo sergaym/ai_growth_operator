@@ -17,3 +17,6 @@ backend/app/repositories/__pycache__/*
 backend/app/schemas/__pycache__/*
 backend/playground/own_models/output/*
 backend/output/*
+backend/playground/own_models/*.png
+backend/playground/own_models/*.mp3
+frontend/demo.env

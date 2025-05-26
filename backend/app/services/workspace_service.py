@@ -7,7 +7,7 @@ from fastapi import HTTPException
 
 class WorkspaceService:
     @staticmethod
-    def get_user_workspaces(db: Session, user_id: int) -> List[Workspace]:
+    def get_user_workspaces(db: Session, user_id: str) -> List[Workspace]:
         return db.query(Workspace).join(Workspace.users).filter(Workspace.users.any(id=user_id)).all()
 
     @staticmethod
@@ -44,7 +44,7 @@ class WorkspaceService:
         return workspace
     
     @staticmethod
-    def user_has_access(db: Session, user_id: int, workspace_id: str) -> bool:
+    def user_has_access(db: Session, user_id: str, workspace_id: str) -> bool:
         """Check if a user has access to a workspace"""
         user_workspace = db.query(UserWorkspace).filter(
             UserWorkspace.user_id == user_id,
@@ -54,7 +54,7 @@ class WorkspaceService:
         return user_workspace is not None
     
     @staticmethod
-    def is_workspace_owner(db: Session, user_id: int, workspace_id: str) -> bool:
+    def is_workspace_owner(db: Session, user_id: str, workspace_id: str) -> bool:
         """Check if a user is the owner of a workspace"""
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
         if not workspace:
@@ -96,7 +96,7 @@ class WorkspaceService:
         return active_subscription, plan, user_count
     
     @staticmethod
-    def add_user_to_workspace(db: Session, user_id: int, workspace_id: str, role: str = "member") -> UserWorkspace:
+    def add_user_to_workspace(db: Session, user_id: str, workspace_id: str, role: str = "member") -> UserWorkspace:
         """Add a user to a workspace with subscription limit enforcement"""
         # Check if user is already in workspace
         existing = db.query(UserWorkspace).filter(
@@ -135,7 +135,7 @@ class WorkspaceService:
         return user_workspace
     
     @staticmethod
-    def remove_user_from_workspace(db: Session, user_id: int, workspace_id: str) -> bool:
+    def remove_user_from_workspace(db: Session, user_id: str, workspace_id: str) -> bool:
         """Remove a user from a workspace"""
         # Cannot remove the owner
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)

@@ -82,9 +82,9 @@ class BaseAsset(Base):
     local_url = Column(String)
     blob_url = Column(String)
     
-    # Relationship placeholders (nullable for now)
-    user_id = Column(String, nullable=True)
-    workspace_id = Column(String, nullable=True)
+    # Relationship placeholders (with proper foreign key constraints)
+    user_id = Column(String, ForeignKey("users.id"), nullable=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=True)
     
     # Status and metadata
     status = Column(String, default="completed")
@@ -173,7 +173,7 @@ class LipsyncVideo(BaseAsset):
 
 class UserWorkspace(Base):
     __tablename__ = "user_workspaces"
-    user_id = Column(Integer, ForeignKey("users.id"), primary_key=True)
+    user_id = Column(String, ForeignKey("users.id"), primary_key=True)
     workspace_id = Column(String, ForeignKey("workspaces.id"), primary_key=True)
     role = Column(String(50), nullable=False, default="member")
     active = Column(Boolean, nullable=False, default=False)
@@ -190,7 +190,7 @@ class Workspace(Base):
     id = Column(String, primary_key=True, index=True, default=generate_uuid)
     name = Column(String(100), nullable=False)
     type = Column(String(50), nullable=False)
-    owner_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    owner_id = Column(String, ForeignKey("users.id"), nullable=False)
     created_at = Column(DateTime, default=datetime.now, nullable=False)
     updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
     
@@ -220,13 +220,15 @@ class Workspace(Base):
         viewonly=True,
         uselist=False
     )
+    # Projects relationship
+    projects = relationship("Project", back_populates="workspace", cascade="all, delete-orphan")
 
     def __repr__(self):
         return f"<Workspace {self.id}: {self.name}>"
 
 class User(Base):
     __tablename__ = "users"
-    id = Column(Integer, primary_key=True, index=True)
+    id = Column(String, primary_key=True, index=True, default=generate_uuid)
     first_name = Column(String(100), nullable=False)
     last_name = Column(String(100), nullable=False)
     email = Column(String(255), unique=True, nullable=False, index=True)
@@ -253,6 +255,7 @@ class User(Base):
         back_populates="owner", 
         foreign_keys="[Workspace.owner_id]"
     )
+    created_projects = relationship("Project", back_populates="created_by")
 
     def __repr__(self):
         return f"<User {self.id}: {self.email}>"
@@ -295,6 +298,46 @@ def create_personal_workspace(mapper, connection, target):
 
 # Set up the event listener for after a User is inserted
 event.listen(User, 'after_insert', create_personal_workspace)
+
+
+# ----------------
+# Project Models
+# ----------------
+
+class ProjectStatus(str, enum.Enum):
+    """Status of a project."""
+    DRAFT = "draft"
+    IN_PROGRESS = "in_progress"
+    COMPLETED = "completed"
+    ARCHIVED = "archived"
+
+
+class Project(Base):
+    """Model for projects within workspaces."""
+    __tablename__ = "projects"
+    
+    id = Column(String, primary_key=True, default=generate_uuid)
+    name = Column(String(255), nullable=False)
+    description = Column(Text, nullable=True)
+    workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
+    created_by_user_id = Column(String, ForeignKey("users.id"), nullable=False)
+    status = Column(String(20), default=ProjectStatus.DRAFT.value, nullable=False)
+    thumbnail_url = Column(String, nullable=True)
+    
+    # Timestamps
+    created_at = Column(DateTime, default=datetime.now, nullable=False)
+    updated_at = Column(DateTime, default=datetime.now, onupdate=datetime.now, nullable=False)
+    last_activity_at = Column(DateTime, default=datetime.now, nullable=False)
+    
+    # Metadata
+    metadata_json = Column(JSON, nullable=True)
+    
+    # Relationships
+    workspace = relationship("Workspace", back_populates="projects")
+    created_by = relationship("User", back_populates="created_projects")
+    
+    def __repr__(self):
+        return f"<Project {self.id}: {self.name} ({self.status})>"
 
 
 # ----------------
@@ -380,7 +423,7 @@ class PaymentMethod(Base):
     __tablename__ = "payment_methods"
     
     id = Column(Integer, primary_key=True, index=True)
-    user_id = Column(Integer, ForeignKey("users.id"), nullable=False)
+    user_id = Column(String, ForeignKey("users.id"), nullable=False)
     workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=False)
     
     # Card details (stored in a PCI-compliant way)

@@ -5,7 +5,8 @@ from app.services.subscription_service import SubscriptionService
 from app.db.database import get_db
 from app.core.security import get_current_user
 from app.models import User
-from app.schemas.models import WorkspaceResponse, WorkspaceWithSubscriptionResponse, UserResponse
+from app.schemas.workspace_schemas import WorkspaceResponse, UserResponse
+from app.schemas.subscription_schemas import WorkspaceWithSubscriptionResponse
 from typing import List, Optional
 
 router = APIRouter()
