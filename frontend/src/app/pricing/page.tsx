@@ -1,12 +1,12 @@
 "use client";
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, Suspense } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { PricingPlans } from '@/components/pricing/PricingPlans';
 import { TrustSection } from '@/components/trust/TrustSection';
 import { FAQSection } from '@/components/faq/FAQSection';
 import { PageBackground } from "@/components/ui/PageBackground";
 
-export default function PricingPage() {
+function PricingContent() {
   const searchParams = useSearchParams();
   const [workspaceId, setWorkspaceId] = useState<number | undefined>(undefined);
   
@@ -46,5 +46,13 @@ export default function PricingPage() {
         </div>
       </div>
     </div>
+  );
+}
+
+export default function PricingPage() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PricingContent />
+    </Suspense>
   );
 }
