@@ -96,3 +96,12 @@ class ProjectAssetsResponse(BaseModel):
     asset_summary: ProjectAssetSummary = Field(..., description="Summary of asset types")
 
 
+class ProjectStatsResponse(BaseModel):
+    """Response model for project statistics."""
+    total_projects: int = Field(..., description="Total number of projects in workspace")
+    projects_by_status: Dict[str, int] = Field(..., description="Count of projects by status")
+    total_assets: int = Field(..., description="Total number of assets across all projects")
+    recent_activity_count: int = Field(..., description="Number of projects with recent activity")
+    most_active_projects: List[ProjectResponse] = Field(..., description="Projects with most recent activity")
+
+
