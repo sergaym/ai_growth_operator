@@ -1,5 +1,5 @@
 "use client";
-import React, { useEffect, useState, useMemo } from 'react';
+import React, { useEffect, useState, useMemo, Suspense } from 'react';
 import { motion } from 'framer-motion';
 import { Button } from "@/components/ui/button";
 import { CheckIcon, Loader2 } from 'lucide-react';
@@ -43,7 +43,7 @@ interface PricingPlansProps {
   onSuccess?: () => void;
 }
 
-export function PricingPlans({
+function PricingPlansContent({
   onSuccess
 }: PricingPlansProps): React.ReactElement {
   const router = useRouter();
@@ -425,3 +425,21 @@ export function PricingPlans({
     </div>
   );
 }
+
+export default function PricingPlans(props: PricingPlansProps): React.ReactElement {
+  return (
+    <Suspense fallback={
+      <div className="py-12 md:py-20 text-center">
+        <div className="flex flex-col items-center justify-center py-20">
+          <Loader2 className="w-10 h-10 text-primary animate-spin" />
+          <p className="mt-4 text-muted-foreground">Loading pricing plans...</p>
+        </div>
+      </div>
+    }>
+      <PricingPlansContent {...props} />
+    </Suspense>
+  );
+}
+
+// Named export for backward compatibility
+export { PricingPlans };
