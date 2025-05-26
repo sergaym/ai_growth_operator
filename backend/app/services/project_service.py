@@ -457,3 +457,87 @@ class ProjectService:
             self.logger.error(f"Error getting workspace stats for {workspace_id}: {str(e)}")
             raise
     
+    async def update_project_activity(
+        self,
+        project_id: str,
+        db: Session
+    ):
+        """
+        Update the last activity timestamp for a project.
+        Called when assets are created/updated in the project.
+        
+        Args:
+            project_id: Project ID
+            db: Database session
+        """
+        try:
+            project = db.query(Project).filter(Project.id == project_id).first()
+            if project:
+                project.update_activity()
+                db.commit()
+                self.logger.debug(f"Updated activity for project {project_id}")
+        except Exception as e:
+            self.logger.error(f"Error updating project activity {project_id}: {str(e)}")
+    
+    async def _get_project_asset_summary(
+        self,
+        project_id: str,
+        db: Session
+    ) -> ProjectAssetSummary:
+        """
+        Get asset summary for a project.
+        
+        Args:
+            project_id: Project ID
+            db: Database session
+            
+        Returns:
+            Asset summary
+        """
+        try:
+            # Count each asset type
+            total_images = db.query(Image).filter(Image.project_id == project_id).count()
+            total_videos = db.query(Video).filter(Video.project_id == project_id).count()
+            total_audio = db.query(Audio).filter(Audio.project_id == project_id).count()
+            total_lipsync_videos = db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id).count()
+            
+            # Find latest asset creation time
+            latest_times = []
+            
+            if total_images > 0:
+                latest_image = db.query(func.max(Image.created_at)).filter(Image.project_id == project_id).scalar()
+                if latest_image:
+                    latest_times.append(latest_image)
+            
+            if total_videos > 0:
+                latest_video = db.query(func.max(Video.created_at)).filter(Video.project_id == project_id).scalar()
+                if latest_video:
+                    latest_times.append(latest_video)
+            
+            if total_audio > 0:
+                latest_audio = db.query(func.max(Audio.created_at)).filter(Audio.project_id == project_id).scalar()
+                if latest_audio:
+                    latest_times.append(latest_audio)
+            
+            if total_lipsync_videos > 0:
+                latest_lipsync = db.query(func.max(LipsyncVideo.created_at)).filter(LipsyncVideo.project_id == project_id).scalar()
+                if latest_lipsync:
+                    latest_times.append(latest_lipsync)
+            
+            latest_asset_created_at = max(latest_times) if latest_times else None
+            
+            return ProjectAssetSummary(
+                total_videos=total_videos,
+                total_audio=total_audio,
+                total_images=total_images,
+                total_lipsync_videos=total_lipsync_videos,
+                latest_asset_created_at=latest_asset_created_at
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error getting asset summary for project {project_id}: {str(e)}")
+            return ProjectAssetSummary()
+
+
+# Global service instance
+project_service = ProjectService() 
