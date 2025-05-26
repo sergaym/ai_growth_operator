@@ -35,7 +35,7 @@ class ProjectService:
     async def create_project(
         self, 
         workspace_id: str,
-        user_id: int, 
+        user_id: str, 
         request: ProjectCreateRequest,
         db: Session
     ) -> ProjectResponse:
