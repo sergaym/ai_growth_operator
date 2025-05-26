@@ -1,5 +1,5 @@
 "use client";
-import React, { useState, createElement, useEffect, useRef } from "react";
+import React, { useState, createElement, useEffect, useRef, Suspense } from "react";
 import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
@@ -90,12 +90,11 @@ function WorkspaceSkeleton() {
   );
 }
 
-export default function PlaygroundOverview() {
-  const { workspaces, loading, error, refetchWorkspaces } = useWorkspaces();
-  const [searchQuery, setSearchQuery] = useState("");
+// Component to handle payment redirects and search params
+function PaymentHandler() {
+  const { refetchWorkspaces } = useWorkspaces();
   const searchParams = useSearchParams();
   const router = useRouter();
-
   const hasHandledRedirect = useRef(false);
 
   useEffect(() => {
@@ -145,6 +144,13 @@ export default function PlaygroundOverview() {
       toast.info('Payment was cancelled. You can try again if you change your mind.');
     }
   }, [searchParams, router, refetchWorkspaces]);
+
+  return null; // This component doesn't render anything
+}
+
+function PlaygroundOverviewContent() {
+  const { workspaces, loading, error } = useWorkspaces();
+  const [searchQuery, setSearchQuery] = useState("");
 
   // Filter workspaces based on search query
   const filteredWorkspaces = searchQuery && workspaces
@@ -249,5 +255,14 @@ export default function PlaygroundOverview() {
         )}
       </div>
     </PlaygroundLayout>
+  );
+}
+
+export default function PlaygroundOverview() {
+  return (
+    <Suspense fallback={<div>Loading...</div>}>
+      <PaymentHandler />
+      <PlaygroundOverviewContent />
+    </Suspense>
   );
 }
