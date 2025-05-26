@@ -35,7 +35,7 @@ logger = logging.getLogger(__name__)
     """
 )
 async def create_project(
-    workspace_id: int = Path(..., description="Workspace ID to create project in"),
+    workspace_id: str = Path(..., description="Workspace ID to create project in"),
     request: ProjectCreateRequest = ...,
     user_id: int = Query(..., description="ID of the user creating the project"),
     db: Session = Depends(get_db)
@@ -80,7 +80,7 @@ async def create_project(
     """
 )
 async def list_projects(
-    workspace_id: int = Path(..., description="Workspace ID to list projects from"),
+    workspace_id: str = Path(..., description="Workspace ID to list projects from"),
     page: int = Query(1, ge=1, description="Page number (1-based)"),
     per_page: int = Query(20, ge=1, le=100, description="Number of projects per page"),
     status: Optional[str] = Query(None, description="Filter by project status"),
@@ -131,7 +131,7 @@ async def list_projects(
     """
 )
 async def get_project(
-    workspace_id: int = Path(..., description="Workspace ID"),
+    workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     include_assets: bool = Query(False, description="Include asset summary"),
     db: Session = Depends(get_db)
@@ -182,7 +182,7 @@ async def get_project(
     """
 )
 async def update_project(
-    workspace_id: int = Path(..., description="Workspace ID"),
+    workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     request: ProjectUpdateRequest = ...,
     db: Session = Depends(get_db)
@@ -233,7 +233,7 @@ async def update_project(
     """
 )
 async def delete_project(
-    workspace_id: int = Path(..., description="Workspace ID"),
+    workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     db: Session = Depends(get_db)
 ):
@@ -282,7 +282,7 @@ async def delete_project(
     """
 )
 async def get_project_assets(
-    workspace_id: int = Path(..., description="Workspace ID"),
+    workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     asset_type: Optional[str] = Query(
         None, 
@@ -330,7 +330,7 @@ async def get_project_assets(
     """
 )
 async def get_workspace_project_stats(
-    workspace_id: int = Path(..., description="Workspace ID"),
+    workspace_id: str = Path(..., description="Workspace ID"),
     db: Session = Depends(get_db)
 ):
     """
