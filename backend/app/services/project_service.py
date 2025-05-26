@@ -307,3 +307,78 @@ class ProjectService:
             db.rollback()
             self.logger.error(f"Error deleting project {project_id}: {str(e)}")
             raise
+    
+    async def get_project_assets(
+        self,
+        project_id: str,
+        workspace_id: int,
+        asset_type: Optional[str] = None,
+        db: Session = None
+    ) -> ProjectAssetsResponse:
+        """
+        Get all assets for a project.
+        
+        Args:
+            project_id: Project ID
+            workspace_id: Workspace ID
+            asset_type: Filter by asset type (video, audio, image, lipsync_video)
+            db: Database session
+            
+        Returns:
+            Project assets response
+        """
+        try:
+            if db is None:
+                db = next(get_db())
+            
+            # Verify project exists and belongs to workspace
+            project = db.query(Project).filter(
+                and_(
+                    Project.id == project_id,
+                    Project.workspace_id == workspace_id
+                )
+            ).first()
+            
+            if not project:
+                raise ValueError(f"Project {project_id} not found in workspace {workspace_id}")
+            
+            assets = []
+            
+            # Collect all asset types
+            asset_queries = [
+                (db.query(Image).filter(Image.project_id == project_id), "image"),
+                (db.query(Video).filter(Video.project_id == project_id), "video"),
+                (db.query(Audio).filter(Audio.project_id == project_id), "audio"),
+                (db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id), "lipsync_video"),
+            ]
+            
+            for query, asset_type_name in asset_queries:
+                if asset_type is None or asset_type == asset_type_name:
+                    for asset in query.all():
+                        asset_response = ProjectAssetResponse(
+                            id=asset.id,
+                            type=asset_type_name,
+                            status=asset.status,
+                            created_at=asset.created_at,
+                            updated_at=asset.updated_at,
+                            file_url=asset.file_url,
+                            thumbnail_url=getattr(asset, 'preview_image_url', None),
+                            metadata=asset.metadata_json
+                        )
+                        assets.append(asset_response)
+            
+            # Sort by creation date (newest first)
+            assets.sort(key=lambda x: x.created_at, reverse=True)
+            
+            # Get asset summary
+            asset_summary = await self._get_project_asset_summary(project_id, db)
+            
+            return ProjectAssetsResponse(
+                assets=assets,
+                total=len(assets),
+                asset_summary=asset_summary
+            )
+            
+        except Exception as e:
+            self.logger.error(f"Error getting assets for project {project_id}: {str(e)}")
+            raise
