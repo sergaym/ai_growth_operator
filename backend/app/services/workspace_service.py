@@ -11,11 +11,11 @@ class WorkspaceService:
         return db.query(Workspace).join(Workspace.users).filter(Workspace.users.any(id=user_id)).all()
 
     @staticmethod
-    def get_workspace_by_id(db: Session, workspace_id: int) -> Optional[Workspace]:
+    def get_workspace_by_id(db: Session, workspace_id: str) -> Optional[Workspace]:
         return db.query(Workspace).filter(Workspace.id == workspace_id).first()
     
     @staticmethod
-    def get_workspace_with_subscription(db: Session, workspace_id: int) -> Optional[Dict[str, Any]]:
+    def get_workspace_with_subscription(db: Session, workspace_id: str) -> Optional[Dict[str, Any]]:
         """Get workspace with its active subscription details"""
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
         if not workspace:
@@ -33,7 +33,7 @@ class WorkspaceService:
         }
 
     @staticmethod
-    def update_workspace_name(db: Session, workspace_id: int, new_name: str) -> Workspace:
+    def update_workspace_name(db: Session, workspace_id: str, new_name: str) -> Workspace:
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
         if not workspace:
             raise ValueError("Workspace not found")
@@ -44,7 +44,7 @@ class WorkspaceService:
         return workspace
     
     @staticmethod
-    def user_has_access(db: Session, user_id: int, workspace_id: int) -> bool:
+    def user_has_access(db: Session, user_id: int, workspace_id: str) -> bool:
         """Check if a user has access to a workspace"""
         user_workspace = db.query(UserWorkspace).filter(
             UserWorkspace.user_id == user_id,
@@ -54,7 +54,7 @@ class WorkspaceService:
         return user_workspace is not None
     
     @staticmethod
-    def is_workspace_owner(db: Session, user_id: int, workspace_id: int) -> bool:
+    def is_workspace_owner(db: Session, user_id: int, workspace_id: str) -> bool:
         """Check if a user is the owner of a workspace"""
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
         if not workspace:
@@ -63,7 +63,7 @@ class WorkspaceService:
         return workspace.owner_id == user_id
     
     @staticmethod
-    def get_workspace_users(db: Session, workspace_id: int) -> List[User]:
+    def get_workspace_users(db: Session, workspace_id: str) -> List[User]:
         """Get all users in a workspace"""
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
         if not workspace:
@@ -72,12 +72,12 @@ class WorkspaceService:
         return workspace.users
     
     @staticmethod
-    def count_workspace_users(db: Session, workspace_id: int) -> int:
+    def count_workspace_users(db: Session, workspace_id: str) -> int:
         """Count the number of users in a workspace"""
         return db.query(UserWorkspace).filter(UserWorkspace.workspace_id == workspace_id).count()
     
     @staticmethod
-    def get_workspace_subscription_details(db: Session, workspace_id: int) -> Tuple[Optional[Subscription], Optional[SubscriptionPlan], int]:
+    def get_workspace_subscription_details(db: Session, workspace_id: str) -> Tuple[Optional[Subscription], Optional[SubscriptionPlan], int]:
         """Get workspace subscription details including the plan and current user count"""
         # Get active subscription
         active_subscription = db.query(Subscription).filter(
@@ -96,7 +96,7 @@ class WorkspaceService:
         return active_subscription, plan, user_count
     
     @staticmethod
-    def add_user_to_workspace(db: Session, user_id: int, workspace_id: int, role: str = "member") -> UserWorkspace:
+    def add_user_to_workspace(db: Session, user_id: int, workspace_id: str, role: str = "member") -> UserWorkspace:
         """Add a user to a workspace with subscription limit enforcement"""
         # Check if user is already in workspace
         existing = db.query(UserWorkspace).filter(
@@ -135,7 +135,7 @@ class WorkspaceService:
         return user_workspace
     
     @staticmethod
-    def remove_user_from_workspace(db: Session, user_id: int, workspace_id: int) -> bool:
+    def remove_user_from_workspace(db: Session, user_id: int, workspace_id: str) -> bool:
         """Remove a user from a workspace"""
         # Cannot remove the owner
         workspace = WorkspaceService.get_workspace_by_id(db, workspace_id)
