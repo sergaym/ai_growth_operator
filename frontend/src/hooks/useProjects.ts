@@ -123,3 +123,38 @@ export function useProjects(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Create a new project
+  const createProject = useCallback(async (
+    request: ProjectCreateRequest
+  ): Promise<Project | null> => {
+    if (!workspaceId || !user.isAuthenticated || !user.user?.id) {
+      setError('User not authenticated or workspace not specified');
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects`;
+      const project = await apiClient<Project>(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      // Add the new project to the current list
+      setProjects(prev => [project, ...prev]);
+      return project;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create project';
+      setError(errorMessage);
+      console.error('Error creating project:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated, user.user?.id]);
+
