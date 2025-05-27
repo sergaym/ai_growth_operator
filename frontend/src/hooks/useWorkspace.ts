@@ -134,6 +134,37 @@ export function useWorkspace(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Update workspace name
+  const updateWorkspaceName = useCallback(async (newName: string): Promise<Workspace | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/name?new_name=${encodeURIComponent(newName)}`;
+      const updatedWorkspace = await apiClient<Workspace>(url, {
+        method: 'PUT',
+      });
+
+      // Update local state
+      if (workspace) {
+        setWorkspace({ ...workspace, ...updatedWorkspace });
+      }
+
+      return updatedWorkspace;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update workspace name';
+      setError(errorMessage);
+      console.error('Error updating workspace name:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated, workspace]);
+
 
 function getAccessToken() {
   if (typeof window !== 'undefined') {
