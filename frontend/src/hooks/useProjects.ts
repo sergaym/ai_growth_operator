@@ -275,3 +275,56 @@ export function useProjects(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Get workspace project statistics
+  const getWorkspaceStats = useCallback(async (): Promise<ProjectStats | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/stats`;
+      const statsData = await apiClient<ProjectStats>(url);
+      
+      setStats(statsData);
+      return statsData;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace stats';
+      setError(errorMessage);
+      console.error('Error fetching workspace stats:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
+  // Auto-fetch projects when workspaceId changes
+  useEffect(() => {
+    if (workspaceId && user.isAuthenticated) {
+      listProjects({ include_assets: true });
+    }
+  }, [workspaceId, user.isAuthenticated, listProjects]);
+
+  return {
+    // State
+    projects,
+    loading,
+    error,
+    stats,
+    
+    // Actions
+    listProjects,
+    createProject,
+    getProject,
+    updateProject,
+    deleteProject,
+    getProjectAssets,
+    getWorkspaceStats,
+    
+    // Utilities
+    refreshProjects: () => listProjects({ include_assets: true }),
+    clearError: () => setError(null),
+  };
+} 
