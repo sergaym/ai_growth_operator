@@ -157,13 +157,45 @@ export default function PlaygroundLayout({
             )}
             
             <div className="space-y-6">
-              <div>
-                <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-                {description && (
-                  <p className="text-muted-foreground mt-2">
-                    {description}
-                  </p>
-                )}
+              {/* Enhanced Header Section */}
+              <div className="space-y-4">
+                {/* Back button and title row */}
+                <div className="flex items-start justify-between">
+                  <div className="flex items-start gap-4 min-w-0 flex-1">
+                    {showBackButton && (
+                      <Button 
+                        variant="ghost" 
+                        size="sm" 
+                        onClick={handleBack}
+                        className="gap-2 shrink-0 mt-1"
+                      >
+                        <ArrowLeft className="h-4 w-4" />
+                        Back
+                      </Button>
+                    )}
+                    
+                    <div className="min-w-0 flex-1">
+                      <div className="flex items-center gap-3 mb-2 flex-wrap">
+                        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+                        {status && getStatusBadge(status)}
+                      </div>
+                      
+                      {subtitle && (
+                        <p className="text-muted-foreground text-sm mb-2">{subtitle}</p>
+                      )}
+                      
+                      {description && (
+                        <p className="text-muted-foreground">{description}</p>
+                      )}
+                    </div>
+                  </div>
+                  
+                  {headerActions && (
+                    <div className="shrink-0 ml-4">
+                      {headerActions}
+                    </div>
+                  )}
+                </div>
               </div>
               
               <div className="space-y-8">
