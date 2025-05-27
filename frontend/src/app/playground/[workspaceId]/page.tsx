@@ -77,10 +77,27 @@ export default function WorkspaceProjects() {
     switch (status) {
       case "completed":
         return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
-      case "in-progress":
+      case "in_progress":
         return <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">In Progress</span>;
       case "draft":
         return <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-1 rounded-full">Draft</span>;
+      case "archived":
+        return <span className="text-xs bg-gray-500/10 text-gray-500 px-2 py-1 rounded-full">Archived</span>;
+      default:
+        return null;
+    }
+  };
+
+  const getAssetIcon = (type: string, className: string = "h-3 w-3") => {
+    switch (type) {
+      case 'video':
+        return <Video className={className} />;
+      case 'audio':
+        return <Music className={className} />;
+      case 'image':
+        return <Image className={className} />;
+      case 'lipsync_video':
+        return <FileVideo className={className} />;
       default:
         return null;
     }
