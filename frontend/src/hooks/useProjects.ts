@@ -76,3 +76,50 @@ export interface ProjectStats {
   most_active_projects: Project[];
 }
 
+export function useProjects(workspaceId?: string) {
+  const { user } = useAuth();
+  const [projects, setProjects] = useState<Project[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [stats, setStats] = useState<ProjectStats | null>(null);
+
+  // List projects in a workspace
+  const listProjects = useCallback(async (
+    options: {
+      page?: number;
+      per_page?: number;
+      status?: string;
+      search?: string;
+      include_assets?: boolean;
+    } = {}
+  ): Promise<ProjectListResponse | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = new URLSearchParams();
+      if (options.page) params.append('page', options.page.toString());
+      if (options.per_page) params.append('per_page', options.per_page.toString());
+      if (options.status) params.append('status', options.status);
+      if (options.search) params.append('search', options.search);
+      if (options.include_assets) params.append('include_assets', 'true');
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects?${params}`;
+      const data = await apiClient<ProjectListResponse>(url);
+      
+      setProjects(data.projects);
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch projects';
+      setError(errorMessage);
+      console.error('Error fetching projects:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
