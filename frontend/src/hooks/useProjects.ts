@@ -186,3 +186,38 @@ export function useProjects(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Update a project
+  const updateProject = useCallback(async (
+    projectId: string,
+    request: ProjectUpdateRequest
+  ): Promise<Project | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}`;
+      const updatedProject = await apiClient<Project>(url, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(request),
+      });
+
+      // Update the project in the current list
+      setProjects(prev => prev.map(p => p.id === projectId ? updatedProject : p));
+      return updatedProject;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update project';
+      setError(errorMessage);
+      console.error('Error updating project:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
