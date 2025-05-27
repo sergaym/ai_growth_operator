@@ -219,6 +219,59 @@ export function useWorkspace(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated, getWorkspaceUsers]);
 
+  // Remove user from workspace
+  const removeUserFromWorkspace = useCallback(async (userId: string): Promise<boolean> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users/${userId}`;
+      await apiClient(url, { method: 'DELETE' });
+
+      // Refresh workspace users
+      await getWorkspaceUsers();
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to remove user from workspace';
+      setError(errorMessage);
+      console.error('Error removing user from workspace:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated, getWorkspaceUsers]);
+
+  // Auto-fetch workspace details when workspaceId changes
+  useEffect(() => {
+    if (workspaceId && user.isAuthenticated) {
+      getWorkspaceDetails();
+    }
+  }, [workspaceId, user.isAuthenticated, getWorkspaceDetails]);
+
+  return {
+    // State
+    workspace,
+    workspaceUsers,
+    loading,
+    error,
+
+    // Actions
+    getWorkspaceDetails,
+    updateWorkspaceName,
+    getWorkspaceUsers,
+    addUserToWorkspace,
+    removeUserFromWorkspace,
+
+    // Utilities
+    refreshWorkspace: getWorkspaceDetails,
+    refreshUsers: getWorkspaceUsers,
+    clearError: () => setError(null),
+  };
+}
 
 function getAccessToken() {
   if (typeof window !== 'undefined') {
