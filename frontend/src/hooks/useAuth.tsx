@@ -197,3 +197,35 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Logout function
+  const logout = useCallback((redirectUrl?: string) => {
+    try {
+      setLoading(true);
+      
+      // Clear all client-side auth state
+      if (typeof window !== 'undefined') {
+        // Clear localStorage tokens
+        window.localStorage.removeItem('access_token');
+        window.localStorage.removeItem('refresh_token');
+        
+        // Clear all potential auth cookies
+        document.cookie = 'auth-token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'refresh_token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+        document.cookie = 'token=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;';
+      }
+      
+      // Reset user state
+      setUser({ isAuthenticated: false, user: null });
+      if (redirectUrl) {
+        router.push(redirectUrl);
+      }
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [router]);
+
