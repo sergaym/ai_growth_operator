@@ -124,9 +124,18 @@ export default function PlaygroundLayout({
                 </>
               )}
               
+              {isProject && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>Projects</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
+              
               <BreadcrumbSeparator />
               <BreadcrumbItem>
-                <BreadcrumbPage>{title}</BreadcrumbPage>
+                <BreadcrumbPage>{isProject ? (projectName || title) : title}</BreadcrumbPage>
               </BreadcrumbItem>
             </BreadcrumbList>
           </Breadcrumb>
