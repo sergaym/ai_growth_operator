@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func, and_, or_
 
 from app.db.database import get_db
-from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo
+from app.models import Project, Workspace, User, Video, Audio, LipsyncVideo
 from app.api.v1.schemas import (
     ProjectCreateRequest,
     ProjectUpdateRequest,
@@ -322,7 +322,7 @@ class ProjectService:
         Args:
             project_id: Project ID
             workspace_id: Workspace ID
-            asset_type: Filter by asset type (video, audio, image, lipsync_video)
+            asset_type: Filter by asset type (video, audio, lipsync_video)
             db: Database session
             
         Returns:
@@ -347,7 +347,6 @@ class ProjectService:
             
             # Collect all asset types
             asset_queries = [
-                (db.query(Image).filter(Image.project_id == project_id), "image"),
                 (db.query(Video).filter(Video.project_id == project_id), "video"),
                 (db.query(Audio).filter(Audio.project_id == project_id), "audio"),
                 (db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id), "lipsync_video"),
@@ -421,7 +420,6 @@ class ProjectService:
             
             total_assets = 0
             if project_ids:
-                total_assets += db.query(Image).filter(Image.project_id.in_(project_ids)).count()
                 total_assets += db.query(Video).filter(Video.project_id.in_(project_ids)).count()
                 total_assets += db.query(Audio).filter(Audio.project_id.in_(project_ids)).count()
                 total_assets += db.query(LipsyncVideo).filter(LipsyncVideo.project_id.in_(project_ids)).count()
@@ -497,18 +495,12 @@ class ProjectService:
         """
         try:
             # Count each asset type
-            total_images = db.query(Image).filter(Image.project_id == project_id).count()
             total_videos = db.query(Video).filter(Video.project_id == project_id).count()
             total_audio = db.query(Audio).filter(Audio.project_id == project_id).count()
             total_lipsync_videos = db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id).count()
             
             # Find latest asset creation time
             latest_times = []
-            
-            if total_images > 0:
-                latest_image = db.query(func.max(Image.created_at)).filter(Image.project_id == project_id).scalar()
-                if latest_image:
-                    latest_times.append(latest_image)
             
             if total_videos > 0:
                 latest_video = db.query(func.max(Video.created_at)).filter(Video.project_id == project_id).scalar()
@@ -530,7 +522,7 @@ class ProjectService:
             return ProjectAssetSummary(
                 total_videos=total_videos,
                 total_audio=total_audio,
-                total_images=total_images,
+                total_images=0,  # Projects should not have images
                 total_lipsync_videos=total_lipsync_videos,
                 latest_asset_created_at=latest_asset_created_at
             )
