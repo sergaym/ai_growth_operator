@@ -158,3 +158,31 @@ export function useProjects(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated, user.user?.id]);
 
+  // Get a specific project
+  const getProject = useCallback(async (
+    projectId: string,
+    includeAssets: boolean = false
+  ): Promise<Project | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = includeAssets ? '?include_assets=true' : '';
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}${params}`;
+      const project = await apiClient<Project>(url);
+      
+      return project;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project';
+      setError(errorMessage);
+      console.error('Error fetching project:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
