@@ -33,19 +33,15 @@ export function BillingSection({ workspaceId, onSuccess }: BillingSectionProps) 
     const fetchSubscription = async () => {
       try {
         setLoading(true);
-        
-        // Ensure workspaceId is a number for API calls
-        const numericWorkspaceId = typeof workspaceId === 'string' ? parseInt(workspaceId) : workspaceId;
-        
         // First try to get the subscription from the workspace
-        const workspace = await subscriptionService.getWorkspaceWithSubscription(numericWorkspaceId);
+        const workspace = await subscriptionService.getWorkspaceWithSubscription(workspaceId);
         
         if (workspace.active_subscription) {
           setSubscription(workspace.active_subscription);
         } else {
           // If not found in workspace, try the direct subscription endpoint
           try {
-            const sub = await subscriptionService.getWorkspaceSubscription(numericWorkspaceId);
+            const sub = await subscriptionService.getWorkspaceSubscription(workspaceId);
             setSubscription(sub);
           } catch (err) {
             // Subscription not found is okay - the workspace might not have one yet
@@ -73,9 +69,7 @@ export function BillingSection({ workspaceId, onSuccess }: BillingSectionProps) 
   const handleManageSubscription = async () => {
     try {
       setPortalLoading(true);
-      // Ensure workspaceId is a number for API calls
-      const numericWorkspaceId = typeof workspaceId === 'string' ? parseInt(workspaceId) : workspaceId;
-      const portal = await subscriptionService.createCustomerPortalSession(numericWorkspaceId);
+      const portal = await subscriptionService.createCustomerPortalSession(workspaceId);
       window.location.href = portal.portal_url;
     } catch (error) {
       console.error('Error opening customer portal:', error);

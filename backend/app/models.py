@@ -266,18 +266,18 @@ class User(Base):
 
 def create_personal_workspace(mapper, connection, target):
     """Create a personal workspace for a new user."""
-    # Use the connection to execute raw SQL to avoid session flushing issues
     from sqlalchemy.sql import text
     
-    # Insert workspace with timestamps
     current_time = datetime.now()
+    workspace_uuid = generate_uuid()
     result = connection.execute(
         text("""
-            INSERT INTO workspaces (name, type, owner_id, created_at, updated_at)
-            VALUES (:name, :type, :owner_id, :created_at, :updated_at)
+            INSERT INTO workspaces (id, name, type, owner_id, created_at, updated_at)
+            VALUES (:id, :name, :type, :owner_id, :created_at, :updated_at)
             RETURNING id
         """),
         {
+            "id": workspace_uuid,
             "name": "Personal Workspace",
             "type": "personal",
             "owner_id": target.id,

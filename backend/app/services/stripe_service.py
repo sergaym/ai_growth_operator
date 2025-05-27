@@ -83,7 +83,7 @@ class StripeService:
     @staticmethod
     def create_checkout_session(
         db: Session, 
-        workspace_id: int, 
+        workspace_id: str, 
         plan_id: int,
         success_url: str = None
     ) -> Dict[str, Any]:
@@ -497,7 +497,7 @@ class StripeService:
         return subscription
     
     @staticmethod
-    def get_customer_portal_session(db: Session, workspace_id: int) -> Dict[str, Any]:
+    def get_customer_portal_session(db: Session, workspace_id: str) -> Dict[str, Any]:
         """
         Create a Stripe customer portal session for managing subscriptions.
         Returns the portal URL.
