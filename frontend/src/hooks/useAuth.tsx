@@ -84,3 +84,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  // Check if the user is authenticated on mount (client side only)
+  useEffect(() => {
+    // Prevent multiple initialization calls
+    if (isInitialized) return;
+
+    const checkAuth = async () => {
+      try {
+        // First check if we have an access token
+        const accessToken = getAccessToken();
+        if (!accessToken) {
+          setUser({ isAuthenticated: false, user: null });
+          setLoading(false);
+          setIsInitialized(true);
+          return;
+        }
+
+        // Try to validate the token with the backend
+        try {
+          await getUserProfile(accessToken);
+          setLoading(false);
+          setIsInitialized(true);
+        } catch (err) {
+          console.log('Token validation failed, trying to refresh');
+          // If token is invalid, try to refresh it
+          const newToken = await refreshAccessToken();
+          if (!newToken) {
+            setUser({ isAuthenticated: false, user: null });
+            setLoading(false);
+            setIsInitialized(true);
+            return;
+          }
+          // Try to get profile with the new token
+          await getUserProfile(newToken);
+          setLoading(false);
+          setIsInitialized(true);
+        }
+      } catch (err) {
+        console.error('Auth check error:', err);
+        setUser({ isAuthenticated: false, user: null });
+        setLoading(false);
+        setIsInitialized(true);
+      }
+    };
+
+    // Only run in the browser
+    if (typeof window !== 'undefined') {
+      checkAuth();
+    } else {
+      // In SSR, just set loading to false
+      setLoading(false);
+      setIsInitialized(true);
+    }
+  }, [getUserProfile, isInitialized]);
+
