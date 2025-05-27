@@ -186,3 +186,40 @@ async def update_project(
         logger.error(f"Error updating project {project_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to update project: {str(e)}")
 
+
+@router.delete(
+    "/{workspace_id}/projects/{project_id}",
+    tags=["Projects"],
+    summary="Delete project",
+    description="Delete a project from the workspace."
+)
+async def delete_project(
+    workspace_id: str = Path(..., description="Workspace ID"),
+    project_id: str = Path(..., description="Project ID"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Delete a project."""
+    _check_workspace_access(db, current_user.id, workspace_id)
+    
+    try:
+        success = await project_service.delete_project(
+            project_id=project_id,
+            workspace_id=workspace_id,
+            db=db
+        )
+        
+        if not success:
+            raise HTTPException(
+                status_code=404,
+                detail=f"Project {project_id} not found in workspace {workspace_id}"
+            )
+        
+        return {"message": f"Project {project_id} deleted successfully"}
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error deleting project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to delete project: {str(e)}")
+
