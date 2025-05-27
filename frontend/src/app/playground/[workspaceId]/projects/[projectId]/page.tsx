@@ -23,10 +23,27 @@ import {
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
+  const router = useRouter();
   const stringWorkspaceId = workspaceId as string || '';
   const stringProjectId = projectId as string || '';
+  
   const { workspaces } = useWorkspaces();
   const { user } = useAuth();
+  const { 
+    getProject, 
+    getProjectAssets, 
+    updateProject,
+    deleteProject,
+    createProject,
+    loading: projectsLoading,
+    error: projectsError 
+  } = useProjects(stringWorkspaceId);
+  
+  const [project, setProject] = useState<Project | null>(null);
+  const [assets, setAssets] = useState<any>(null);
+  const [loading, setLoading] = useState(true);
+  const [isCreatingProject, setIsCreatingProject] = useState(false);
+
   const currentWorkspace = workspaces.find(ws => ws.id === stringWorkspaceId);
 
   const workspace = currentWorkspace 
