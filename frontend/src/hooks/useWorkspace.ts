@@ -5,9 +5,26 @@ import { useRouter } from 'next/navigation';
 import { useAuth } from './useAuth';
 import { apiClient } from '../services/apiClient';
 
+// Workspace interfaces matching the backend schemas
 export interface Workspace {
   id: string;
   name: string;
+  type: string;
+  owner_id: string;
+  created_at: string;
+  updated_at: string;
+  stripe_customer_id?: string;
+}
+
+export interface User {
+  id: string;
+  first_name: string;
+  last_name: string;
+  email: string;
+  role?: string;
+  created_at: string;
+  updated_at: string;
+}
 }
 
 export function useWorkspaces() {
