@@ -1,13 +1,25 @@
 "use client";
 
-import React, { useState } from "react";
-import { useParams } from "next/navigation";
+import React, { useState, useEffect } from "react";
+import { useParams, useRouter } from "next/navigation";
 import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useProjects, type Project } from "@/hooks/useProjects";
 import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { VideoPreview } from "@/components/chat/VideoPreview";
 import { GestureChat } from "@/components/chat/GestureChat";
+import { Button } from "@/components/ui/button";
+import { 
+  Settings,
+  MoreHorizontal 
+} from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 export default function ProjectPage() {
   const { workspaceId, projectId } = useParams();
