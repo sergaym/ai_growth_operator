@@ -50,6 +50,92 @@ export default function ProjectPage() {
     ? { id: currentWorkspace.id, name: currentWorkspace.name }
     : { id: stringWorkspaceId, name: "Workspace" };
 
+  // Generate a unique project name based on timestamp
+  const generateProjectName = () => {
+    const now = new Date();
+    const timestamp = now.toLocaleString('en-US', {
+      month: 'short',
+      day: 'numeric',
+      hour: '2-digit',
+      minute: '2-digit',
+      hour12: false
+    });
+    return `New Project ${timestamp}`;
+  };
+
+  // Auto-create project if it doesn't exist
+  const autoCreateProject = async () => {
+    if (!stringWorkspaceId || !stringProjectId || isCreatingProject) return null;
+    
+    setIsCreatingProject(true);
+    try {
+      const newProject = await createProject({
+        name: generateProjectName(),
+        description: "Automatically created project for video generation",
+        metadata: {
+          auto_created: true,
+          created_from: "direct_access"
+        }
+      });
+      
+      if (newProject) {
+        console.log(`Auto-created project: ${newProject.name} (${newProject.id})`);
+        return newProject;
+      }
+    } catch (error) {
+      console.error('Error auto-creating project:', error);
+    } finally {
+      setIsCreatingProject(false);
+    }
+    return null;
+  };
+
+  // Load project data or create if not exists
+  useEffect(() => {
+    const loadOrCreateProject = async () => {
+      if (!stringWorkspaceId || !stringProjectId) return;
+      
+      setLoading(true);
+      try {
+        // First, try to load the existing project
+        const projectData = await getProject(stringProjectId, true);
+        
+        if (projectData) {
+          // Project exists, load its data
+          const assetsData = await getProjectAssets(stringProjectId);
+          setProject(projectData);
+          setAssets(assetsData);
+        } else {
+          // Project doesn't exist, auto-create it
+          console.log(`Project ${stringProjectId} not found, auto-creating...`);
+          const newProject = await autoCreateProject();
+          
+          if (newProject) {
+            setProject(newProject);
+            setAssets(null); // New project has no assets yet
+          } else {
+            console.error('Failed to auto-create project');
+          }
+        }
+      } catch (error) {
+        console.error('Error loading/creating project:', error);
+        
+        // If there's an error loading, try to auto-create
+        if (!isCreatingProject) {
+          const newProject = await autoCreateProject();
+          if (newProject) {
+            setProject(newProject);
+            setAssets(null);
+          }
+        }
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadOrCreateProject();
+  }, [stringWorkspaceId, stringProjectId, getProject, getProjectAssets]);
+
   // Video generation state
   const { 
     generateVideo, 
