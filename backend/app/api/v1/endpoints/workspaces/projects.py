@@ -240,7 +240,7 @@ async def get_project_assets(
     project_id: str = Path(..., description="Project ID"),
     asset_type: Optional[str] = Query(
         None, 
-        description="Filter by asset type (video, audio, image, lipsync_video)"
+        description="Filter by asset type (video, audio, lipsync_video)"
     ),
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
