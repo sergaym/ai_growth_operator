@@ -49,3 +49,38 @@ interface AuthContextType {
   getUserProfile: (accessToken: string) => Promise<void>;
 }
 
+// Create the AuthContext
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// AuthProvider component
+export function AuthProvider({ children }: { children: ReactNode }) {
+  const router = useRouter();
+  const [user, setUser] = useState<AuthUser>({ isAuthenticated: false, user: null });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
+
+  const getUserProfile = useCallback(async (accessToken: string): Promise<void> => {
+    try {
+      const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`, {
+        headers: {
+          'Authorization': `Bearer ${accessToken}`
+        }
+      });
+      
+      setUser({
+        isAuthenticated: true,
+        user: {
+          id: userData.id,
+          email: userData.email,
+          first_name: userData.first_name,
+          last_name: userData.last_name,
+          workspaces: userData.workspaces || []
+        }
+      });
+    } catch (err) {
+      console.error('Error fetching user profile:', err);
+      throw err;
+    }
+  }, []);
+
