@@ -213,33 +213,12 @@ export default function WorkspaceProjects() {
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={handleNewProject} className="gap-1.5">
-                <PlusCircle className="h-4 w-4" />
+              <Button onClick={createNewProject} className="gap-1.5">
+                <FolderPlus className="h-4 w-4" />
                 <span>New Project</span>
               </Button>
             </div>
           </div>
-
-          {/* Featured Card */}
-          {/* Temporarily hidden API Demo section
-          <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
-            <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
-              <div className="mb-4 sm:mb-0">
-                <h3 className="text-xl font-semibold mb-2">API Playground</h3>
-                <p className="text-sm text-gray-500 max-w-md">
-                  Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
-                </p>
-              </div>
-              <Button 
-                onClick={navigateToApiDemo} 
-                variant="default" 
-                className="min-w-[120px]"
-              >
-                Try Now
-              </Button>
-            </CardContent>
-          </Card>
-          */}
 
           {/* Project Grid */}
           {loading ? (
