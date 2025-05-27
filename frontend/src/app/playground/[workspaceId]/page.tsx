@@ -161,13 +161,6 @@ export default function WorkspaceProjects() {
       currentWorkspace={workspace}
       error={workspaceError || projectsError}
     >
-      {/* Top loading bar - visible only during loading */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-0.5 z-50">
-          <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
-        </div>
-      )}
-
       {/* If workspace not found, show error and return button */}
       {workspaceError ? (
         <div className="text-center py-12">
