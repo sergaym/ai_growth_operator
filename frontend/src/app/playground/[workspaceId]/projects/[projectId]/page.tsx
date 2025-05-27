@@ -252,10 +252,18 @@ export default function ProjectPage() {
 
   return (
     <PlaygroundLayout
-      title=""
+      title={project.name}
+      description={project.description}
       currentWorkspace={workspace}
+      error={projectsError}
+      showBackButton={true}
+      onBack={handleBackToWorkspace}
+      status={project.status}
+      headerActions={<ProjectActions />}
+      isProject={true}
+      projectName={project.name}
     >
-      <div className="max-w-5xl mx-auto space-y-6">
+      <div className="space-y-6">
         {/* Video Preview */}
         <VideoPreview
           videoUrl={result?.video_url}
