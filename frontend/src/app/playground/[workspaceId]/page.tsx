@@ -41,23 +41,37 @@ export default function WorkspaceProjects() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.workspaceId as string;
+  const { toast } = useToast();
   
   // Get workspace data from API
-  const { workspaces, loading, error } = useWorkspaces();
+  const { workspaces, loading: workspacesLoading } = useWorkspaces();
+  
+  // Get projects data from API
+  const { 
+    projects, 
+    loading: projectsLoading, 
+    error: projectsError,
+    deleteProject,
+    refreshProjects,
+    stats
+  } = useProjects(workspaceId);
   
   // Find the current workspace based on the URL parameter
-  const currentWorkspace = workspaces.find(ws => ws.id == workspaceId);
+  const currentWorkspace = workspaces.find(ws => ws.id === workspaceId);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [projects, setProjects] = useState(projectsData);
+  const [statusFilter, setStatusFilter] = useState<string | null>(null);
 
-  // Filter projects based on search query
-  const filteredProjects = searchQuery
-    ? projects.filter(project => 
-        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : projects;
+  // Filter projects based on search query and status
+  const filteredProjects = projects.filter(project => {
+    const matchesSearch = !searchQuery || 
+      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+    
+    const matchesStatus = !statusFilter || project.status === statusFilter;
+    
+    return matchesSearch && matchesStatus;
+  });
 
   const getStatusBadge = (status: string) => {
     switch (status) {
