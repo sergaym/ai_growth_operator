@@ -221,3 +221,57 @@ export function useProjects(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Delete a project
+  const deleteProject = useCallback(async (projectId: string): Promise<boolean> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}`;
+      await apiClient(url, { method: 'DELETE' });
+
+      // Remove the project from the current list
+      setProjects(prev => prev.filter(p => p.id !== projectId));
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete project';
+      setError(errorMessage);
+      console.error('Error deleting project:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
+  // Get project assets
+  const getProjectAssets = useCallback(async (
+    projectId: string,
+    assetType?: string
+  ): Promise<ProjectAssetsResponse | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const params = assetType ? `?asset_type=${assetType}` : '';
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}/assets${params}`;
+      const assets = await apiClient<ProjectAssetsResponse>(url);
+      
+      return assets;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project assets';
+      setError(errorMessage);
+      console.error('Error fetching project assets:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
