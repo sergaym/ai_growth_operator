@@ -231,54 +231,127 @@ export default function WorkspaceProjects() {
           ) : filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium">No projects found</h3>
-              <p className="mt-1 text-gray-500">Get started by creating a new project.</p>
-              <Button onClick={handleNewProject} className="mt-4">Create Project</Button>
+              <h3 className="mt-4 text-lg font-medium">
+                {projects.length === 0 ? "No projects yet" : "No projects found"}
+              </h3>
+              <p className="mt-1 text-gray-500">
+                {projects.length === 0 
+                  ? "Get started by creating your first project." 
+                  : "Try adjusting your search or filter criteria."
+                }
+              </p>
+              {projects.length === 0 && (
+                <Button onClick={createNewProject} className="mt-4 gap-1.5">
+                  <FolderPlus className="h-4 w-4" />
+                  <span>Create Your First Project</span>
+                </Button>
+              )}
             </div>
           ) : (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProjects.map((project) => (
-                  <Card key={project.id} className="overflow-hidden group">
-                    <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                      {/* Placeholder for thumbnail */}
+              {filteredProjects.map((project) => (
+                <Card key={project.id} className="overflow-hidden group cursor-pointer" onClick={() => navigateToProject(project.id)}>
+                  <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                    {project.thumbnail_url ? (
+                      <img 
+                        src={project.thumbnail_url} 
+                        alt={project.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                        <div className="text-xl font-bold text-white/70">{project.name.substring(0, 2).toUpperCase()}</div>
+                        <div className="text-xl font-bold text-white/70">
+                          {project.name.substring(0, 2).toUpperCase()}
+                        </div>
                       </div>
-                      {/* Hover overlay with actions */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button size="sm" variant="secondary" onClick={() => navigateToProject(project.id)}>
-                          Edit
-                        </Button>
-                      </div>
+                    )}
+                    {/* Hover overlay with actions */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateToProject(project.id);
+                        }}
+                      >
+                        Open
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium truncate mr-2">{project.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            <MoreHorizontal className="h-4 w-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={() => navigateToProject(project.id)}>
+                            Open Project
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-500"
+                            onClick={() => handleDeleteProject(project.id, project.name)}
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium truncate mr-2">{project.name}</h3>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuItem>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                    {project.description && (
                       <p className="text-sm text-gray-500 mb-3 truncate">{project.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {project.lastEdited}
-                        </div>
-                        {getStatusBadge(project.status)}
+                    )}
+                    
+                    {/* Asset summary */}
+                    {project.asset_summary && (
+                      <div className="flex items-center gap-3 mb-3 text-xs text-gray-500">
+                        {project.asset_summary.total_videos > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('video')}
+                            <span>{project.asset_summary.total_videos}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_audio > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('audio')}
+                            <span>{project.asset_summary.total_audio}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_images > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('image')}
+                            <span>{project.asset_summary.total_images}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_lipsync_videos > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('lipsync_video')}
+                            <span>{project.asset_summary.total_lipsync_videos}</span>
+                          </div>
+                        )}
                       </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(project.last_activity_at)}
+                      </div>
+                      {getStatusBadge(project.status)}
                     </div>
-                  </Card>
-                ))}
+                  </div>
+                </Card>
+              ))}
             </div>
           )}
         </>
