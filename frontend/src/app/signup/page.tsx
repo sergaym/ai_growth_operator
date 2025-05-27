@@ -93,11 +93,8 @@ function SignupPageContent() {
         companyName: formData.companyName
       }));
       const callbackUrl = sessionStorage.getItem('signupCallbackUrl');
-      if (callbackUrl) {
-        router.push(callbackUrl);
-      } else {
-        router.push('/pricing?from=signup');
-      }
+      const callbackParameter = callbackUrl ? `&callbackUrl=${encodeURIComponent(callbackUrl)}` : '';
+      router.push(`/pricing?from=signup${callbackParameter}`);
     } catch (error: any) {
       console.error('Signup error:', error);
       setSignupError(error.message || 'An unexpected error occurred during signup.');
