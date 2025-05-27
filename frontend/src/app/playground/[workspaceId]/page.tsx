@@ -136,21 +136,30 @@ export default function WorkspaceProjects() {
   };
   
   // Create a safe workspace object with default values if currentWorkspace is not found
-  const workspace = !loading && currentWorkspace 
+  const workspace = !workspacesLoading && currentWorkspace 
     ? { id: currentWorkspace.id, name: currentWorkspace.name }
     : { id: workspaceId, name: "Workspace" };
 
   // Render error inside the layout instead of a fullscreen message
-  const workspaceError = !loading && !currentWorkspace 
+  const workspaceError = !workspacesLoading && !currentWorkspace 
     ? "The workspace you're trying to access doesn't exist or you don't have permission to view it."
     : null;
+
+  const loading = workspacesLoading || projectsLoading;
+
+  // Generate a new project ID and navigate to it
+  const createNewProject = () => {
+    // Generate a unique project ID (similar to UUID format)
+    const projectId = 'proj_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
+    router.push(`/playground/${workspaceId}/projects/${projectId}`);
+  };
 
   return (
     <PlaygroundLayout
       title="Projects"
       description="Create and manage your AI-generated content projects."
       currentWorkspace={workspace}
-      error={workspaceError}
+      error={workspaceError || projectsError}
     >
       {/* Top loading bar - visible only during loading */}
       {loading && (
