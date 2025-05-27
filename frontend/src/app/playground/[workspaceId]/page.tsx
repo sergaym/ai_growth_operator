@@ -5,59 +5,16 @@ import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, Filter, FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
+import { Clock, Filter, FolderPlus, Search, MoreHorizontal, Video, Music, Image, FileVideo } from "lucide-react";
 import { 
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { nanoid } from 'nanoid';
 import { useWorkspaces } from '@/hooks/useWorkspace';
-
-// Simulated project data (this should eventually come from an API)
-const projectsData = [
-  {
-    id: nanoid(10),
-    name: "Marketing Video",
-    description: "Brand awareness campaign",
-    lastEdited: "2 days ago",
-    status: "completed",
-    thumbnail: "/projects/marketing-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Product Showcase",
-    description: "New feature demonstration",
-    lastEdited: "5 hours ago",
-    status: "in-progress",
-    thumbnail: "/projects/product-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Team Introduction",
-    description: "Company culture video",
-    lastEdited: "1 week ago",
-    status: "completed",
-    thumbnail: "/projects/team-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Tutorial Series",
-    description: "How-to guides for new users",
-    lastEdited: "3 days ago",
-    status: "draft",
-    thumbnail: "/projects/tutorial-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Customer Testimonial",
-    description: "Success story interview",
-    lastEdited: "Just now",
-    status: "in-progress",
-    thumbnail: "/projects/testimonial-thumbnail.jpg",
-  },
-];
+import { useProjects, type Project } from '@/hooks/useProjects';
+import { useToast } from "@/components/ui/use-toast";
 
 // Project card skeleton component
 function ProjectCardSkeleton() {
