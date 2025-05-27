@@ -199,18 +199,24 @@ export default function WorkspaceProjects() {
                   <Button variant="outline" size="sm" className="gap-1.5">
                     <Filter className="h-4 w-4" />
                     <span>Filter</span>
+                    {statusFilter && <span className="text-xs">({statusFilter})</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+                    All Projects
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("completed")}>
                     Completed
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter("in_progress")}>
                     In Progress
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter("draft")}>
                     Drafts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter("archived")}>
+                    Archived
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
