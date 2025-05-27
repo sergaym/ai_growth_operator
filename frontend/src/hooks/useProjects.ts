@@ -12,3 +12,26 @@ export interface ProjectAssetSummary {
   total_lipsync_videos: number;
   latest_asset_created_at?: string;
 }
+
+export interface Project {
+  id: string;
+  name: string;
+  description?: string;
+  workspace_id: string;
+  created_by_user_id: string;
+  status: 'draft' | 'in_progress' | 'completed' | 'archived';
+  thumbnail_url?: string;
+  created_at: string;
+  updated_at: string;
+  last_activity_at: string;
+  asset_summary?: ProjectAssetSummary;
+  metadata?: Record<string, any>;
+}
+
+export interface ProjectCreateRequest {
+  name: string;
+  description?: string;
+  thumbnail_url?: string;
+  metadata?: Record<string, any>;
+}
+
