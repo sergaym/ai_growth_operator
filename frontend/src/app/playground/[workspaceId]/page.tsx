@@ -103,13 +103,28 @@ export default function WorkspaceProjects() {
     }
   };
 
-  const handleNewProject = () => {
-    const projectId = nanoid(10);
-    router.push(`/playground/${workspaceId}/projects/${projectId}`);
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInHours < 48) return "1 day ago";
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)} days ago`;
+    return date.toLocaleDateString();
   };
 
-  const navigateToApiDemo = () => {
-    router.push(`/playground/${workspaceId}/api-demo`);
+  const handleDeleteProject = async (projectId: string, projectName: string) => {
+    if (confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
+      const success = await deleteProject(projectId);
+      if (success) {
+        toast({
+          title: "Project Deleted",
+          description: `"${projectName}" has been deleted successfully.`,
+        });
+      }
+    }
   };
 
   const navigateToProject = (projectId: string) => {
