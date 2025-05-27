@@ -102,6 +102,39 @@ export function useWorkspaces() {
   };
 }
 
+export function useWorkspace(workspaceId?: string) {
+  const { user } = useAuth();
+  const [workspace, setWorkspace] = useState<WorkspaceWithSubscription | null>(null);
+  const [workspaceUsers, setWorkspaceUsers] = useState<User[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
+  // Get workspace details with subscription
+  const getWorkspaceDetails = useCallback(async (): Promise<WorkspaceWithSubscription | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}`;
+      const data = await apiClient<WorkspaceWithSubscription>(url);
+      
+      setWorkspace(data);
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace details';
+      setError(errorMessage);
+      console.error('Error fetching workspace details:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
+
 function getAccessToken() {
   if (typeof window !== 'undefined') {
     return localStorage.getItem('access_token');
