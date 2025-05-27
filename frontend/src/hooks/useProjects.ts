@@ -51,3 +51,28 @@ export interface ProjectListResponse {
   total_pages: number;
 }
 
+export interface ProjectAsset {
+  id: string;
+  type: 'video' | 'audio' | 'lipsync_video';
+  status: string;
+  created_at: string;
+  updated_at: string;
+  file_url?: string;
+  thumbnail_url?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ProjectAssetsResponse {
+  assets: ProjectAsset[];
+  total: number;
+  asset_summary: ProjectAssetSummary;
+}
+
+export interface ProjectStats {
+  total_projects: number;
+  projects_by_status: Record<string, number>;
+  total_assets: number;
+  recent_activity_count: number;
+  most_active_projects: Project[];
+}
+
