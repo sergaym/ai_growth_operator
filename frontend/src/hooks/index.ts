@@ -1,7 +1,7 @@
 // Export hooks here
-export { useAuth, AuthProvider } from './useAuth';
+export { useAuth } from './useAuth';
+export { useWorkspaces, useWorkspaceDetails, useWorkspace } from './useWorkspace';
+export { useProjects } from './useProjects';
 export { useTextToSpeech } from './useTextToSpeech';
 export { useActors } from './useActors';
-export { useVideoGeneration } from './useVideoGeneration';
-export { useProjects } from './useProjects';
-export { useWorkspaces, useWorkspace } from './useWorkspace'; 
+export { useVideoGeneration } from './useVideoGeneration'; 
