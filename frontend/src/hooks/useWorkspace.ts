@@ -73,7 +73,7 @@ export function useWorkspaces() {
 
     setLoading(true); 
     try {
-      const data = await apiClient(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/`);
+      const data = await apiClient<Workspace[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/`);
       
       if (Array.isArray(data)) {
         setWorkspaces(data);
