@@ -169,12 +169,86 @@ export default function ProjectPage() {
         voice_preset: 'professional_male',
         project_id: stringProjectId,
         user_id: String(user.user.id),
-        workspace_id: user.user.workspaces?.[0]?.id ? String(user.user.workspaces[0].id) : undefined,
+        workspace_id: stringWorkspaceId,
       });
     } catch (error) {
       console.error('Failed to start video generation:', error);
     }
   };
+
+  const handleBackToWorkspace = () => {
+    router.push(`/playground/${stringWorkspaceId}`);
+  };
+
+  const handleDeleteProject = async () => {
+    if (!project) return;
+    
+    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
+      const success = await deleteProject(project.id);
+      if (success) {
+        router.push(`/playground/${stringWorkspaceId}`);
+      }
+    }
+  };
+
+  // Project actions menu component
+  const ProjectActions = () => (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="ghost" size="icon">
+          <MoreHorizontal className="h-4 w-4" />
+        </Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent align="end">
+        <DropdownMenuItem>
+          <Settings className="h-4 w-4 mr-2" />
+          Project Settings
+        </DropdownMenuItem>
+        <DropdownMenuItem 
+          className="text-red-500"
+          onClick={handleDeleteProject}
+        >
+          Delete Project
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
+
+  if (loading || projectsLoading || isCreatingProject) {
+    return (
+      <PlaygroundLayout
+        title={isCreatingProject ? "Creating Project..." : "Loading..."}
+        currentWorkspace={workspace}
+        showBackButton={true}
+        onBack={handleBackToWorkspace}
+        isProject={true}
+      >
+        <div className="space-y-6">
+          <div className="animate-pulse">
+            <div className="h-64 bg-gray-200 rounded mb-6"></div>
+            <div className="h-32 bg-gray-200 rounded"></div>
+          </div>
+        </div>
+      </PlaygroundLayout>
+    );
+  }
+
+  if (!project) {
+    return (
+      <PlaygroundLayout
+        title="Project Creation Failed"
+        currentWorkspace={workspace}
+        error="Failed to create or load project. Please try again."
+        showBackButton={true}
+        onBack={handleBackToWorkspace}
+        isProject={true}
+      >
+        <div className="text-center py-12">
+          <p className="text-muted-foreground mb-4">Unable to create or load the project.</p>
+        </div>
+      </PlaygroundLayout>
+    );
+  }
 
   return (
     <PlaygroundLayout
