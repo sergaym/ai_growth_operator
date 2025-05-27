@@ -106,3 +106,43 @@ async def list_projects(
         logger.error(f"Error listing projects for workspace {workspace_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to list projects: {str(e)}")
 
+
+@router.get(
+    "/{workspace_id}/projects/{project_id}",
+    response_model=ProjectResponse,
+    tags=["Projects"],
+    summary="Get project details",
+    description="Get detailed information about a specific project."
+)
+async def get_project(
+    workspace_id: str = Path(..., description="Workspace ID"),
+    project_id: str = Path(..., description="Project ID"),
+    include_assets: bool = Query(False, description="Include asset summary"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get a project by ID."""
+    _check_workspace_access(db, current_user.id, workspace_id)
+    
+    try:
+        project = await project_service.get_project(
+            project_id=project_id,
+            workspace_id=workspace_id,
+            include_assets=include_assets,
+            db=db
+        )
+        
+        if not project:
+            raise HTTPException(
+                status_code=404, 
+                detail=f"Project {project_id} not found in workspace {workspace_id}"
+            )
+        
+        return project
+        
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Error getting project {project_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get project: {str(e)}")
+
