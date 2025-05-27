@@ -263,3 +263,29 @@ async def get_project_assets(
         logger.error(f"Error getting assets for project {project_id}: {str(e)}")
         raise HTTPException(status_code=500, detail=f"Failed to get project assets: {str(e)}")
 
+
+@router.get(
+    "/{workspace_id}/projects/stats",
+    response_model=ProjectStatsResponse,
+    tags=["Projects"],
+    summary="Get workspace project statistics",
+    description="Get statistics about all projects in the workspace."
+)
+async def get_workspace_project_stats(
+    workspace_id: str = Path(..., description="Workspace ID"),
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
+):
+    """Get project statistics for a workspace."""
+    _check_workspace_access(db, current_user.id, workspace_id)
+    
+    try:
+        stats = await project_service.get_workspace_stats(
+            workspace_id=workspace_id,
+            db=db
+        )
+        return stats
+        
+    except Exception as e:
+        logger.error(f"Error getting workspace stats for {workspace_id}: {str(e)}")
+        raise HTTPException(status_code=500, detail=f"Failed to get workspace stats: {str(e)}") 
