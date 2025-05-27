@@ -35,3 +35,19 @@ export interface ProjectCreateRequest {
   metadata?: Record<string, any>;
 }
 
+export interface ProjectUpdateRequest {
+  name?: string;
+  description?: string;
+  status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+  thumbnail_url?: string;
+  metadata?: Record<string, any>;
+}
+
+export interface ProjectListResponse {
+  projects: Project[];
+  total: number;
+  page: number;
+  per_page: number;
+  total_pages: number;
+}
+
