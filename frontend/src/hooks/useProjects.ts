@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from './useAuth';
+import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '../services/apiClient';
 
 // Project interfaces matching the backend schemas
