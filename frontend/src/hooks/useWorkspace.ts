@@ -165,6 +165,31 @@ export function useWorkspace(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated, workspace]);
 
+  // Get workspace users
+  const getWorkspaceUsers = useCallback(async (): Promise<User[] | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users`;
+      const users = await apiClient<User[]>(url);
+      
+      setWorkspaceUsers(users);
+      return users;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace users';
+      setError(errorMessage);
+      console.error('Error fetching workspace users:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated]);
+
 
 function getAccessToken() {
   if (typeof window !== 'undefined') {
