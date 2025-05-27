@@ -229,3 +229,57 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [router]);
 
+  // Helper: get access token
+  const getAccessToken = () => {
+    if (typeof window !== 'undefined') {
+      return window.localStorage.getItem('access_token');
+    }
+    return null;
+  };
+
+  // Helper: refresh access token using the centralized function from apiClient.ts
+  const refreshAccessToken = async (): Promise<string | null> => {
+    try {
+      console.log('Calling centralized token refresh');
+      
+      // Call the centralized refresh function from apiClient.ts
+      const newToken = await apiRefreshAccessToken();
+      
+      if (newToken) {
+        console.log('Token refresh successful, updating user state');
+        // After successful token refresh, try to get user data
+        try {
+          // Get user profile with the new token
+          const userData = await apiClient<AuthUserData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/me`);
+          
+          // Update the user state
+          setUser({
+            isAuthenticated: true,
+            user: {
+              id: userData.id,
+              email: userData.email,
+              first_name: userData.first_name,
+              last_name: userData.last_name,
+              workspaces: userData.workspaces || []
+            }
+          });
+        } catch (profileError) {
+          console.error('Error fetching profile after token refresh:', profileError);
+          // If we can't fetch the profile, the token might be invalid or there are other issues
+          // Keep the user authenticated but note the error
+        }
+        
+        return newToken;
+      }
+      
+      // If token refresh failed, clear auth state
+      console.log('Token refresh returned null, clearing auth state');
+      setUser({ isAuthenticated: false, user: null });
+      return null;
+    } catch (e) {
+      console.error('Token refresh error:', e);
+      await logout('/login');
+      return null;
+    }
+  };
+
