@@ -14,8 +14,11 @@ import {
   SidebarProvider,
   SidebarTrigger,
 } from "@/components/ui/sidebar"
+import { Button } from "@/components/ui/button"
+import { Badge } from "@/components/ui/badge"
+import { ArrowLeft } from "lucide-react"
 import { useWorkspaces } from '@/hooks/useWorkspace';
-import { useParams } from 'next/navigation';
+import { useParams, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 
 interface PlaygroundLayoutProps {
@@ -27,18 +30,63 @@ interface PlaygroundLayoutProps {
   description?: string;
   error?: string | null;
   children: ReactNode;
+  // Enhanced header props for project pages
+  showBackButton?: boolean;
+  backUrl?: string;
+  onBack?: () => void;
+  status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+  headerActions?: ReactNode;
+  subtitle?: string;
+  isProject?: boolean;
+  projectName?: string;
 }
 
 export default function PlaygroundLayout({ 
   title, 
-  description, 
+  description,
+  subtitle,
   error, 
-  children 
+  children,
+  showBackButton = false,
+  backUrl,
+  onBack,
+  status,
+  headerActions,
+  isProject = false,
+  projectName
 }: PlaygroundLayoutProps) {
   const params = useParams();
+  const router = useRouter();
   const currentWorkspaceId = params.workspaceId as string | null;
   const { workspaces, loading: workspaceLoading, error: workspaceError } = useWorkspaces();
   const currentWorkspace = workspaces.find(ws => ws.id == currentWorkspaceId);
+
+  const handleBack = () => {
+    if (onBack) {
+      onBack();
+    } else if (backUrl) {
+      router.push(backUrl);
+    } else if (currentWorkspaceId) {
+      router.push(`/playground/${currentWorkspaceId}`);
+    } else {
+      router.push('/playground');
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case "completed":
+        return <Badge variant="default" className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>;
+      case "in_progress":
+        return <Badge variant="default" className="bg-blue-500/10 text-blue-500 border-blue-500/20">In Progress</Badge>;
+      case "draft":
+        return <Badge variant="default" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Draft</Badge>;
+      case "archived":
+        return <Badge variant="default" className="bg-gray-500/10 text-gray-500 border-gray-500/20">Archived</Badge>;
+      default:
+        return null;
+    }
+  };
 
   return (
     <SidebarProvider>
