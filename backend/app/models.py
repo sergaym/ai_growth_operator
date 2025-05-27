@@ -85,6 +85,7 @@ class BaseAsset(Base):
     # Relationship placeholders (with proper foreign key constraints)
     user_id = Column(String, ForeignKey("users.id"), nullable=True)
     workspace_id = Column(String, ForeignKey("workspaces.id"), nullable=True)
+    project_id = Column(String, ForeignKey("projects.id"), nullable=True)
     
     # Status and metadata
     status = Column(String, default="completed")
@@ -335,6 +336,10 @@ class Project(Base):
     # Relationships
     workspace = relationship("Workspace", back_populates="projects")
     created_by = relationship("User", back_populates="created_projects")
+    
+    def update_activity(self):
+        """Update the last activity timestamp."""
+        self.last_activity_at = datetime.now()
     
     def __repr__(self):
         return f"<Project {self.id}: {self.name} ({self.status})>"
