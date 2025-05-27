@@ -138,3 +138,62 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     }
   }, [getUserProfile, isInitialized]);
 
+  // Login function
+  const login = useCallback(async (email: string, password: string, callbackUrl?: string) => {
+    try {
+      setLoading(true);
+      setError(null);
+
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+      
+      const data = await apiClient<AuthData>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/auth/signin`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: formData
+      });
+
+      // Store tokens securely (dual storage strategy)
+      if (typeof window !== 'undefined' && data.access_token) {
+        // 1. Store access token in localStorage for easy client-side access
+        window.localStorage.setItem('access_token', data.access_token);
+        
+        // 2. Store refresh token in localStorage if provided
+        if (data.refresh_token) {
+          window.localStorage.setItem('refresh_token', data.refresh_token);
+        }
+        
+        // 3. Also set auth-token in cookies for middleware (non-HttpOnly)
+        document.cookie = `auth-token=${data.access_token}; path=/; max-age=${60 * 60 * 24}; SameSite=Lax`;  // 24 hours
+        
+        // Map the backend user data to match our AuthUserData interface
+        const formattedUser: AuthUserData = {
+          id: data.user.id,
+          email: data.user.email,
+          first_name: data.user.first_name,
+          last_name: data.user.last_name,
+          workspaces: data.user.workspaces || []
+        };
+        setUser({ isAuthenticated: true, user: formattedUser });
+      }
+      
+      // Force a hard refresh to ensure all auth state is properly set
+      if (typeof window !== 'undefined') {
+        // Redirect to the callback URL or dashboard
+        const redirectUrl = callbackUrl || '/dashboard';
+        window.location.href = redirectUrl;
+      }
+
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'An unknown error occurred';
+      setError(errorMessage);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
