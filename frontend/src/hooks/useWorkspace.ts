@@ -25,6 +25,30 @@ export interface User {
   created_at: string;
   updated_at: string;
 }
+
+export interface SubscriptionPlan {
+  id: number;
+  name: string;
+  description?: string;
+  price: number;
+  currency: string;
+  billing_interval: string;
+  max_users: number;
+}
+
+export interface Subscription {
+  id: number;
+  workspace_id: string;
+  plan_id: number;
+  status: string;
+  stripe_subscription_id?: string;
+  start_date: string;
+  end_date?: string;
+  plan: SubscriptionPlan;
+}
+
+export interface WorkspaceWithSubscription extends Workspace {
+  active_subscription?: Subscription;
 }
 
 export function useWorkspaces() {
