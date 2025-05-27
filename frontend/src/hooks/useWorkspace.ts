@@ -190,6 +190,35 @@ export function useWorkspace(workspaceId?: string) {
     }
   }, [workspaceId, user.isAuthenticated]);
 
+  // Add user to workspace
+  const addUserToWorkspace = useCallback(async (
+    userId: string, 
+    role: string = 'member'
+  ): Promise<boolean> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      setLoading(true);
+      setError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users/${userId}?role=${role}`;
+      await apiClient(url, { method: 'POST' });
+
+      // Refresh workspace users
+      await getWorkspaceUsers();
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add user to workspace';
+      setError(errorMessage);
+      console.error('Error adding user to workspace:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [workspaceId, user.isAuthenticated, getWorkspaceUsers]);
+
 
 function getAccessToken() {
   if (typeof window !== 'undefined') {
