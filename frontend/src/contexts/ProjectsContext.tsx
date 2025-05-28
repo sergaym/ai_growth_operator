@@ -148,3 +148,36 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     return fetchProjects(workspaceId);
   }, [user.isAuthenticated, fetchProjects]);
 
+  // Create a new project
+  const createProject = useCallback(async (workspaceId: string, request: ProjectCreateRequest): Promise<Project | null> => {
+    if (!user.isAuthenticated || !workspaceId) {
+      return null;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects`;
+      const project = await apiClient<Project>(url, {
+        method: 'POST',
+        body: JSON.stringify(request),
+      });
+
+      // Update local state
+      setProjectsByWorkspace(prev => ({
+        ...prev,
+        [workspaceId]: [...(prev[workspaceId] || []), project]
+      }));
+
+      return project;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to create project';
+      setError(errorMessage);
+      console.error('Error creating project:', err);
+      return null;
+    } finally {
+      setLoading(false);
+    }
+  }, [user.isAuthenticated]);
+
