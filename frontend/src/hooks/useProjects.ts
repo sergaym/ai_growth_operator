@@ -298,14 +298,10 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     return updatedProject;
   }, [workspaceId, projectId, updateProject]);
 
-  const memoizedGetProjectAssets = useCallback(async (assetType?: string) => {
+  const memoizedGetProjectAssets = useCallback(async (assetType?: string, forceRefresh?: boolean) => {
     if (!workspaceId || !projectId) return null;
     
-    const assets = await getProjectAssets(workspaceId, projectId, assetType);
-    if (assets) {
-      setProjectState(prev => ({ ...prev, assets, fetchedAssets: true }));
-    }
-    return assets;
+    return getProjectAssets(workspaceId, projectId, assetType, forceRefresh);
   }, [workspaceId, projectId, getProjectAssets]);
 
   const refreshProject = useCallback(async () => {
@@ -315,44 +311,63 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     // This prevents the "Loading..." page from appearing during video generation
     
     // Force fresh fetch without showing loading state
-    const [projectData, assetsData] = await Promise.all([
-      getProject(workspaceId, projectId, true),
-      getProjectAssets(workspaceId, projectId)
-    ]);
+    const projectData = await getProject(workspaceId, projectId, true);
 
     setProjectState(prev => ({
       ...prev,
       project: projectData,
-      assets: assetsData,
-      fetched: true,
-      fetchedAssets: true
+      fetched: true
     }));
 
     return projectData;
-  }, [workspaceId, projectId, getProject, getProjectAssets]);
+  }, [workspaceId, projectId, getProject]);
+
+  const refreshAssets = useCallback(async () => {
+    if (!workspaceId || !projectId) return null;
+    
+    return refreshProjectAssets(workspaceId, projectId);
+  }, [workspaceId, projectId, refreshProjectAssets]);
+
+  const memoizedGetCachedAssets = useCallback(() => {
+    return projectId ? getCachedAssets(projectId) : null;
+  }, [projectId, getCachedAssets]);
+
+  const memoizedInvalidateAssetsCache = useCallback(() => {
+    if (projectId) {
+      invalidateAssetsCache(projectId);
+    }
+  }, [projectId, invalidateAssetsCache]);
   
   return useMemo(() => ({
     project: projectState.project,
     loading: projectState.isInitialLoading, // Only show loading for initial fetch
     error,
-    assets: projectState.assets,
+    assets,
     hasFetched: projectState.fetched,
+    isAssetsLoading,
     getProject: memoizedGetProject,
     updateProject: memoizedUpdateProject,
     getProjectAssets: memoizedGetProjectAssets,
     refreshProject,
+    refreshAssets,
     clearError,
+    getCachedAssets: memoizedGetCachedAssets,
+    invalidateAssetsCache: memoizedInvalidateAssetsCache,
   }), [
     projectState.project,
-    projectState.assets,
     projectState.fetched,
     projectState.isInitialLoading,
     error,
+    assets,
+    isAssetsLoading,
     memoizedGetProject,
     memoizedUpdateProject,
     memoizedGetProjectAssets,
     refreshProject,
+    refreshAssets,
     clearError,
+    memoizedGetCachedAssets,
+    memoizedInvalidateAssetsCache,
   ]);
 }
 
@@ -366,6 +381,10 @@ export function useWorkspaceStats(workspaceId?: string) {
   } = useProjectsContext();
 
   const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
+
+  const fetchStats = useCallback(() => {
+    return workspaceId ? getWorkspaceStats(workspaceId) : Promise.resolve(null);
+  }, [workspaceId, getWorkspaceStats]);
 
   return {
     stats,
