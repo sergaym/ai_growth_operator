@@ -391,12 +391,12 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       
       return project;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project';
-      console.error('Error fetching project:', err);
+      const error = handleApiError(err, `fetching project ${projectId}`);
+      console.error('Error fetching project:', error);
       // Don't set global error for individual project fetches
       return null;
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, user.user, loading, handleApiError]);
 
   // Update a project
   const updateProject = useCallback(async (workspaceId: string, projectId: string, request: ProjectUpdateRequest): Promise<Project | null> => {
@@ -404,7 +404,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    setLoading(true);
+    updateLoadingState('updating', projectId, true);
     setError(null);
 
     try {
@@ -420,16 +420,17 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         [workspaceId]: prev[workspaceId]?.map(p => p.id === projectId ? updatedProject : p) || []
       }));
 
+      console.log(`Updated project ${projectId} in workspace ${workspaceId}`);
       return updatedProject;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to update project';
-      setError(errorMessage);
-      console.error('Error updating project:', err);
+      const error = handleApiError(err, `updating project ${projectId}`);
+      setError(error);
+      console.error('Error updating project:', error);
       return null;
     } finally {
-      setLoading(false);
+      updateLoadingState('updating', projectId, false);
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, updateLoadingState, handleApiError]);
 
   // Delete a project
   const deleteProject = useCallback(async (workspaceId: string, projectId: string): Promise<boolean> => {
