@@ -19,6 +19,7 @@ import { Badge } from "@/components/ui/badge"
 import { ArrowLeft } from "lucide-react"
 import { useParams, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
+import { ProjectStatus } from '@/contexts/ProjectsContext';
 
 interface PlaygroundLayoutProps {
   title: string;
@@ -33,7 +34,7 @@ interface PlaygroundLayoutProps {
   showBackButton?: boolean;
   backUrl?: string;
   onBack?: () => void;
-  status?: 'draft' | 'in_progress' | 'completed' | 'archived';
+  status?: ProjectStatus;
   headerActions?: ReactNode;
   subtitle?: string;
   isProject?: boolean;
@@ -71,15 +72,15 @@ export default function PlaygroundLayout({
     }
   };
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ProjectStatus) => {
     switch (status) {
-      case "completed":
+      case ProjectStatus.COMPLETED:
         return <Badge variant="default" className="bg-green-500/10 text-green-500 border-green-500/20">Completed</Badge>;
-      case "in_progress":
+      case ProjectStatus.IN_PROGRESS:
         return <Badge variant="default" className="bg-blue-500/10 text-blue-500 border-blue-500/20">In Progress</Badge>;
-      case "draft":
+      case ProjectStatus.DRAFT:
         return <Badge variant="default" className="bg-amber-500/10 text-amber-500 border-amber-500/20">Draft</Badge>;
-      case "archived":
+      case ProjectStatus.ARCHIVED:
         return <Badge variant="default" className="bg-gray-500/10 text-gray-500 border-gray-500/20">Archived</Badge>;
       default:
         return null;
