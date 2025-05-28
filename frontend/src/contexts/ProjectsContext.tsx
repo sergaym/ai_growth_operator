@@ -131,3 +131,20 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated, loading, fetchedWorkspaces, projectsByWorkspace]);
 
+  // Refresh projects for a workspace (force refetch)
+  const refreshProjects = useCallback(async (workspaceId: string): Promise<Project[]> => {
+    if (!user.isAuthenticated || !workspaceId) {
+      return [];
+    }
+
+    // Remove from fetched cache to force refetch
+    setFetchedWorkspaces(prev => {
+      const newSet = new Set(prev);
+      newSet.delete(workspaceId);
+      return newSet;
+    });
+
+    // Now fetch projects
+    return fetchProjects(workspaceId);
+  }, [user.isAuthenticated, fetchProjects]);
+
