@@ -129,6 +129,7 @@ export function SignupStepCompany({ data, onUpdate, onNext, onBack }: SignupStep
         {/* Navigation buttons */}
         <div className="flex justify-between">
           <Button
+            type="button"
             variant="ghost"
             onClick={onBack}
             className="rounded-lg text-base font-medium flex items-center gap-2"
@@ -139,6 +140,7 @@ export function SignupStepCompany({ data, onUpdate, onNext, onBack }: SignupStep
             Back
           </Button>
           <Button
+            type="submit"
             variant="gradient" 
             gradient="purple-blue" 
             className="rounded-xl text-base font-medium"

@@ -8,13 +8,12 @@ import { PageBackground } from "@/components/ui/PageBackground";
 
 function PricingContent() {
   const searchParams = useSearchParams();
-  const [workspaceId, setWorkspaceId] = useState<number | undefined>(undefined);
+  const [workspaceId, setWorkspaceId] = useState<string | undefined>(undefined);
   
   useEffect(() => {
-    // Get workspace ID from URL if available
     const workspaceParam = searchParams.get('workspace');
-    if (workspaceParam && !isNaN(parseInt(workspaceParam))) {
-      setWorkspaceId(parseInt(workspaceParam));
+    if (workspaceParam) {
+      setWorkspaceId(workspaceParam);
     }
   }, [searchParams]);
   

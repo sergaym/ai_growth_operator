@@ -128,6 +128,7 @@ export function SignupStepProfile({ data, onUpdate, onNext }: SignupStepProfileP
         {/* Submit button */}
         <div className="flex justify-end">
           <Button 
+            type="submit" 
             variant="gradient" 
             gradient="purple-blue" 
             className="rounded-xl text-base font-medium"

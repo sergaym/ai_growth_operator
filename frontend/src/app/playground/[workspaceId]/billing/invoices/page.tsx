@@ -51,9 +51,7 @@ export default function InvoicesPage() {
     const fetchInvoices = async () => {
       try {
         setLoading(true);
-        // Call API to fetch invoices for the workspace
-        const numericWorkspaceId = parseInt(workspaceId);
-        const data = await apiClient<Invoice[]>(`/api/v1/subscriptions/workspaces/${numericWorkspaceId}/invoices`, {
+        const data = await apiClient<Invoice[]>(`/api/v1/subscriptions/workspaces/${workspaceId}/invoices`, {
           method: 'GET'
         });
         setInvoices(data);
