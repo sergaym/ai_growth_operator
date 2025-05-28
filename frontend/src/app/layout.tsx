@@ -4,6 +4,8 @@ import { Analytics } from '@vercel/analytics/react';
 import { SpeedInsights } from '@vercel/speed-insights/next';
 import { Toaster } from "@/components/ui/toaster";
 import { AuthProvider } from "@/hooks/useAuth";
+import { WorkspaceProvider } from "@/contexts/WorkspaceContext";
+import { ProjectsProvider } from "@/contexts/ProjectsContext";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -32,7 +34,11 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} antialiased`}
       >
         <AuthProvider>
-          {children}
+          <WorkspaceProvider>
+            <ProjectsProvider>
+            {children}
+            </ProjectsProvider>
+          </WorkspaceProvider>
         </AuthProvider>
         <Toaster />
         <Analytics />
