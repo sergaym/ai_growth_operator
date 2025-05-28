@@ -1,5 +1,5 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
@@ -12,7 +12,6 @@ import {
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
 import { 
   Search, 
   Filter, 
@@ -76,30 +75,23 @@ export default function WorkspaceProjects() {
   
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<ProjectStatus | null>(null);
-  
-  // Delete dialog state
-  const [deleteDialog, setDeleteDialog] = useState<{
-    open: boolean;
-    project: Project | null;
-    isDeleting: boolean;
-  }>({
-    open: false,
-    project: null,
-    isDeleting: false,
-  });
+  const [deletingProjects, setDeletingProjects] = useState<Set<string>>(new Set());
 
   // Filter projects based on search query and status
-  const filteredProjects = projects.filter((project: Project) => {
-    const matchesSearch = !searchQuery || 
-      project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
-    
-    const matchesStatus = !statusFilter || project.status === statusFilter;
-    
-    return matchesSearch && matchesStatus;
-  });
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project: Project) => {
+      const matchesSearch = !searchQuery || 
+        project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
+        (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesStatus = !statusFilter || project.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [projects, searchQuery, statusFilter]);
 
-  const getStatusBadge = (status: ProjectStatus) => {
+  // Memoized utility functions
+  const getStatusBadge = useCallback((status: ProjectStatus) => {
     switch (status) {
       case ProjectStatus.COMPLETED:
         return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
@@ -112,9 +104,9 @@ export default function WorkspaceProjects() {
       default:
         return null;
     }
-  };
+  }, []);
 
-  const getAssetIcon = (type: string, className: string = "h-3 w-3") => {
+  const getAssetIcon = useCallback((type: string, className: string = "h-3 w-3") => {
     switch (type) {
       case 'video':
         return <Video className={className} />;
@@ -127,9 +119,9 @@ export default function WorkspaceProjects() {
       default:
         return null;
     }
-  };
+  }, []);
 
-  const formatDate = (dateString: string) => {
+  const formatDate = useCallback((dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
     const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
@@ -139,20 +131,24 @@ export default function WorkspaceProjects() {
     if (diffInHours < 48) return "1 day ago";
     if (diffInHours < 168) return `${Math.floor(diffInHours / 24)} days ago`;
     return date.toLocaleDateString();
-  };
+  }, []);
 
-  const navigateToProject = (projectId: string) => {
+  // Navigation functions
+  const navigateToProject = useCallback((projectId: string) => {
     router.push(`/playground/${workspaceId}/projects/${projectId}`);
-  };
+  }, [router, workspaceId]);
 
-  const navigateToWorkspaces = () => {
+  const navigateToWorkspaces = useCallback(() => {
     router.push("/playground");
-  };
+  }, [router]);
   
   // Create a safe workspace object with default values if currentWorkspace is not found
-  const workspace = currentWorkspace 
-    ? { id: currentWorkspace.id, name: currentWorkspace.name }
-    : { id: workspaceId, name: "Workspace" };
+  const workspace = useMemo(() => 
+    currentWorkspace 
+      ? { id: currentWorkspace.id, name: currentWorkspace.name }
+      : { id: workspaceId, name: "Workspace" },
+    [currentWorkspace, workspaceId]
+  );
 
   // Only show workspace error after workspaces have been fetched and workspace is still not found
   const workspaceError = hasFetched && !workspacesLoading && !currentWorkspace 
@@ -162,7 +158,7 @@ export default function WorkspaceProjects() {
   const loading = workspacesLoading || projectsLoading;
 
   // Create a new project and navigate to it
-  const createNewProject = async () => {
+  const createNewProject = useCallback(async () => {
     try {
       const newProject = await createProject({
         name: "New Project",
@@ -190,46 +186,52 @@ export default function WorkspaceProjects() {
         variant: "destructive",
       });
     }
-  };
+  }, [createProject, router, workspaceId, toast]);
 
-  const handleConfirmDelete = async () => {
-    if (!deleteDialog.project) return;
+  // Direct delete function with confirmation
+  const handleDeleteProject = useCallback(async (project: Project, event: React.MouseEvent) => {
+    event.stopPropagation();
     
-    setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
+    // Simple browser confirmation
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone.`
+    );
     
+    if (!confirmed) {
+      return;
+    }
+
+    // Add to deleting set
+    setDeletingProjects(prev => new Set(prev).add(project.id));
+
     try {
-      const success = await deleteProject(deleteDialog.project.id);
+      console.log('Deleting project:', project.id);
+      const success = await deleteProject(project.id);
+      
       if (success) {
         toast({
           title: "Project Deleted",
-          description: `"${deleteDialog.project.name}" has been deleted successfully.`,
+          description: `"${project.name}" has been deleted successfully.`,
         });
-        // Close dialog after successful deletion
-        setDeleteDialog({ open: false, project: null, isDeleting: false });
       } else {
-        toast({
-          title: "Error",
-          description: "Failed to delete project. Please try again.",
-          variant: "destructive",
-        });
-        setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
+        throw new Error('Delete operation failed');
       }
     } catch (error) {
       console.error('Error deleting project:', error);
       toast({
         title: "Error",
-        description: "Failed to delete project. Please try again.",
+        description: `Failed to delete "${project.name}". Please try again.`,
         variant: "destructive",
       });
-      setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
+    } finally {
+      // Remove from deleting set
+      setDeletingProjects(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(project.id);
+        return newSet;
+      });
     }
-  };
-
-  const handleCloseDeleteDialog = (open: boolean) => {
-    if (!open && !deleteDialog.isDeleting) {
-      setDeleteDialog({ open: false, project: null, isDeleting: false });
-    }
-  };
+  }, [deleteProject, toast]);
 
   return (
     <PlaygroundLayout
@@ -332,7 +334,11 @@ export default function WorkspaceProjects() {
           ) : hasFetchedWorkspace ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProjects.map((project: Project) => (
-                <Card key={project.id} className="overflow-hidden group cursor-pointer" onClick={() => navigateToProject(project.id)}>
+                <Card 
+                  key={project.id} 
+                  className="overflow-hidden group cursor-pointer" 
+                  onClick={() => navigateToProject(project.id)}
+                >
                   <div className="relative aspect-video bg-gray-100 overflow-hidden">
                     {project.thumbnail_url ? (
                       <img 
@@ -372,8 +378,13 @@ export default function WorkspaceProjects() {
                             size="icon" 
                             className="h-8 w-8"
                             onClick={(e) => e.stopPropagation()}
+                            disabled={deletingProjects.has(project.id)}
                           >
-                            <MoreHorizontal className="h-4 w-4" />
+                            {deletingProjects.has(project.id) ? (
+                              <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+                            ) : (
+                              <MoreHorizontal className="h-4 w-4" />
+                            )}
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
@@ -385,12 +396,10 @@ export default function WorkspaceProjects() {
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-500"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              setDeleteDialog({ open: true, project: project, isDeleting: false });
-                            }}
+                            onClick={(e) => handleDeleteProject(project, e)}
+                            disabled={deletingProjects.has(project.id)}
                           >
-                            Delete
+                            {deletingProjects.has(project.id) ? 'Deleting...' : 'Delete'}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -451,17 +460,6 @@ export default function WorkspaceProjects() {
           )}
         </>
       )}
-      <DeleteDialog
-        open={deleteDialog.open}
-        onOpenChange={handleCloseDeleteDialog}
-        onConfirm={handleConfirmDelete}
-        title="Delete Project"
-        description="This project and all its associated data will be permanently deleted. This action cannot be undone."
-        itemName={deleteDialog.project?.name || ""}
-        itemType="project"
-        destructiveAction="Delete Project"
-        isLoading={deleteDialog.isDeleting}
-      />
     </PlaygroundLayout>
   );
 }
