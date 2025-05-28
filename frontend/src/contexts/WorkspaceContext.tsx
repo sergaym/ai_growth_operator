@@ -91,3 +91,31 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   const [workspaceLoading, setWorkspaceLoading] = useState(false);
   const [workspaceError, setWorkspaceError] = useState<string | null>(null);
 
+  // Fetch all workspaces
+  const fetchWorkspaces = useCallback(async () => {
+    if (!user.isAuthenticated) {
+      setError('User not authenticated. Please log in.');
+      setLoading(false);
+      return;
+    }
+
+    setLoading(true);
+    try {
+      const data = await apiClient<Workspace[]>(`${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/`);
+      
+      if (Array.isArray(data)) {
+        setWorkspaces(data);
+        setError(null);
+        setHasFetched(true);
+      } else {
+        console.error('Invalid workspace data received:', data);
+        setError('Received invalid data format for workspaces.');
+      }
+    } catch (err) {
+      console.error('Error fetching workspaces:', err);
+      setError('Failed to fetch workspaces. Please try again later.');
+    } finally {
+      setLoading(false);
+    }
+  }, [user.isAuthenticated]);
+
