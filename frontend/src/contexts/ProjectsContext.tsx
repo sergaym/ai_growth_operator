@@ -93,3 +93,41 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
+  // Fetch projects for a workspace
+  const fetchProjects = useCallback(async (workspaceId: string): Promise<Project[]> => {
+    if (!user.isAuthenticated || !workspaceId) {
+      return [];
+    }
+
+    // Don't fetch if already loading or already fetched
+    if (loading || fetchedWorkspaces.has(workspaceId)) {
+      return projectsByWorkspace[workspaceId] || [];
+    }
+
+    setLoading(true);
+    setError(null);
+    
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects`;
+      const data = await apiClient<{ projects: Project[] }>(url);
+      
+      const projects = data.projects || [];
+      setProjectsByWorkspace(prev => ({
+        ...prev,
+        [workspaceId]: projects
+      }));
+      
+      // Mark this workspace as fetched
+      setFetchedWorkspaces(prev => new Set(prev).add(workspaceId));
+      
+      return projects;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch projects';
+      setError(errorMessage);
+      console.error('Error fetching projects:', err);
+      return [];
+    } finally {
+      setLoading(false);
+    }
+  }, [user.isAuthenticated, loading, fetchedWorkspaces, projectsByWorkspace]);
+
