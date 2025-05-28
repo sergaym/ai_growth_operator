@@ -142,7 +142,7 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     updateProject,
     getProjectAssets,
     projectsByWorkspace,
-    loading,
+    loading: contextLoading,
     error,
     clearError 
   } = useProjectsContext();
@@ -152,11 +152,13 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     assets: import('@/contexts/ProjectsContext').ProjectAssetsResponse | null;
     fetched: boolean;
     fetchedAssets: boolean;
+    isInitialLoading: boolean;
   }>({
     project: null,
     assets: null,
     fetched: false,
-    fetchedAssets: false
+    fetchedAssets: false,
+    isInitialLoading: false
   });
 
   // Get cached project from workspace projects if available
@@ -168,13 +170,25 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
   // Auto-fetch project details when workspaceId/projectId changes
   useEffect(() => {
     if (!workspaceId || !projectId) {
-      setProjectState({ project: null, assets: null, fetched: false, fetchedAssets: false });
+      setProjectState({ 
+        project: null, 
+        assets: null, 
+        fetched: false, 
+        fetchedAssets: false,
+        isInitialLoading: false
+      });
+      return;
+    }
+
+    // If we already have the project data, don't show loading
+    if (projectState.fetched && projectState.project) {
       return;
     }
 
     // Always fetch fresh project details from API for project pages
     const fetchProjectDetails = async () => {
       try {
+        setProjectState(prev => ({ ...prev, isInitialLoading: true }));
         console.log(`Fetching project details for ${projectId} in workspace ${workspaceId}`);
         
         // Fetch project with assets included
@@ -190,7 +204,8 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
           project: projectData,
           assets: assetsData,
           fetched: true,
-          fetchedAssets: true
+          fetchedAssets: true,
+          isInitialLoading: false
         });
       } catch (error) {
         console.error('Error fetching project details:', error);
@@ -198,7 +213,8 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
           project: null,
           assets: null,
           fetched: true,
-          fetchedAssets: true
+          fetchedAssets: true,
+          isInitialLoading: false
         });
       }
     };
@@ -243,27 +259,29 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
   const refreshProject = useCallback(async () => {
     if (!workspaceId || !projectId) return null;
     
-    setProjectState(prev => ({ ...prev, fetched: false, fetchedAssets: false }));
+    // Don't set loading state for refresh operations
+    // This prevents the "Loading..." page from appearing during video generation
     
-    // Force fresh fetch
+    // Force fresh fetch without showing loading state
     const [projectData, assetsData] = await Promise.all([
       getProject(workspaceId, projectId, true),
       getProjectAssets(workspaceId, projectId)
     ]);
 
-    setProjectState({
+    setProjectState(prev => ({
+      ...prev,
       project: projectData,
       assets: assetsData,
       fetched: true,
       fetchedAssets: true
-    });
+    }));
 
     return projectData;
   }, [workspaceId, projectId, getProject, getProjectAssets]);
   
   return useMemo(() => ({
     project: projectState.project,
-    loading,
+    loading: projectState.isInitialLoading, // Only show loading for initial fetch
     error,
     assets: projectState.assets,
     hasFetched: projectState.fetched,
@@ -276,7 +294,7 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     projectState.project,
     projectState.assets,
     projectState.fetched,
-    loading,
+    projectState.isInitialLoading,
     error,
     memoizedGetProject,
     memoizedUpdateProject,
