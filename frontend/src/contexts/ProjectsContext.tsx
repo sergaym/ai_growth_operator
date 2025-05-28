@@ -318,29 +318,54 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       return false;
     }
 
-    setLoading(true);
+    // Check if project exists before attempting deletion
+    const existingProject = projectsByWorkspace[workspaceId]?.find(p => p.id === projectId);
+    if (!existingProject) {
+      console.warn('Delete project: Project not found in local state', { workspaceId, projectId });
+      // Still attempt API call in case it exists on server
+    }
+
+    updateLoadingState('deleting', projectId, true);
     setError(null);
 
     try {
+      console.log('Delete project: Starting deletion', { workspaceId, projectId });
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}`;
       await apiClient(url, { method: 'DELETE' });
 
-      // Update local state
-      setProjectsByWorkspace(prev => ({
-        ...prev,
-        [workspaceId]: prev[workspaceId]?.filter(p => p.id !== projectId) || []
-      }));
+      console.log('Delete project: API call successful, updating local state');
+      
+      // Update local state - remove the project from the workspace
+      setProjectsByWorkspace(prev => {
+        const currentProjects = prev[workspaceId] || [];
+        const updatedProjects = currentProjects.filter(p => p.id !== projectId);
+        
+        console.log('Delete project: Updated projects count', {
+          before: currentProjects.length,
+          after: updatedProjects.length,
+          removed: currentProjects.length - updatedProjects.length
+        });
+        
+        return {
+          ...prev,
+          [workspaceId]: updatedProjects
+        };
+      });
 
       return true;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to delete project';
       setError(errorMessage);
-      console.error('Error deleting project:', err);
+      console.error('Delete project: API call failed', { 
+        workspaceId, 
+        projectId, 
+        error: err 
+      });
       return false;
     } finally {
-      setLoading(false);
+      updateLoadingState('deleting', projectId, false);
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, projectsByWorkspace, updateLoadingState]);
 
   // Get project assets
   const getProjectAssets = useCallback(async (workspaceId: string, projectId: string, assetType?: string): Promise<ProjectAssetsResponse | null> => {
