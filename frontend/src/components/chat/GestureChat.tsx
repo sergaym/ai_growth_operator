@@ -425,17 +425,6 @@ export function GestureChat({
                   Text to Speech
                 </div>
               )}
-              
-              {!selectedActor && (
-                <button 
-                  onClick={handleAddActors}
-                  className="flex items-center gap-1.5 text-sm text-blue-600 hover:text-blue-800 px-3 py-1.5 bg-blue-50 hover:bg-blue-100 rounded-md transition-colors border border-blue-200"
-                  disabled={isGenerating}
-                >
-                  <UserPlus className="h-4 w-4" />
-                  Add Actor
-                </button>
-              )}
             </div>
 
             {/* Character count for long inputs */}
