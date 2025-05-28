@@ -249,43 +249,136 @@ export default function ProjectPage() {
     );
   }
 
-  // Success state - render project
+  // Success state - render project (only if project exists and fetch is complete)
+  if (!project || !hasFetched) {
+    return null; // This should not happen due to the loading/error checks above, but satisfies TypeScript
+  }
+
   return (
     <>
       <PlaygroundLayout
-        title={projectWithAssets.project.name}
-        description={projectWithAssets.project.description}
+        title={project.name}
+        description={project.description}
         currentWorkspace={currentWorkspace}
         error={error}
         showBackButton={true}
         onBack={handleBackToWorkspace}
-        status={projectWithAssets.project.status}
+        status={project.status}
         headerActions={<ProjectActions />}
         isProject={true}
-        projectName={projectWithAssets.project.name}
+        projectName={project.name}
       >
         <div className="space-y-6">
-          {/* Video Preview */}
-          <VideoPreview
-            videoUrl={result?.video_url}
-            isGenerating={isGenerating}
-            progress={progress}
-            currentStep={currentStep ?? undefined}
-            error={videoError ?? undefined}
-            processingTime={result?.processing_time}
-            onCancel={cancel}
-            onReset={reset}
-            onRetry={reset}
-            showGettingStarted={!result && !videoError && !isGenerating}
-          />
+          {/* Project Assets Section */}
+          {assets && assets.assets && assets.assets.length > 0 && (
+            <div className="space-y-4">
+              <div className="flex items-center justify-between">
+                <h2 className="text-xl font-semibold">Project Assets</h2>
+                <span className="text-sm text-muted-foreground">
+                  {assets.total} asset{assets.total !== 1 ? 's' : ''}
+                </span>
+              </div>
+              
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+                {assets.assets.map((asset) => (
+                  <div key={asset.id} className="border rounded-lg p-4 space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-sm font-medium capitalize">
+                        {asset.type.replace('_', ' ')}
+                      </span>
+                      <span className={`text-xs px-2 py-1 rounded-full ${
+                        asset.status === 'completed' 
+                          ? 'bg-green-100 text-green-700' 
+                          : asset.status === 'processing'
+                          ? 'bg-blue-100 text-blue-700'
+                          : 'bg-gray-100 text-gray-700'
+                      }`}>
+                        {asset.status}
+                      </span>
+                    </div>
+                    
+                    {/* Video Preview */}
+                    {asset.type === 'video' && asset.file_url && (
+                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+                        <video 
+                          src={asset.file_url} 
+                          controls 
+                          className="w-full h-full object-cover"
+                          poster={asset.thumbnail_url}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    )}
+                    
+                    {/* Audio Preview */}
+                    {asset.type === 'audio' && asset.file_url && (
+                      <div className="bg-gray-50 rounded p-4">
+                        <audio controls className="w-full">
+                          <source src={asset.file_url} />
+                          Your browser does not support the audio tag.
+                        </audio>
+                      </div>
+                    )}
+                    
+                    {/* Image Preview */}
+                    {asset.type === 'image' && asset.file_url && (
+                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+                        <img 
+                          src={asset.file_url} 
+                          alt="Project asset"
+                          className="w-full h-full object-cover"
+                        />
+                      </div>
+                    )}
+                    
+                    {/* Lipsync Video Preview */}
+                    {asset.type === 'lipsync_video' && asset.file_url && (
+                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
+                        <video 
+                          src={asset.file_url} 
+                          controls 
+                          className="w-full h-full object-cover"
+                          poster={asset.thumbnail_url}
+                        >
+                          Your browser does not support the video tag.
+                        </video>
+                      </div>
+                    )}
+                    
+                    <div className="text-xs text-muted-foreground">
+                      Created {new Date(asset.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
-          {/* Enhanced Chat Input */}
-          <GestureChat 
-            projectId={projectId} 
-            onGenerateVideo={handleGenerateVideo}
-            isGenerating={isGenerating}
-            showTips={true}
-          />
+          {/* Video Generation Section */}
+          <div className="space-y-4">            
+            {/* Video Preview */}
+            <VideoPreview
+              videoUrl={result?.video_url}
+              isGenerating={isGenerating}
+              progress={progress}
+              currentStep={currentStep ?? undefined}
+              error={videoError ?? undefined}
+              processingTime={result?.processing_time}
+              onCancel={cancel}
+              onReset={reset}
+              onRetry={reset}
+              showGettingStarted={!result && !videoError && !isGenerating && (!assets || assets.assets.length === 0)}
+            />
+
+            {/* Enhanced Chat Input */}
+            <GestureChat 
+              projectId={projectId} 
+              onGenerateVideo={handleGenerateVideo}
+              isGenerating={isGenerating}
+              showTips={true}
+            />
+          </div>
         </div>
       </PlaygroundLayout>
 
@@ -296,7 +389,7 @@ export default function ProjectPage() {
         onConfirm={handleDeleteProject}
         title="Delete Project"
         description="This project and all its content will be permanently deleted. This action cannot be undone."
-        itemName={projectWithAssets.project?.name || ""}
+        itemName={project?.name || ""}
         itemType="project"
         destructiveAction="Delete Project"
         isLoading={deleteDialog.isDeleting}
