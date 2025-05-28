@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useEffect, useCallback, useMemo, useState } from 'react';
+import { useAuth } from '@/hooks/useAuth';
 
 // Re-export everything from the context for backward compatibility
 export {
@@ -11,6 +12,7 @@ export {
   type ProjectAsset,
   type ProjectAssetsResponse,
   type ProjectStats,
+  type ProjectError,
   ProjectStatus,
   useProjectsContext as useProjects,
 } from '@/contexts/ProjectsContext';
@@ -20,7 +22,9 @@ import {
   useProjectsContext, 
   type Project, 
   type ProjectCreateRequest,
-  type ProjectUpdateRequest 
+  type ProjectUpdateRequest,
+  type ProjectError,
+  type ProjectAssetsResponse 
 } from '@/contexts/ProjectsContext';
 
 export interface ProjectListResponse {
