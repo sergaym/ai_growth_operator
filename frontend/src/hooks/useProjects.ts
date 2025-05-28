@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useCallback, useMemo } from 'react';
+import React, { useEffect, useCallback, useMemo, useState } from 'react';
 
 // Re-export everything from the context for backward compatibility
 export {
@@ -46,11 +46,15 @@ export interface UseWorkspaceProjectsReturn {
 }
 
 export interface UseProjectDetailsReturn {
+  project: Project | null;
   loading: boolean;
   error: string | null;
+  assets: import('@/contexts/ProjectsContext').ProjectAssetsResponse | null;
+  hasFetched: boolean;
   getProject: (includeAssets?: boolean) => Promise<Project | null>;
   updateProject: (request: ProjectUpdateRequest) => Promise<Project | null>;
   getProjectAssets: (assetType?: string) => Promise<import('@/contexts/ProjectsContext').ProjectAssetsResponse | null>;
+  refreshProject: () => Promise<Project | null>;
   clearError: () => void;
 }
 
@@ -137,39 +141,147 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     getProject,
     updateProject,
     getProjectAssets,
+    projectsByWorkspace,
     loading,
     error,
     clearError 
   } = useProjectsContext();
   
-  const memoizedGetProject = useCallback((includeAssets?: boolean) => {
-    if (!workspaceId || !projectId) return Promise.resolve(null);
-    return getProject(workspaceId, projectId, includeAssets);
+  const [projectState, setProjectState] = useState<{
+    project: Project | null;
+    assets: import('@/contexts/ProjectsContext').ProjectAssetsResponse | null;
+    fetched: boolean;
+    fetchedAssets: boolean;
+  }>({
+    project: null,
+    assets: null,
+    fetched: false,
+    fetchedAssets: false
+  });
+
+  // Get cached project from workspace projects if available
+  const cachedProject = useMemo(() => {
+    if (!workspaceId || !projectId) return null;
+    return projectsByWorkspace[workspaceId]?.find(p => p.id === projectId) || null;
+  }, [projectsByWorkspace, workspaceId, projectId]);
+
+  // Auto-fetch project details when workspaceId/projectId changes
+  useEffect(() => {
+    if (!workspaceId || !projectId) {
+      setProjectState({ project: null, assets: null, fetched: false, fetchedAssets: false });
+      return;
+    }
+
+    // Always fetch fresh project details from API for project pages
+    const fetchProjectDetails = async () => {
+      try {
+        console.log(`Fetching project details for ${projectId} in workspace ${workspaceId}`);
+        
+        // Fetch project with assets included
+        const [projectData, assetsData] = await Promise.all([
+          getProject(workspaceId, projectId, true),
+          getProjectAssets(workspaceId, projectId)
+        ]);
+
+        console.log('Project data received:', projectData);
+        console.log('Assets data received:', assetsData);
+
+        setProjectState({
+          project: projectData,
+          assets: assetsData,
+          fetched: true,
+          fetchedAssets: true
+        });
+      } catch (error) {
+        console.error('Error fetching project details:', error);
+        setProjectState({
+          project: null,
+          assets: null,
+          fetched: true,
+          fetchedAssets: true
+        });
+      }
+    };
+
+    // Only fetch if we haven't fetched yet or if the project/workspace changed
+    if (!projectState.fetched) {
+      fetchProjectDetails();
+    }
+  }, [workspaceId, projectId, projectState.fetched, getProject, getProjectAssets]);
+
+  // Memoized functions
+  const memoizedGetProject = useCallback(async (includeAssets?: boolean) => {
+    if (!workspaceId || !projectId) return null;
+    
+    const project = await getProject(workspaceId, projectId, includeAssets);
+    if (project) {
+      setProjectState(prev => ({ ...prev, project, fetched: true }));
+    }
+    return project;
   }, [workspaceId, projectId, getProject]);
 
-  const memoizedUpdateProject = useCallback((request: ProjectUpdateRequest) => {
-    if (!workspaceId || !projectId) return Promise.resolve(null);
-    return updateProject(workspaceId, projectId, request);
+  const memoizedUpdateProject = useCallback(async (request: ProjectUpdateRequest) => {
+    if (!workspaceId || !projectId) return null;
+    
+    const updatedProject = await updateProject(workspaceId, projectId, request);
+    if (updatedProject) {
+      setProjectState(prev => ({ ...prev, project: updatedProject }));
+    }
+    return updatedProject;
   }, [workspaceId, projectId, updateProject]);
 
-  const memoizedGetProjectAssets = useCallback((assetType?: string) => {
-    if (!workspaceId || !projectId) return Promise.resolve(null);
-    return getProjectAssets(workspaceId, projectId, assetType);
+  const memoizedGetProjectAssets = useCallback(async (assetType?: string) => {
+    if (!workspaceId || !projectId) return null;
+    
+    const assets = await getProjectAssets(workspaceId, projectId, assetType);
+    if (assets) {
+      setProjectState(prev => ({ ...prev, assets, fetchedAssets: true }));
+    }
+    return assets;
   }, [workspaceId, projectId, getProjectAssets]);
+
+  const refreshProject = useCallback(async () => {
+    if (!workspaceId || !projectId) return null;
+    
+    setProjectState(prev => ({ ...prev, fetched: false, fetchedAssets: false }));
+    
+    // Force fresh fetch
+    const [projectData, assetsData] = await Promise.all([
+      getProject(workspaceId, projectId, true),
+      getProjectAssets(workspaceId, projectId)
+    ]);
+
+    setProjectState({
+      project: projectData,
+      assets: assetsData,
+      fetched: true,
+      fetchedAssets: true
+    });
+
+    return projectData;
+  }, [workspaceId, projectId, getProject, getProjectAssets]);
   
   return useMemo(() => ({
+    project: projectState.project,
     loading,
     error,
+    assets: projectState.assets,
+    hasFetched: projectState.fetched,
     getProject: memoizedGetProject,
     updateProject: memoizedUpdateProject,
     getProjectAssets: memoizedGetProjectAssets,
+    refreshProject,
     clearError,
   }), [
+    projectState.project,
+    projectState.assets,
+    projectState.fetched,
     loading,
     error,
     memoizedGetProject,
     memoizedUpdateProject,
     memoizedGetProjectAssets,
+    refreshProject,
     clearError,
   ]);
 }
