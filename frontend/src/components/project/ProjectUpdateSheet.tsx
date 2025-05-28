@@ -139,3 +139,113 @@ export function ProjectUpdateSheet({
     setIsResizing(false);
   }, []);
 
+  // Add global mouse event listeners for resize
+  useEffect(() => {
+    if (isResizing) {
+      document.addEventListener('mousemove', handleMouseMove);
+      document.addEventListener('mouseup', handleMouseUp);
+      document.body.style.cursor = 'col-resize';
+      document.body.style.userSelect = 'none';
+      
+      return () => {
+        document.removeEventListener('mousemove', handleMouseMove);
+        document.removeEventListener('mouseup', handleMouseUp);
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
+      };
+    }
+  }, [isResizing, handleMouseMove, handleMouseUp]);
+
+  // Handle form field changes
+  const handleChange = (field: keyof ProjectUpdateRequest, value: string | ProjectStatus) => {
+    setFormData(prev => ({
+      ...prev,
+      [field]: value
+    }));
+  };
+
+  // Handle save
+  const handleSave = async () => {
+    if (!project) return;
+
+    // Validation
+    if (!formData.name?.trim()) {
+      toast({
+        title: "Validation Error",
+        description: "Project name is required.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.name.length > 255) {
+      toast({
+        title: "Validation Error",
+        description: "Project name must be less than 255 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (formData.description && formData.description.length > 1000) {
+      toast({
+        title: "Validation Error",
+        description: "Project description must be less than 1000 characters.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    setIsSaving(true);
+    
+    try {
+      // Only send fields that have changed
+      const updateRequest: ProjectUpdateRequest = {};
+      
+      if (formData.name !== project.name) {
+        updateRequest.name = formData.name;
+      }
+      
+      if (formData.description !== project.description) {
+        updateRequest.description = formData.description;
+      }
+      
+      if (formData.status !== project.status) {
+        updateRequest.status = formData.status;
+      }
+      
+      if (formData.thumbnail_url !== project.thumbnail_url) {
+        updateRequest.thumbnail_url = formData.thumbnail_url;
+      }
+
+      // Only proceed if there are actual changes
+      if (Object.keys(updateRequest).length === 0) {
+        toast({
+          title: "No Changes",
+          description: "No changes were made to the project.",
+        });
+        onOpenChange(false);
+        return;
+      }
+
+      const updatedProject = await onUpdate(updateRequest);
+      
+      if (updatedProject) {
+        toast({
+          title: "Project Updated",
+          description: "Project details have been updated successfully.",
+        });
+        onOpenChange(false);
+      }
+    } catch (error) {
+      console.error('Error updating project:', error);
+      toast({
+        title: "Update Failed",
+        description: "Failed to update project details. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsSaving(false);
+    }
+  };
+
