@@ -70,6 +70,14 @@ interface ProjectsContextType {
   loading: boolean;
   error: string | null;
   
+  // Loading states for specific operations
+  loadingStates: {
+    fetching: { [workspaceId: string]: boolean };
+    creating: { [workspaceId: string]: boolean };
+    updating: { [projectId: string]: boolean };
+    deleting: { [projectId: string]: boolean };
+  };
+  
   // Actions
   fetchProjects: (workspaceId: string) => Promise<Project[]>;
   refreshProjects: (workspaceId: string) => Promise<Project[]>;
@@ -80,6 +88,10 @@ interface ProjectsContextType {
   getProjectAssets: (workspaceId: string, projectId: string, assetType?: string) => Promise<ProjectAssetsResponse | null>;
   getWorkspaceStats: (workspaceId: string) => Promise<ProjectStats | null>;
   clearError: () => void;
+  
+  // Utility functions
+  isProjectLoading: (projectId: string) => boolean;
+  isWorkspaceLoading: (workspaceId: string) => boolean;
 }
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
@@ -92,6 +104,38 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const [fetchedWorkspaces, setFetchedWorkspaces] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
+
+  // Enhanced loading states for granular control
+  const [loadingStates, setLoadingStates] = useState({
+    fetching: {} as { [workspaceId: string]: boolean },
+    creating: {} as { [workspaceId: string]: boolean },
+    updating: {} as { [projectId: string]: boolean },
+    deleting: {} as { [projectId: string]: boolean },
+  });
+
+  // Utility functions for loading states
+  const isProjectLoading = useCallback((projectId: string): boolean => {
+    return loadingStates.updating[projectId] || loadingStates.deleting[projectId] || false;
+  }, [loadingStates]);
+
+  const isWorkspaceLoading = useCallback((workspaceId: string): boolean => {
+    return loadingStates.fetching[workspaceId] || loadingStates.creating[workspaceId] || false;
+  }, [loadingStates]);
+
+  // Helper to update specific loading states
+  const updateLoadingState = useCallback((
+    category: keyof typeof loadingStates,
+    key: string,
+    isLoading: boolean
+  ) => {
+    setLoadingStates(prev => ({
+      ...prev,
+      [category]: {
+        ...prev[category],
+        [key]: isLoading
+      }
+    }));
+  }, []);
 
   // Fetch projects for a workspace
   const fetchProjects = useCallback(async (workspaceId: string): Promise<Project[]> => {
@@ -316,6 +360,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     fetchedWorkspaces,
     loading,
     error,
+    loadingStates,
     fetchProjects,
     refreshProjects,
     createProject,
@@ -325,6 +370,8 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     getProjectAssets,
     getWorkspaceStats,
     clearError,
+    isProjectLoading,
+    isWorkspaceLoading,
   };
 
   return (
