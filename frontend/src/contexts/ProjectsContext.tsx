@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useState, useCallback, ReactNode } from 'react';
+import React, { createContext, useContext, useState, useCallback, ReactNode, useRef } from 'react';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '../services/apiClient';
 
@@ -12,12 +12,13 @@ export enum ProjectStatus {
   ARCHIVED = "archived"
 }
 
-// Project interfaces
+// Enhanced interfaces to match backend schemas exactly
 export interface ProjectAssetSummary {
   total_videos: number;
   total_audio: number;
   total_images: number;
   total_lipsync_videos: number;
+  latest_asset_created_at?: string; // ISO string from backend
 }
 
 export interface Project {
@@ -50,15 +51,11 @@ export interface ProjectUpdateRequest {
   metadata?: Record<string, any>;
 }
 
+// Enhanced asset interface to match backend ProjectAssetResponse exactly
 export interface ProjectAsset {
   id: string;
-  project_id: string;
-  type: string;
+  type: string; // 'video' | 'audio' | 'lipsync_video'
   status: string;
-  filename: string;
-  file_path: string;
-  file_size: number;
-  mime_type: string;
   created_at: string;
   updated_at: string;
   file_url?: string;
@@ -66,32 +63,52 @@ export interface ProjectAsset {
   metadata?: Record<string, any>;
 }
 
+// Enhanced assets response to match backend ProjectAssetsResponse exactly
 export interface ProjectAssetsResponse {
   assets: ProjectAsset[];
   total: number;
+  asset_summary: ProjectAssetSummary;
 }
 
 export interface ProjectStats {
   total_projects: number;
-  active_projects: number;
-  completed_projects: number;
+  projects_by_status: Record<string, number>;
   total_assets: number;
+  recent_activity_count: number;
+  most_active_projects: Project[];
+}
+
+// Enhanced error types for better error handling
+export interface ProjectError {
+  code: string;
+  message: string;
+  details?: any;
+}
+
+// Cache entry for assets with TTL
+interface AssetsCacheEntry {
+  data: ProjectAssetsResponse;
+  timestamp: number;
+  ttl: number; // Time to live in milliseconds
 }
 
 interface ProjectsContextType {
   // State
   projectsByWorkspace: { [workspaceId: string]: Project[] };
   statsByWorkspace: { [workspaceId: string]: ProjectStats };
+  assetsByProject: { [projectId: string]: ProjectAssetsResponse };
   fetchedWorkspaces: Set<string>;
   loading: boolean;
-  error: string | null;
+  error: ProjectError | null;
   
-  // Loading states for specific operations
+  // Enhanced loading states for granular control
   loadingStates: {
     fetching: { [workspaceId: string]: boolean };
     creating: { [workspaceId: string]: boolean };
     updating: { [projectId: string]: boolean };
     deleting: { [projectId: string]: boolean };
+    fetchingAssets: { [projectId: string]: boolean };
+    refreshingAssets: { [projectId: string]: boolean };
   };
   
   // Actions
@@ -101,25 +118,37 @@ interface ProjectsContextType {
   getProject: (workspaceId: string, projectId: string, includeAssets?: boolean) => Promise<Project | null>;
   updateProject: (workspaceId: string, projectId: string, request: ProjectUpdateRequest) => Promise<Project | null>;
   deleteProject: (workspaceId: string, projectId: string) => Promise<boolean>;
-  getProjectAssets: (workspaceId: string, projectId: string, assetType?: string) => Promise<ProjectAssetsResponse | null>;
+  getProjectAssets: (workspaceId: string, projectId: string, assetType?: string, forceRefresh?: boolean) => Promise<ProjectAssetsResponse | null>;
+  refreshProjectAssets: (workspaceId: string, projectId: string, assetType?: string) => Promise<ProjectAssetsResponse | null>;
   getWorkspaceStats: (workspaceId: string) => Promise<ProjectStats | null>;
   clearError: () => void;
   
   // Utility functions
   isProjectLoading: (projectId: string) => boolean;
   isWorkspaceLoading: (workspaceId: string) => boolean;
+  isProjectAssetsLoading: (projectId: string) => boolean;
+  getCachedAssets: (projectId: string) => ProjectAssetsResponse | null;
+  invalidateAssetsCache: (projectId?: string) => void;
 }
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+
+// Cache TTL constants
+const ASSETS_CACHE_TTL = 5 * 60 * 1000; // 5 minutes
+const MAX_CACHE_SIZE = 50; // Maximum number of cached asset entries
 
 export function ProjectsProvider({ children }: { children: ReactNode }) {
   const { user } = useAuth();
   
   const [projectsByWorkspace, setProjectsByWorkspace] = useState<{ [workspaceId: string]: Project[] }>({});
   const [statsByWorkspace, setStatsByWorkspace] = useState<{ [workspaceId: string]: ProjectStats }>({});
+  const [assetsByProject, setAssetsByProject] = useState<{ [projectId: string]: ProjectAssetsResponse }>({});
   const [fetchedWorkspaces, setFetchedWorkspaces] = useState<Set<string>>(new Set());
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
+  const [error, setError] = useState<ProjectError | null>(null);
+
+  // Assets cache with TTL support
+  const assetsCacheRef = useRef<Map<string, AssetsCacheEntry>>(new Map());
 
   // Enhanced loading states for granular control
   const [loadingStates, setLoadingStates] = useState({
