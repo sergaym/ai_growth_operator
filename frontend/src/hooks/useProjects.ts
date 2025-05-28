@@ -179,14 +179,23 @@ export function useProjectsLegacy(workspaceId?: string, autoFetch: boolean = fal
     // Actions
     listProjects,
     createProject,
-    getProject,
+    getProject: (projectId: string, includeAssets?: boolean) => {
+      if (!workspaceId) return Promise.resolve(null);
+      return getProject(workspaceId, projectId, includeAssets);
+    },
     updateProject,
     deleteProject,
-    getProjectAssets,
-    getWorkspaceStats,
+    getProjectAssets: (projectId: string, assetType?: string) => {
+      if (!workspaceId) return Promise.resolve(null);
+      return getProjectAssets(workspaceId, projectId, assetType);
+    },
+    getWorkspaceStats: () => {
+      if (!workspaceId) return Promise.resolve(null);
+      return getWorkspaceStats(workspaceId);
+    },
     
     // Utilities
-    refreshProjects: () => listProjects({ include_assets: true }),
-    clearError: () => setError(null),
+    refreshProjects,
+    clearError,
   };
 } 
