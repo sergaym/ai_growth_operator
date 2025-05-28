@@ -84,3 +84,12 @@ interface ProjectsContextType {
 
 const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
 
+export function ProjectsProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  
+  const [projectsByWorkspace, setProjectsByWorkspace] = useState<{ [workspaceId: string]: Project[] }>({});
+  const [statsByWorkspace, setStatsByWorkspace] = useState<{ [workspaceId: string]: ProjectStats }>({});
+  const [fetchedWorkspaces, setFetchedWorkspaces] = useState<Set<string>>(new Set());
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+
