@@ -122,16 +122,16 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     loading,
     error,
     hasFetchedWorkspace,
-    fetchProjects: () => workspaceId ? fetchProjects(workspaceId) : Promise.resolve([]),
-    refreshProjects: () => workspaceId ? refreshProjects(workspaceId) : Promise.resolve([]),
-    createProject: (request: any) => workspaceId ? createProject(workspaceId, request) : Promise.resolve(null),
-    deleteProject: (projectId: string) => workspaceId ? deleteProject(workspaceId, projectId) : Promise.resolve(false),
+    memoizedFetchProjects,
+    memoizedRefreshProjects,
+    memoizedCreateProject,
+    memoizedDeleteProject,
     clearError,
-  };
+  ]);
 }
 
 // For components that need to work with a specific project
-export function useProjectDetails(workspaceId?: string, projectId?: string) {
+export function useProjectDetails(workspaceId?: string, projectId?: string): UseProjectDetailsReturn {
   const { 
     getProject,
     updateProject,
