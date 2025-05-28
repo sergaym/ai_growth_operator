@@ -211,7 +211,8 @@ class TextToSpeechService:
         save_to_file: bool = True,
         upload_to_blob: bool = False,
         user_id: Optional[str] = None,
-        workspace_id: Optional[str] = None
+        workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate speech from text using ElevenLabs API.
@@ -228,6 +229,7 @@ class TextToSpeechService:
             upload_to_blob: Whether to upload the audio to blob storage
             user_id: Optional user ID to associate with the audio
             workspace_id: Optional workspace ID to associate with the audio
+            project_id: Optional project ID to associate with the audio
             
         Returns:
             Dictionary with response data
@@ -398,6 +400,9 @@ class TextToSpeechService:
                 if workspace_id:
                     db_data["workspace_id"] = workspace_id
                 
+                if project_id:
+                    db_data["project_id"] = project_id
+                
                 # Get a database session and save the audio
                 db = next(get_db())
                 db_audio = audio_repository.create(db_data, db)
@@ -456,6 +461,9 @@ class TextToSpeechService:
                 
                 if workspace_id:
                     error_db_data["workspace_id"] = workspace_id
+                
+                if project_id:
+                    error_db_data["project_id"] = project_id
                 
                 # Get a database session and save the error
                 db = next(get_db())
