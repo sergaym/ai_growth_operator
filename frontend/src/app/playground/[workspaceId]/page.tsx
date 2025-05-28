@@ -64,10 +64,7 @@ export default function WorkspaceProjects() {
     loading: projectsLoading, 
     error: projectsError,
     deleteProject,
-    refreshProjects,
-    stats,
     createProject,
-    hasFetchedWorkspace
   } = useWorkspaceProjects(workspaceId);
   
   // Find the current workspace based on the URL parameter
@@ -238,7 +235,7 @@ export default function WorkspaceProjects() {
       title="Projects"
       description="Create and manage your AI-generated content projects."
       currentWorkspace={workspace}
-      error={workspaceError || projectsError}
+      error={workspaceError || (projectsError?.message)}
     >
       {/* If workspace not found, show error and return button */}
       {workspaceError ? (
@@ -296,7 +293,7 @@ export default function WorkspaceProjects() {
               <Button 
                 onClick={createNewProject} 
                 className="gap-1.5"
-                disabled={loading || !hasFetched}
+                disabled={loading}
               >
                 <FolderPlus className="h-4 w-4" />
                 <span>New Project</span>
@@ -312,7 +309,7 @@ export default function WorkspaceProjects() {
                 <ProjectCardSkeleton key={`skeleton-${index}`} />
               ))}
             </div>
-          ) : hasFetchedWorkspace && filteredProjects.length === 0 ? (
+          ) : hasFetched && filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium">
@@ -331,7 +328,7 @@ export default function WorkspaceProjects() {
                 </Button>
               )}
             </div>
-          ) : hasFetchedWorkspace ? (
+          ) : hasFetched ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
               {filteredProjects.map((project: Project) => (
                 <Card 
