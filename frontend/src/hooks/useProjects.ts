@@ -141,23 +141,36 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     clearError 
   } = useProjectsContext();
   
-  return {
+  const memoizedGetProject = useCallback((includeAssets?: boolean) => {
+    if (!workspaceId || !projectId) return Promise.resolve(null);
+    return getProject(workspaceId, projectId, includeAssets);
+  }, [workspaceId, projectId, getProject]);
+
+  const memoizedUpdateProject = useCallback((request: ProjectUpdateRequest) => {
+    if (!workspaceId || !projectId) return Promise.resolve(null);
+    return updateProject(workspaceId, projectId, request);
+  }, [workspaceId, projectId, updateProject]);
+
+  const memoizedGetProjectAssets = useCallback((assetType?: string) => {
+    if (!workspaceId || !projectId) return Promise.resolve(null);
+    return getProjectAssets(workspaceId, projectId, assetType);
+  }, [workspaceId, projectId, getProjectAssets]);
+  
+  return useMemo(() => ({
     loading,
     error,
-    getProject: (includeAssets?: boolean) => {
-      if (!workspaceId || !projectId) return Promise.resolve(null);
-      return getProject(workspaceId, projectId, includeAssets);
-    },
-    updateProject: (request: any) => {
-      if (!workspaceId || !projectId) return Promise.resolve(null);
-      return updateProject(workspaceId, projectId, request);
-    },
-    getProjectAssets: (assetType?: string) => {
-      if (!workspaceId || !projectId) return Promise.resolve(null);
-      return getProjectAssets(workspaceId, projectId, assetType);
-    },
+    getProject: memoizedGetProject,
+    updateProject: memoizedUpdateProject,
+    getProjectAssets: memoizedGetProjectAssets,
     clearError,
-  };
+  }), [
+    loading,
+    error,
+    memoizedGetProject,
+    memoizedUpdateProject,
+    memoizedGetProjectAssets,
+    clearError,
+  ]);
 }
 
 // For components that need workspace-level project statistics
