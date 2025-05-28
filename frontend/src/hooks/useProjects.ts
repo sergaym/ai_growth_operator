@@ -187,14 +187,46 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
     return projectsByWorkspace[workspaceId]?.find(p => p.id === projectId) || null;
   }, [projectsByWorkspace, workspaceId, projectId]);
 
-  // Auto-fetch project details when workspaceId/projectId changes
+  // Get cached or state-managed assets
+  const assets = useMemo(() => {
+    if (!projectId) return null;
+    return assetsByProject[projectId] || null;
+  }, [assetsByProject, projectId]);
+
+  // Check if assets are currently loading
+  const isAssetsLoading = useMemo(() => {
+    return projectId ? isProjectAssetsLoading(projectId) : false;
+  }, [isProjectAssetsLoading, projectId]);
+
+  // Auto-fetch project details when workspaceId/projectId changes or when auth becomes available
   useEffect(() => {
     if (!workspaceId || !projectId) {
       setProjectState({ 
         project: null, 
-        assets: null, 
         fetched: false, 
-        fetchedAssets: false,
+        isInitialLoading: false
+      });
+      return;
+    }
+
+    // Don't attempt to fetch if still loading auth or if already authenticated and already fetched
+    if (authLoading) {
+      console.log('useProjectDetails: Waiting for auth to complete...');
+      return;
+    }
+
+    // If we already have the project data and auth is stable, don't refetch
+    if (projectState.fetched && projectState.project && authUser.isAuthenticated) {
+      console.log('useProjectDetails: Project already fetched, skipping...');
+      return;
+    }
+
+    // Reset state if auth failed and we had a fetch attempt
+    if (!authUser.isAuthenticated && projectState.fetched) {
+      console.log('useProjectDetails: Auth failed, resetting state');
+      setProjectState({ 
+        project: null, 
+        fetched: false, 
         isInitialLoading: false
       });
       return;
