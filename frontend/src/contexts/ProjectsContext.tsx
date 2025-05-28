@@ -233,3 +233,32 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated]);
 
+  // Delete a project
+  const deleteProject = useCallback(async (workspaceId: string, projectId: string): Promise<boolean> => {
+    if (!user.isAuthenticated || !workspaceId || !projectId) {
+      return false;
+    }
+
+    setLoading(true);
+    setError(null);
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}`;
+      await apiClient(url, { method: 'DELETE' });
+
+      // Update local state
+      setProjectsByWorkspace(prev => ({
+        ...prev,
+        [workspaceId]: prev[workspaceId]?.filter(p => p.id !== projectId) || []
+      }));
+
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to delete project';
+      setError(errorMessage);
+      console.error('Error deleting project:', err);
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  }, [user.isAuthenticated]);
