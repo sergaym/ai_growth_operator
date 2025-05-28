@@ -103,6 +103,10 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     return workspaceId ? fetchedWorkspaces.has(workspaceId) : false;
   }, [fetchedWorkspaces, workspaceId]);
 
+  const workspaceLoading = useMemo(() => {
+    return workspaceId ? isWorkspaceLoading(workspaceId) : false;
+  }, [isWorkspaceLoading, workspaceId]);
+
   // Memoize functions to prevent re-renders
   const memoizedFetchProjects = useCallback(() => {
     return workspaceId ? fetchProjects(workspaceId) : Promise.resolve([]);
@@ -131,6 +135,7 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     createProject: memoizedCreateProject,
     deleteProject: memoizedDeleteProject,
     clearError,
+    isWorkspaceLoading: workspaceLoading,
   }), [
     projects,
     stats,
@@ -142,32 +147,37 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     memoizedCreateProject,
     memoizedDeleteProject,
     clearError,
+    workspaceLoading,
   ]);
 }
 
-// For components that need to work with a specific project
+// Enhanced hook for project details with comprehensive asset management
 export function useProjectDetails(workspaceId?: string, projectId?: string): UseProjectDetailsReturn {
   const { 
     getProject,
     updateProject,
     getProjectAssets,
+    refreshProjectAssets,
     projectsByWorkspace,
+    assetsByProject,
     loading: contextLoading,
     error,
-    clearError 
+    clearError,
+    isProjectAssetsLoading,
+    getCachedAssets,
+    invalidateAssetsCache
   } = useProjectsContext();
+  
+  // Get authentication state from useAuth
+  const { user: authUser, loading: authLoading } = useAuth();
   
   const [projectState, setProjectState] = useState<{
     project: Project | null;
-    assets: import('@/contexts/ProjectsContext').ProjectAssetsResponse | null;
     fetched: boolean;
-    fetchedAssets: boolean;
     isInitialLoading: boolean;
   }>({
     project: null,
-    assets: null,
     fetched: false,
-    fetchedAssets: false,
     isInitialLoading: false
   });
 
