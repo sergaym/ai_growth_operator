@@ -156,7 +156,31 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     creating: {} as { [workspaceId: string]: boolean },
     updating: {} as { [projectId: string]: boolean },
     deleting: {} as { [projectId: string]: boolean },
+    fetchingAssets: {} as { [projectId: string]: boolean },
+    refreshingAssets: {} as { [projectId: string]: boolean },
   });
+
+  // Enhanced error handling
+  const createError = useCallback((code: string, message: string, details?: any): ProjectError => {
+    return { code, message, details };
+  }, []);
+
+  const handleApiError = useCallback((err: any, context: string): ProjectError => {
+    console.error(`${context}:`, err);
+    
+    if (err.response?.status === 404) {
+      return createError('NOT_FOUND', `Resource not found: ${context}`, err);
+    } else if (err.response?.status === 403) {
+      return createError('FORBIDDEN', `Access denied: ${context}`, err);
+    } else if (err.response?.status >= 500) {
+      return createError('SERVER_ERROR', `Server error: ${context}`, err);
+    } else if (err.name === 'AbortError') {
+      return createError('CANCELLED', `Request cancelled: ${context}`, err);
+    } else {
+      const message = err instanceof Error ? err.message : `Failed: ${context}`;
+      return createError('UNKNOWN', message, err);
+    }
+  }, [createError]);
 
   // Utility functions for loading states
   const isProjectLoading = useCallback((projectId: string): boolean => {
@@ -165,6 +189,10 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
 
   const isWorkspaceLoading = useCallback((workspaceId: string): boolean => {
     return loadingStates.fetching[workspaceId] || loadingStates.creating[workspaceId] || false;
+  }, [loadingStates]);
+
+  const isProjectAssetsLoading = useCallback((projectId: string): boolean => {
+    return loadingStates.fetchingAssets[projectId] || loadingStates.refreshingAssets[projectId] || false;
   }, [loadingStates]);
 
   // Helper to update specific loading states
@@ -180,6 +208,60 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         [key]: isLoading
       }
     }));
+  }, []);
+
+  // Cache management functions
+  const getCachedAssets = useCallback((projectId: string): ProjectAssetsResponse | null => {
+    const cache = assetsCacheRef.current;
+    const entry = cache.get(projectId);
+    
+    if (!entry) return null;
+    
+    const now = Date.now();
+    if (now > entry.timestamp + entry.ttl) {
+      // Cache expired
+      cache.delete(projectId);
+      return null;
+    }
+    
+    return entry.data;
+  }, []);
+
+  const setCachedAssets = useCallback((projectId: string, data: ProjectAssetsResponse) => {
+    const cache = assetsCacheRef.current;
+    
+    // Cleanup old entries if cache is too large
+    if (cache.size >= MAX_CACHE_SIZE) {
+      const oldestKey = cache.keys().next().value;
+      if (oldestKey) cache.delete(oldestKey);
+    }
+    
+    cache.set(projectId, {
+      data,
+      timestamp: Date.now(),
+      ttl: ASSETS_CACHE_TTL
+    });
+    
+    // Also update the state cache
+    setAssetsByProject(prev => ({
+      ...prev,
+      [projectId]: data
+    }));
+  }, []);
+
+  const invalidateAssetsCache = useCallback((projectId?: string) => {
+    const cache = assetsCacheRef.current;
+    
+    if (projectId) {
+      cache.delete(projectId);
+      setAssetsByProject(prev => {
+        const { [projectId]: removed, ...rest } = prev;
+        return rest;
+      });
+    } else {
+      cache.clear();
+      setAssetsByProject({});
+    }
   }, []);
 
   // Fetch projects for a workspace
