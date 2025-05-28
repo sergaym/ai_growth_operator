@@ -30,8 +30,31 @@ export interface ProjectListResponse {
   total_pages: number;
 }
 
+// Enhanced return types for better type inference
+export interface UseWorkspaceProjectsReturn {
+  projects: Project[];
+  stats: import('@/contexts/ProjectsContext').ProjectStats | null;
+  loading: boolean;
+  error: string | null;
+  hasFetchedWorkspace: boolean;
+  fetchProjects: () => Promise<Project[]>;
+  refreshProjects: () => Promise<Project[]>;
+  createProject: (request: ProjectCreateRequest) => Promise<Project | null>;
+  deleteProject: (projectId: string) => Promise<boolean>;
+  clearError: () => void;
+}
+
+export interface UseProjectDetailsReturn {
+  loading: boolean;
+  error: string | null;
+  getProject: (includeAssets?: boolean) => Promise<Project | null>;
+  updateProject: (request: ProjectUpdateRequest) => Promise<Project | null>;
+  getProjectAssets: (assetType?: string) => Promise<import('@/contexts/ProjectsContext').ProjectAssetsResponse | null>;
+  clearError: () => void;
+}
+
 // For components that need to work with projects in a specific workspace
-export function useWorkspaceProjects(workspaceId?: string) {
+export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjectsReturn {
   const { 
     projectsByWorkspace, 
     loading, 
