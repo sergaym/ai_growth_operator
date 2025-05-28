@@ -34,17 +34,8 @@ import {
   DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+import { AssetViewer } from "@/components/project/AssetViewer";
 
-// Add keyframe animations for smooth loading transitions
-const loadingStyles = `
-  @keyframes fadeIn {
-    from { opacity: 0; transform: translateY(10px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .fade-in-stagger {
-    animation: fadeIn 0.3s ease-out forwards;
-  }
-`;
 
 export default function ProjectPage() {
   const params = useParams();
@@ -65,6 +56,7 @@ export default function ProjectPage() {
     assets,
     hasFetched,
     refreshProject,
+    refreshAssets,
     updateProject,
     clearError
   } = useProjectDetails(workspaceId, projectId);
@@ -76,6 +68,7 @@ export default function ProjectPage() {
   const [isDeleting, setIsDeleting] = useState(false);
   const [isUpdateSheetOpen, setIsUpdateSheetOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDebugPanel, setShowDebugPanel] = useState(true);
 
   // Workspace resolution
   const currentWorkspace = useMemo(() => {
