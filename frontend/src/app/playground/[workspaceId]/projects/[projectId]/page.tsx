@@ -98,54 +98,59 @@ export default function ProjectPage() {
         initialized: true
       });
     }
-    return null;
-  };
+  }, [cachedProject, projectWithAssets.initialized]);
 
-  // Load project data or create if not exists
+  // Fetch detailed project data when needed
   useEffect(() => {
-    const loadOrCreateProject = async () => {
-      if (!stringWorkspaceId || !stringProjectId) return;
+    if (!workspaceId || !projectId || !shouldFetchDetails || projectWithAssets.initialized) {
+      return;
+    }
+
+    const fetchProjectDetails = async () => {
+      setProjectWithAssets(prev => ({ ...prev, loading: true }));
       
-      setLoading(true);
       try {
-        // First, try to load the existing project
-        const projectData = await getProject(stringProjectId, true);
-        
+        const [projectData, assetsData] = await Promise.all([
+          getProject(true), // Include assets in project fetch
+          getProjectAssets()
+        ]);
+
         if (projectData) {
-          // Project exists, load its data
-          const assetsData = await getProjectAssets(stringProjectId);
-          setProject(projectData);
-          setAssets(assetsData);
+          setProjectWithAssets({
+            project: projectData,
+            assets: assetsData,
+            loading: false,
+            initialized: true
+          });
         } else {
-          // Project doesn't exist, auto-create it
-          console.log(`Project ${stringProjectId} not found, auto-creating...`);
-          const newProject = await autoCreateProject();
-          
-          if (newProject) {
-            setProject(newProject);
-            setAssets(null); // New project has no assets yet
-          } else {
-            console.error('Failed to auto-create project');
-          }
+          // Project doesn't exist
+          setProjectWithAssets({
+            project: null,
+            assets: null,
+            loading: false,
+            initialized: true
+          });
         }
       } catch (error) {
-        console.error('Error loading/creating project:', error);
+        console.error('Error fetching project details:', error);
+        setProjectWithAssets({
+          project: null,
+          assets: null,
+          loading: false,
+          initialized: true
+        });
         
-        // If there's an error loading, try to auto-create
-        if (!isCreatingProject) {
-          const newProject = await autoCreateProject();
-          if (newProject) {
-            setProject(newProject);
-            setAssets(null);
-          }
-        }
-      } finally {
-        setLoading(false);
+        toast({
+          title: "Error",
+          description: "Failed to load project details. Please try again.",
+          variant: "destructive",
+        });
       }
     };
 
-    loadOrCreateProject();
-  }, [stringWorkspaceId, stringProjectId, getProject, getProjectAssets]);
+    fetchProjectDetails();
+  }, [workspaceId, projectId, shouldFetchDetails, projectWithAssets.initialized, getProject, getProjectAssets, toast]);
+
 
   // Video generation state
   const { 
