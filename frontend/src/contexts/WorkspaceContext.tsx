@@ -145,3 +145,34 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
   }, [user.isAuthenticated]);
 
   // Update workspace name
+  const updateWorkspaceName = useCallback(async (workspaceId: string, newName: string): Promise<Workspace | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/name?new_name=${encodeURIComponent(newName)}`;
+      const updatedWorkspace = await apiClient<Workspace>(url, {
+        method: 'PUT',
+      });
+
+      // Update local state
+      setWorkspaces(prev => prev.map(ws => ws.id === workspaceId ? { ...ws, ...updatedWorkspace } : ws));
+      if (currentWorkspace && currentWorkspace.id === workspaceId) {
+        setCurrentWorkspace({ ...currentWorkspace, ...updatedWorkspace });
+      }
+
+      return updatedWorkspace;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to update workspace name';
+      setWorkspaceError(errorMessage);
+      console.error('Error updating workspace name:', err);
+      return null;
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  }, [user.isAuthenticated, currentWorkspace]);
+
