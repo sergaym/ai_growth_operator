@@ -191,9 +191,9 @@ export default function ProjectPage() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem>
+        <DropdownMenuItem onClick={refreshProject}>
           <Settings className="h-4 w-4 mr-2" />
-          Project Settings
+          Refresh Project
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="text-red-500"
@@ -225,8 +225,8 @@ export default function ProjectPage() {
     );
   }
 
-  // Error state - project not found
-  if (!projectWithAssets.project) {
+  // Error state - project not found (only show after fetch is complete)
+  if (hasFetched && !project && !isLoading) {
     return (
       <PlaygroundLayout
         title="Project Not Found"
