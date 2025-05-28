@@ -452,7 +452,6 @@ export default function ProjectPage() {
       <PlaygroundLayout
         title="Project Not Found"
         currentWorkspace={currentWorkspace}
-        error="The project you're looking for doesn't exist or you don't have access to it."
         showBackButton={true}
         onBack={handleBackToWorkspace}
         isProject={true}
@@ -476,7 +475,7 @@ export default function ProjectPage() {
         title={displayTitle}
         description={displayDescription}
         currentWorkspace={currentWorkspace}
-        error={error}
+        error={null}
         showBackButton={true}
         onBack={handleBackToWorkspace}
         status={project?.status}
