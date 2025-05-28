@@ -1,47 +1,21 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
-import { useAuth } from '@/hooks/useAuth';
-import { apiClient } from '../services/apiClient';
+import React, { useEffect } from 'react';
 
-// Project interfaces matching the backend schemas
-export interface ProjectAssetSummary {
-  total_videos: number;
-  total_audio: number;
-  total_images: number; // Keep for compatibility but will always be 0 for projects
-  total_lipsync_videos: number;
-  latest_asset_created_at?: string;
-}
+// Re-export everything from the context for backward compatibility
+export {
+  type ProjectAssetSummary,
+  type Project,
+  type ProjectCreateRequest,
+  type ProjectUpdateRequest,
+  type ProjectAsset,
+  type ProjectAssetsResponse,
+  type ProjectStats,
+  useProjectsContext as useProjects,
+} from '@/contexts/ProjectsContext';
 
-export interface Project {
-  id: string;
-  name: string;
-  description?: string;
-  workspace_id: string;
-  created_by_user_id: string;
-  status: 'draft' | 'in_progress' | 'completed' | 'archived';
-  thumbnail_url?: string;
-  created_at: string;
-  updated_at: string;
-  last_activity_at: string;
-  asset_summary?: ProjectAssetSummary;
-  metadata?: Record<string, any>;
-}
-
-export interface ProjectCreateRequest {
-  name: string;
-  description?: string;
-  thumbnail_url?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface ProjectUpdateRequest {
-  name?: string;
-  description?: string;
-  status?: 'draft' | 'in_progress' | 'completed' | 'archived';
-  thumbnail_url?: string;
-  metadata?: Record<string, any>;
-}
+// For components that specifically need only the projects list for a workspace
+import { useProjectsContext, type Project } from '@/contexts/ProjectsContext';
 
 export interface ProjectListResponse {
   projects: Project[];
