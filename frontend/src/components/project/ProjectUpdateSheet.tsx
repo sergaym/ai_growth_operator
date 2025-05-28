@@ -42,3 +42,38 @@ import {
 } from "lucide-react";
 import { ProjectStatus, type Project, type ProjectUpdateRequest } from "@/hooks/useProjects";
 
+interface ProjectUpdateSheetProps {
+  project: Project | null;
+  open: boolean;
+  onOpenChange: (open: boolean) => void;
+  onUpdate: (request: ProjectUpdateRequest) => Promise<Project | null>;
+  isUpdating?: boolean;
+}
+
+// Status display configuration with better styling
+const statusConfig = {
+  [ProjectStatus.DRAFT]: {
+    label: "Draft",
+    description: "Project is in draft state",
+    variant: "secondary" as const,
+    dotColor: "bg-amber-500"
+  },
+  [ProjectStatus.IN_PROGRESS]: {
+    label: "In Progress",
+    description: "Actively working on this project",
+    variant: "default" as const,
+    dotColor: "bg-blue-500"
+  },
+  [ProjectStatus.COMPLETED]: {
+    label: "Completed",
+    description: "Project is finished",
+    variant: "default" as const,
+    dotColor: "bg-green-500"
+  },
+  [ProjectStatus.ARCHIVED]: {
+    label: "Archived",
+    description: "Project is archived",
+    variant: "outline" as const,
+    dotColor: "bg-gray-500"
+  }
+};
