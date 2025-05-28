@@ -503,65 +503,36 @@ export default function ProjectPage() {
             <div className="space-y-6">
 
               
-              {/* Asset Grid - Responsive layout */}
+              {/* Asset Grid - Responsive layout - Only Lip-sync Videos */}
               <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-                {assets.assets.map((asset, index) => (
-                  <div 
-                    key={asset.id} 
-                    className="animate-in fade-in-50 duration-300"
-                    style={{ animationDelay: `${index * 100}ms` }}
-                  >
-                    <AssetViewer 
-                      asset={asset}
-                      showMetadata={true}
-                      compact={false}
-                    />
-                  </div>
-                ))}
+                {assets.assets
+                  .filter(asset => asset.type === 'lipsync_video')
+                  .map((asset, index) => (
+                    <div 
+                      key={asset.id} 
+                      className="animate-in fade-in-50 duration-300"
+                      style={{ animationDelay: `${index * 100}ms` }}
+                    >
+                      <AssetViewer 
+                        asset={asset}
+                        showMetadata={true}
+                        compact={false}
+                      />
+                    </div>
+                  ))}
               </div>
               
-              {/* Asset Summary Stats */}
-              {assets.asset_summary && (
-                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
-                  <h3 className="text-sm font-medium text-gray-900 mb-3">Asset Summary</h3>
-                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-                    {assets.asset_summary.total_videos > 0 && (
-                      <div className="text-center">
-                        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full mx-auto mb-1">
-                          <Video className="h-4 w-4 text-blue-600" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_videos}</p>
-                        <p className="text-xs text-gray-500">Videos</p>
-                      </div>
-                    )}
-                    {assets.asset_summary.total_lipsync_videos > 0 && (
-                      <div className="text-center">
-                        <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full mx-auto mb-1">
-                          <Video className="h-4 w-4 text-purple-600" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_lipsync_videos}</p>
-                        <p className="text-xs text-gray-500">Lip-sync</p>
-                      </div>
-                    )}
-                    {assets.asset_summary.total_audio > 0 && (
-                      <div className="text-center">
-                        <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full mx-auto mb-1">
-                          <Music className="h-4 w-4 text-indigo-600" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_audio}</p>
-                        <p className="text-xs text-gray-500">Audio</p>
-                      </div>
-                    )}
-                    {assets.asset_summary.total_images > 0 && (
-                      <div className="text-center">
-                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full mx-auto mb-1">
-                          <ImageIcon className="h-4 w-4 text-green-600" />
-                        </div>
-                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_images}</p>
-                        <p className="text-xs text-gray-500">Images</p>
-                      </div>
-                    )}
+              {/* Show message if no lip-sync videos found */}
+              {assets.assets.filter(asset => asset.type === 'lipsync_video').length === 0 && (
+                <div className="text-center py-12 text-gray-500">
+                  <div className="w-16 h-16 mx-auto mb-4 bg-purple-100 rounded-full flex items-center justify-center">
+                    <Video className="h-8 w-8 text-purple-600" />
                   </div>
+                  <h3 className="text-lg font-medium text-gray-900 mb-2">No Lip-sync Videos Yet</h3>
+                  <p className="text-gray-600 mb-4">Generate your first AI lip-sync video using the chat below.</p>
+                  <Button size="sm" onClick={() => refreshAssets()}>
+                    🔄 Refresh Assets
+                  </Button>
                 </div>
               )}
             </div>
