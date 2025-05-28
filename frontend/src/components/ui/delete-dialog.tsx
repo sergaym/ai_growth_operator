@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Dialog,
   DialogContent,
@@ -34,17 +34,112 @@ export function DeleteDialog({
   destructiveAction = "Delete",
   isLoading = false
 }: DeleteDialogProps) {
-  const handleConfirm = () => {
-    onConfirm();
-    // Don't auto-close - let parent component handle dialog state
+  const wasOpen = useRef(false);
+
+  // Force cleanup of any lingering portal elements
+  useEffect(() => {
+    if (!open && wasOpen.current) {
+      console.log('Dialog closed, forcing DOM cleanup');
+      
+      // Small delay to ensure React has processed the state change
+      const timeoutId = setTimeout(() => {
+        // Remove any lingering dialog overlays
+        const overlays = document.querySelectorAll('[data-state="closed"][data-slot="dialog-overlay"]');
+        overlays.forEach(overlay => {
+          console.warn('Removing lingering dialog overlay:', overlay);
+          overlay.remove();
+        });
+        
+        // Remove any orphaned dialog content
+        const contents = document.querySelectorAll('[data-state="closed"][data-slot="dialog-content"]');
+        contents.forEach(content => {
+          console.warn('Removing lingering dialog content:', content);
+          content.remove();
+        });
+        
+        // Reset body styles that might have been left behind
+        document.body.style.removeProperty('pointer-events');
+        document.body.style.removeProperty('overflow');
+        
+        // Remove any Radix focus guards that might be lingering
+        const focusGuards = document.querySelectorAll('[data-radix-focus-guard]');
+        focusGuards.forEach(guard => {
+          if (!guard.closest('[data-state="open"]')) {
+            console.warn('Removing lingering focus guard:', guard);
+            guard.remove();
+          }
+        });
+      }, 100);
+      
+      return () => clearTimeout(timeoutId);
+    }
+    
+    wasOpen.current = open;
+  }, [open]);
+
+  // Emergency escape hatch - allow force close with double escape
+  useEffect(() => {
+    let escapeCount = 0;
+    let resetTimer: NodeJS.Timeout;
+    
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.key === 'Escape' && open) {
+        escapeCount++;
+        if (escapeCount >= 2) {
+          // Force close on double escape
+          console.warn('Force closing delete dialog via double escape');
+          onOpenChange(false);
+          escapeCount = 0;
+        } else {
+          // Reset counter after 1 second
+          clearTimeout(resetTimer);
+          resetTimer = setTimeout(() => {
+            escapeCount = 0;
+          }, 1000);
+        }
+      }
+    };
+
+    if (open) {
+      document.addEventListener('keydown', handleKeyDown);
+    }
+
+    return () => {
+      document.removeEventListener('keydown', handleKeyDown);
+      clearTimeout(resetTimer);
+    };
+  }, [open, onOpenChange]);
+
+  const handleConfirm = async () => {
+    try {
+      console.log('Delete dialog: confirming deletion');
+      await onConfirm();
+    } catch (error) {
+      console.error('Delete confirmation error:', error);
+      // Ensure dialog can still be closed on error
+      onOpenChange(false);
+    }
   };
 
   const handleCancel = () => {
-    onOpenChange(false);
+    if (!isLoading) {
+      onOpenChange(false);
+    }
+  };
+
+  // Prevent closing dialog when loading unless explicitly requested
+  const handleOpenChange = (open: boolean) => {
+    console.log('Delete dialog: open change requested:', open, 'isLoading:', isLoading);
+    if (!open && isLoading) {
+      // Prevent closing when loading unless parent explicitly allows it
+      console.log('Delete dialog: preventing close while loading');
+      return;
+    }
+    onOpenChange(open);
   };
 
   return (
-    <Dialog open={open} onOpenChange={onOpenChange}>
+    <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent className="sm:max-w-[440px] gap-0 p-0 overflow-hidden">
         {/* Header with icon */}
         <DialogHeader className="px-6 pt-6 pb-4 space-y-4">
