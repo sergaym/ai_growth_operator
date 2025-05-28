@@ -1,55 +1,22 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useMemo } from 'react';
 import { useRouter } from 'next/navigation';
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '../services/apiClient';
 
-// Workspace interfaces matching the backend schemas
-export interface Workspace {
-  id: string;
-  name: string;
-  type: string;
-  owner_id: string;
-  created_at: string;
-  updated_at: string;
-  stripe_customer_id?: string;
-}
+// Re-export everything from the context for backward compatibility
+export {
+  type Workspace,
+  type User,
+  type SubscriptionPlan,
+  type Subscription,
+  type WorkspaceWithSubscription,
+  useWorkspaceContext as useWorkspace,
+} from '@/contexts/WorkspaceContext';
 
-export interface User {
-  id: string;
-  first_name: string;
-  last_name: string;
-  email: string;
-  role?: string;
-  created_at: string;
-  updated_at: string;
-}
-
-export interface SubscriptionPlan {
-  id: number;
-  name: string;
-  description?: string;
-  price: number;
-  currency: string;
-  billing_interval: string;
-  max_users: number;
-}
-
-export interface Subscription {
-  id: number;
-  workspace_id: string;
-  plan_id: number;
-  status: string;
-  stripe_subscription_id?: string;
-  start_date: string;
-  end_date?: string;
-  plan: SubscriptionPlan;
-}
-
-export interface WorkspaceWithSubscription extends Workspace {
-  active_subscription?: Subscription;
-}
+// For components that specifically need only the workspace list
+import { useWorkspaceContext } from '@/contexts/WorkspaceContext';
 
 export function useWorkspaces() {
   const router = useRouter();
