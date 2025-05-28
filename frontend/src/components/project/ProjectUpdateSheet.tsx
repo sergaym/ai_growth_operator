@@ -273,3 +273,215 @@ export function ProjectUpdateSheet({
 
   if (!project) return null;
 
+  return (
+    <Sheet open={open} onOpenChange={onOpenChange}>
+      <SheetContent 
+        ref={sheetRef}
+        className="flex flex-col p-0 w-auto border-l"
+        style={{ 
+          width: `${width}px`,
+          maxWidth: 'none'
+        }}
+      >
+        {/* Resize Handle */}
+        <div
+          className="absolute left-0 top-0 h-full w-1 cursor-col-resize bg-border hover:bg-primary/50 transition-colors z-10 group"
+          onMouseDown={handleMouseDown}
+        >
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 opacity-0 group-hover:opacity-100 transition-opacity">
+            <GripVertical className="h-4 w-4 text-muted-foreground" />
+          </div>
+        </div>
+
+        {/* Content with proper padding */}
+        <div className="flex flex-col h-full p-6 pl-8">
+          <SheetHeader className="space-y-4 pb-6">
+            <div className="flex items-center gap-3">
+              <div className="flex h-10 w-10 items-center justify-center rounded-lg bg-primary/10">
+                <Edit3 className="h-5 w-5 text-primary" />
+              </div>
+              <div className="space-y-1">
+                <SheetTitle className="text-xl">Edit Project Details</SheetTitle>
+                <SheetDescription className="text-base">
+                  Make changes to your project information. Click save when you're done.
+                </SheetDescription>
+              </div>
+            </div>
+          </SheetHeader>
+          
+          <div className="flex-1 space-y-8 overflow-auto">
+            {/* Project Name */}
+            <div className="space-y-3">
+              <Label htmlFor="name" className="text-sm font-medium">
+                Project Name <span className="text-red-500">*</span>
+              </Label>
+              <Input
+                id="name"
+                value={formData.name}
+                onChange={(e) => handleChange('name', e.target.value)}
+                placeholder="Enter project name"
+                disabled={isSaving || isUpdating}
+                maxLength={255}
+                className="h-11"
+              />
+              <p className="text-xs text-muted-foreground">
+                {(formData.name || "").length}/255 characters
+              </p>
+            </div>
+
+            {/* Project Description */}
+            <div className="space-y-3">
+              <Label htmlFor="description" className="text-sm font-medium">
+                Description
+              </Label>
+              <Textarea
+                id="description"
+                value={formData.description}
+                onChange={(e) => handleChange('description', e.target.value)}
+                placeholder="Describe your project"
+                disabled={isSaving || isUpdating}
+                maxLength={1000}
+                className="min-h-[120px] resize-none"
+              />
+              <p className="text-xs text-muted-foreground">
+                {(formData.description || "").length}/1000 characters
+              </p>
+            </div>
+
+            {/* Project Status */}
+            <div className="space-y-3">
+              <Label htmlFor="status" className="text-sm font-medium">
+                Status
+              </Label>
+              <Select
+                value={formData.status}
+                onValueChange={(value) => handleChange('status', value as ProjectStatus)}
+                disabled={isSaving || isUpdating}
+              >
+                <SelectTrigger className="h-11">
+                  <SelectValue placeholder="Select status">
+                    {formData.status && (
+                      <div className="flex items-center gap-2">
+                        <div className={`h-2 w-2 rounded-full ${statusConfig[formData.status].dotColor}`} />
+                        <span>{statusConfig[formData.status].label}</span>
+                      </div>
+                    )}
+                  </SelectValue>
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(statusConfig).map(([status, config]) => (
+                    <SelectItem key={status} value={status} className="py-3">
+                      <div className="flex items-center gap-3">
+                        <div className={`h-2 w-2 rounded-full ${config.dotColor}`} />
+                        <div className="space-y-1">
+                          <div className="font-medium">{config.label}</div>
+                          <div className="text-xs text-muted-foreground">{config.description}</div>
+                        </div>
+                      </div>
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* Thumbnail URL */}
+            <div className="space-y-3">
+              <Label htmlFor="thumbnail" className="text-sm font-medium">
+                Thumbnail URL
+              </Label>
+              <Input
+                id="thumbnail"
+                type="url"
+                value={formData.thumbnail_url}
+                onChange={(e) => handleChange('thumbnail_url', e.target.value)}
+                placeholder="https://example.com/image.jpg"
+                disabled={isSaving || isUpdating}
+                className="h-11"
+              />
+              <p className="text-xs text-muted-foreground">
+                Optional: URL to a thumbnail image for your project
+              </p>
+            </div>
+
+            <Separator className="my-8" />
+
+            {/* Project Information Card */}
+            <Card>
+              <CardHeader className="pb-4">
+                <CardTitle className="flex items-center gap-2 text-base">
+                  <Info className="h-4 w-4" />
+                  Project Information
+                </CardTitle>
+                <CardDescription>
+                  Read-only project metadata and timestamps
+                </CardDescription>
+              </CardHeader>
+              <CardContent className="space-y-4">
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Calendar className="h-3 w-3" />
+                      Created
+                    </div>
+                    <div className="text-sm font-medium">
+                      {new Date(project.created_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                      <Clock className="h-3 w-3" />
+                      Last Updated
+                    </div>
+                    <div className="text-sm font-medium">
+                      {new Date(project.updated_at).toLocaleDateString()}
+                    </div>
+                  </div>
+                </div>
+                
+                <div className="space-y-2">
+                  <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                    <Hash className="h-3 w-3" />
+                    Project ID
+                  </div>
+                  <div className="text-sm font-mono bg-muted px-2 py-1 rounded text-muted-foreground">
+                    {project.id}
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          </div>
+
+          <SheetFooter className="flex-col gap-2 pt-6 mt-auto">
+            <Button 
+              onClick={handleSave} 
+              disabled={isSaving || isUpdating || !hasChanges}
+              className="w-full h-11"
+              size="lg"
+            >
+              {isSaving ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Saving...
+                </>
+              ) : (
+                <>
+                  <Save className="mr-2 h-4 w-4" />
+                  Save Changes
+                </>
+              )}
+            </Button>
+            <Button 
+              variant="outline" 
+              onClick={handleCancel}
+              disabled={isSaving || isUpdating}
+              className="w-full h-11"
+              size="lg"
+            >
+              Cancel
+            </Button>
+          </SheetFooter>
+        </div>
+      </SheetContent>
+    </Sheet>
+  );
+} 
