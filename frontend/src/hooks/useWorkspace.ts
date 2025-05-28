@@ -1,9 +1,5 @@
 "use client";
 
-import { useState, useEffect, useCallback, useMemo } from 'react';
-import { useRouter } from 'next/navigation';
-import { useAuth } from '@/hooks/useAuth';
-import { apiClient } from '../services/apiClient';
 
 // Re-export everything from the context for backward compatibility
 export {
@@ -57,9 +53,3 @@ export function useWorkspaceDetails(workspaceId?: string) {
   };
 }
 
-function getAccessToken() {
-  if (typeof window !== 'undefined') {
-    return localStorage.getItem('access_token');
-  }
-  return null;
-}
