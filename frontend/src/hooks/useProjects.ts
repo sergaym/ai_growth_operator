@@ -66,6 +66,37 @@ export function useWorkspaceProjects(workspaceId?: string) {
   };
 }
 
+// For components that need to work with a specific project
+export function useProjectDetails(workspaceId?: string, projectId?: string) {
+  const { 
+    getProject,
+    updateProject,
+    getProjectAssets,
+    loading,
+    error,
+    clearError 
+  } = useProjectsContext();
+  
+  return {
+    loading,
+    error,
+    getProject: (includeAssets?: boolean) => {
+      if (!workspaceId || !projectId) return Promise.resolve(null);
+      return getProject(workspaceId, projectId, includeAssets);
+    },
+    updateProject: (request: any) => {
+      if (!workspaceId || !projectId) return Promise.resolve(null);
+      return updateProject(workspaceId, projectId, request);
+    },
+    getProjectAssets: (assetType?: string) => {
+      if (!workspaceId || !projectId) return Promise.resolve(null);
+      return getProjectAssets(workspaceId, projectId, assetType);
+    },
+    clearError,
+  };
+}
+
+
   return {
     // State
     projects,
