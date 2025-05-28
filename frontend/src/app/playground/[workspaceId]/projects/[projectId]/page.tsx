@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { useWorkspaces } from '@/hooks/useWorkspace';
 import { useWorkspaceProjects, useProjectDetails, type Project } from '@/hooks/useProjects';
@@ -211,7 +211,27 @@ export default function ProjectPage() {
     return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  // Enhanced video generation handler
+  // Watch for video generation completion to refresh assets
+  useEffect(() => {
+    if (result?.video_url) {
+      // Video generation completed, refresh project to get latest assets
+      refreshProject();
+    }
+  }, [result?.video_url, refreshProject]);
+
+  // Smart content display logic
+  const hasExistingAssets = assets && assets.assets && assets.assets.length > 0;
+  const hasVideoGenerationActivity = isGenerating || result?.video_url || videoError;
+  const shouldShowVideoPreview = hasVideoGenerationActivity || !hasExistingAssets;
+  const shouldShowGettingStarted = !hasExistingAssets && !hasVideoGenerationActivity;
+
+  // Smart reset handler for better UX
+  const handleReset = useCallback(() => {
+    reset();
+    // If there are existing assets, this allows starting fresh generation
+  }, [reset]);
+
+  // Enhanced video generation handler with better asset integration
   const handleGenerateVideo = async (
     text: string, 
     actorId: string, 
@@ -237,6 +257,9 @@ export default function ProjectPage() {
     }
 
     try {
+      // Reset any previous generation state
+      reset();
+      
       await generateVideo({
         text: text.trim(),
         actor_id: String(actorId),
@@ -249,7 +272,6 @@ export default function ProjectPage() {
       });
       
       // Refresh project assets after generation starts
-      // This will help show any newly created assets
       setTimeout(() => {
         refreshProject();
       }, 2000);
@@ -262,14 +284,6 @@ export default function ProjectPage() {
       });
     }
   };
-
-  // Watch for video generation completion to refresh assets
-  useEffect(() => {
-    if (result?.video_url) {
-      // Video generation completed, refresh project to get latest assets
-      refreshProject();
-    }
-  }, [result?.video_url, refreshProject]);
 
   // Navigation handlers
   const handleBackToWorkspace = () => {
@@ -470,17 +484,18 @@ export default function ProjectPage() {
         isProject={true}
         projectName={project?.name}
       >
-        <div className="space-y-8">
-          {/* Project Assets Section - Progressive Loading */}
-          {showSkeleton ? (
-            <AssetsSkeleton />
-          ) : assets && assets.assets && assets.assets.length > 0 ? (
-            <div className="space-y-6 opacity-0 animate-[fadeIn_0.3s_ease-in-out_forwards]">
+        <div className="space-y-6">
+          {/* Loading State for Assets */}
+          {showSkeleton && <AssetsSkeleton />}
+          
+          {/* Existing Assets Section - Only show if assets exist */}
+          {!showSkeleton && hasExistingAssets && (
+            <div className="space-y-4 opacity-0 animate-[fadeIn_0.3s_ease-in-out_forwards]">
               <div className="flex items-center justify-between border-b border-gray-100 pb-3">
                 <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Assets</h2>
+                  <h2 className="text-lg font-semibold text-gray-900">Generated Assets</h2>
                   <p className="text-sm text-gray-600 mt-0.5">
-                    {assets.total} item{assets.total !== 1 ? 's' : ''} • Generated content for this project
+                    {assets.total} item{assets.total !== 1 ? 's' : ''} • Your project content
                   </p>
                 </div>
               </div>
@@ -591,61 +606,38 @@ export default function ProjectPage() {
                 })}
               </div>
             </div>
-          ) : assets && assets.assets ? (
-            <div className="space-y-6">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Assets</h2>
-                  <p className="text-sm text-gray-600 mt-0.5">
-                    No assets yet • Generate content below to get started
-                  </p>
-                </div>
-              </div>
-              
-              <div className="text-center py-12">
-                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
-                  <FileText className="h-8 w-8 text-gray-400" />
-                </div>
-                <h3 className="text-lg font-medium text-gray-900 mb-2">No assets yet</h3>
-                <p className="text-gray-600 mb-6 max-w-sm mx-auto">
-                  Start creating content using the AI video generation tools below. Your generated videos, audio, and images will appear here.
-                </p>
-              </div>
-            </div>
-          ) : null}
+          )}
 
-          {/* Video Generation Section - Progressive Loading */}
+          {/* Video Generation Section - Smart Display Logic */}
           {showSkeleton ? (
             <ContentSkeleton />
           ) : (
-            <div className="space-y-6">
-              <div className="border-b border-gray-100 pb-3">
-                <h2 className="text-lg font-semibold text-gray-900">Create New Content</h2>
-                <p className="text-sm text-gray-600 mt-0.5">
-                  Generate videos using AI actors and your text content
-                </p>
-              </div>
+            <div className="space-y-4">
+              {/* Section Header */}
               
-              {/* Video Preview */}
-              <VideoPreview
-                videoUrl={result?.video_url}
-                isGenerating={isGenerating}
-                progress={progress}
-                currentStep={currentStep ?? undefined}
-                error={videoError ?? undefined}
-                processingTime={result?.processing_time}
-                onCancel={cancel}
-                onReset={reset}
-                onRetry={reset}
-                showGettingStarted={!result && !videoError && !isGenerating && (!assets || assets.assets.length === 0)}
-              />
+              {/* Video Preview - Only show when there's generation activity or no existing assets */}
+              {shouldShowVideoPreview && (
+                <VideoPreview
+                  videoUrl={result?.video_url}
+                  isGenerating={isGenerating}
+                  progress={progress}
+                  currentStep={currentStep ?? undefined}
+                  error={videoError ?? undefined}
+                  processingTime={result?.processing_time}
+                  onCancel={cancel}
+                  onReset={handleReset}
+                  onRetry={reset}
+                  showGettingStarted={shouldShowGettingStarted}
+                  compact={Boolean(hasExistingAssets)} // Use compact mode when assets exist
+                />
+              )}
 
               {/* Enhanced Chat Input */}
               <GestureChat 
                 projectId={projectId} 
                 onGenerateVideo={handleGenerateVideo}
                 isGenerating={isGenerating}
-                showTips={true}
+                showTips={!hasExistingAssets} // Only show tips for new projects
               />
             </div>
           )}
