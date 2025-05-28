@@ -61,13 +61,6 @@ const projectsData = [
   },
 ];
 
-// Define the Workspace type
-interface Workspace {
-  id: string;
-  name: string;
-  type?: string;
-}
-
 // Skeleton loader component for workspace cards
 function WorkspaceSkeleton() {
   return (
