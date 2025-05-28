@@ -71,42 +71,32 @@ export default function ProjectPage() {
     initialized: false
   });
 
-  // Generate a unique project name based on timestamp
-  const generateProjectName = () => {
-    const now = new Date();
-    const timestamp = now.toLocaleString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      hour: '2-digit',
-      minute: '2-digit',
-      hour12: false
-    });
-    return `New Project ${timestamp}`;
-  };
+  // Get cached project from workspace projects
+  const cachedProject = useMemo(() => {
+    return projects.find(p => p.id === projectId) || null;
+  }, [projects, projectId]);
 
-  // Auto-create project if it doesn't exist
-  const autoCreateProject = async () => {
-    if (!stringWorkspaceId || !stringProjectId || isCreatingProject) return null;
+  // Determine if we should fetch detailed project data
+  const shouldFetchDetails = useMemo(() => {
+    // If we have a cached project, we don't need to fetch details initially
+    if (cachedProject) return false;
     
-    setIsCreatingProject(true);
-    try {
-      const newProject = await createProject({
-        name: generateProjectName(),
-        description: "Automatically created project for video generation",
-        metadata: {
-          auto_created: true,
-          created_from: "direct_access"
-        }
+    // If projects are still loading, wait
+    if (projectsLoading) return false;
+    
+    // If projects loaded but no cached project found, try detailed fetch
+    return true;
+  }, [cachedProject, projectsLoading]);
+
+  // Initialize project state when cached project is available
+  useEffect(() => {
+    if (cachedProject && !projectWithAssets.initialized) {
+      setProjectWithAssets({
+        project: cachedProject,
+        assets: null,
+        loading: false,
+        initialized: true
       });
-      
-      if (newProject) {
-        console.log(`Auto-created project: ${newProject.name} (${newProject.id})`);
-        return newProject;
-      }
-    } catch (error) {
-      console.error('Error auto-creating project:', error);
-    } finally {
-      setIsCreatingProject(false);
     }
     return null;
   };
