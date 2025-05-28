@@ -249,7 +249,26 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
 
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}${includeAssets ? '?include_assets=true' : ''}`;
+      
       const project = await apiClient<Project>(url);
+      
+      // Cache the project in the workspace projects list if not already there
+      if (project) {
+        setProjectsByWorkspace(prev => {
+          const workspaceProjects = prev[workspaceId] || [];
+          const existingIndex = workspaceProjects.findIndex(p => p.id === projectId);
+          
+          if (existingIndex >= 0) {
+            // Update existing project
+            const updatedProjects = [...workspaceProjects];
+            updatedProjects[existingIndex] = project;
+            return { ...prev, [workspaceId]: updatedProjects };
+          } else {
+            // Add new project to the list
+            return { ...prev, [workspaceId]: [...workspaceProjects, project] };
+          }
+        });
+      }
       
       return project;
     } catch (err) {
