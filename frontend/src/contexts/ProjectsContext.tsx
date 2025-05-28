@@ -4,6 +4,14 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 import { useAuth } from '@/hooks/useAuth';
 import { apiClient } from '../services/apiClient';
 
+// Project status enum to match backend
+export enum ProjectStatus {
+  DRAFT = "draft",
+  IN_PROGRESS = "in_progress", 
+  COMPLETED = "completed",
+  ARCHIVED = "archived"
+}
+
 // Project interfaces
 export interface ProjectAssetSummary {
   total_videos: number;
@@ -16,25 +24,30 @@ export interface Project {
   id: string;
   name: string;
   description?: string;
-  status: string;
+  status: ProjectStatus;
   workspace_id: string;
+  created_by_user_id: string;
   created_at: string;
   updated_at: string;
   last_activity_at: string;
   thumbnail_url?: string;
   asset_summary?: ProjectAssetSummary;
+  metadata?: Record<string, any>;
 }
 
 export interface ProjectCreateRequest {
   name: string;
   description?: string;
-  status?: string;
+  thumbnail_url?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface ProjectUpdateRequest {
   name?: string;
   description?: string;
-  status?: string;
+  status?: ProjectStatus;
+  thumbnail_url?: string;
+  metadata?: Record<string, any>;
 }
 
 export interface ProjectAsset {
