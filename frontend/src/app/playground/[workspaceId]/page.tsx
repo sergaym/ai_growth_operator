@@ -27,6 +27,7 @@ import {
 
 import { useWorkspaces } from "@/hooks/useWorkspace";
 import { useWorkspaceProjects, type Project } from "@/hooks/useProjects";
+import { ProjectStatus } from "@/contexts/ProjectsContext";
 
 // Project card skeleton component
 function ProjectCardSkeleton() {
@@ -74,7 +75,7 @@ export default function WorkspaceProjects() {
   const currentWorkspace = workspaces.find(ws => ws.id === workspaceId);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | null>(null);
   
   // Delete dialog state
   const [deleteDialog, setDeleteDialog] = useState<{
@@ -98,15 +99,15 @@ export default function WorkspaceProjects() {
     return matchesSearch && matchesStatus;
   });
 
-  const getStatusBadge = (status: string) => {
+  const getStatusBadge = (status: ProjectStatus) => {
     switch (status) {
-      case "completed":
+      case ProjectStatus.COMPLETED:
         return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
-      case "in_progress":
+      case ProjectStatus.IN_PROGRESS:
         return <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">In Progress</span>;
-      case "draft":
+      case ProjectStatus.DRAFT:
         return <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-1 rounded-full">Draft</span>;
-      case "archived":
+      case ProjectStatus.ARCHIVED:
         return <span className="text-xs bg-gray-500/10 text-gray-500 px-2 py-1 rounded-full">Archived</span>;
       default:
         return null;
@@ -140,18 +141,6 @@ export default function WorkspaceProjects() {
     return date.toLocaleDateString();
   };
 
-  const handleDeleteProject = async (projectId: string, projectName: string) => {
-    if (confirm(`Are you sure you want to delete "${projectName}"? This action cannot be undone.`)) {
-      const success = await deleteProject(projectId);
-      if (success) {
-        toast({
-          title: "Project Deleted",
-          description: `"${projectName}" has been deleted successfully.`,
-        });
-      }
-    }
-  };
-
   const navigateToProject = (projectId: string) => {
     router.push(`/playground/${workspaceId}/projects/${projectId}`);
   };
@@ -161,22 +150,85 @@ export default function WorkspaceProjects() {
   };
   
   // Create a safe workspace object with default values if currentWorkspace is not found
-  const workspace = !workspacesLoading && currentWorkspace 
+  const workspace = currentWorkspace 
     ? { id: currentWorkspace.id, name: currentWorkspace.name }
     : { id: workspaceId, name: "Workspace" };
 
-  // Render error inside the layout instead of a fullscreen message
-  const workspaceError = !workspacesLoading && !currentWorkspace 
+  // Only show workspace error after workspaces have been fetched and workspace is still not found
+  const workspaceError = hasFetched && !workspacesLoading && !currentWorkspace 
     ? "The workspace you're trying to access doesn't exist or you don't have permission to view it."
     : null;
 
   const loading = workspacesLoading || projectsLoading;
 
-  // Generate a new project ID and navigate to it
-  const createNewProject = () => {
-    // Generate a unique project ID (similar to UUID format)
-    const projectId = 'proj_' + Math.random().toString(36).substr(2, 9) + Date.now().toString(36);
-    router.push(`/playground/${workspaceId}/projects/${projectId}`);
+  // Create a new project and navigate to it
+  const createNewProject = async () => {
+    try {
+      const newProject = await createProject({
+        name: "New Project",
+        description: "Automatically created project for video generation",
+        metadata: {
+          auto_created: true,
+          created_from: "new_project_button"
+        }
+      });
+      
+      if (newProject) {
+        router.push(`/playground/${workspaceId}/projects/${newProject.id}`);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to create project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
+
+  const handleConfirmDelete = async () => {
+    if (!deleteDialog.project) return;
+    
+    setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
+    
+    try {
+      const success = await deleteProject(deleteDialog.project.id);
+      if (success) {
+        toast({
+          title: "Project Deleted",
+          description: `"${deleteDialog.project.name}" has been deleted successfully.`,
+        });
+        // Close dialog after successful deletion
+        setDeleteDialog({ open: false, project: null, isDeleting: false });
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to delete project. Please try again.",
+          variant: "destructive",
+        });
+        setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive",
+      });
+      setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
+    }
+  };
+
+  const handleCloseDeleteDialog = (open: boolean) => {
+    if (!open && !deleteDialog.isDeleting) {
+      setDeleteDialog({ open: false, project: null, isDeleting: false });
+    }
   };
 
   return (
@@ -209,12 +261,13 @@ export default function WorkspaceProjects() {
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="flex gap-2 items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" disabled={loading}>
                     <Filter className="h-4 w-4" />
                     <span>Filter</span>
                     {statusFilter && <span className="text-xs">({statusFilter})</span>}
@@ -224,21 +277,25 @@ export default function WorkspaceProjects() {
                   <DropdownMenuItem onClick={() => setStatusFilter(null)}>
                     All Projects
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("completed")}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.COMPLETED)}>
                     Completed
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("in_progress")}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.IN_PROGRESS)}>
                     In Progress
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("draft")}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.DRAFT)}>
                     Drafts
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setStatusFilter("archived")}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.ARCHIVED)}>
                     Archived
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={createNewProject} className="gap-1.5">
+              <Button 
+                onClick={createNewProject} 
+                className="gap-1.5"
+                disabled={loading || !hasFetched}
+              >
                 <FolderPlus className="h-4 w-4" />
                 <span>New Project</span>
               </Button>
@@ -253,7 +310,7 @@ export default function WorkspaceProjects() {
                 <ProjectCardSkeleton key={`skeleton-${index}`} />
               ))}
             </div>
-          ) : filteredProjects.length === 0 ? (
+          ) : hasFetchedWorkspace && filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
               <h3 className="mt-4 text-lg font-medium">
@@ -272,9 +329,9 @@ export default function WorkspaceProjects() {
                 </Button>
               )}
             </div>
-          ) : (
+          ) : hasFetchedWorkspace ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-              {filteredProjects.map((project) => (
+              {filteredProjects.map((project: Project) => (
                 <Card key={project.id} className="overflow-hidden group cursor-pointer" onClick={() => navigateToProject(project.id)}>
                   <div className="relative aspect-video bg-gray-100 overflow-hidden">
                     {project.thumbnail_url ? (
@@ -320,12 +377,18 @@ export default function WorkspaceProjects() {
                           </Button>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end">
-                          <DropdownMenuItem onClick={() => navigateToProject(project.id)}>
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            navigateToProject(project.id);
+                          }}>
                             Open Project
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             className="text-red-500"
-                            onClick={() => handleDeleteProject(project.id, project.name)}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setDeleteDialog({ open: true, project: project, isDeleting: false });
+                            }}
                           >
                             Delete
                           </DropdownMenuItem>
@@ -378,9 +441,27 @@ export default function WorkspaceProjects() {
                 </Card>
               ))}
             </div>
+          ) : (
+            // Still loading projects for this workspace - show skeleton
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array(3).fill(0).map((_, index) => (
+                <ProjectCardSkeleton key={`skeleton-loading-${index}`} />
+              ))}
+            </div>
           )}
         </>
       )}
+      <DeleteDialog
+        open={deleteDialog.open}
+        onOpenChange={handleCloseDeleteDialog}
+        onConfirm={handleConfirmDelete}
+        title="Delete Project"
+        description="This project and all its associated data will be permanently deleted. This action cannot be undone."
+        itemName={deleteDialog.project?.name || ""}
+        itemType="project"
+        destructiveAction="Delete Project"
+        isLoading={deleteDialog.isDeleting}
+      />
     </PlaygroundLayout>
   );
 }
