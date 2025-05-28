@@ -30,24 +30,30 @@ export function useWorkspaces() {
   };
 }
 
-  return {
-    // State
-    workspace,
-    workspaceUsers,
-    loading,
-    error,
-
-    // Actions
+// For components that need a specific workspace
+export function useWorkspaceDetails(workspaceId?: string) {
+  const { 
+    currentWorkspace, 
+    workspaceLoading, 
+    workspaceError, 
     getWorkspaceDetails,
-    updateWorkspaceName,
+    workspaceUsers,
     getWorkspaceUsers,
+    updateWorkspaceName,
+    addUserToWorkspace,
+    removeUserFromWorkspace
+  } = useWorkspaceContext();
+  
+  return {
+    workspace: currentWorkspace,
+    loading: workspaceLoading,
+    error: workspaceError,
+    users: workspaceUsers,
+    getWorkspaceDetails,
+    getWorkspaceUsers,
+    updateWorkspaceName,
     addUserToWorkspace,
     removeUserFromWorkspace,
-
-    // Utilities
-    refreshWorkspace: getWorkspaceDetails,
-    refreshUsers: getWorkspaceUsers,
-    clearError: () => setError(null),
   };
 }
 
