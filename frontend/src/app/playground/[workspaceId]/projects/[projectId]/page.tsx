@@ -151,6 +151,19 @@ export default function ProjectPage() {
     fetchProjectDetails();
   }, [workspaceId, projectId, shouldFetchDetails, projectWithAssets.initialized, getProject, getProjectAssets, toast]);
 
+  // Workspace resolution
+  const currentWorkspace = useMemo(() => {
+    const workspace = workspaces.find(ws => ws.id === workspaceId);
+    return workspace 
+      ? { id: workspace.id, name: workspace.name }
+      : { id: workspaceId, name: "Workspace" };
+  }, [workspaces, workspaceId]);
+
+  // Consolidated loading state
+  const isLoading = workspacesLoading || projectsLoading || projectWithAssets.loading;
+  
+  // Consolidated error state
+  const error = projectsError || projectDetailsError;
 
   // Video generation state
   const { 
