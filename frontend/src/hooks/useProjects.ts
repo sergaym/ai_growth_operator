@@ -25,37 +25,20 @@ export interface ProjectListResponse {
   total_pages: number;
 }
 
-export interface ProjectAsset {
-  id: string;
-  type: 'video' | 'audio' | 'lipsync_video';
-  status: string;
-  created_at: string;
-  updated_at: string;
-  file_url?: string;
-  thumbnail_url?: string;
-  metadata?: Record<string, any>;
-}
-
-export interface ProjectAssetsResponse {
-  assets: ProjectAsset[];
-  total: number;
-  asset_summary: ProjectAssetSummary;
-}
-
-export interface ProjectStats {
-  total_projects: number;
-  projects_by_status: Record<string, number>;
-  total_assets: number;
-  recent_activity_count: number;
-  most_active_projects: Project[];
-}
-
-export function useProjects(workspaceId?: string) {
-  const { user } = useAuth();
-  const [projects, setProjects] = useState<Project[]>([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
-  const [stats, setStats] = useState<ProjectStats | null>(null);
+// For components that need to work with projects in a specific workspace
+export function useWorkspaceProjects(workspaceId?: string) {
+  const { 
+    projectsByWorkspace, 
+    loading, 
+    error, 
+    fetchProjects,
+    refreshProjects,
+    createProject,
+    deleteProject,
+    statsByWorkspace,
+    fetchedWorkspaces,
+    clearError 
+  } = useProjectsContext();
 
   // List projects in a workspace
   const listProjects = useCallback(async (
