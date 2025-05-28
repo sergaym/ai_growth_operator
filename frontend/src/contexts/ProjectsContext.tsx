@@ -472,39 +472,116 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         };
       });
 
+      // Also invalidate any cached assets for this project
+      invalidateAssetsCache(projectId);
+
       return true;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to delete project';
-      setError(errorMessage);
+      const error = handleApiError(err, `deleting project ${projectId}`);
+      setError(error);
       console.error('Delete project: API call failed', { 
         workspaceId, 
         projectId, 
-        error: err 
+        error 
       });
       return false;
     } finally {
       updateLoadingState('deleting', projectId, false);
     }
-  }, [user.isAuthenticated, projectsByWorkspace, updateLoadingState]);
+  }, [user.isAuthenticated, projectsByWorkspace, updateLoadingState, handleApiError, invalidateAssetsCache]);
 
-  // Get project assets
-  const getProjectAssets = useCallback(async (workspaceId: string, projectId: string, assetType?: string): Promise<ProjectAssetsResponse | null> => {
-    if (!user.isAuthenticated || !workspaceId || !projectId) {
+  // Enhanced get project assets with caching and better error handling
+  const getProjectAssets = useCallback(async (
+    workspaceId: string, 
+    projectId: string, 
+    assetType?: string,
+    forceRefresh?: boolean
+  ): Promise<ProjectAssetsResponse | null> => {
+    console.log(`🎯 getProjectAssets called:`, { workspaceId, projectId, assetType, forceRefresh });
+    
+    // Wait for authentication to be fully initialized before checking
+    if (loading || (!user.isAuthenticated && !user.user)) {
+      console.log('🔒 getProjectAssets: Waiting for auth initialization...', { loading, isAuthenticated: user.isAuthenticated, hasUser: !!user.user });
       return null;
     }
+    
+    if (!user.isAuthenticated || !workspaceId || !projectId) {
+      console.log('❌ getProjectAssets: Authentication or params missing', { isAuthenticated: user.isAuthenticated, workspaceId, projectId });
+      return null;
+    }
+
+    // Check cache first unless forcing refresh
+    if (!forceRefresh) {
+      const cached = getCachedAssets(projectId);
+      if (cached) {
+        console.log(`📦 Using cached assets for project ${projectId}`, cached);
+        return cached;
+      }
+    }
+
+    const loadingKey = forceRefresh ? 'refreshingAssets' : 'fetchingAssets';
+    if (loadingStates[loadingKey][projectId]) {
+      console.log(`⏳ Already loading assets for project ${projectId}, returning cached data`);
+      // Already loading, return cached data if available
+      return assetsByProject[projectId] || null;
+    }
+
+    updateLoadingState(loadingKey, projectId, true);
 
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}/assets${assetType ? `?type=${assetType}` : ''}`;
+      console.log(`🌐 Fetching assets from URL: ${url}`);
+      
       const response = await apiClient<ProjectAssetsResponse>(url);
+      console.log('📥 Raw assets response:', JSON.stringify(response, null, 2));
+      
+      // Backend now handles URL optimization, so we can use the response directly
+      // The file_url field now contains the prioritized blob storage URL
+      console.log(`🎉 Successfully fetched ${response.total} assets for project ${projectId}`, {
+        total: response.total,
+        assetsWithUrls: response.assets.filter(a => a.file_url).length,
+        assetSummary: response.asset_summary,
+        assetTypes: response.assets.map(a => `${a.type}:${a.status}:${a.file_url ? 'has_url' : 'no_url'}`),
+        assets: response.assets.map(a => ({
+          id: a.id,
+          type: a.type,
+          status: a.status,
+          file_url: a.file_url,
+          has_metadata: Boolean(a.metadata)
+        }))
+      });
+      
+      // Cache the response directly - backend handles URL optimization
+      setCachedAssets(projectId, response);
       
       return response;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project assets';
-      console.error('Error fetching project assets:', err);
-      // Don't set global error for asset fetches during refresh
+      const error = handleApiError(err, `fetching assets for project ${projectId}`);
+      console.error('💥 Project assets fetch failed:', error);
+      
+      // For refresh operations, don't set global error but still log
+      if (!forceRefresh) {
+        setError(error);
+      }
+      
       return null;
+    } finally {
+      updateLoadingState(loadingKey, projectId, false);
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, user.user, loading, loadingStates, assetsByProject, getCachedAssets, setCachedAssets, updateLoadingState, handleApiError]);
+
+  // Refresh project assets (force refresh)
+  const refreshProjectAssets = useCallback(async (
+    workspaceId: string, 
+    projectId: string, 
+    assetType?: string
+  ): Promise<ProjectAssetsResponse | null> => {
+    // Invalidate cache for this project
+    invalidateAssetsCache(projectId);
+    
+    // Fetch with force refresh flag
+    return getProjectAssets(workspaceId, projectId, assetType, true);
+  }, [getProjectAssets, invalidateAssetsCache]);
 
   // Get workspace stats
   const getWorkspaceStats = useCallback(async (workspaceId: string): Promise<ProjectStats | null> => {
@@ -521,14 +598,15 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
         [workspaceId]: stats
       }));
       
+      console.log(`Fetched workspace stats for ${workspaceId}:`, stats);
       return stats;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace stats';
-      setError(errorMessage);
-      console.error('Error fetching workspace stats:', err);
+      const error = handleApiError(err, `fetching workspace stats for workspace ${workspaceId}`);
+      setError(error);
+      console.error('Error fetching workspace stats:', error);
       return null;
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, handleApiError]);
 
   const clearError = useCallback(() => {
     setError(null);
@@ -537,6 +615,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
   const value: ProjectsContextType = {
     projectsByWorkspace,
     statsByWorkspace,
+    assetsByProject,
     fetchedWorkspaces,
     loading,
     error,
@@ -548,10 +627,14 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     updateProject,
     deleteProject,
     getProjectAssets,
+    refreshProjectAssets,
     getWorkspaceStats,
     clearError,
     isProjectLoading,
     isWorkspaceLoading,
+    isProjectAssetsLoading,
+    getCachedAssets,
+    invalidateAssetsCache,
   };
 
   return (
