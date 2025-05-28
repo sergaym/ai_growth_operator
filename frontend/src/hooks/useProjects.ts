@@ -232,52 +232,52 @@ export function useProjectDetails(workspaceId?: string, projectId?: string): Use
       return;
     }
 
-    // If we already have the project data, don't show loading
-    if (projectState.fetched && projectState.project) {
+    // Only attempt fetch if authenticated or if we haven't tried yet
+    if (!authUser.isAuthenticated && projectState.fetched) {
       return;
     }
 
-    // Always fetch fresh project details from API for project pages
+    // Fetch project details from API
     const fetchProjectDetails = async () => {
       try {
         setProjectState(prev => ({ ...prev, isInitialLoading: true }));
         console.log(`Fetching project details for ${projectId} in workspace ${workspaceId}`);
         
-        // Fetch project with assets included
-        const [projectData, assetsData] = await Promise.all([
-          getProject(workspaceId, projectId, true),
-          getProjectAssets(workspaceId, projectId)
-        ]);
-
+        // Fetch project first
+        const projectData = await getProject(workspaceId, projectId, true);
         console.log('Project data received:', projectData);
+
+        // Then explicitly fetch assets
+        const assetsData = await getProjectAssets(workspaceId, projectId);
         console.log('Assets data received:', assetsData);
 
         setProjectState({
           project: projectData,
-          assets: assetsData,
           fetched: true,
-          fetchedAssets: true,
           isInitialLoading: false
         });
       } catch (error) {
         console.error('Error fetching project details:', error);
         setProjectState({
           project: null,
-          assets: null,
           fetched: true,
-          fetchedAssets: true,
           isInitialLoading: false
         });
       }
     };
 
-    // Only fetch if we haven't fetched yet or if the project/workspace changed
-    if (!projectState.fetched) {
+    // Only fetch if we haven't fetched yet or if auth state changed to authenticated
+    if (!projectState.fetched || (!projectState.project && authUser.isAuthenticated)) {
+      console.log('useProjectDetails: Starting fetch...', {
+        hasFetched: projectState.fetched,
+        hasProject: !!projectState.project,
+        isAuthenticated: authUser.isAuthenticated
+      });
       fetchProjectDetails();
     }
-  }, [workspaceId, projectId, projectState.fetched, getProject, getProjectAssets]);
+  }, [workspaceId, projectId, authUser.isAuthenticated, authLoading, projectState.fetched, projectState.project, getProject, getProjectAssets]);
 
-  // Memoized functions
+  // Memoized functions with enhanced error handling
   const memoizedGetProject = useCallback(async (includeAssets?: boolean) => {
     if (!workspaceId || !projectId) return null;
     
