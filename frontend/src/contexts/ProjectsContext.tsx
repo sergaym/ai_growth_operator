@@ -54,12 +54,15 @@ export interface ProjectAsset {
   id: string;
   project_id: string;
   type: string;
+  status: string;
   filename: string;
   file_path: string;
   file_size: number;
   mime_type: string;
   created_at: string;
   updated_at: string;
+  file_url?: string;
+  thumbnail_url?: string;
   metadata?: Record<string, any>;
 }
 
