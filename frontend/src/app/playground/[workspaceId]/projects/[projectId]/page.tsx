@@ -116,6 +116,12 @@ export default function ProjectPage() {
         user_id: String(user.user.id),
         workspace_id: workspaceId,
       });
+      
+      // Refresh project assets after generation starts
+      // This will help show any newly created assets
+      setTimeout(() => {
+        refreshProject();
+      }, 2000);
     } catch (error) {
       console.error('Failed to start video generation:', error);
       toast({
@@ -125,6 +131,14 @@ export default function ProjectPage() {
       });
     }
   };
+
+  // Watch for video generation completion to refresh assets
+  useEffect(() => {
+    if (result?.video_url) {
+      // Video generation completed, refresh project to get latest assets
+      refreshProject();
+    }
+  }, [result?.video_url, refreshProject]);
 
   // Navigation handlers
   const handleBackToWorkspace = () => {
@@ -141,16 +155,16 @@ export default function ProjectPage() {
   };
 
   const handleDeleteProject = async () => {
-    if (!projectWithAssets.project) return;
+    if (!project) return;
     
     setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
 
     try {
-      const success = await deleteProject(projectWithAssets.project.id);
+      const success = await deleteProject(project.id);
       if (success) {
         toast({
           title: "Project Deleted",
-          description: `"${projectWithAssets.project.name}" has been deleted successfully.`,
+          description: `"${project.name}" has been deleted successfully.`,
         });
         router.push(`/playground/${workspaceId}`);
       } else {
