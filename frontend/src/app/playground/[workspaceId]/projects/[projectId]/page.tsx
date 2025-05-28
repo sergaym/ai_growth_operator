@@ -10,12 +10,11 @@ import PlaygroundLayout from "@/components/playground/Layout";
 import { VideoPreview } from "@/components/chat/VideoPreview";
 import { GestureChat } from "@/components/chat/GestureChat";
 import { Button } from "@/components/ui/button";
-import { DeleteDialog } from "@/components/ui/delete-dialog";
-import { useToast } from "@/components/ui/use-toast";
+import { ProjectUpdateSheet } from "@/components/project/ProjectUpdateSheet";
 import { 
-  Settings,
   MoreHorizontal,
-  ArrowLeft
+  ArrowLeft,
+  Edit3
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -23,6 +22,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { useToast } from "@/components/ui/use-toast";
 
 export default function ProjectPage() {
   const params = useParams();
@@ -52,6 +52,9 @@ export default function ProjectPage() {
 
   // Simple delete state
   const [isDeleting, setIsDeleting] = useState(false);
+
+  // Project update sheet state
+  const [isUpdateSheetOpen, setIsUpdateSheetOpen] = useState(false);
 
   // Workspace resolution
   const currentWorkspace = useMemo(() => {
@@ -192,9 +195,12 @@ export default function ProjectPage() {
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={refreshProject} disabled={isDeleting}>
-          <Settings className="h-4 w-4 mr-2" />
-          Refresh Project
+        <DropdownMenuItem 
+          onClick={() => setIsUpdateSheetOpen(true)} 
+          disabled={isDeleting}
+        >
+          <Edit3 className="h-4 w-4 mr-2" />
+          Edit Project Details
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="text-red-500"
@@ -383,6 +389,15 @@ export default function ProjectPage() {
           </div>
         </div>
       </PlaygroundLayout>
+
+      {/* Project Update Sheet */}
+      <ProjectUpdateSheet
+        project={project}
+        open={isUpdateSheetOpen}
+        onOpenChange={setIsUpdateSheetOpen}
+        onUpdate={updateProject}
+        isUpdating={false}
+      />
     </>
   );
 }
