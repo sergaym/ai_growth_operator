@@ -201,3 +201,33 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated]);
 
+  // Add user to workspace
+  const addUserToWorkspace = useCallback(async (
+    workspaceId: string,
+    userId: string, 
+    role: string = 'member'
+  ): Promise<boolean> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users/${userId}?role=${role}`;
+      await apiClient(url, { method: 'POST' });
+
+      // Refresh workspace users
+      await getWorkspaceUsers(workspaceId);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to add user to workspace';
+      setWorkspaceError(errorMessage);
+      console.error('Error adding user to workspace:', err);
+      return false;
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  }, [user.isAuthenticated, getWorkspaceUsers]);
+
