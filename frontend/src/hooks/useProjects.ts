@@ -221,12 +221,12 @@ export function useProjectsLegacy(workspaceId?: string, autoFetch: boolean = fal
   const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
 
   // Wrapper functions that include workspaceId
-  const createProject = async (request: any) => {
+  const createProject = async (request: ProjectCreateRequest) => {
     if (!workspaceId) return null;
     return contextCreateProject(workspaceId, request);
   };
 
-  const updateProject = async (projectId: string, request: any) => {
+  const updateProject = async (projectId: string, request: ProjectUpdateRequest) => {
     if (!workspaceId) return null;
     return contextUpdateProject(workspaceId, projectId, request);
   };
