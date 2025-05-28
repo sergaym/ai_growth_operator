@@ -262,3 +262,23 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       setLoading(false);
     }
   }, [user.isAuthenticated]);
+
+  // Get project assets
+  const getProjectAssets = useCallback(async (workspaceId: string, projectId: string, assetType?: string): Promise<ProjectAssetsResponse | null> => {
+    if (!user.isAuthenticated || !workspaceId || !projectId) {
+      return null;
+    }
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}/assets${assetType ? `?type=${assetType}` : ''}`;
+      const response = await apiClient<ProjectAssetsResponse>(url);
+      
+      return response;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project assets';
+      setError(errorMessage);
+      console.error('Error fetching project assets:', err);
+      return null;
+    }
+  }, [user.isAuthenticated]);
+
