@@ -56,26 +56,39 @@ export default function WorkspaceProjects() {
   const { toast } = useToast();
   
   // Get workspace data from API
-  const { workspaces, loading: workspacesLoading } = useWorkspaces();
+  const { workspaces, loading: workspacesLoading, hasFetched } = useWorkspaces();
   
-  // Get projects data from API
+  // Get projects data from API using the new hook
   const { 
     projects, 
     loading: projectsLoading, 
     error: projectsError,
     deleteProject,
     refreshProjects,
-    stats
-  } = useProjects(workspaceId);
+    stats,
+    createProject,
+    hasFetchedWorkspace
+  } = useWorkspaceProjects(workspaceId);
   
   // Find the current workspace based on the URL parameter
   const currentWorkspace = workspaces.find(ws => ws.id === workspaceId);
   
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState<string | null>(null);
+  
+  // Delete dialog state
+  const [deleteDialog, setDeleteDialog] = useState<{
+    open: boolean;
+    project: Project | null;
+    isDeleting: boolean;
+  }>({
+    open: false,
+    project: null,
+    isDeleting: false,
+  });
 
   // Filter projects based on search query and status
-  const filteredProjects = projects.filter(project => {
+  const filteredProjects = projects.filter((project: Project) => {
     const matchesSearch = !searchQuery || 
       project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
       (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
