@@ -35,34 +35,39 @@ export interface ProjectListResponse {
   total_pages: number;
 }
 
-// Enhanced return types for better type inference
+// Enhanced return types for better type inference and error handling
 export interface UseWorkspaceProjectsReturn {
   projects: Project[];
   stats: import('@/contexts/ProjectsContext').ProjectStats | null;
   loading: boolean;
-  error: string | null;
+  error: ProjectError | null;
   hasFetchedWorkspace: boolean;
   fetchProjects: () => Promise<Project[]>;
   refreshProjects: () => Promise<Project[]>;
   createProject: (request: ProjectCreateRequest) => Promise<Project | null>;
   deleteProject: (projectId: string) => Promise<boolean>;
   clearError: () => void;
+  isWorkspaceLoading: boolean;
 }
 
 export interface UseProjectDetailsReturn {
   project: Project | null;
   loading: boolean;
-  error: string | null;
-  assets: import('@/contexts/ProjectsContext').ProjectAssetsResponse | null;
+  error: ProjectError | null;
+  assets: ProjectAssetsResponse | null;
   hasFetched: boolean;
+  isAssetsLoading: boolean;
   getProject: (includeAssets?: boolean) => Promise<Project | null>;
   updateProject: (request: ProjectUpdateRequest) => Promise<Project | null>;
-  getProjectAssets: (assetType?: string) => Promise<import('@/contexts/ProjectsContext').ProjectAssetsResponse | null>;
+  getProjectAssets: (assetType?: string, forceRefresh?: boolean) => Promise<ProjectAssetsResponse | null>;
   refreshProject: () => Promise<Project | null>;
+  refreshAssets: () => Promise<ProjectAssetsResponse | null>;
   clearError: () => void;
+  getCachedAssets: () => ProjectAssetsResponse | null;
+  invalidateAssetsCache: () => void;
 }
 
-// For components that need to work with projects in a specific workspace
+// Enhanced hook for workspace-level project management
 export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjectsReturn {
   const { 
     projectsByWorkspace, 
@@ -74,7 +79,8 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     deleteProject,
     statsByWorkspace,
     fetchedWorkspaces,
-    clearError 
+    clearError,
+    isWorkspaceLoading 
   } = useProjectsContext();
 
   // Auto-fetch projects for this workspace when workspaceId changes
