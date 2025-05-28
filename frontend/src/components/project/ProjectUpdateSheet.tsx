@@ -249,3 +249,27 @@ export function ProjectUpdateSheet({
     }
   };
 
+  // Handle cancel
+  const handleCancel = () => {
+    if (project) {
+      // Reset form to original values
+      setFormData({
+        name: project.name || "",
+        description: project.description || "",
+        status: project.status || ProjectStatus.DRAFT,
+        thumbnail_url: project.thumbnail_url || "",
+      });
+    }
+    onOpenChange(false);
+  };
+
+  // Check if there are unsaved changes
+  const hasChanges = project && (
+    formData.name !== project.name ||
+    formData.description !== project.description ||
+    formData.status !== project.status ||
+    formData.thumbnail_url !== project.thumbnail_url
+  );
+
+  if (!project) return null;
+
