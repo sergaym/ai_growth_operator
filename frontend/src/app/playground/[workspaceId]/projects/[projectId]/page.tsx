@@ -212,8 +212,25 @@ export default function ProjectPage() {
     }
   }, [result?.video_url, refreshProject]);
 
-  // Smart content display logic
+  // Smart content display logic - Show assets if they exist regardless of status
   const hasExistingAssets = assets && assets.assets && assets.assets.length > 0;
+  
+  // Debug logging - temporary
+  useEffect(() => {
+    console.log('🔍 Asset Detection Debug:', {
+      assets,
+      hasAssets: !!assets,
+      assetsArray: assets?.assets,
+      assetsLength: assets?.assets?.length,
+      hasExistingAssets,
+      projectId,
+      workspaceId,
+      hasFetched,
+      showSkeleton,
+      projectLoading
+    });
+  }, [assets, hasExistingAssets, projectId, workspaceId, hasFetched, showSkeleton, projectLoading]);
+  
   const hasVideoGenerationActivity = isGenerating || result?.video_url || videoError;
   const shouldShowVideoPreview = hasVideoGenerationActivity || !hasExistingAssets;
   const shouldShowGettingStarted = !hasExistingAssets && !hasVideoGenerationActivity;
