@@ -4,8 +4,8 @@ import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, Filter, FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
-import { useWorkspaces } from "@/hooks/useWorkspace";
+import { FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
+import { useWorkspaces, type Workspace } from "@/hooks/useWorkspace";
 import { 
   DropdownMenu,
   DropdownMenuContent,
