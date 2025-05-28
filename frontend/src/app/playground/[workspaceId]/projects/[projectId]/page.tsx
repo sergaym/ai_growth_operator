@@ -14,15 +14,37 @@ import { ProjectUpdateSheet } from "@/components/project/ProjectUpdateSheet";
 import { 
   MoreHorizontal,
   ArrowLeft,
-  Edit3
+  Edit3,
+  Trash2,
+  Calendar,
+  User,
+  Clock,
+  Video,
+  Music,
+  Image as ImageIcon,
+  FileText,
+  Download,
+  ExternalLink
 } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from "@/components/ui/dropdown-menu";
 import { useToast } from "@/components/ui/use-toast";
+
+// Add keyframe animations for smooth loading transitions
+const loadingStyles = `
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in-stagger {
+    animation: fadeIn 0.3s ease-out forwards;
+  }
+`;
 
 export default function ProjectPage() {
   const params = useParams();
@@ -50,11 +72,10 @@ export default function ProjectPage() {
   // Get workspace projects for delete functionality
   const { deleteProject } = useWorkspaceProjects(workspaceId);
 
-  // Simple delete state
+  // Enhanced state management
   const [isDeleting, setIsDeleting] = useState(false);
-
-  // Project update sheet state
   const [isUpdateSheetOpen, setIsUpdateSheetOpen] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
 
   // Workspace resolution
   const currentWorkspace = useMemo(() => {
@@ -65,8 +86,98 @@ export default function ProjectPage() {
   }, [workspaces, workspaceId]);
 
   // Consolidated loading and error states
-  const isLoading = workspacesLoading || projectLoading || !hasFetched;
+  // Only show loading on initial load, not during refreshes/updates
+  const isInitialLoading = (workspacesLoading && !workspaces.length) || (projectLoading && !hasFetched);
   const error = projectError;
+
+  // Progressive loading - show partial data immediately
+  const showPartialContent = workspaces.length > 0 && currentWorkspace;
+  
+  // Optimistic data display - use cached data when available
+  const [cachedProject, setCachedProject] = useState<Project | null>(null);
+  
+  // Cache project data as soon as it's available
+  useEffect(() => {
+    if (project && !cachedProject) {
+      setCachedProject(project);
+    } else if (project && project.updated_at !== cachedProject?.updated_at) {
+      setCachedProject(project);
+    }
+  }, [project, cachedProject]);
+
+  // Always render the layout - use skeletons for missing data
+  const displayProject = project || cachedProject;
+  const displayTitle = displayProject?.name || "Untitled Project";
+  const displayDescription = displayProject?.description;
+  const isDataLoading = !project || !hasFetched;
+  const showSkeleton = isDataLoading && !cachedProject;
+
+  // Skeleton loading components for fast perceived performance
+  const ProjectHeaderSkeleton = () => (
+    <div className="flex items-center gap-2 animate-pulse">
+      <div className="hidden md:flex items-center gap-4 text-sm mr-4">
+        <div className="flex items-center gap-1">
+          <div className="h-3.5 w-3.5 bg-gray-200 rounded" />
+          <div className="h-3 w-16 bg-gray-200 rounded" />
+        </div>
+        <div className="flex items-center gap-1">
+          <div className="h-3.5 w-3.5 bg-gray-200 rounded" />
+          <div className="h-3 w-20 bg-gray-200 rounded" />
+        </div>
+      </div>
+      <div className="h-8 w-8 bg-gray-200 rounded" />
+    </div>
+  );
+
+  const AssetsSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+      <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+        <div>
+          <div className="h-5 w-14 bg-gray-200 rounded mb-1" />
+          <div className="h-3 w-36 bg-gray-200 rounded" />
+        </div>
+      </div>
+      <div className="space-y-3">
+        {[1, 2, 3].map((i) => (
+          <div key={i} className="border border-gray-200 rounded-lg" style={{ animationDelay: `${i * 100}ms` }}>
+            <div className="flex items-center justify-between p-4 border-b border-gray-100">
+              <div className="flex items-center gap-3">
+                <div className="h-4 w-4 bg-gray-200 rounded" />
+                <div>
+                  <div className="h-4 w-20 bg-gray-200 rounded mb-1.5" />
+                  <div className="h-3 w-16 bg-gray-200 rounded" />
+                </div>
+              </div>
+              <div className="flex items-center gap-2">
+                <div className="h-5 w-14 bg-gray-200 rounded-full" />
+                <div className="h-6 w-6 bg-gray-200 rounded" />
+              </div>
+            </div>
+            <div className="p-4">
+              <div className="aspect-video bg-gray-100 rounded-lg" />
+            </div>
+          </div>
+        ))}
+      </div>
+    </div>
+  );
+
+  const ContentSkeleton = () => (
+    <div className="space-y-6 animate-pulse">
+      <div className="border-b border-gray-100 pb-3">
+        <div className="h-5 w-28 bg-gray-200 rounded mb-1" />
+        <div className="h-3 w-52 bg-gray-200 rounded" />
+      </div>
+      <div className="space-y-4">
+        <div className="h-48 bg-gray-100 rounded-lg" />
+        <div className="space-y-3">
+          <div className="h-4 w-full bg-gray-200 rounded" />
+          <div className="h-4 w-3/4 bg-gray-200 rounded" />
+          <div className="h-10 w-24 bg-gray-200 rounded" />
+        </div>
+      </div>
+    </div>
+  );
 
   // Video generation state
   const { 
@@ -79,6 +190,26 @@ export default function ProjectPage() {
     cancel, 
     reset 
   } = useVideoGeneration();
+
+  // Keyboard shortcuts - Notion style
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      // Cmd/Ctrl + E to edit project
+      if ((e.metaKey || e.ctrlKey) && e.key === 'e') {
+        e.preventDefault();
+        setIsUpdateSheetOpen(true);
+      }
+      
+      // Escape to close dialogs
+      if (e.key === 'Escape') {
+        setShowDeleteConfirm(false);
+        setIsUpdateSheetOpen(false);
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, []);
 
   // Enhanced video generation handler
   const handleGenerateVideo = async (
@@ -148,16 +279,7 @@ export default function ProjectPage() {
   // Direct delete handler with confirmation
   const handleDeleteProject = async () => {
     if (!project) return;
-    
-    // Simple browser confirmation
-    const confirmed = window.confirm(
-      `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone and you will be redirected to the workspace.`
-    );
-    
-    if (!confirmed) {
-      return;
-    }
-
+    setShowDeleteConfirm(false);
     setIsDeleting(true);
 
     try {
@@ -182,59 +304,136 @@ export default function ProjectPage() {
     }
   };
 
-  // Project actions menu component
-  const ProjectActions = () => (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon" disabled={isDeleting}>
-          {isDeleting ? (
-            <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
-          ) : (
-            <MoreHorizontal className="h-4 w-4" />
-          )}
-        </Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent align="end">
-        <DropdownMenuItem 
-          onClick={() => setIsUpdateSheetOpen(true)} 
-          disabled={isDeleting}
-        >
-          <Edit3 className="h-4 w-4 mr-2" />
-          Edit Project Details
-        </DropdownMenuItem>
-        <DropdownMenuItem 
-          className="text-red-500"
-          onClick={handleDeleteProject}
-          disabled={isDeleting}
-        >
-          {isDeleting ? 'Deleting...' : 'Delete Project'}
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  );
+  // Format date in Notion style
+  const formatDate = (dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diff = now.getTime() - date.getTime();
+    const days = Math.floor(diff / (1000 * 60 * 60 * 24));
+    
+    if (days === 0) return 'Today';
+    if (days === 1) return 'Yesterday';
+    if (days < 7) return `${days} days ago`;
+    if (days < 30) return `${Math.floor(days / 7)} weeks ago`;
+    return date.toLocaleDateString('en-US', { 
+      year: 'numeric', 
+      month: 'short', 
+      day: 'numeric' 
+    });
+  };
 
-  // Loading state
-  if (isLoading) {
-    return (
-      <PlaygroundLayout
-        title="Loading..."
-        currentWorkspace={currentWorkspace}
-        showBackButton={true}
-        onBack={handleBackToWorkspace}
-        isProject={true}
-      >
-        <div className="space-y-6">
-          <div className="animate-pulse">
-            <div className="h-64 bg-gray-200 rounded mb-6"></div>
-            <div className="h-32 bg-gray-200 rounded"></div>
+  // Enhanced project actions menu component
+  const ProjectActions = () => (
+    <div className="flex items-center gap-2">
+      {/* Project Metadata - Notion style */}
+      {project && (
+        <div className="hidden md:flex items-center gap-4 text-sm text-muted-foreground mr-4">
+          <div className="flex items-center gap-1">
+            <Clock className="h-3.5 w-3.5" />
+            <span>Edited {formatDate(project.updated_at)}</span>
+          </div>
+          <div className="flex items-center gap-1">
+            <Calendar className="h-3.5 w-3.5" />
+            <span>Created {formatDate(project.created_at)}</span>
           </div>
         </div>
-      </PlaygroundLayout>
-    );
-  }
+      )}
+      
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button 
+            variant="ghost" 
+            size="icon" 
+            disabled={isDeleting}
+            className="h-8 w-8 hover:bg-gray-100"
+          >
+            {isDeleting ? (
+              <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+            ) : (
+              <MoreHorizontal className="h-4 w-4" />
+            )}
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-48">
+          <DropdownMenuItem 
+            onClick={() => setIsUpdateSheetOpen(true)} 
+            disabled={isDeleting}
+            className="flex items-center gap-2"
+          >
+            <Edit3 className="h-4 w-4" />
+            Edit project details
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            className="text-red-600 focus:text-red-600 focus:bg-red-50"
+            onClick={() => setShowDeleteConfirm(true)}
+            disabled={isDeleting}
+          >
+            <Trash2 className="h-4 w-4 mr-2" />
+            {isDeleting ? 'Deleting...' : 'Delete project'}
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    </div>
+  );
 
+  // Delete confirmation dialog
+  const DeleteConfirmDialog = () => {
+    if (!showDeleteConfirm) return null;
+    
+    return (
+      <div className="fixed inset-0 z-50 bg-black/80 flex items-center justify-center p-4">
+        <div className="bg-white rounded-lg shadow-lg max-w-md w-full p-6">
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-10 h-10 rounded-full bg-red-100 flex items-center justify-center">
+              <Trash2 className="h-5 w-5 text-red-600" />
+            </div>
+            <div>
+              <h3 className="font-semibold text-gray-900">Delete project</h3>
+              <p className="text-sm text-gray-600">This action cannot be undone</p>
+            </div>
+          </div>
+          
+          <p className="text-gray-700 mb-6">
+            Are you sure you want to delete <strong>"{project?.name}"</strong>? 
+            All assets and data will be permanently removed.
+          </p>
+          
+          <div className="flex gap-3 justify-end">
+            <Button 
+              variant="outline" 
+              onClick={() => setShowDeleteConfirm(false)}
+              disabled={isDeleting}
+            >
+              Cancel
+            </Button>
+            <Button 
+              variant="destructive" 
+              onClick={handleDeleteProject}
+              disabled={isDeleting}
+              className="gap-2"
+            >
+              {isDeleting ? (
+                <>
+                  <div className="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin" />
+                  Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="h-4 w-4" />
+                  Delete project
+                </>
+              )}
+            </Button>
+          </div>
+        </div>
+      </div>
+    );
+  };
+
+  // Progressive loading - immediately show layout with skeletons
   // Error state - project not found (only show after fetch is complete)
-  if (hasFetched && !project && !isLoading) {
+  if (hasFetched && !project && !isInitialLoading) {
     return (
       <PlaygroundLayout
         title="Project Not Found"
@@ -250,154 +449,223 @@ export default function ProjectPage() {
           </p>
           <Button onClick={handleBackToWorkspace} className="gap-2">
             <ArrowLeft className="h-4 w-4" />
-            Return to Projects
+            Return to Workspace
           </Button>
         </div>
       </PlaygroundLayout>
     );
   }
 
-  // Success state - render project (only if project exists and fetch is complete)
-  if (!project || !hasFetched) {
-    return null; // This should not happen due to the loading/error checks above, but satisfies TypeScript
-  }
-
   return (
     <>
       <PlaygroundLayout
-        title={project.name}
-        description={project.description}
+        title={displayTitle}
+        description={displayDescription}
         currentWorkspace={currentWorkspace}
         error={error}
         showBackButton={true}
         onBack={handleBackToWorkspace}
-        status={project.status}
-        headerActions={<ProjectActions />}
+        status={project?.status}
+        headerActions={showSkeleton ? <ProjectHeaderSkeleton /> : <ProjectActions />}
         isProject={true}
-        projectName={project.name}
+        projectName={project?.name}
       >
-        <div className="space-y-6">
-          {/* Project Assets Section */}
-          {assets && assets.assets && assets.assets.length > 0 && (
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <h2 className="text-xl font-semibold">Project Assets</h2>
-                <span className="text-sm text-muted-foreground">
-                  {assets.total} asset{assets.total !== 1 ? 's' : ''}
-                </span>
+        <div className="space-y-8">
+          {/* Project Assets Section - Progressive Loading */}
+          {showSkeleton ? (
+            <AssetsSkeleton />
+          ) : assets && assets.assets && assets.assets.length > 0 ? (
+            <div className="space-y-6 opacity-0 animate-[fadeIn_0.3s_ease-in-out_forwards]">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Assets</h2>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    {assets.total} item{assets.total !== 1 ? 's' : ''} • Generated content for this project
+                  </p>
+                </div>
               </div>
               
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-                {assets.assets.map((asset) => (
-                  <div key={asset.id} className="border rounded-lg p-4 space-y-3">
-                    <div className="flex items-center justify-between">
-                      <span className="text-sm font-medium capitalize">
-                        {asset.type.replace('_', ' ')}
-                      </span>
-                      <span className={`text-xs px-2 py-1 rounded-full ${
-                        asset.status === 'completed' 
-                          ? 'bg-green-100 text-green-700' 
-                          : asset.status === 'processing'
-                          ? 'bg-blue-100 text-blue-700'
-                          : 'bg-gray-100 text-gray-700'
-                      }`}>
-                        {asset.status}
-                      </span>
+              <div className="space-y-2">
+                {assets.assets.map((asset, index) => {
+                  const getAssetIcon = (type: string) => {
+                    switch (type) {
+                      case 'video':
+                      case 'lipsync_video':
+                        return <Video className="h-4 w-4 text-blue-600" />;
+                      case 'audio':
+                        return <Music className="h-4 w-4 text-purple-600" />;
+                      case 'image':
+                        return <ImageIcon className="h-4 w-4 text-green-600" />;
+                      default:
+                        return <FileText className="h-4 w-4 text-gray-600" />;
+                    }
+                  };
+
+                  const formatAssetType = (type: string) => {
+                    switch (type) {
+                      case 'lipsync_video':
+                        return 'Lip-sync Video';
+                      default:
+                        return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
+                    }
+                  };
+
+                  return (
+                    <div key={asset.id} className="group border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
+                      {/* Asset header */}
+                      <div className="flex items-center justify-between p-4 border-b border-gray-100">
+                        <div className="flex items-center gap-3">
+                          {getAssetIcon(asset.type)}
+                          <div>
+                            <h3 className="font-medium text-gray-900">
+                              {formatAssetType(asset.type)}
+                            </h3>
+                            <p className="text-sm text-gray-500">
+                              Created {formatDate(asset.created_at)}
+                            </p>
+                          </div>
+                        </div>
+                        
+                        <div className="flex items-center gap-2">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
+                            asset.status === 'completed' 
+                              ? 'bg-green-100 text-green-800' 
+                              : asset.status === 'processing'
+                              ? 'bg-blue-100 text-blue-800'
+                              : 'bg-gray-100 text-gray-800'
+                          }`}>
+                            {asset.status}
+                          </span>
+                          
+                          {asset.file_url && (
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              className="opacity-0 group-hover:opacity-100 transition-opacity"
+                              onClick={() => window.open(asset.file_url, '_blank')}
+                            >
+                              <ExternalLink className="h-4 w-4" />
+                            </Button>
+                          )}
+                        </div>
+                      </div>
+                      
+                      {/* Asset preview */}
+                      {asset.file_url && (
+                        <div className="p-4">
+                          {(asset.type === 'video' || asset.type === 'lipsync_video') && (
+                            <div className="aspect-video bg-gray-50 rounded-lg overflow-hidden">
+                              <video 
+                                src={asset.file_url} 
+                                controls 
+                                className="w-full h-full object-cover"
+                                poster={asset.thumbnail_url}
+                              >
+                                Your browser does not support the video tag.
+                              </video>
+                            </div>
+                          )}
+                          
+                          {asset.type === 'audio' && (
+                            <div className="bg-gray-50 rounded-lg p-6">
+                              <audio controls className="w-full">
+                                <source src={asset.file_url} />
+                                Your browser does not support the audio tag.
+                              </audio>
+                            </div>
+                          )}
+                          
+                          {asset.type === 'image' && (
+                            <div className="aspect-video bg-gray-50 rounded-lg overflow-hidden">
+                              <img 
+                                src={asset.file_url} 
+                                alt="Project asset"
+                                className="w-full h-full object-cover"
+                              />
+                            </div>
+                          )}
+                        </div>
+                      )}
                     </div>
-                    
-                    {/* Video Preview */}
-                    {asset.type === 'video' && asset.file_url && (
-                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
-                        <video 
-                          src={asset.file_url} 
-                          controls 
-                          className="w-full h-full object-cover"
-                          poster={asset.thumbnail_url}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )}
-                    
-                    {/* Audio Preview */}
-                    {asset.type === 'audio' && asset.file_url && (
-                      <div className="bg-gray-50 rounded p-4">
-                        <audio controls className="w-full">
-                          <source src={asset.file_url} />
-                          Your browser does not support the audio tag.
-                        </audio>
-                      </div>
-                    )}
-                    
-                    {/* Image Preview */}
-                    {asset.type === 'image' && asset.file_url && (
-                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
-                        <img 
-                          src={asset.file_url} 
-                          alt="Project asset"
-                          className="w-full h-full object-cover"
-                        />
-                      </div>
-                    )}
-                    
-                    {/* Lipsync Video Preview */}
-                    {asset.type === 'lipsync_video' && asset.file_url && (
-                      <div className="aspect-video bg-gray-100 rounded overflow-hidden">
-                        <video 
-                          src={asset.file_url} 
-                          controls 
-                          className="w-full h-full object-cover"
-                          poster={asset.thumbnail_url}
-                        >
-                          Your browser does not support the video tag.
-                        </video>
-                      </div>
-                    )}
-                    
-                    <div className="text-xs text-muted-foreground">
-                      Created {new Date(asset.created_at).toLocaleDateString()}
-                    </div>
-                  </div>
-                ))}
+                  );
+                })}
               </div>
             </div>
+          ) : assets && assets.assets ? (
+            <div className="space-y-6">
+              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
+                <div>
+                  <h2 className="text-lg font-semibold text-gray-900">Assets</h2>
+                  <p className="text-sm text-gray-600 mt-0.5">
+                    No assets yet • Generate content below to get started
+                  </p>
+                </div>
+              </div>
+              
+              <div className="text-center py-12">
+                <div className="w-16 h-16 mx-auto mb-4 bg-gray-100 rounded-full flex items-center justify-center">
+                  <FileText className="h-8 w-8 text-gray-400" />
+                </div>
+                <h3 className="text-lg font-medium text-gray-900 mb-2">No assets yet</h3>
+                <p className="text-gray-600 mb-6 max-w-sm mx-auto">
+                  Start creating content using the AI video generation tools below. Your generated videos, audio, and images will appear here.
+                </p>
+              </div>
+            </div>
+          ) : null}
+
+          {/* Video Generation Section - Progressive Loading */}
+          {showSkeleton ? (
+            <ContentSkeleton />
+          ) : (
+            <div className="space-y-6">
+              <div className="border-b border-gray-100 pb-3">
+                <h2 className="text-lg font-semibold text-gray-900">Create New Content</h2>
+                <p className="text-sm text-gray-600 mt-0.5">
+                  Generate videos using AI actors and your text content
+                </p>
+              </div>
+              
+              {/* Video Preview */}
+              <VideoPreview
+                videoUrl={result?.video_url}
+                isGenerating={isGenerating}
+                progress={progress}
+                currentStep={currentStep ?? undefined}
+                error={videoError ?? undefined}
+                processingTime={result?.processing_time}
+                onCancel={cancel}
+                onReset={reset}
+                onRetry={reset}
+                showGettingStarted={!result && !videoError && !isGenerating && (!assets || assets.assets.length === 0)}
+              />
+
+              {/* Enhanced Chat Input */}
+              <GestureChat 
+                projectId={projectId} 
+                onGenerateVideo={handleGenerateVideo}
+                isGenerating={isGenerating}
+                showTips={true}
+              />
+            </div>
           )}
-
-          {/* Video Generation Section */}
-          <div className="space-y-4">            
-            {/* Video Preview */}
-            <VideoPreview
-              videoUrl={result?.video_url}
-              isGenerating={isGenerating}
-              progress={progress}
-              currentStep={currentStep ?? undefined}
-              error={videoError ?? undefined}
-              processingTime={result?.processing_time}
-              onCancel={cancel}
-              onReset={reset}
-              onRetry={reset}
-              showGettingStarted={!result && !videoError && !isGenerating && (!assets || assets.assets.length === 0)}
-            />
-
-            {/* Enhanced Chat Input */}
-            <GestureChat 
-              projectId={projectId} 
-              onGenerateVideo={handleGenerateVideo}
-              isGenerating={isGenerating}
-              showTips={true}
-            />
-          </div>
         </div>
       </PlaygroundLayout>
 
       {/* Project Update Sheet */}
-      <ProjectUpdateSheet
-        project={project}
-        open={isUpdateSheetOpen}
-        onOpenChange={setIsUpdateSheetOpen}
-        onUpdate={updateProject}
-        isUpdating={false}
-      />
+      {project && (
+        <ProjectUpdateSheet
+          project={project}
+          open={isUpdateSheetOpen}
+          onOpenChange={setIsUpdateSheetOpen}
+          onUpdate={updateProject}
+          isUpdating={false}
+        />
+      )}
+
+      {/* Delete Confirmation Dialog */}
+      <DeleteConfirmDialog />
     </>
   );
 }
+
