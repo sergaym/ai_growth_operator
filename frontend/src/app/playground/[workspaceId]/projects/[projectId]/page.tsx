@@ -50,11 +50,8 @@ export default function ProjectPage() {
   // Get workspace projects for delete functionality
   const { deleteProject } = useWorkspaceProjects(workspaceId);
 
-  // Delete dialog state
-  const [deleteDialog, setDeleteDialog] = useState({
-    open: false,
-    isDeleting: false,
-  });
+  // Simple delete state
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Workspace resolution
   const currentWorkspace = useMemo(() => {
@@ -145,19 +142,20 @@ export default function ProjectPage() {
     router.push(`/playground/${workspaceId}`);
   };
 
-  // Delete handlers
-  const openDeleteDialog = () => {
-    setDeleteDialog({ open: true, isDeleting: false });
-  };
-
-  const closeDeleteDialog = () => {
-    setDeleteDialog({ open: false, isDeleting: false });
-  };
-
+  // Direct delete handler with confirmation
   const handleDeleteProject = async () => {
     if (!project) return;
     
-    setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
+    // Simple browser confirmation
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone and you will be redirected to the workspace.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
+    setIsDeleting(true);
 
     try {
       const success = await deleteProject(project.id);
@@ -177,8 +175,7 @@ export default function ProjectPage() {
         description: "Failed to delete project. Please try again.",
         variant: "destructive",
       });
-    } finally {
-      setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
+      setIsDeleting(false);
     }
   };
 
@@ -186,20 +183,25 @@ export default function ProjectPage() {
   const ProjectActions = () => (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="icon">
-          <MoreHorizontal className="h-4 w-4" />
+        <Button variant="ghost" size="icon" disabled={isDeleting}>
+          {isDeleting ? (
+            <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+          ) : (
+            <MoreHorizontal className="h-4 w-4" />
+          )}
         </Button>
       </DropdownMenuTrigger>
       <DropdownMenuContent align="end">
-        <DropdownMenuItem onClick={refreshProject}>
+        <DropdownMenuItem onClick={refreshProject} disabled={isDeleting}>
           <Settings className="h-4 w-4 mr-2" />
           Refresh Project
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="text-red-500"
-          onClick={openDeleteDialog}
+          onClick={handleDeleteProject}
+          disabled={isDeleting}
         >
-          Delete Project
+          {isDeleting ? 'Deleting...' : 'Delete Project'}
         </DropdownMenuItem>
       </DropdownMenuContent>
     </DropdownMenu>
@@ -381,19 +383,6 @@ export default function ProjectPage() {
           </div>
         </div>
       </PlaygroundLayout>
-
-      {/* Professional Delete Dialog */}
-      <DeleteDialog
-        open={deleteDialog.open}
-        onOpenChange={(open) => !open && closeDeleteDialog()}
-        onConfirm={handleDeleteProject}
-        title="Delete Project"
-        description="This project and all its content will be permanently deleted. This action cannot be undone."
-        itemName={project?.name || ""}
-        itemType="project"
-        destructiveAction="Delete Project"
-        isLoading={deleteDialog.isDeleting}
-      />
     </>
   );
 }
