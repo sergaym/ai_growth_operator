@@ -76,3 +76,18 @@ interface WorkspaceContextType {
 
 const WorkspaceContext = createContext<WorkspaceContextType | undefined>(undefined);
 
+export function WorkspaceProvider({ children }: { children: ReactNode }) {
+  const { user } = useAuth();
+  
+  // Global workspace list state
+  const [workspaces, setWorkspaces] = useState<Workspace[]>([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState<string | null>(null);
+  const [hasFetched, setHasFetched] = useState(false);
+  
+  // Individual workspace state
+  const [currentWorkspace, setCurrentWorkspace] = useState<WorkspaceWithSubscription | null>(null);
+  const [workspaceUsers, setWorkspaceUsers] = useState<User[]>([]);
+  const [workspaceLoading, setWorkspaceLoading] = useState(false);
+  const [workspaceError, setWorkspaceError] = useState<string | null>(null);
+
