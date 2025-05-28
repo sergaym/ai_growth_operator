@@ -181,3 +181,22 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated]);
 
+  // Get a specific project
+  const getProject = useCallback(async (workspaceId: string, projectId: string, includeAssets?: boolean): Promise<Project | null> => {
+    if (!user.isAuthenticated || !workspaceId || !projectId) {
+      return null;
+    }
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}${includeAssets ? '?include_assets=true' : ''}`;
+      const project = await apiClient<Project>(url);
+      
+      return project;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project';
+      setError(errorMessage);
+      console.error('Error fetching project:', err);
+      return null;
+    }
+  }, [user.isAuthenticated]);
+
