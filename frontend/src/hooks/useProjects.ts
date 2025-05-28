@@ -47,68 +47,24 @@ export function useWorkspaceProjects(workspaceId?: string) {
     }
   }, [workspaceId, fetchProjects, loading]);
 
-    }
-  }, [workspaceId, user.isAuthenticated]);
+  // Get projects for the current workspace
+  const projects = workspaceId ? (projectsByWorkspace[workspaceId] || []) : [];
+  const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
+  const hasFetchedWorkspace = workspaceId ? fetchedWorkspaces.has(workspaceId) : false;
 
-  // Get project assets
-  const getProjectAssets = useCallback(async (
-    projectId: string,
-    assetType?: string
-  ): Promise<ProjectAssetsResponse | null> => {
-    if (!workspaceId || !user.isAuthenticated) {
-      return null;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const params = assetType ? `?asset_type=${assetType}` : '';
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}/assets${params}`;
-      const assets = await apiClient<ProjectAssetsResponse>(url);
-      
-      return assets;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project assets';
-      setError(errorMessage);
-      console.error('Error fetching project assets:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [workspaceId, user.isAuthenticated]);
-
-  // Get workspace project statistics
-  const getWorkspaceStats = useCallback(async (): Promise<ProjectStats | null> => {
-    if (!workspaceId || !user.isAuthenticated) {
-      return null;
-    }
-
-    try {
-      setLoading(true);
-      setError(null);
-
-      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/stats`;
-      const statsData = await apiClient<ProjectStats>(url);
-      
-      setStats(statsData);
-      return statsData;
-    } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace stats';
-      setError(errorMessage);
-      console.error('Error fetching workspace stats:', err);
-      return null;
-    } finally {
-      setLoading(false);
-    }
-  }, [workspaceId, user.isAuthenticated]);
-
-  // Auto-fetch projects when workspaceId changes
-  useEffect(() => {
-    if (workspaceId && user.isAuthenticated) {
-      listProjects({ include_assets: true });
-    }
-  }, [workspaceId, user.isAuthenticated, listProjects]);
+  return {
+    projects,
+    stats,
+    loading,
+    error,
+    hasFetchedWorkspace,
+    fetchProjects: () => workspaceId ? fetchProjects(workspaceId) : Promise.resolve([]),
+    refreshProjects: () => workspaceId ? refreshProjects(workspaceId) : Promise.resolve([]),
+    createProject: (request: any) => workspaceId ? createProject(workspaceId, request) : Promise.resolve(null),
+    deleteProject: (projectId: string) => workspaceId ? deleteProject(workspaceId, projectId) : Promise.resolve(false),
+    clearError,
+  };
+}
 
   return {
     // State
