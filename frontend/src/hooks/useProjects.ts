@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect } from 'react';
+import React, { useEffect, useCallback, useMemo } from 'react';
 
 // Re-export everything from the context for backward compatibility
 export {
@@ -15,7 +15,12 @@ export {
 } from '@/contexts/ProjectsContext';
 
 // For components that specifically need only the projects list for a workspace
-import { useProjectsContext, type Project } from '@/contexts/ProjectsContext';
+import { 
+  useProjectsContext, 
+  type Project, 
+  type ProjectCreateRequest,
+  type ProjectUpdateRequest 
+} from '@/contexts/ProjectsContext';
 
 export interface ProjectListResponse {
   projects: Project[];
