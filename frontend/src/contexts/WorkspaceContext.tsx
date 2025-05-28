@@ -231,3 +231,78 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated, getWorkspaceUsers]);
 
+  // Remove user from workspace
+  const removeUserFromWorkspace = useCallback(async (workspaceId: string, userId: string): Promise<boolean> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return false;
+    }
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users/${userId}`;
+      await apiClient(url, { method: 'DELETE' });
+
+      // Refresh workspace users
+      await getWorkspaceUsers(workspaceId);
+      return true;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to remove user from workspace';
+      setWorkspaceError(errorMessage);
+      console.error('Error removing user from workspace:', err);
+      return false;
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  }, [user.isAuthenticated, getWorkspaceUsers]);
+
+  // Clear errors
+  const clearError = useCallback(() => setError(null), []);
+  const clearWorkspaceError = useCallback(() => setWorkspaceError(null), []);
+
+  // Auto-fetch workspaces when user becomes authenticated
+  useEffect(() => {
+    if (user.isAuthenticated && !hasFetched && !loading) {
+      fetchWorkspaces();
+    }
+  }, [user.isAuthenticated, hasFetched, loading, fetchWorkspaces]);
+
+  const value: WorkspaceContextType = {
+    // Global workspace list state
+    workspaces,
+    loading,
+    error,
+    hasFetched,
+    
+    // Individual workspace state
+    currentWorkspace,
+    workspaceUsers,
+    workspaceLoading,
+    workspaceError,
+    
+    // Actions
+    fetchWorkspaces,
+    getWorkspaceDetails,
+    updateWorkspaceName,
+    getWorkspaceUsers,
+    addUserToWorkspace,
+    removeUserFromWorkspace,
+    clearError,
+    clearWorkspaceError,
+  };
+
+  return (
+    <WorkspaceContext.Provider value={value}>
+      {children}
+    </WorkspaceContext.Provider>
+  );
+}
+
+export function useWorkspaceContext() {
+  const context = useContext(WorkspaceContext);
+  if (context === undefined) {
+    throw new Error('useWorkspaceContext must be used within a WorkspaceProvider');
+  }
+  return context;
+} 
