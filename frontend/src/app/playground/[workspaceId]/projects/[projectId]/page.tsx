@@ -497,123 +497,73 @@ export default function ProjectPage() {
           {/* Loading State for Assets */}
           {showSkeleton && <AssetsSkeleton />}
           
-          {/* Existing Assets Section - Only show if assets exist */}
-          {!showSkeleton && hasExistingAssets && (
-            <div className="space-y-4 opacity-0 animate-[fadeIn_0.3s_ease-in-out_forwards]">
-              <div className="flex items-center justify-between border-b border-gray-100 pb-3">
-                <div>
-                  <h2 className="text-lg font-semibold text-gray-900">Generated Assets</h2>
-                  <p className="text-sm text-gray-600 mt-0.5">
-                    {assets.total} item{assets.total !== 1 ? 's' : ''} • Your project content
-                  </p>
-                </div>
+          
+          {/* Existing Assets Section - Show if assets exist */}
+          {!showSkeleton && assets && assets.assets && assets.assets.length > 0 && (
+            <div className="space-y-6">
+
+              
+              {/* Asset Grid - Responsive layout */}
+              <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                {assets.assets.map((asset, index) => (
+                  <div 
+                    key={asset.id} 
+                    className="animate-in fade-in-50 duration-300"
+                    style={{ animationDelay: `${index * 100}ms` }}
+                  >
+                    <AssetViewer 
+                      asset={asset}
+                      showMetadata={true}
+                      compact={false}
+                    />
+                  </div>
+                ))}
               </div>
               
-              <div className="space-y-2">
-                {assets.assets.map((asset, index) => {
-                  const getAssetIcon = (type: string) => {
-                    switch (type) {
-                      case 'video':
-                      case 'lipsync_video':
-                        return <Video className="h-4 w-4 text-blue-600" />;
-                      case 'audio':
-                        return <Music className="h-4 w-4 text-purple-600" />;
-                      case 'image':
-                        return <ImageIcon className="h-4 w-4 text-green-600" />;
-                      default:
-                        return <FileText className="h-4 w-4 text-gray-600" />;
-                    }
-                  };
-
-                  const formatAssetType = (type: string) => {
-                    switch (type) {
-                      case 'lipsync_video':
-                        return 'Lip-sync Video';
-                      default:
-                        return type.charAt(0).toUpperCase() + type.slice(1).replace('_', ' ');
-                    }
-                  };
-
-                  return (
-                    <div key={asset.id} className="group border border-gray-200 rounded-lg hover:border-gray-300 transition-colors">
-                      {/* Asset header */}
-                      <div className="flex items-center justify-between p-4 border-b border-gray-100">
-                        <div className="flex items-center gap-3">
-                          {getAssetIcon(asset.type)}
-                          <div>
-                            <h3 className="font-medium text-gray-900">
-                              {formatAssetType(asset.type)}
-                            </h3>
-                            <p className="text-sm text-gray-500">
-                              Created {formatDate(asset.created_at)}
-                            </p>
-                          </div>
+              {/* Asset Summary Stats */}
+              {assets.asset_summary && (
+                <div className="mt-6 p-4 bg-gray-50 rounded-lg">
+                  <h3 className="text-sm font-medium text-gray-900 mb-3">Asset Summary</h3>
+                  <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+                    {assets.asset_summary.total_videos > 0 && (
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-blue-100 rounded-full mx-auto mb-1">
+                          <Video className="h-4 w-4 text-blue-600" />
                         </div>
-                        
-                        <div className="flex items-center gap-2">
-                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${
-                            asset.status === 'completed' 
-                              ? 'bg-green-100 text-green-800' 
-                              : asset.status === 'processing'
-                              ? 'bg-blue-100 text-blue-800'
-                              : 'bg-gray-100 text-gray-800'
-                          }`}>
-                            {asset.status}
-                          </span>
-                          
-                          {asset.file_url && (
-                            <Button
-                              variant="ghost"
-                              size="sm"
-                              className="opacity-0 group-hover:opacity-100 transition-opacity"
-                              onClick={() => window.open(asset.file_url, '_blank')}
-                            >
-                              <ExternalLink className="h-4 w-4" />
-                            </Button>
-                          )}
-                        </div>
+                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_videos}</p>
+                        <p className="text-xs text-gray-500">Videos</p>
                       </div>
-                      
-                      {/* Asset preview */}
-                      {asset.file_url && (
-                        <div className="p-4">
-                          {(asset.type === 'video' || asset.type === 'lipsync_video') && (
-                            <div className="aspect-video bg-gray-50 rounded-lg overflow-hidden">
-                              <video 
-                                src={asset.file_url} 
-                                controls 
-                                className="w-full h-full object-cover"
-                                poster={asset.thumbnail_url}
-                              >
-                                Your browser does not support the video tag.
-                              </video>
-                            </div>
-                          )}
-                          
-                          {asset.type === 'audio' && (
-                            <div className="bg-gray-50 rounded-lg p-6">
-                              <audio controls className="w-full">
-                                <source src={asset.file_url} />
-                                Your browser does not support the audio tag.
-                              </audio>
-                            </div>
-                          )}
-                          
-                          {asset.type === 'image' && (
-                            <div className="aspect-video bg-gray-50 rounded-lg overflow-hidden">
-                              <img 
-                                src={asset.file_url} 
-                                alt="Project asset"
-                                className="w-full h-full object-cover"
-                              />
-                            </div>
-                          )}
+                    )}
+                    {assets.asset_summary.total_lipsync_videos > 0 && (
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-purple-100 rounded-full mx-auto mb-1">
+                          <Video className="h-4 w-4 text-purple-600" />
                         </div>
-                      )}
-                    </div>
-                  );
-                })}
-              </div>
+                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_lipsync_videos}</p>
+                        <p className="text-xs text-gray-500">Lip-sync</p>
+                      </div>
+                    )}
+                    {assets.asset_summary.total_audio > 0 && (
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-indigo-100 rounded-full mx-auto mb-1">
+                          <Music className="h-4 w-4 text-indigo-600" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_audio}</p>
+                        <p className="text-xs text-gray-500">Audio</p>
+                      </div>
+                    )}
+                    {assets.asset_summary.total_images > 0 && (
+                      <div className="text-center">
+                        <div className="flex items-center justify-center w-8 h-8 bg-green-100 rounded-full mx-auto mb-1">
+                          <ImageIcon className="h-4 w-4 text-green-600" />
+                        </div>
+                        <p className="text-sm font-medium text-gray-900">{assets.asset_summary.total_images}</p>
+                        <p className="text-xs text-gray-500">Images</p>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
