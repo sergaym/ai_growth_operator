@@ -273,8 +273,8 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       return project;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project';
-      setError(errorMessage);
       console.error('Error fetching project:', err);
+      // Don't set global error for individual project fetches
       return null;
     }
   }, [user.isAuthenticated]);
@@ -380,8 +380,8 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       return response;
     } catch (err) {
       const errorMessage = err instanceof Error ? err.message : 'Failed to fetch project assets';
-      setError(errorMessage);
       console.error('Error fetching project assets:', err);
+      // Don't set global error for asset fetches during refresh
       return null;
     }
   }, [user.isAuthenticated]);
