@@ -84,8 +84,7 @@ function WorkspaceSkeleton() {
 }
 
 // Component to handle payment redirects and search params
-function PaymentHandler() {
-  const { refetchWorkspaces } = useWorkspaces();
+function PaymentHandler({ refetchWorkspaces }: { refetchWorkspaces: () => void }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const hasHandledRedirect = useRef(false);
