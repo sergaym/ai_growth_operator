@@ -132,6 +132,9 @@ class Video(BaseAsset):
     source_image_id = Column(String, ForeignKey("images.id"), nullable=True)
     source_image = relationship("Image", back_populates="videos")
     
+    # Project relationship
+    project = relationship("Project", back_populates="videos")
+    
     # Lipsync videos using this video
     lipsync_videos = relationship("LipsyncVideo", foreign_keys="[LipsyncVideo.video_id]", back_populates="video")
 
@@ -151,6 +154,9 @@ class Audio(BaseAsset):
     duration_seconds = Column(Float, nullable=True)
     audio_format = Column(String, nullable=True)
     
+    # Project relationship
+    project = relationship("Project", back_populates="audio")
+    
     # Lipsync videos using this audio
     lipsync_videos = relationship("LipsyncVideo", foreign_keys="[LipsyncVideo.audio_id]", back_populates="audio")
 
@@ -165,6 +171,9 @@ class LipsyncVideo(BaseAsset):
     
     video = relationship("Video", foreign_keys=[video_id], back_populates="lipsync_videos")
     audio = relationship("Audio", foreign_keys=[audio_id], back_populates="lipsync_videos")
+    
+    # Project relationship
+    project = relationship("Project", back_populates="lipsync_videos")
 
 
 
@@ -336,6 +345,11 @@ class Project(Base):
     # Relationships
     workspace = relationship("Workspace", back_populates="projects")
     created_by = relationship("User", back_populates="created_projects")
+    
+    # Asset relationships
+    videos = relationship("Video", back_populates="project", cascade="all, delete-orphan")
+    audio = relationship("Audio", back_populates="project", cascade="all, delete-orphan")
+    lipsync_videos = relationship("LipsyncVideo", back_populates="project", cascade="all, delete-orphan")
     
     def update_activity(self):
         """Update the last activity timestamp."""
