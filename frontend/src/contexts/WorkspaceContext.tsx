@@ -176,3 +176,28 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated, currentWorkspace]);
 
+  // Get workspace users
+  const getWorkspaceUsers = useCallback(async (workspaceId: string): Promise<User[] | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/users`;
+      const users = await apiClient<User[]>(url);
+      
+      setWorkspaceUsers(users);
+      return users;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace users';
+      setWorkspaceError(errorMessage);
+      console.error('Error fetching workspace users:', err);
+      return null;
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  }, [user.isAuthenticated]);
+
