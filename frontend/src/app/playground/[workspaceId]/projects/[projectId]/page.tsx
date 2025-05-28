@@ -25,13 +25,25 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 export default function ProjectPage() {
-  const { workspaceId, projectId } = useParams();
+  const params = useParams();
   const router = useRouter();
-  const stringWorkspaceId = workspaceId as string || '';
-  const stringProjectId = projectId as string || '';
+  const { toast } = useToast();
   
-  const { workspaces } = useWorkspaces();
+  const workspaceId = params.workspaceId as string;
+  const projectId = params.projectId as string;
+  
   const { user } = useAuth();
+  const { workspaces, loading: workspacesLoading } = useWorkspaces();
+  
+  // Get workspace projects (this will auto-fetch and cache projects)
+  const { 
+    projects, 
+    loading: projectsLoading, 
+    error: projectsError,
+    deleteProject 
+  } = useWorkspaceProjects(workspaceId);
+
+  // Get project-specific utilities for detailed operations
   const { 
     getProject, 
     getProjectAssets, 
