@@ -54,7 +54,7 @@ async def generate_lipsync(
             )
         
         # Log the request parameters for debugging
-        logger.info(f"Processing lipsync request: video_url={request.video_url}, audio_url={request.audio_url}")
+        logger.info(f"Processing lipsync request: video_url={request.video_url}, audio_url={request.audio_url}, user_id={request.user_id}, workspace_id={request.workspace_id}, project_id={request.project_id}")
         
         # Process the request through the service
         try:
@@ -63,7 +63,10 @@ async def generate_lipsync(
                 video_url=request.video_url,
                 audio_path=request.audio_path,
                 audio_url=request.audio_url,
-                save_result=request.save_result
+                save_result=request.save_result,
+                user_id=request.user_id,
+                workspace_id=request.workspace_id,
+                project_id=request.project_id
             )
         except ValueError as ve:
             # Handle specific value errors from the service
@@ -87,6 +90,7 @@ async def generate_lipsync(
         
         # All good, return the response
         logger.info(f"Lipsync successful, returning video URL: {response.get('video_url')}")
+                
         return response
         
     except ValidationError as e:

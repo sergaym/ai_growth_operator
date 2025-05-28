@@ -15,6 +15,7 @@ class LipsyncRequest(BaseModel):
     save_result: bool = Field(True, description="Whether to save the result to disk")
     user_id: Optional[str] = Field(None, description="ID of the user making the request")
     workspace_id: Optional[str] = Field(None, description="ID of the workspace for the request")
+    project_id: Optional[str] = Field(None, description="ID of the project to associate with the lipsync video")
     
     @validator('video_url', 'audio_url')
     def validate_urls(cls, v):
@@ -51,15 +52,21 @@ class LipsyncDocumentationExample(BaseModel):
         {
             "video_url": "https://example.com/source-video.mp4",
             "audio_url": "https://example.com/audio-file.mp3",
-            "save_result": True
+            "save_result": True,
+            "user_id": "user_123",
+            "workspace_id": "workspace_456", 
+            "project_id": "project_789"
         },
-        description="Example of using URLs for video and audio"
+        description="Example of using URLs for video and audio with database context"
     )
     path_example: Dict[str, Any] = Field(
         {
             "video_path": "/path/to/local/video.mp4",
             "audio_path": "/path/to/local/audio.mp3",
-            "save_result": True
+            "save_result": True,
+            "user_id": "user_123",
+            "workspace_id": "workspace_456",
+            "project_id": "project_789"
         },
-        description="Example of using local file paths (server-side only)"
+        description="Example of using local file paths with database context (server-side only)"
     ) 

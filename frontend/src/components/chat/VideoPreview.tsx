@@ -27,6 +27,7 @@ interface VideoPreviewProps {
   onCancel?: () => void;
   onReset?: () => void;
   showGettingStarted?: boolean;
+  compact?: boolean;
 }
 
 export function VideoPreview({
@@ -40,6 +41,7 @@ export function VideoPreview({
   onCancel,
   onReset,
   showGettingStarted = true,
+  compact = false,
 }: VideoPreviewProps) {
   const [isPlaying, setIsPlaying] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
@@ -107,22 +109,22 @@ export function VideoPreview({
   // Loading State
   if (isGenerating) {
     return (
-      <div className="relative aspect-video bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl overflow-hidden shadow-sm border">
+      <div className={`relative ${compact ? 'aspect-video' : 'aspect-video'} bg-gradient-to-br from-slate-50 to-slate-100 rounded-xl overflow-hidden shadow-sm border`}>
         <div className="absolute inset-0 bg-gradient-to-br from-blue-50/80 via-purple-50/80 to-indigo-50/80 backdrop-blur-sm flex items-center justify-center">
-          <Card className="max-w-sm mx-4 bg-white/95 backdrop-blur-md shadow-xl border-0">
-            <div className="p-8 text-center space-y-6">
+          <Card className={`${compact ? 'max-w-xs mx-2' : 'max-w-sm mx-4'} bg-white/95 backdrop-blur-md shadow-xl border-0`}>
+            <div className={`${compact ? 'p-4' : 'p-8'} text-center space-y-${compact ? '3' : '6'}`}>
               {/* Animated Icon */}
               <div className="relative">
-                <div className="w-16 h-16 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center">
-                  <Sparkles className="h-8 w-8 text-white animate-pulse" />
+                <div className={`${compact ? 'w-12 h-12' : 'w-16 h-16'} mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl flex items-center justify-center`}>
+                  <Sparkles className={`${compact ? 'h-6 w-6' : 'h-8 w-8'} text-white animate-pulse`} />
                 </div>
-                <div className="absolute inset-0 w-16 h-16 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl animate-ping opacity-20"></div>
+                <div className={`absolute inset-0 ${compact ? 'w-12 h-12' : 'w-16 h-16'} mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-2xl animate-ping opacity-20`}></div>
               </div>
               
               {/* Step Info */}
               <div className="space-y-2">
-                <h3 className="text-xl font-semibold text-slate-800">{stepInfo.title}</h3>
-                <p className="text-sm text-slate-600">{stepInfo.desc}</p>
+                <h3 className={`${compact ? 'text-lg' : 'text-xl'} font-semibold text-slate-800`}>{stepInfo.title}</h3>
+                <p className={`${compact ? 'text-xs' : 'text-sm'} text-slate-600`}>{stepInfo.desc}</p>
               </div>
               
               {/* Progress Bar */}
@@ -133,27 +135,29 @@ export function VideoPreview({
                     style={{ width: `${progress}%` }}
                   />
                 </div>
-                <div className="flex justify-between items-center text-xs text-slate-500">
+                <div className={`flex justify-between items-center ${compact ? 'text-xs' : 'text-xs'} text-slate-500`}>
                   <span>{progress}% complete</span>
-                  <span className="flex items-center gap-1">
-                    <Clock className="h-3 w-3" />
-                    ~2-3 minutes
-                  </span>
+                  {!compact && (
+                    <span className="flex items-center gap-1">
+                      <Clock className="h-3 w-3" />
+                      ~2-3 minutes
+                    </span>
+                  )}
                 </div>
               </div>
               
               {/* Step Indicators */}
               <div className="flex justify-center space-x-3">
-                <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                <div className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} rounded-full transition-all duration-300 ${
                   currentStep === 'text_to_speech' || progress > 0 ? 'bg-blue-500 shadow-lg shadow-blue-500/30' : 'bg-slate-300'
                 }`} />
-                <div className={`w-3 h-3 rounded-full transition-all duration-300 ${
+                <div className={`${compact ? 'w-2 h-2' : 'w-3 h-3'} rounded-full transition-all duration-300 ${
                   currentStep === 'lipsync' || progress > 50 ? 'bg-purple-500 shadow-lg shadow-purple-500/30' : 'bg-slate-300'
                 }`} />
               </div>
               
               {/* Cancel Button */}
-              {onCancel && (
+              {onCancel && !compact && (
                 <Button 
                   variant="ghost" 
                   size="sm" 
@@ -209,7 +213,7 @@ export function VideoPreview({
   // Success State - Video Display
   if (videoUrl) {
     return (
-      <div className="relative aspect-video bg-black rounded-xl overflow-hidden shadow-lg group">
+      <div className={`relative aspect-video bg-black rounded-xl overflow-hidden ${compact ? 'shadow-md' : 'shadow-lg'} group`}>
         <video
           ref={videoRef}
           src={videoUrl}
@@ -234,48 +238,50 @@ export function VideoPreview({
           {/* Play/Pause Button - Center */}
           <div className="absolute inset-0 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity duration-300">
             <Button
-              size="lg"
+              size={compact ? "default" : "lg"}
               onClick={togglePlayPause}
-              className="w-16 h-16 rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-white/20"
+              className={`${compact ? 'w-12 h-12' : 'w-16 h-16'} rounded-full bg-white/20 backdrop-blur-sm hover:bg-white/30 border-white/20`}
             >
               {isPlaying ? (
-                <Pause className="h-8 w-8 text-white" />
+                <Pause className={`${compact ? 'h-6 w-6' : 'h-8 w-8'} text-white`} />
               ) : (
-                <Play className="h-8 w-8 text-white ml-1" />
+                <Play className={`${compact ? 'h-6 w-6' : 'h-8 w-8'} text-white ml-1`} />
               )}
             </Button>
           </div>
           
           {/* Top Actions */}
-          <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            <Button
-              size="sm"
-              onClick={() => window.open(videoUrl, '_blank')}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
-            >
-              <ExternalLink className="h-4 w-4" />
-            </Button>
-            <Button
-              size="sm"
-              onClick={handleDownload}
-              className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
-            >
-              <Download className="h-4 w-4" />
-            </Button>
-            {'share' in navigator && (
+          {!compact && (
+            <div className="absolute top-4 right-4 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
               <Button
                 size="sm"
-                onClick={handleShare}
+                onClick={() => window.open(videoUrl, '_blank')}
                 className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
               >
-                <Share2 className="h-4 w-4" />
+                <ExternalLink className="h-4 w-4" />
               </Button>
-            )}
-          </div>
+              <Button
+                size="sm"
+                onClick={handleDownload}
+                className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+              >
+                <Download className="h-4 w-4" />
+              </Button>
+              {'share' in navigator && (
+                <Button
+                  size="sm"
+                  onClick={handleShare}
+                  className="bg-white/20 backdrop-blur-sm hover:bg-white/30 text-white border-white/20"
+                >
+                  <Share2 className="h-4 w-4" />
+                </Button>
+              )}
+            </div>
+          )}
           
           {/* Bottom Info */}
-          <div className="absolute bottom-4 left-4 flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-            {processingTime && (
+          <div className={`absolute ${compact ? 'bottom-2 left-2' : 'bottom-4 left-4'} flex items-center gap-3 opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
+            {processingTime && !compact && (
               <Badge variant="secondary" className="bg-black/60 text-white border-white/20">
                 <Clock className="h-3 w-3 mr-1" />
                 Generated in {Math.round(processingTime)}s
@@ -297,7 +303,7 @@ export function VideoPreview({
           </div>
           
           {/* Success Badge */}
-          <div className="absolute top-4 left-4 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+          <div className={`absolute ${compact ? 'top-2 left-2' : 'top-4 left-4'} opacity-0 group-hover:opacity-100 transition-opacity duration-300`}>
             <Badge className="bg-emerald-500/90 backdrop-blur-sm text-white border-0">
               <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse" />
               Ready
@@ -311,52 +317,14 @@ export function VideoPreview({
   // Empty State - Getting Started
   if (showGettingStarted) {
     return (
-      <div className="relative aspect-video bg-gradient-to-br from-slate-50 via-blue-50/30 to-purple-50/30 rounded-xl overflow-hidden">
-        <div className="absolute inset-0 flex items-center justify-center p-6">
-          <div className="text-center space-y-6 max-w-md">
-            {/* Animated Icon */}
-            <div className="relative">
-              <div className="w-20 h-20 mx-auto bg-gradient-to-r from-blue-500 to-purple-500 rounded-3xl flex items-center justify-center">
-                <Film className="h-10 w-10 text-white" />
-              </div>
-              <div className="absolute inset-0 w-20 h-20 mx-auto bg-gradient-to-r from-blue-500/20 to-purple-500/20 rounded-3xl animate-ping" />
+      <div className="relative aspect-video bg-slate-100/50 rounded-xl overflow-hidden border-2 border-dashed border-slate-200">
+        <div className="absolute inset-0 flex items-center justify-center">
+          <div className="text-center space-y-3">
+            <div className="w-12 h-12 mx-auto bg-slate-200 rounded-xl flex items-center justify-center">
+              <Film className="h-6 w-6 text-slate-400" />
             </div>
-            
-            {/* Title & Description */}
-            <div className="space-y-3">
-              <h3 className="text-2xl font-semibold text-slate-800">
-                Ready to Create Magic?
-              </h3>
-              <p className="text-slate-600 leading-relaxed">
-                Transform your ideas into engaging AI videos. Select an actor below and describe what you want them to do.
-              </p>
-            </div>
-            
-            {/* Quick Steps */}
-            <div className="bg-white/80 backdrop-blur-sm rounded-lg p-4 space-y-3 border border-white/50">
-              <h4 className="text-sm font-medium text-slate-700 mb-3">Quick Start:</h4>
-              <div className="space-y-2 text-sm text-slate-600">
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-blue-100 text-blue-600 rounded-full flex items-center justify-center text-xs font-semibold">1</div>
-                  <span>Choose an AI actor from the gallery</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-purple-100 text-purple-600 rounded-full flex items-center justify-center text-xs font-semibold">2</div>
-                  <span>Write what you want them to say or do</span>
-                </div>
-                <div className="flex items-center gap-3">
-                  <div className="w-6 h-6 bg-emerald-100 text-emerald-600 rounded-full flex items-center justify-center text-xs font-semibold">3</div>
-                  <span>Watch your AI video come to life!</span>
-                </div>
-              </div>
-            </div>
-            
-            {/* Sparkle Animation */}
-            <div className="flex justify-center space-x-2 opacity-60">
-              <Sparkles className="h-4 w-4 text-blue-500 animate-pulse" style={{ animationDelay: '0s' }} />
-              <Sparkles className="h-4 w-4 text-purple-500 animate-pulse" style={{ animationDelay: '0.5s' }} />
-              <Sparkles className="h-4 w-4 text-indigo-500 animate-pulse" style={{ animationDelay: '1s' }} />
-            </div>
+            <p className="text-slate-500 text-sm">Your video will appear here</p>
+            <p className="text-slate-400 text-xs">👇 Start by choosing an actor below</p>
           </div>
         </div>
       </div>

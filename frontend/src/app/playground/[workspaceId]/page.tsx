@@ -1,63 +1,32 @@
 "use client";
-import React, { useState } from "react";
+import React, { useState, useCallback, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, Filter, FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
 import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { nanoid } from 'nanoid';
-import { useWorkspaces } from '@/hooks/useWorkspace';
+import { useToast } from "@/components/ui/use-toast";
+import { 
+  Search, 
+  Filter, 
+  FolderPlus, 
+  MoreHorizontal, 
+  Video, 
+  Music, 
+  Image, 
+  FileVideo,
+  Clock,
+} from "lucide-react";
 
-// Simulated project data (this should eventually come from an API)
-const projectsData = [
-  {
-    id: nanoid(10),
-    name: "Marketing Video",
-    description: "Brand awareness campaign",
-    lastEdited: "2 days ago",
-    status: "completed",
-    thumbnail: "/projects/marketing-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Product Showcase",
-    description: "New feature demonstration",
-    lastEdited: "5 hours ago",
-    status: "in-progress",
-    thumbnail: "/projects/product-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Team Introduction",
-    description: "Company culture video",
-    lastEdited: "1 week ago",
-    status: "completed",
-    thumbnail: "/projects/team-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Tutorial Series",
-    description: "How-to guides for new users",
-    lastEdited: "3 days ago",
-    status: "draft",
-    thumbnail: "/projects/tutorial-thumbnail.jpg",
-  },
-  {
-    id: nanoid(10),
-    name: "Customer Testimonial",
-    description: "Success story interview",
-    lastEdited: "Just now",
-    status: "in-progress",
-    thumbnail: "/projects/testimonial-thumbnail.jpg",
-  },
-];
+import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useWorkspaceProjects, type Project } from "@/hooks/useProjects";
+import { ProjectStatus } from "@/contexts/ProjectsContext";
 
 // Project card skeleton component
 function ProjectCardSkeleton() {
@@ -84,78 +53,190 @@ export default function WorkspaceProjects() {
   const params = useParams();
   const router = useRouter();
   const workspaceId = params.workspaceId as string;
+  const { toast } = useToast();
   
   // Get workspace data from API
-  const { workspaces, loading, error } = useWorkspaces();
+  const { workspaces, loading: workspacesLoading, hasFetched } = useWorkspaces();
+  
+  // Get projects data from API using the new hook
+  const { 
+    projects, 
+    loading: projectsLoading, 
+    error: projectsError,
+    deleteProject,
+    createProject,
+  } = useWorkspaceProjects(workspaceId);
   
   // Find the current workspace based on the URL parameter
-  const currentWorkspace = workspaces.find(ws => ws.id == workspaceId);
+  const currentWorkspace = workspaces.find(ws => ws.id === workspaceId);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [projects, setProjects] = useState(projectsData);
+  const [statusFilter, setStatusFilter] = useState<ProjectStatus | null>(null);
+  const [deletingProjects, setDeletingProjects] = useState<Set<string>>(new Set());
 
-  // Filter projects based on search query
-  const filteredProjects = searchQuery
-    ? projects.filter(project => 
+  // Filter projects based on search query and status
+  const filteredProjects = useMemo(() => {
+    return projects.filter((project: Project) => {
+      const matchesSearch = !searchQuery || 
         project.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        project.description.toLowerCase().includes(searchQuery.toLowerCase())
-      )
-    : projects;
+        (project.description && project.description.toLowerCase().includes(searchQuery.toLowerCase()));
+      
+      const matchesStatus = !statusFilter || project.status === statusFilter;
+      
+      return matchesSearch && matchesStatus;
+    });
+  }, [projects, searchQuery, statusFilter]);
 
-  const getStatusBadge = (status: string) => {
+  // Memoized utility functions
+  const getStatusBadge = useCallback((status: ProjectStatus) => {
     switch (status) {
-      case "completed":
+      case ProjectStatus.COMPLETED:
         return <span className="text-xs bg-green-500/10 text-green-500 px-2 py-1 rounded-full">Completed</span>;
-      case "in-progress":
+      case ProjectStatus.IN_PROGRESS:
         return <span className="text-xs bg-blue-500/10 text-blue-500 px-2 py-1 rounded-full">In Progress</span>;
-      case "draft":
+      case ProjectStatus.DRAFT:
         return <span className="text-xs bg-amber-500/10 text-amber-500 px-2 py-1 rounded-full">Draft</span>;
+      case ProjectStatus.ARCHIVED:
+        return <span className="text-xs bg-gray-500/10 text-gray-500 px-2 py-1 rounded-full">Archived</span>;
       default:
         return null;
     }
-  };
+  }, []);
 
-  const handleNewProject = () => {
-    const projectId = nanoid(10);
+  const getAssetIcon = useCallback((type: string, className: string = "h-3 w-3") => {
+    switch (type) {
+      case 'video':
+        return <Video className={className} />;
+      case 'audio':
+        return <Music className={className} />;
+      case 'image':
+        return <Image className={className} />;
+      case 'lipsync_video':
+        return <FileVideo className={className} />;
+      default:
+        return null;
+    }
+  }, []);
+
+  const formatDate = useCallback((dateString: string) => {
+    const date = new Date(dateString);
+    const now = new Date();
+    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
+    
+    if (diffInHours < 1) return "Just now";
+    if (diffInHours < 24) return `${diffInHours} hours ago`;
+    if (diffInHours < 48) return "1 day ago";
+    if (diffInHours < 168) return `${Math.floor(diffInHours / 24)} days ago`;
+    return date.toLocaleDateString();
+  }, []);
+
+  // Navigation functions
+  const navigateToProject = useCallback((projectId: string) => {
     router.push(`/playground/${workspaceId}/projects/${projectId}`);
-  };
+  }, [router, workspaceId]);
 
-  const navigateToApiDemo = () => {
-    router.push(`/playground/${workspaceId}/api-demo`);
-  };
-
-  const navigateToProject = (projectId: string) => {
-    router.push(`/playground/${workspaceId}/projects/${projectId}`);
-  };
-
-  const navigateToWorkspaces = () => {
+  const navigateToWorkspaces = useCallback(() => {
     router.push("/playground");
-  };
+  }, [router]);
   
   // Create a safe workspace object with default values if currentWorkspace is not found
-  const workspace = !loading && currentWorkspace 
-    ? { id: currentWorkspace.id, name: currentWorkspace.name }
-    : { id: workspaceId, name: "Workspace" };
+  const workspace = useMemo(() => 
+    currentWorkspace 
+      ? { id: currentWorkspace.id, name: currentWorkspace.name }
+      : { id: workspaceId, name: "Workspace" },
+    [currentWorkspace, workspaceId]
+  );
 
-  // Render error inside the layout instead of a fullscreen message
-  const workspaceError = !loading && !currentWorkspace 
+  // Only show workspace error after workspaces have been fetched and workspace is still not found
+  const workspaceError = hasFetched && !workspacesLoading && !currentWorkspace 
     ? "The workspace you're trying to access doesn't exist or you don't have permission to view it."
     : null;
+
+  const loading = workspacesLoading || projectsLoading;
+
+  // Create a new project and navigate to it
+  const createNewProject = useCallback(async () => {
+    try {
+      const newProject = await createProject({
+        name: "New Project",
+        description: "Automatically created project for video generation",
+        metadata: {
+          auto_created: true,
+          created_from: "new_project_button"
+        }
+      });
+      
+      if (newProject) {
+        router.push(`/playground/${workspaceId}/projects/${newProject.id}`);
+      } else {
+        toast({
+          title: "Error",
+          description: "Failed to create project. Please try again.",
+          variant: "destructive",
+        });
+      }
+    } catch (error) {
+      console.error('Error creating project:', error);
+      toast({
+        title: "Error", 
+        description: "Failed to create project. Please try again.",
+        variant: "destructive",
+      });
+    }
+  }, [createProject, router, workspaceId, toast]);
+
+  // Direct delete function with confirmation
+  const handleDeleteProject = useCallback(async (project: Project, event: React.MouseEvent) => {
+    event.stopPropagation();
+    
+    // Simple browser confirmation
+    const confirmed = window.confirm(
+      `Are you sure you want to delete "${project.name}"?\n\nThis action cannot be undone.`
+    );
+    
+    if (!confirmed) {
+      return;
+    }
+
+    // Add to deleting set
+    setDeletingProjects(prev => new Set(prev).add(project.id));
+
+    try {
+      console.log('Deleting project:', project.id);
+      const success = await deleteProject(project.id);
+      
+      if (success) {
+        toast({
+          title: "Project Deleted",
+          description: `"${project.name}" has been deleted successfully.`,
+        });
+      } else {
+        throw new Error('Delete operation failed');
+      }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Error",
+        description: `Failed to delete "${project.name}". Please try again.`,
+        variant: "destructive",
+      });
+    } finally {
+      // Remove from deleting set
+      setDeletingProjects(prev => {
+        const newSet = new Set(prev);
+        newSet.delete(project.id);
+        return newSet;
+      });
+    }
+  }, [deleteProject, toast]);
 
   return (
     <PlaygroundLayout
       title="Projects"
       description="Create and manage your AI-generated content projects."
       currentWorkspace={workspace}
-      error={workspaceError}
+      error={workspaceError || (projectsError?.message)}
     >
-      {/* Top loading bar - visible only during loading */}
-      {loading && (
-        <div className="fixed top-0 left-0 w-full h-0.5 z-50">
-          <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
-        </div>
-      )}
-
       {/* If workspace not found, show error and return button */}
       {workspaceError ? (
         <div className="text-center py-12">
@@ -179,56 +260,46 @@ export default function WorkspaceProjects() {
                 className="pl-10"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
+                disabled={loading}
               />
             </div>
             <div className="flex gap-2 items-center">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" size="sm" className="gap-1.5">
+                  <Button variant="outline" size="sm" className="gap-1.5" disabled={loading}>
                     <Filter className="h-4 w-4" />
                     <span>Filter</span>
+                    {statusFilter && <span className="text-xs">({statusFilter})</span>}
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  <DropdownMenuItem onClick={() => setProjects(projectsData)}>All Projects</DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "completed"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(null)}>
+                    All Projects
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.COMPLETED)}>
                     Completed
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "in-progress"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.IN_PROGRESS)}>
                     In Progress
                   </DropdownMenuItem>
-                  <DropdownMenuItem onClick={() => setProjects(projectsData.filter(p => p.status === "draft"))}>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.DRAFT)}>
                     Drafts
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => setStatusFilter(ProjectStatus.ARCHIVED)}>
+                    Archived
                   </DropdownMenuItem>
                 </DropdownMenuContent>
               </DropdownMenu>
-              <Button onClick={handleNewProject} className="gap-1.5">
-                <PlusCircle className="h-4 w-4" />
+              <Button 
+                onClick={createNewProject} 
+                className="gap-1.5"
+                disabled={loading}
+              >
+                <FolderPlus className="h-4 w-4" />
                 <span>New Project</span>
               </Button>
             </div>
           </div>
-
-          {/* Featured Card */}
-          {/* Temporarily hidden API Demo section
-          <Card className="mb-6 bg-gradient-to-r from-blue-500/10 to-purple-500/10 backdrop-blur-sm border border-blue-500/20">
-            <CardContent className="flex flex-col sm:flex-row items-center justify-between p-6">
-              <div className="mb-4 sm:mb-0">
-                <h3 className="text-xl font-semibold mb-2">API Playground</h3>
-                <p className="text-sm text-gray-500 max-w-md">
-                  Explore our AI content generation capabilities directly. Try text-to-image, text-to-speech, and more.
-                </p>
-              </div>
-              <Button 
-                onClick={navigateToApiDemo} 
-                variant="default" 
-                className="min-w-[120px]"
-              >
-                Try Now
-              </Button>
-            </CardContent>
-          </Card>
-          */}
 
           {/* Project Grid */}
           {loading ? (
@@ -238,57 +309,150 @@ export default function WorkspaceProjects() {
                 <ProjectCardSkeleton key={`skeleton-${index}`} />
               ))}
             </div>
-          ) : filteredProjects.length === 0 ? (
+          ) : hasFetched && filteredProjects.length === 0 ? (
             <div className="text-center py-12">
               <FolderPlus className="mx-auto h-12 w-12 text-gray-400" />
-              <h3 className="mt-4 text-lg font-medium">No projects found</h3>
-              <p className="mt-1 text-gray-500">Get started by creating a new project.</p>
-              <Button onClick={handleNewProject} className="mt-4">Create Project</Button>
+              <h3 className="mt-4 text-lg font-medium">
+                {projects.length === 0 ? "No projects yet" : "No projects found"}
+              </h3>
+              <p className="mt-1 text-gray-500">
+                {projects.length === 0 
+                  ? "Get started by creating your first project." 
+                  : "Try adjusting your search or filter criteria."
+                }
+              </p>
+              {projects.length === 0 && (
+                <Button onClick={createNewProject} className="mt-4 gap-1.5">
+                  <FolderPlus className="h-4 w-4" />
+                  <span>Create Your First Project</span>
+                </Button>
+              )}
             </div>
-          ) : (
+          ) : hasFetched ? (
             <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
-                {filteredProjects.map((project) => (
-                  <Card key={project.id} className="overflow-hidden group">
-                    <div className="relative aspect-video bg-gray-100 overflow-hidden">
-                      {/* Placeholder for thumbnail */}
+              {filteredProjects.map((project: Project) => (
+                <Card 
+                  key={project.id} 
+                  className="overflow-hidden group cursor-pointer" 
+                  onClick={() => navigateToProject(project.id)}
+                >
+                  <div className="relative aspect-video bg-gray-100 overflow-hidden">
+                    {project.thumbnail_url ? (
+                      <img 
+                        src={project.thumbnail_url} 
+                        alt={project.name}
+                        className="w-full h-full object-cover"
+                      />
+                    ) : (
                       <div className="absolute inset-0 bg-gradient-to-br from-blue-500/20 to-purple-500/20 flex items-center justify-center">
-                        <div className="text-xl font-bold text-white/70">{project.name.substring(0, 2).toUpperCase()}</div>
+                        <div className="text-xl font-bold text-white/70">
+                          {project.name.substring(0, 2).toUpperCase()}
+                        </div>
                       </div>
-                      {/* Hover overlay with actions */}
-                      <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
-                        <Button size="sm" variant="secondary" onClick={() => navigateToProject(project.id)}>
-                          Edit
-                        </Button>
-                      </div>
+                    )}
+                    {/* Hover overlay with actions */}
+                    <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex items-center justify-center gap-2">
+                      <Button 
+                        size="sm" 
+                        variant="secondary" 
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          navigateToProject(project.id);
+                        }}
+                      >
+                        Open
+                      </Button>
+                    </div>
+                  </div>
+                  
+                  <div className="p-4">
+                    <div className="flex justify-between items-start mb-2">
+                      <h3 className="font-medium truncate mr-2">{project.name}</h3>
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="h-8 w-8"
+                            onClick={(e) => e.stopPropagation()}
+                            disabled={deletingProjects.has(project.id)}
+                          >
+                            {deletingProjects.has(project.id) ? (
+                              <div className="w-4 h-4 border-2 border-gray-400 border-t-gray-600 rounded-full animate-spin" />
+                            ) : (
+                              <MoreHorizontal className="h-4 w-4" />
+                            )}
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          <DropdownMenuItem onClick={(e) => {
+                            e.stopPropagation();
+                            navigateToProject(project.id);
+                          }}>
+                            Open Project
+                          </DropdownMenuItem>
+                          <DropdownMenuItem 
+                            className="text-red-500"
+                            onClick={(e) => handleDeleteProject(project, e)}
+                            disabled={deletingProjects.has(project.id)}
+                          >
+                            {deletingProjects.has(project.id) ? 'Deleting...' : 'Delete'}
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                     
-                    <div className="p-4">
-                      <div className="flex justify-between items-start mb-2">
-                        <h3 className="font-medium truncate mr-2">{project.name}</h3>
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button variant="ghost" size="icon" className="h-8 w-8">
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end">
-                            <DropdownMenuItem>Duplicate</DropdownMenuItem>
-                            <DropdownMenuItem>Rename</DropdownMenuItem>
-                            <DropdownMenuItem className="text-red-500">Delete</DropdownMenuItem>
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
+                    {project.description && (
                       <p className="text-sm text-gray-500 mb-3 truncate">{project.description}</p>
-                      <div className="flex items-center justify-between">
-                        <div className="flex items-center text-xs text-gray-500">
-                          <Clock className="h-3 w-3 mr-1" />
-                          {project.lastEdited}
-                        </div>
-                        {getStatusBadge(project.status)}
+                    )}
+                    
+                    {/* Asset summary */}
+                    {project.asset_summary && (
+                      <div className="flex items-center gap-3 mb-3 text-xs text-gray-500">
+                        {project.asset_summary.total_videos > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('video')}
+                            <span>{project.asset_summary.total_videos}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_audio > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('audio')}
+                            <span>{project.asset_summary.total_audio}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_images > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('image')}
+                            <span>{project.asset_summary.total_images}</span>
+                          </div>
+                        )}
+                        {project.asset_summary.total_lipsync_videos > 0 && (
+                          <div className="flex items-center gap-1">
+                            {getAssetIcon('lipsync_video')}
+                            <span>{project.asset_summary.total_lipsync_videos}</span>
+                          </div>
+                        )}
                       </div>
+                    )}
+                    
+                    <div className="flex items-center justify-between">
+                      <div className="flex items-center text-xs text-gray-500">
+                        <Clock className="h-3 w-3 mr-1" />
+                        {formatDate(project.last_activity_at)}
+                      </div>
+                      {getStatusBadge(project.status)}
                     </div>
-                  </Card>
-                ))}
+                  </div>
+                </Card>
+              ))}
+            </div>
+          ) : (
+            // Still loading projects for this workspace - show skeleton
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-6">
+              {Array(3).fill(0).map((_, index) => (
+                <ProjectCardSkeleton key={`skeleton-loading-${index}`} />
+              ))}
             </div>
           )}
         </>

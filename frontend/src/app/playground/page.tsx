@@ -5,7 +5,7 @@ import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Clock, Filter, FolderPlus, Search, MoreHorizontal, PlusCircle } from "lucide-react";
-import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useWorkspaces, type Workspace } from "@/hooks/useWorkspace";
 import { 
   DropdownMenu,
   DropdownMenuContent,
@@ -61,13 +61,6 @@ const projectsData = [
   },
 ];
 
-// Define the Workspace type
-interface Workspace {
-  id: string;
-  name: string;
-  type?: string;
-}
-
 // Skeleton loader component for workspace cards
 function WorkspaceSkeleton() {
   return (
@@ -91,8 +84,7 @@ function WorkspaceSkeleton() {
 }
 
 // Component to handle payment redirects and search params
-function PaymentHandler() {
-  const { refetchWorkspaces } = useWorkspaces();
+function PaymentHandler({ refetchWorkspaces }: { refetchWorkspaces: () => void }) {
   const searchParams = useSearchParams();
   const router = useRouter();
   const hasHandledRedirect = useRef(false);
@@ -148,12 +140,21 @@ function PaymentHandler() {
   return null; // This component doesn't render anything
 }
 
-function PlaygroundOverviewContent() {
-  const { workspaces, loading, error } = useWorkspaces();
+function PlaygroundOverviewContent({ 
+  workspaces, 
+  loading, 
+  error,
+  hasFetched
+}: { 
+  workspaces: Workspace[], 
+  loading: boolean, 
+  error: string | null,
+  hasFetched: boolean
+}) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter workspaces based on search query
-  const filteredWorkspaces = searchQuery && workspaces
+  const filteredWorkspaces = searchQuery 
     ? workspaces.filter((workspace: Workspace) => 
         workspace.name.toLowerCase().includes(searchQuery.toLowerCase())
       )
@@ -184,10 +185,11 @@ function PlaygroundOverviewContent() {
             className="pl-9 pr-4"
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
+            disabled={loading}
           />
         </div>
         <div className="flex gap-2">
-          <Button size="sm" className="gap-1" onClick={handleNewWorkspace}>
+          <Button size="sm" className="gap-1" onClick={handleNewWorkspace} disabled={loading || !hasFetched}>
             <PlusCircle className="h-4 w-4" />
             <span>New Workspace</span>
           </Button>
@@ -202,10 +204,33 @@ function PlaygroundOverviewContent() {
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         {loading ? (
+          // Show skeleton cards while loading
           Array(6).fill(0).map((_, index) => (
             <WorkspaceSkeleton key={`skeleton-${index}`} />
           ))
-        ) : filteredWorkspaces && filteredWorkspaces.length > 0 ? (
+        ) : hasFetched && filteredWorkspaces.length === 0 ? (
+          // Only show "No workspaces found" after workspaces have been fetched
+          <div className="col-span-3 bg-gray-50 rounded-lg p-8 text-center">
+            <div className="mb-4">
+              <FolderPlus className="h-12 w-12 text-gray-300 mx-auto" />
+            </div>
+            <h3 className="text-lg font-medium text-gray-700">
+              {workspaces.length === 0 ? "No workspaces yet" : "No workspaces found"}
+            </h3>
+            <p className="text-sm text-gray-500 mt-1">
+              {workspaces.length === 0 
+                ? "Create your first workspace to get started." 
+                : "Try adjusting your search criteria."
+              }
+            </p>
+            {workspaces.length === 0 && (
+              <Button className="mt-4" onClick={handleNewWorkspace}>
+                Create Workspace
+              </Button>
+            )}
+          </div>
+        ) : hasFetched ? (
+          // Show workspaces after they have been fetched
           filteredWorkspaces.map((workspace: Workspace) => (
             <Card key={workspace.id} className="overflow-hidden border border-gray-200 hover:border-gray-300 hover:shadow-md transition-all cursor-pointer">
               <CardContent className="p-0">
@@ -242,16 +267,10 @@ function PlaygroundOverviewContent() {
             </Card>
           ))
         ) : (
-          <div className="col-span-3 bg-gray-50 rounded-lg p-8 text-center">
-            <div className="mb-4">
-              <FolderPlus className="h-12 w-12 text-gray-300 mx-auto" />
-            </div>
-            <h3 className="text-lg font-medium text-gray-700">No workspaces found</h3>
-            <p className="text-sm text-gray-500 mt-1">Create your first workspace to get started.</p>
-            <Button className="mt-4" onClick={handleNewWorkspace}>
-              Create Workspace
-            </Button>
-          </div>
+          // Still loading workspaces - show skeleton
+          Array(3).fill(0).map((_, index) => (
+            <WorkspaceSkeleton key={`skeleton-loading-${index}`} />
+          ))
         )}
       </div>
     </PlaygroundLayout>
@@ -259,10 +278,18 @@ function PlaygroundOverviewContent() {
 }
 
 export default function PlaygroundOverview() {
+  // Single useWorkspaces call for the entire page
+  const { workspaces, loading, error, refetchWorkspaces, hasFetched } = useWorkspaces();
+
   return (
     <Suspense fallback={<div>Loading...</div>}>
-      <PaymentHandler />
-      <PlaygroundOverviewContent />
+      <PaymentHandler refetchWorkspaces={refetchWorkspaces} />
+      <PlaygroundOverviewContent 
+        workspaces={workspaces} 
+        loading={loading} 
+        error={error} 
+        hasFetched={hasFetched}
+      />
     </Suspense>
   );
 }

@@ -1,6 +1,8 @@
 """
-Project endpoints for the AI Growth Operator API v1.
-These endpoints handle project management within workspaces.
+Workspace projects endpoints.
+
+Handles project management within workspaces including CRUD operations,
+asset management, and project statistics.
 """
 
 from typing import Optional
@@ -17,45 +19,45 @@ from app.api.v1.schemas import (
     ProjectStatsResponse,
 )
 from app.services.project_service import project_service
+from app.services.workspace_service import WorkspaceService
 from app.db.database import get_db
+from app.core.security import get_current_user
+from app.models import User
 
 router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
+def _check_workspace_access(db: Session, user_id: str, workspace_id: str):
+    """Helper function to check workspace access."""
+    if not WorkspaceService.user_has_access(db, user_id, workspace_id):
+        raise HTTPException(status_code=403, detail="Not authorized to access this workspace")
+
+
+# ============================================================================
+# PROJECT CRUD OPERATIONS
+# ============================================================================
+
 @router.post(
-    "/workspaces/{workspace_id}/projects",
+    "/{workspace_id}/projects",
     response_model=ProjectResponse,
+    tags=["Projects"],
     summary="Create a new project",
-    description="""
-    Create a new project within a workspace.
-    
-    Projects are used to organize video generation work, assets, and collaborate
-    within a workspace. Each project tracks its status, assets, and activity.
-    """
+    description="Create a new project within a workspace."
 )
 async def create_project(
     workspace_id: str = Path(..., description="Workspace ID to create project in"),
     request: ProjectCreateRequest = ...,
-    user_id: str = Query(..., description="ID of the user creating the project"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Create a new project in the specified workspace.
+    """Create a new project in the specified workspace."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: ID of the workspace
-        request: Project creation request
-        user_id: ID of the user creating the project
-        db: Database session
-        
-    Returns:
-        Created project information
-    """
     try:
         project = await project_service.create_project(
             workspace_id=workspace_id,
-            user_id=user_id,
+            user_id=current_user.id,
             request=request,
             db=db
         )
@@ -69,15 +71,11 @@ async def create_project(
 
 
 @router.get(
-    "/workspaces/{workspace_id}/projects",
+    "/{workspace_id}/projects",
     response_model=ProjectListResponse,
+    tags=["Projects"],
     summary="List projects in workspace",
-    description="""
-    Get a paginated list of projects in the workspace.
-    
-    Supports filtering by status and searching by name/description.
-    Projects are ordered by last activity (most recent first).
-    """
+    description="Get a paginated list of projects in the workspace."
 )
 async def list_projects(
     workspace_id: str = Path(..., description="Workspace ID to list projects from"),
@@ -86,23 +84,12 @@ async def list_projects(
     status: Optional[str] = Query(None, description="Filter by project status"),
     search: Optional[str] = Query(None, description="Search in project name and description"),
     include_assets: bool = Query(False, description="Include asset summaries for each project"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    List projects in a workspace with pagination and filtering.
+    """List projects in a workspace with pagination and filtering."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        page: Page number
-        per_page: Projects per page
-        status: Filter by status
-        search: Search query
-        include_assets: Include asset summaries
-        db: Database session
-        
-    Returns:
-        Paginated list of projects
-    """
     try:
         projects = await project_service.list_projects(
             workspace_id=workspace_id,
@@ -121,33 +108,22 @@ async def list_projects(
 
 
 @router.get(
-    "/workspaces/{workspace_id}/projects/{project_id}",
+    "/{workspace_id}/projects/{project_id}",
     response_model=ProjectResponse,
+    tags=["Projects"],
     summary="Get project details",
-    description="""
-    Get detailed information about a specific project.
-    
-    Optionally includes asset summary with counts and latest activity.
-    """
+    description="Get detailed information about a specific project."
 )
 async def get_project(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     include_assets: bool = Query(False, description="Include asset summary"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Get a project by ID.
+    """Get a project by ID."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        project_id: Project ID
-        include_assets: Include asset summary
-        db: Database session
-        
-    Returns:
-        Project information
-    """
     try:
         project = await project_service.get_project(
             project_id=project_id,
@@ -171,34 +147,23 @@ async def get_project(
         raise HTTPException(status_code=500, detail=f"Failed to get project: {str(e)}")
 
 
-@router.put(
-    "/workspaces/{workspace_id}/projects/{project_id}",
+@router.patch(
+    "/{workspace_id}/projects/{project_id}",
     response_model=ProjectResponse,
-    summary="Update project",
-    description="""
-    Update project information including name, description, status, and metadata.
-    
-    Updating a project automatically updates its last activity timestamp.
-    """
+    tags=["Projects"],
+    summary="Update project details",
+    description="Partially update project information including name, description, status, and metadata."
 )
-async def update_project(
+async def update_project_details(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     request: ProjectUpdateRequest = ...,
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Update a project.
+    """Update project details using PATCH semantics for partial updates."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        project_id: Project ID
-        request: Update request
-        db: Database session
-        
-    Returns:
-        Updated project information
-    """
     try:
         project = await project_service.update_project(
             project_id=project_id,
@@ -223,31 +188,20 @@ async def update_project(
 
 
 @router.delete(
-    "/workspaces/{workspace_id}/projects/{project_id}",
+    "/{workspace_id}/projects/{project_id}",
+    tags=["Projects"],
     summary="Delete project",
-    description="""
-    Delete a project from the workspace.
-    
-    Note: This does not delete associated assets by default.
-    Assets will become unlinked from the project but remain in the system.
-    """
+    description="Delete a project from the workspace."
 )
 async def delete_project(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Delete a project.
+    """Delete a project."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        project_id: Project ID
-        db: Database session
-        
-    Returns:
-        Success confirmation
-    """
     try:
         success = await project_service.delete_project(
             project_id=project_id,
@@ -270,38 +224,30 @@ async def delete_project(
         raise HTTPException(status_code=500, detail=f"Failed to delete project: {str(e)}")
 
 
+# ============================================================================
+# PROJECT ASSETS & ANALYTICS
+# ============================================================================
+
 @router.get(
-    "/workspaces/{workspace_id}/projects/{project_id}/assets",
+    "/{workspace_id}/projects/{project_id}/assets",
     response_model=ProjectAssetsResponse,
+    tags=["Projects"],
     summary="Get project assets",
-    description="""
-    Get all assets (videos, audio, images, lipsync videos) associated with a project.
-    
-    Assets are returned sorted by creation date (newest first).
-    Optionally filter by asset type.
-    """
+    description="Get all assets associated with a project."
 )
 async def get_project_assets(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     asset_type: Optional[str] = Query(
         None, 
-        description="Filter by asset type (video, audio, image, lipsync_video)"
+        description="Filter by asset type (video, audio, lipsync_video)"
     ),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Get all assets for a project.
+    """Get all assets for a project."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        project_id: Project ID
-        asset_type: Optional asset type filter
-        db: Database session
-        
-    Returns:
-        Project assets and summary
-    """
     try:
         assets = await project_service.get_project_assets(
             project_id=project_id,
@@ -319,30 +265,20 @@ async def get_project_assets(
 
 
 @router.get(
-    "/workspaces/{workspace_id}/projects/stats",
+    "/{workspace_id}/projects/stats",
     response_model=ProjectStatsResponse,
+    tags=["Projects"],
     summary="Get workspace project statistics",
-    description="""
-    Get statistics about all projects in the workspace.
-    
-    Includes project counts by status, total assets, recent activity,
-    and most active projects.
-    """
+    description="Get statistics about all projects in the workspace."
 )
 async def get_workspace_project_stats(
     workspace_id: str = Path(..., description="Workspace ID"),
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    current_user: User = Depends(get_current_user)
 ):
-    """
-    Get project statistics for a workspace.
+    """Get project statistics for a workspace."""
+    _check_workspace_access(db, current_user.id, workspace_id)
     
-    Args:
-        workspace_id: Workspace ID
-        db: Database session
-        
-    Returns:
-        Workspace project statistics
-    """
     try:
         stats = await project_service.get_workspace_stats(
             workspace_id=workspace_id,
@@ -352,5 +288,4 @@ async def get_workspace_project_stats(
         
     except Exception as e:
         logger.error(f"Error getting workspace stats for {workspace_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get workspace stats: {str(e)}")
-
+        raise HTTPException(status_code=500, detail=f"Failed to get workspace stats: {str(e)}") 

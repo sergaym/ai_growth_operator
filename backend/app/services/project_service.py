@@ -10,7 +10,7 @@ from sqlalchemy.orm import Session, joinedload
 from sqlalchemy import desc, func, and_, or_
 
 from app.db.database import get_db
-from app.models import Project, Workspace, User, Image, Video, Audio, LipsyncVideo
+from app.models import Project, Workspace, User, Video, Audio, LipsyncVideo
 from app.api.v1.schemas import (
     ProjectCreateRequest,
     ProjectUpdateRequest,
@@ -322,7 +322,7 @@ class ProjectService:
         Args:
             project_id: Project ID
             workspace_id: Workspace ID
-            asset_type: Filter by asset type (video, audio, image, lipsync_video)
+            asset_type: Filter by asset type (video, audio, lipsync_video)
             db: Database session
             
         Returns:
@@ -347,7 +347,6 @@ class ProjectService:
             
             # Collect all asset types
             asset_queries = [
-                (db.query(Image).filter(Image.project_id == project_id), "image"),
                 (db.query(Video).filter(Video.project_id == project_id), "video"),
                 (db.query(Audio).filter(Audio.project_id == project_id), "audio"),
                 (db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id), "lipsync_video"),
@@ -356,14 +355,18 @@ class ProjectService:
             for query, asset_type_name in asset_queries:
                 if asset_type is None or asset_type == asset_type_name:
                     for asset in query.all():
+                        # Enhanced URL prioritization logic for consistent blob storage URLs
+                        optimized_file_url = self._get_optimized_asset_url(asset, asset_type_name)
+                        optimized_thumbnail_url = self._get_optimized_thumbnail_url(asset, asset_type_name)
+                        
                         asset_response = ProjectAssetResponse(
                             id=asset.id,
                             type=asset_type_name,
                             status=asset.status,
                             created_at=asset.created_at,
                             updated_at=asset.updated_at,
-                            file_url=asset.file_url,
-                            thumbnail_url=getattr(asset, 'preview_image_url', None),
+                            file_url=optimized_file_url,
+                            thumbnail_url=optimized_thumbnail_url,
                             metadata=asset.metadata_json
                         )
                         assets.append(asset_response)
@@ -421,7 +424,6 @@ class ProjectService:
             
             total_assets = 0
             if project_ids:
-                total_assets += db.query(Image).filter(Image.project_id.in_(project_ids)).count()
                 total_assets += db.query(Video).filter(Video.project_id.in_(project_ids)).count()
                 total_assets += db.query(Audio).filter(Audio.project_id.in_(project_ids)).count()
                 total_assets += db.query(LipsyncVideo).filter(LipsyncVideo.project_id.in_(project_ids)).count()
@@ -480,6 +482,144 @@ class ProjectService:
         except Exception as e:
             self.logger.error(f"Error updating project activity {project_id}: {str(e)}")
     
+    def _get_optimized_asset_url(self, asset, asset_type: str) -> Optional[str]:
+        """
+        Get the optimized asset URL prioritizing blob storage over external URLs.
+        
+        Args:
+            asset: Database asset object
+            asset_type: Type of asset (video, audio, lipsync_video)
+            
+        Returns:
+            Optimized URL preferring blob storage
+        """
+        try:
+            # Priority 1: Use blob_url if available (our storage)
+            if hasattr(asset, 'blob_url') and asset.blob_url:
+                self.logger.debug(f"✅ Using blob_url for {asset_type} asset {asset.id}: {asset.blob_url}")
+                return asset.blob_url
+            
+            # Priority 2: Extract blob URL from metadata for different asset types
+            if asset.metadata_json:
+                metadata = asset.metadata_json
+                
+                # For lipsync videos
+                if asset_type == 'lipsync_video':
+                    # Check for video_url in metadata (should be blob storage)
+                    if metadata.get('video_url') and 'vercel-storage.com' in str(metadata.get('video_url')):
+                        self.logger.debug(f"✅ Using metadata.video_url (blob) for lipsync {asset.id}: {metadata['video_url']}")
+                        return metadata['video_url']
+                    
+                    # Check for blob_url in metadata
+                    elif metadata.get('blob_url'):
+                        self.logger.debug(f"✅ Using metadata.blob_url for lipsync {asset.id}: {metadata['blob_url']}")
+                        return metadata['blob_url']
+                
+                # For audio assets
+                elif asset_type == 'audio':
+                    # Check for audio_url in metadata (should be blob storage)
+                    if metadata.get('audio_url') and 'vercel-storage.com' in str(metadata.get('audio_url')):
+                        self.logger.debug(f"✅ Using metadata.audio_url (blob) for audio {asset.id}: {metadata['audio_url']}")
+                        return metadata['audio_url']
+                    
+                    # Check for blob_url in metadata
+                    elif metadata.get('blob_url'):
+                        self.logger.debug(f"✅ Using metadata.blob_url for audio {asset.id}: {metadata['blob_url']}")
+                        return metadata['blob_url']
+                
+                # For video assets
+                elif asset_type == 'video':
+                    # Check for video_url in metadata (should be blob storage)
+                    if metadata.get('video_url') and 'vercel-storage.com' in str(metadata.get('video_url')):
+                        self.logger.debug(f"✅ Using metadata.video_url (blob) for video {asset.id}: {metadata['video_url']}")
+                        return metadata['video_url']
+                    
+                    # Check for blob_url in metadata
+                    elif metadata.get('blob_url'):
+                        self.logger.debug(f"✅ Using metadata.blob_url for video {asset.id}: {metadata['blob_url']}")
+                        return metadata['blob_url']
+                
+                # Generic fallbacks for any asset type
+                # Check nested result structures
+                result = metadata.get('result', {})
+                if isinstance(result, dict):
+                    # Check result.video.url for lipsync/video assets
+                    if asset_type in ['video', 'lipsync_video'] and result.get('video', {}).get('url'):
+                        url = result['video']['url']
+                        # Only use external URLs as last resort
+                        if 'vercel-storage.com' in str(url):
+                            self.logger.debug(f"✅ Using result.video.url (blob) for {asset_type} {asset.id}: {url}")
+                            return url
+                    
+                    # Check result.audio_url for audio assets
+                    elif asset_type == 'audio' and result.get('audio_url'):
+                        url = result['audio_url']
+                        if 'vercel-storage.com' in str(url):
+                            self.logger.debug(f"✅ Using result.audio_url (blob) for audio {asset.id}: {url}")
+                            return url
+            
+            # Priority 3: Use file_url if it's a blob storage URL
+            if asset.file_url and 'vercel-storage.com' in str(asset.file_url):
+                self.logger.debug(f"✅ Using file_url (blob) for {asset_type} asset {asset.id}: {asset.file_url}")
+                return asset.file_url
+            
+            # Priority 4: Fallback to original file_url (external URL)
+            if asset.file_url:
+                self.logger.warning(f"⚠️ Using external file_url for {asset_type} asset {asset.id}: {asset.file_url}")
+                return asset.file_url
+            
+            # No URL found
+            self.logger.warning(f"❌ No URL found for {asset_type} asset {asset.id}")
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error optimizing URL for {asset_type} asset {asset.id}: {str(e)}")
+            # Fallback to original file_url
+            return getattr(asset, 'file_url', None)
+    
+    def _get_optimized_thumbnail_url(self, asset, asset_type: str) -> Optional[str]:
+        """
+        Get the optimized thumbnail URL prioritizing blob storage.
+        
+        Args:
+            asset: Database asset object
+            asset_type: Type of asset
+            
+        Returns:
+            Optimized thumbnail URL
+        """
+        try:
+            # Priority 1: Check for thumbnail_blob_url
+            if hasattr(asset, 'thumbnail_blob_url') and asset.thumbnail_blob_url:
+                return asset.thumbnail_blob_url
+            
+            # Priority 2: Check metadata for thumbnail URLs
+            if asset.metadata_json:
+                metadata = asset.metadata_json
+                
+                # Check for thumbnail_url in metadata
+                if metadata.get('thumbnail_url'):
+                    return metadata['thumbnail_url']
+                
+                # Check nested result for thumbnail
+                result = metadata.get('result', {})
+                if isinstance(result, dict) and result.get('thumbnail_url'):
+                    return result['thumbnail_url']
+            
+            # Priority 3: Use preview_image_url (legacy field)
+            if hasattr(asset, 'preview_image_url') and asset.preview_image_url:
+                return asset.preview_image_url
+            
+            # Priority 4: Use thumbnail_url field if exists
+            if hasattr(asset, 'thumbnail_url') and asset.thumbnail_url:
+                return asset.thumbnail_url
+            
+            return None
+            
+        except Exception as e:
+            self.logger.error(f"Error optimizing thumbnail URL for {asset_type} asset {asset.id}: {str(e)}")
+            return getattr(asset, 'preview_image_url', None)
+    
     async def _get_project_asset_summary(
         self,
         project_id: str,
@@ -497,18 +637,12 @@ class ProjectService:
         """
         try:
             # Count each asset type
-            total_images = db.query(Image).filter(Image.project_id == project_id).count()
             total_videos = db.query(Video).filter(Video.project_id == project_id).count()
             total_audio = db.query(Audio).filter(Audio.project_id == project_id).count()
             total_lipsync_videos = db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id).count()
             
             # Find latest asset creation time
             latest_times = []
-            
-            if total_images > 0:
-                latest_image = db.query(func.max(Image.created_at)).filter(Image.project_id == project_id).scalar()
-                if latest_image:
-                    latest_times.append(latest_image)
             
             if total_videos > 0:
                 latest_video = db.query(func.max(Video.created_at)).filter(Video.project_id == project_id).scalar()
@@ -530,7 +664,7 @@ class ProjectService:
             return ProjectAssetSummary(
                 total_videos=total_videos,
                 total_audio=total_audio,
-                total_images=total_images,
+                total_images=0,  # Projects should not have images
                 total_lipsync_videos=total_lipsync_videos,
                 latest_asset_created_at=latest_asset_created_at
             )

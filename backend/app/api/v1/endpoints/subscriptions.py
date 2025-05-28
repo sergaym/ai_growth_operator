@@ -58,7 +58,7 @@ class StripeCheckoutSessionResponse(BaseModel):
     customer_email: Optional[str] = None
 
 
-@router.get("/plans", response_model=List[SubscriptionPlanResponse], tags=["subscriptions"])
+@router.get("/plans", response_model=List[SubscriptionPlanResponse])
 async def get_subscription_plans(
     db: Session = Depends(get_db)
 ):
@@ -69,7 +69,7 @@ async def get_subscription_plans(
     return plans
 
 
-@router.get("/workspaces/{workspace_id}/subscription", response_model=SubscriptionResponse, tags=["subscriptions"])
+@router.get("/workspaces/{workspace_id}/subscription", response_model=SubscriptionResponse)
 async def get_workspace_subscription(
     workspace_id: str,
     db: Session = Depends(get_db),
@@ -94,7 +94,7 @@ async def get_workspace_subscription(
     return subscription
 
 
-@router.post("/workspaces/{workspace_id}/checkout", tags=["subscriptions"])
+@router.post("/workspaces/{workspace_id}/checkout")
 async def create_checkout_session(
     workspace_id: str,
     plan_id: int,
@@ -123,7 +123,7 @@ async def create_checkout_session(
         raise HTTPException(status_code=500, detail=f"Error creating checkout session: {str(e)}")
 
 
-@router.post("/workspaces/{workspace_id}/portal", tags=["subscriptions"])
+@router.post("/workspaces/{workspace_id}/portal")
 async def create_customer_portal_session(
     workspace_id: str,
     db: Session = Depends(get_db),
@@ -151,7 +151,7 @@ async def create_customer_portal_session(
         raise HTTPException(status_code=500, detail=f"Error creating portal session: {str(e)}")
 
 
-@router.get("/workspaces/{workspace_id}/invoices", response_model=List[InvoiceResponse], tags=["subscriptions"])
+@router.get("/workspaces/{workspace_id}/invoices", response_model=List[InvoiceResponse])
 async def get_workspace_invoices(
     workspace_id: str,
     db: Session = Depends(get_db),
@@ -208,7 +208,7 @@ async def get_workspace_invoices(
         raise HTTPException(status_code=500, detail=f"Error fetching invoices: {str(e)}")
 
 
-@router.get("/stripe/checkout-session/{session_id}", response_model=StripeCheckoutSessionResponse, tags=["stripe"])
+@router.get("/stripe/checkout-session/{session_id}", response_model=StripeCheckoutSessionResponse, tags=["Stripe"])
 async def get_stripe_checkout_session_status(session_id: str):
     """
     Retrieve the status and details of a Stripe Checkout Session.

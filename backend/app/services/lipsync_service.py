@@ -22,6 +22,9 @@ from app.core.config import settings
 # Import database components if needed for storage
 from app.db.blob_storage import upload_file, AssetType
 
+# Import database components
+from app.db import get_db, lipsync_repository
+
 # Configure logging
 logger = logging.getLogger(__name__)
 
@@ -109,7 +112,10 @@ class LipsyncService:
         video_path: Optional[str] = None,
         audio_url: Optional[str] = None,
         audio_path: Optional[str] = None,
-        save_result: bool = True
+        save_result: bool = True,
+        user_id: Optional[str] = None,
+        workspace_id: Optional[str] = None,
+        project_id: Optional[str] = None
     ) -> Dict[str, Any]:
         """
         Generate a lip-synced video from the provided video and audio sources.
@@ -120,6 +126,9 @@ class LipsyncService:
             audio_url: URL to the audio file
             audio_path: Path to local audio file
             save_result: Whether to save the result to disk
+            user_id: ID of the user
+            workspace_id: ID of the workspace
+            project_id: ID of the project
             
         Returns:
             Dictionary containing the lipsync results
@@ -266,6 +275,49 @@ class LipsyncService:
                             logger.info(f"Uploaded lipsync video to blob storage: {blob_url}")
                         except Exception as e:
                             logger.error(f"Error uploading to blob storage: {str(e)}")
+                
+                # Save to database for backward compatibility case too
+                try:
+                    # Prepare database data for lipsync video
+                    db_data = {
+                        "status": "completed",
+                        "metadata_json": {
+                            "video_url": uploaded_video_url,
+                            "audio_url": uploaded_audio_url,
+                            "result": result,
+                            "timestamp": timestamp,
+                            "request_id": request_id
+                        }
+                    }
+                    
+                    # Add file paths/URLs if available
+                    if response.get("local_path"):
+                        db_data["file_path"] = response["local_path"]
+                        db_data["local_url"] = f"file://{response['local_path']}"
+                    if response.get("video_url"):
+                        db_data["file_url"] = response["video_url"]
+                    if response.get("blob_url"):
+                        db_data["blob_url"] = response["blob_url"]
+                    
+                    # Add user, workspace, and project IDs if provided
+                    if user_id:
+                        db_data["user_id"] = user_id
+                    if workspace_id:
+                        db_data["workspace_id"] = workspace_id
+                    if project_id:
+                        db_data["project_id"] = project_id
+                    
+                    # Save to database
+                    db = next(get_db())
+                    db_lipsync = lipsync_repository.create(db_data, db)
+                    
+                    if db_lipsync:
+                        response["db_id"] = db_lipsync.id
+                        logger.info(f"Saved lipsync video to database with ID: {db_lipsync.id}")
+                        
+                except Exception as e:
+                    logger.error(f"Error saving lipsync video to database: {str(e)}")
+                    # Continue execution even if database save fails
             else:
                 # Log the full response structure for debugging
                 logger.error(f"No result URL found in response structure: {result}")
@@ -274,6 +326,49 @@ class LipsyncService:
             # Get duration if available
             if "duration" in result:
                 response["duration"] = result["duration"]
+            
+            # Save to database
+            try:
+                # Prepare database data for lipsync video
+                db_data = {
+                    "status": "completed",
+                    "metadata_json": {
+                        "video_url": uploaded_video_url,
+                        "audio_url": uploaded_audio_url,
+                        "result": result,
+                        "timestamp": timestamp,
+                        "request_id": request_id
+                    }
+                }
+                
+                # Add file paths/URLs if available
+                if response.get("local_path"):
+                    db_data["file_path"] = response["local_path"]
+                    db_data["local_url"] = f"file://{response['local_path']}"
+                if response.get("video_url"):
+                    db_data["file_url"] = response["video_url"]
+                if response.get("blob_url"):
+                    db_data["blob_url"] = response["blob_url"]
+                
+                # Add user, workspace, and project IDs if provided
+                if user_id:
+                    db_data["user_id"] = user_id
+                if workspace_id:
+                    db_data["workspace_id"] = workspace_id
+                if project_id:
+                    db_data["project_id"] = project_id
+                
+                # Save to database
+                db = next(get_db())
+                db_lipsync = lipsync_repository.create(db_data, db)
+                
+                if db_lipsync:
+                    response["db_id"] = db_lipsync.id
+                    logger.info(f"Saved lipsync video to database with ID: {db_lipsync.id}")
+                    
+            except Exception as e:
+                logger.error(f"Error saving lipsync video to database: {str(e)}")
+                # Continue execution even if database save fails
             
             # Clean up temporary files
             if temp_video_path and os.path.exists(temp_video_path):

@@ -7,7 +7,7 @@ import { useRouter, useSearchParams } from 'next/navigation';
 import { subscriptionService, SubscriptionPlan, Subscription } from '@/services/subscriptionService';
 import { useToast } from '@/components/ui/use-toast';
 import { useAuth } from '@/hooks/useAuth';
-import { useWorkspaces, Workspace } from '@/hooks/useWorkspace';
+import { useWorkspaceContext, type Workspace } from '@/contexts/WorkspaceContext';
 
 // Format price display with robust floating-point comparison
 const formatPrice = (price: number, currency: string) => {
@@ -66,8 +66,8 @@ function PricingPlansContent({
   const [subscriptionLoading, setSubscriptionLoading] = useState(true); // For current subscription
   const [plansLoading, setPlansLoading] = useState(true); // New state for plans loading
 
-  // Workspace management using useWorkspaces hook
-  const { workspaces: fetchedUserWorkspaces, loading: workspacesLoading, error: workspacesError } = useWorkspaces();
+  // Workspace management using useWorkspaceContext hook  
+  const { workspaces: fetchedUserWorkspaces, loading: workspacesLoading, error: workspacesError } = useWorkspaceContext();
   const [selectedWorkspaceId, setSelectedWorkspaceId] = useState<string | null>(null); // Changed to string | null
   const [userWorkspaces, setUserWorkspaces] = useState<Workspace[]>([]);
   const [isWorkspaceSelectionRequired, setIsWorkspaceSelectionRequired] = useState(false);

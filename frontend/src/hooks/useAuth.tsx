@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, createContext, useContext, ReactNode } from 'react';
 import { useRouter } from 'next/navigation';
 import { apiClient, refreshAccessToken as apiRefreshAccessToken } from '../services/apiClient';
 
@@ -38,11 +38,27 @@ interface AuthData {
   refresh_token: string;
 }
 
-export function useAuth() {
+interface AuthContextType {
+  user: AuthUser;
+  loading: boolean;
+  error: string | null;
+  login: (email: string, password: string, callbackUrl?: string) => Promise<boolean>;
+  logout: (redirectUrl?: string) => boolean;
+  getAccessToken: () => string | null;
+  refreshAccessToken: () => Promise<string | null>;
+  getUserProfile: (accessToken: string) => Promise<void>;
+}
+
+// Create the AuthContext
+const AuthContext = createContext<AuthContextType | undefined>(undefined);
+
+// AuthProvider component
+export function AuthProvider({ children }: { children: ReactNode }) {
   const router = useRouter();
   const [user, setUser] = useState<AuthUser>({ isAuthenticated: false, user: null });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [isInitialized, setIsInitialized] = useState(false);
 
   const getUserProfile = useCallback(async (accessToken: string): Promise<void> => {
     try {
@@ -64,11 +80,15 @@ export function useAuth() {
       });
     } catch (err) {
       console.error('Error fetching user profile:', err);
+      throw err;
     }
   }, []);
 
   // Check if the user is authenticated on mount (client side only)
   useEffect(() => {
+    // Prevent multiple initialization calls
+    if (isInitialized) return;
+
     const checkAuth = async () => {
       try {
         // First check if we have an access token
@@ -76,6 +96,7 @@ export function useAuth() {
         if (!accessToken) {
           setUser({ isAuthenticated: false, user: null });
           setLoading(false);
+          setIsInitialized(true);
           return;
         }
 
@@ -83,6 +104,7 @@ export function useAuth() {
         try {
           await getUserProfile(accessToken);
           setLoading(false);
+          setIsInitialized(true);
         } catch (err) {
           console.log('Token validation failed, trying to refresh');
           // If token is invalid, try to refresh it
@@ -90,16 +112,19 @@ export function useAuth() {
           if (!newToken) {
             setUser({ isAuthenticated: false, user: null });
             setLoading(false);
+            setIsInitialized(true);
             return;
           }
           // Try to get profile with the new token
           await getUserProfile(newToken);
           setLoading(false);
+          setIsInitialized(true);
         }
       } catch (err) {
         console.error('Auth check error:', err);
         setUser({ isAuthenticated: false, user: null });
         setLoading(false);
+        setIsInitialized(true);
       }
     };
 
@@ -109,8 +134,9 @@ export function useAuth() {
     } else {
       // In SSR, just set loading to false
       setLoading(false);
+      setIsInitialized(true);
     }
-  }, [getUserProfile]);
+  }, [getUserProfile, isInitialized]);
 
   // Login function
   const login = useCallback(async (email: string, password: string, callbackUrl?: string) => {
@@ -257,7 +283,7 @@ export function useAuth() {
     }
   };
 
-  return {
+  const value: AuthContextType = {
     user,
     loading,
     error,
@@ -267,4 +293,19 @@ export function useAuth() {
     refreshAccessToken,
     getUserProfile
   };
+
+  return (
+    <AuthContext.Provider value={value}>
+      {children}
+    </AuthContext.Provider>
+  );
+}
+
+// Hook to use the AuthContext
+export function useAuth() {
+  const context = useContext(AuthContext);
+  if (context === undefined) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
 }

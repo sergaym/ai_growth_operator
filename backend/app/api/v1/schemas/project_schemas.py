@@ -4,7 +4,7 @@ Defines request/response models for project management within workspaces.
 """
 
 from typing import Optional, Dict, Any, List
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, field_validator
 from enum import Enum
 from datetime import datetime
 
@@ -35,12 +35,12 @@ class ProjectUpdateRequest(BaseModel):
 
 
 class ProjectAssetSummary(BaseModel):
-    """Summary of assets within a project."""
+    """Summary of assets in a project."""
     total_videos: int = Field(0, description="Total number of videos")
     total_audio: int = Field(0, description="Total number of audio files")
     total_images: int = Field(0, description="Total number of images")
     total_lipsync_videos: int = Field(0, description="Total number of lipsync videos")
-    latest_asset_created_at: Optional[datetime] = Field(None, description="When the most recent asset was created")
+    latest_asset_created_at: Optional[datetime] = Field(None, description="When the latest asset was created")
 
 
 class ProjectResponse(BaseModel):
@@ -61,11 +61,12 @@ class ProjectResponse(BaseModel):
     # Asset summary (optional, only included when requested)
     asset_summary: Optional[ProjectAssetSummary] = Field(None, description="Summary of project assets")
     
-    # Additional metadata
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional project metadata")
+    # Additional metadata - mapped from metadata_json
+    metadata: Optional[Dict[str, Any]] = Field(None, alias="metadata_json", description="Additional project metadata")
 
     class Config:
         from_attributes = True
+        populate_by_name = True  # Allow both field name and alias
 
 
 class ProjectListResponse(BaseModel):
@@ -78,22 +79,22 @@ class ProjectListResponse(BaseModel):
 
 
 class ProjectAssetResponse(BaseModel):
-    """Response model for project assets."""
+    """Response model for a project asset."""
     id: str = Field(..., description="Asset unique identifier")
     type: str = Field(..., description="Asset type (video, audio, image, lipsync_video)")
     status: str = Field(..., description="Asset status")
     created_at: datetime = Field(..., description="When the asset was created")
     updated_at: datetime = Field(..., description="When the asset was last updated")
-    file_url: Optional[str] = Field(None, description="Asset file URL")
-    thumbnail_url: Optional[str] = Field(None, description="Asset thumbnail URL")
-    metadata: Optional[Dict[str, Any]] = Field(None, description="Asset metadata")
+    file_url: Optional[str] = Field(None, description="URL to the asset file")
+    thumbnail_url: Optional[str] = Field(None, description="URL to the asset thumbnail")
+    metadata: Optional[Dict[str, Any]] = Field(None, description="Additional asset metadata")
 
 
 class ProjectAssetsResponse(BaseModel):
-    """Response model for project assets list."""
+    """Response model for project assets."""
     assets: List[ProjectAssetResponse] = Field(..., description="List of project assets")
     total: int = Field(..., description="Total number of assets")
-    asset_summary: ProjectAssetSummary = Field(..., description="Summary of asset types")
+    asset_summary: ProjectAssetSummary = Field(..., description="Summary of assets by type")
 
 
 class ProjectStatsResponse(BaseModel):

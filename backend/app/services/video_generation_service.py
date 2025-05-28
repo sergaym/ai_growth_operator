@@ -207,7 +207,8 @@ class VideoGenerationWorkflowService:
             save_to_file=True,
             upload_to_blob=True,
             user_id=tts_request["user_id"],
-            workspace_id=tts_request["workspace_id"]
+            workspace_id=tts_request["workspace_id"],
+            project_id=request.project_id
         )
         
         if result.get("status") == "error":
@@ -220,7 +221,10 @@ class VideoGenerationWorkflowService:
         result = await lipsync_service.lipsync(
             video_url=request.actor_video_url,
             audio_url=audio_url,
-            save_result=request.save_result or True
+            save_result=request.save_result or True,
+            user_id=request.user_id,
+            workspace_id=request.workspace_id,
+            project_id=request.project_id
         )
         
         if result.get("status") == "error":
