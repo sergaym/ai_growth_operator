@@ -140,8 +140,17 @@ function PaymentHandler({ refetchWorkspaces }: { refetchWorkspaces: () => void }
   return null; // This component doesn't render anything
 }
 
-function PlaygroundOverviewContent() {
-  const { workspaces, loading, error } = useWorkspaces();
+function PlaygroundOverviewContent({ 
+  workspaces, 
+  loading, 
+  error,
+  hasFetched
+}: { 
+  workspaces: Workspace[], 
+  loading: boolean, 
+  error: string | null,
+  hasFetched: boolean
+}) {
   const [searchQuery, setSearchQuery] = useState("");
 
   // Filter workspaces based on search query
