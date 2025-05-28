@@ -77,3 +77,65 @@ const statusConfig = {
     dotColor: "bg-gray-500"
   }
 };
+
+export function ProjectUpdateSheet({ 
+  project, 
+  open, 
+  onOpenChange, 
+  onUpdate, 
+  isUpdating = false 
+}: ProjectUpdateSheetProps) {
+  const { toast } = useToast();
+  
+  // Form state
+  const [formData, setFormData] = useState<ProjectUpdateRequest>({
+    name: "",
+    description: "",
+    status: ProjectStatus.DRAFT,
+    thumbnail_url: "",
+  });
+
+  // Loading state
+  const [isSaving, setIsSaving] = useState(false);
+
+  // Resize state
+  const [width, setWidth] = useState(540); // Default width
+  const [isResizing, setIsResizing] = useState(false);
+  const sheetRef = useRef<HTMLDivElement>(null);
+
+  // Sync form data with project when project changes
+  useEffect(() => {
+    if (project) {
+      setFormData({
+        name: project.name || "",
+        description: project.description || "",
+        status: project.status || ProjectStatus.DRAFT,
+        thumbnail_url: project.thumbnail_url || "",
+      });
+    }
+  }, [project]);
+
+  // Handle resize
+  const handleMouseDown = useCallback((e: React.MouseEvent) => {
+    setIsResizing(true);
+    e.preventDefault();
+  }, []);
+
+  const handleMouseMove = useCallback((e: MouseEvent) => {
+    if (!isResizing || !sheetRef.current) return;
+    
+    const rect = sheetRef.current.getBoundingClientRect();
+    const newWidth = window.innerWidth - e.clientX;
+    
+    // Constrain width between 320px and 80% of window width
+    const minWidth = 320;
+    const maxWidth = window.innerWidth * 0.8;
+    const constrainedWidth = Math.max(minWidth, Math.min(maxWidth, newWidth));
+    
+    setWidth(constrainedWidth);
+  }, [isResizing]);
+
+  const handleMouseUp = useCallback(() => {
+    setIsResizing(false);
+  }, []);
+
