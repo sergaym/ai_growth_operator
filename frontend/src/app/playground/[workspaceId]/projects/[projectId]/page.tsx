@@ -280,7 +280,7 @@ export default function ProjectPage() {
         </DropdownMenuItem>
         <DropdownMenuItem 
           className="text-red-500"
-          onClick={handleDeleteProject}
+          onClick={openDeleteDialog}
         >
           Delete Project
         </DropdownMenuItem>
@@ -288,11 +288,12 @@ export default function ProjectPage() {
     </DropdownMenu>
   );
 
-  if (loading || projectsLoading || isCreatingProject) {
+  // Loading state
+  if (isLoading) {
     return (
       <PlaygroundLayout
-        title={isCreatingProject ? "Creating Project..." : "Loading..."}
-        currentWorkspace={workspace}
+        title="Loading..."
+        currentWorkspace={currentWorkspace}
         showBackButton={true}
         onBack={handleBackToWorkspace}
         isProject={true}
@@ -307,59 +308,82 @@ export default function ProjectPage() {
     );
   }
 
-  if (!project) {
+  // Error state - project not found
+  if (!projectWithAssets.project) {
     return (
       <PlaygroundLayout
-        title="Project Creation Failed"
-        currentWorkspace={workspace}
-        error="Failed to create or load project. Please try again."
+        title="Project Not Found"
+        currentWorkspace={currentWorkspace}
+        error="The project you're looking for doesn't exist or you don't have access to it."
         showBackButton={true}
         onBack={handleBackToWorkspace}
         isProject={true}
       >
         <div className="text-center py-12">
-          <p className="text-muted-foreground mb-4">Unable to create or load the project.</p>
+          <p className="text-muted-foreground mb-4">
+            Unable to find the requested project.
+          </p>
+          <Button onClick={handleBackToWorkspace} className="gap-2">
+            <ArrowLeft className="h-4 w-4" />
+            Return to Projects
+          </Button>
         </div>
       </PlaygroundLayout>
     );
   }
 
+  // Success state - render project
   return (
-    <PlaygroundLayout
-      title={project.name}
-      description={project.description}
-      currentWorkspace={workspace}
-      error={projectsError}
-      showBackButton={true}
-      onBack={handleBackToWorkspace}
-      status={project.status}
-      headerActions={<ProjectActions />}
-      isProject={true}
-      projectName={project.name}
-    >
-      <div className="space-y-6">
-        {/* Video Preview */}
-        <VideoPreview
-          videoUrl={result?.video_url}
-          isGenerating={isGenerating}
-          progress={progress}
-          currentStep={currentStep ?? undefined}
-          error={error ?? undefined}
-          processingTime={result?.processing_time}
-          onCancel={cancel}
-          onReset={reset}
-          onRetry={reset}
-          showGettingStarted={!result && !error && !isGenerating}
-        />
+    <>
+      <PlaygroundLayout
+        title={projectWithAssets.project.name}
+        description={projectWithAssets.project.description}
+        currentWorkspace={currentWorkspace}
+        error={error}
+        showBackButton={true}
+        onBack={handleBackToWorkspace}
+        status={projectWithAssets.project.status}
+        headerActions={<ProjectActions />}
+        isProject={true}
+        projectName={projectWithAssets.project.name}
+      >
+        <div className="space-y-6">
+          {/* Video Preview */}
+          <VideoPreview
+            videoUrl={result?.video_url}
+            isGenerating={isGenerating}
+            progress={progress}
+            currentStep={currentStep ?? undefined}
+            error={videoError ?? undefined}
+            processingTime={result?.processing_time}
+            onCancel={cancel}
+            onReset={reset}
+            onRetry={reset}
+            showGettingStarted={!result && !videoError && !isGenerating}
+          />
 
-        {/* Enhanced Chat Input */}
-        <GestureChat 
-          projectId={stringProjectId} 
-          onGenerateVideo={handleGenerateVideo}
-          isGenerating={isGenerating}
-          showTips={true}
-        />
-      </div>
-    </PlaygroundLayout>
+          {/* Enhanced Chat Input */}
+          <GestureChat 
+            projectId={projectId} 
+            onGenerateVideo={handleGenerateVideo}
+            isGenerating={isGenerating}
+            showTips={true}
+          />
+        </div>
+      </PlaygroundLayout>
+
+      {/* Professional Delete Dialog */}
+      <DeleteDialog
+        open={deleteDialog.open}
+        onOpenChange={(open) => !open && closeDeleteDialog()}
+        onConfirm={handleDeleteProject}
+        title="Delete Project"
+        description="This project and all its content will be permanently deleted. This action cannot be undone."
+        itemName={projectWithAssets.project?.name || ""}
+        itemType="project"
+        destructiveAction="Delete Project"
+        isLoading={deleteDialog.isDeleting}
+      />
+    </>
   );
 }
