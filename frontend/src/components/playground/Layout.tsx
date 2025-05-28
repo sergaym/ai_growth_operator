@@ -93,9 +93,9 @@ export default function PlaygroundLayout({
       <SidebarInset className="bg-background">
         <Toaster richColors position="top-right" />
         
-        <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
+        <header className="flex h-12 lg:h-14 items-center gap-3 border-b bg-background px-4">
           <SidebarTrigger />
-          <Separator orientation="vertical" className="h-6" />
+          <Separator orientation="vertical" className="h-4" />
           <Breadcrumb>
             <BreadcrumbList>
               <BreadcrumbItem>
@@ -113,63 +113,68 @@ export default function PlaygroundLayout({
                 </>
               )}
               
-              {isProject && (
+              {isProject && projectName && (
                 <>
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
-                    <BreadcrumbPage>Projects</BreadcrumbPage>
+                    <BreadcrumbPage>{projectName}</BreadcrumbPage>
                   </BreadcrumbItem>
                 </>
               )}
               
-              <BreadcrumbSeparator />
-              <BreadcrumbItem>
-                <BreadcrumbPage>{isProject ? (projectName || title) : title}</BreadcrumbPage>
-              </BreadcrumbItem>
+              {!isProject && (
+                <>
+                  <BreadcrumbSeparator />
+                  <BreadcrumbItem>
+                    <BreadcrumbPage>{title}</BreadcrumbPage>
+                  </BreadcrumbItem>
+                </>
+              )}
             </BreadcrumbList>
           </Breadcrumb>
         </header>
 
         <div className="flex-1 overflow-auto">
-          <div className="container max-w-5xl mx-auto p-6">
+          <div className="container max-w-5xl mx-auto p-4">
             {error && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
+              <div className="mb-4 p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
                 <p className="font-medium text-sm">Error: {error}</p>
               </div>
             )}
             
-            <div className="space-y-6">
+            <div className="space-y-4">
               {/* Enhanced Header Section */}
-              <div className="space-y-4">
-                {/* Back button and title row */}
+              <div className="space-y-2">
+                {/* Notion-style back button above title */}
+                {showBackButton && (
+                  <div className="mb-1">
+                    <Button 
+                      variant="ghost" 
+                      size="sm" 
+                      onClick={handleBack}
+                      className="gap-1 h-7 px-2 text-gray-500 hover:text-gray-900 hover:bg-gray-100 transition-colors -ml-1"
+                    >
+                      <ArrowLeft className="h-3 w-3" />
+                      <span className="text-xs font-medium">{currentWorkspace?.name || 'Back'}</span>
+                    </Button>
+                  </div>
+                )}
+                
+                {/* Title and actions row */}
                 <div className="flex items-start justify-between">
-                  <div className="flex items-start gap-4 min-w-0 flex-1">
-                    {showBackButton && (
-                      <Button 
-                        variant="ghost" 
-                        size="sm" 
-                        onClick={handleBack}
-                        className="gap-2 shrink-0 mt-1"
-                      >
-                        <ArrowLeft className="h-4 w-4" />
-                        Back
-                      </Button>
+                  <div className="min-w-0 flex-1">
+                    <div className="flex items-center gap-3 mb-1 flex-wrap">
+                      <h1 className="text-2xl font-semibold tracking-tight text-gray-900">{title}</h1>
+                      {status && getStatusBadge(status)}
+                    </div>
+                    
+                    {subtitle && (
+                      <p className="text-muted-foreground text-sm mb-1">{subtitle}</p>
                     )}
                     
-                    <div className="min-w-0 flex-1">
-                      <div className="flex items-center gap-3 mb-2 flex-wrap">
-                <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
-                        {status && getStatusBadge(status)}
-                      </div>
-                      
-                      {subtitle && (
-                        <p className="text-muted-foreground text-sm mb-2">{subtitle}</p>
-                      )}
-                      
-                {description && (
-                        <p className="text-muted-foreground">{description}</p>
-                )}
-                    </div>
+                    {description && (
+                      <p className="text-muted-foreground">{description}</p>
+                    )}
                   </div>
                   
                   {headerActions && (
@@ -180,9 +185,7 @@ export default function PlaygroundLayout({
                 </div>
               </div>
               
-              <div className="space-y-8">
-                {children}
-              </div>
+              <div className="space-y-6">{children}</div>
             </div>
           </div>
         </div>
