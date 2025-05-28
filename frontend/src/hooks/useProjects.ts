@@ -11,6 +11,7 @@ export {
   type ProjectAsset,
   type ProjectAssetsResponse,
   type ProjectStats,
+  ProjectStatus,
   useProjectsContext as useProjects,
 } from '@/contexts/ProjectsContext';
 
