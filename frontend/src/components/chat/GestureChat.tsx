@@ -352,14 +352,12 @@ export function GestureChat({
                 </Select>
               )}
 
-              {/* Examples Button */}
-              <button
-                onClick={() => setShowExamples(!showExamples)}
-                className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors border border-slate-200"
-              >
-                <Sparkles className="h-4 w-4" />
-                Examples
-              </button>
+              {messageType === 'talking' && (
+                <div className="flex items-center gap-1.5 text-sm text-slate-600 px-3 py-1.5 bg-slate-100 rounded-md">
+                  <Volume2 className="h-4 w-4" />
+                  Text to Speech
+                </div>
+              )}
             </div>
 
             {/* Example Prompts */}
@@ -419,12 +417,14 @@ export function GestureChat({
           {/* Bottom Actions */}
           <div className="flex items-center justify-between px-3 py-3 border-t border-slate-100 bg-slate-50/50">
             <div className="flex items-center gap-2">
-              {messageType === 'talking' && (
-                <div className="flex items-center gap-1.5 text-sm text-slate-600 px-3 py-1.5 bg-slate-100 rounded-md">
-                  <Volume2 className="h-4 w-4" />
-                  Text to Speech
-                </div>
-              )}
+              {/* Examples Button */}
+              <button
+                onClick={() => setShowExamples(!showExamples)}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm text-slate-600 hover:text-slate-800 bg-slate-50 hover:bg-slate-100 rounded-md transition-colors border border-slate-200"
+              >
+                <Sparkles className="h-4 w-4" />
+                Examples
+              </button>
             </div>
 
             {/* Character count for long inputs */}
