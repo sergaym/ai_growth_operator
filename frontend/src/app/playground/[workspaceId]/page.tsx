@@ -5,16 +5,28 @@ import { Card, CardContent } from "@/components/ui/card";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Clock, Filter, FolderPlus, Search, MoreHorizontal, Video, Music, Image, FileVideo } from "lucide-react";
 import { 
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
+  DropdownMenu, 
+  DropdownMenuContent, 
+  DropdownMenuItem, 
+  DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { useWorkspaces } from '@/hooks/useWorkspace';
-import { useProjects, type Project } from '@/hooks/useProjects';
 import { useToast } from "@/components/ui/use-toast";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { 
+  Search, 
+  Filter, 
+  FolderPlus, 
+  MoreHorizontal, 
+  Video, 
+  Music, 
+  Image, 
+  FileVideo,
+  Clock,
+} from "lucide-react";
+
+import { useWorkspaces } from "@/hooks/useWorkspace";
+import { useWorkspaceProjects, type Project } from "@/hooks/useProjects";
 
 // Project card skeleton component
 function ProjectCardSkeleton() {

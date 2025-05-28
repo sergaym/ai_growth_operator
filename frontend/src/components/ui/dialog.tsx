@@ -19,9 +19,14 @@ function DialogTrigger({
 }
 
 function DialogPortal({
+  children,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
-  return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
+  return (
+    <DialogPrimitive.Portal data-slot="dialog-portal" {...props}>
+      {children}
+    </DialogPrimitive.Portal>
+  );
 }
 
 function DialogClose({
@@ -39,6 +44,7 @@ function DialogOverlay({
       data-slot="dialog-overlay"
       className={cn(
         "data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 fixed inset-0 z-50 bg-black/50",
+        "data-[state=closed]:pointer-events-none",
         className
       )}
       {...props}
