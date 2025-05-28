@@ -390,12 +390,164 @@ export function useWorkspaceStats(workspaceId?: string) {
     stats,
     loading,
     error,
-    getWorkspaceStats: () => workspaceId ? getWorkspaceStats(workspaceId) : Promise.resolve(null),
+    getWorkspaceStats: fetchStats,
+  };
+}
+
+/**
+ * Hook for monitoring asset loading performance and providing debugging insights
+ * 
+ * @example
+ * ```tsx
+ * const { performanceMetrics, isSlowLoading } = useAssetPerformance(projectId);
+ * 
+ * if (isSlowLoading) {
+ *   console.warn('Slow asset loading detected:', performanceMetrics);
+ * }
+ * ```
+ */
+export function useAssetPerformance(projectId?: string) {
+  const { isProjectAssetsLoading, getCachedAssets } = useProjectsContext();
+  const [metrics, setMetrics] = useState<{
+    loadStartTime?: number;
+    loadEndTime?: number;
+    cacheHits: number;
+    cacheMisses: number;
+    totalRequests: number;
+  }>({
+    cacheHits: 0,
+    cacheMisses: 0,
+    totalRequests: 0
+  });
+
+  const isLoading = useMemo(() => {
+    return projectId ? isProjectAssetsLoading(projectId) : false;
+  }, [isProjectAssetsLoading, projectId]);
+
+  const isSlowLoading = useMemo(() => {
+    if (!metrics.loadStartTime || !isLoading) return false;
+    return Date.now() - metrics.loadStartTime > 3000; // 3 seconds threshold
+  }, [metrics.loadStartTime, isLoading]);
+
+  // Track cache performance
+  useEffect(() => {
+    if (!projectId) return;
+
+    const cached = getCachedAssets(projectId);
+    setMetrics(prev => ({
+      ...prev,
+      totalRequests: prev.totalRequests + 1,
+      cacheHits: cached ? prev.cacheHits + 1 : prev.cacheHits,
+      cacheMisses: cached ? prev.cacheMisses : prev.cacheMisses + 1
+    }));
+  }, [projectId, getCachedAssets]);
+
+  // Track loading times
+  useEffect(() => {
+    if (isLoading && !metrics.loadStartTime) {
+      setMetrics(prev => ({ ...prev, loadStartTime: Date.now() }));
+    } else if (!isLoading && metrics.loadStartTime && !metrics.loadEndTime) {
+      setMetrics(prev => ({ 
+        ...prev, 
+        loadEndTime: Date.now(),
+        loadStartTime: undefined 
+      }));
+    }
+  }, [isLoading, metrics.loadStartTime, metrics.loadEndTime]);
+
+  const performanceMetrics = useMemo(() => ({
+    loadingDuration: metrics.loadStartTime && metrics.loadEndTime ? 
+      metrics.loadEndTime - metrics.loadStartTime : null,
+    cacheHitRate: metrics.totalRequests > 0 ? 
+      (metrics.cacheHits / metrics.totalRequests) * 100 : 0,
+    ...metrics
+  }), [metrics]);
+
+  return {
+    performanceMetrics,
+    isSlowLoading,
+    isLoading
+  };
+}
+
+/**
+ * Advanced hook for bulk asset operations across multiple projects
+ * 
+ * @example
+ * ```tsx
+ * const { 
+ *   bulkRefreshAssets, 
+ *   bulkInvalidateCache, 
+ *   getBulkAssetSummary 
+ * } = useBulkAssetOperations(workspaceId);
+ * 
+ * // Refresh assets for multiple projects
+ * await bulkRefreshAssets([projectId1, projectId2]);
+ * ```
+ */
+export function useBulkAssetOperations(workspaceId?: string) {
+  const { 
+    projectsByWorkspace, 
+    refreshProjectAssets, 
+    invalidateAssetsCache,
+    assetsByProject 
+  } = useProjectsContext();
+
+  const projects = useMemo(() => {
+    return workspaceId ? (projectsByWorkspace[workspaceId] || []) : [];
+  }, [projectsByWorkspace, workspaceId]);
+
+  const bulkRefreshAssets = useCallback(async (projectIds?: string[]) => {
+    if (!workspaceId) return [];
+
+    const targetProjects = projectIds || projects.map(p => p.id);
+    const results = await Promise.allSettled(
+      targetProjects.map(projectId => refreshProjectAssets(workspaceId, projectId))
+    );
+
+    const successful = results
+      .map((result, index) => ({ result, projectId: targetProjects[index] }))
+      .filter(({ result }) => result.status === 'fulfilled')
+      .map(({ projectId }) => projectId);
+
+    console.log(`Bulk refresh completed: ${successful.length}/${targetProjects.length} successful`);
+    return successful;
+  }, [workspaceId, projects, refreshProjectAssets]);
+
+  const bulkInvalidateCache = useCallback((projectIds?: string[]) => {
+    const targetProjects = projectIds || projects.map(p => p.id);
+    targetProjects.forEach(projectId => invalidateAssetsCache(projectId));
+    console.log(`Invalidated cache for ${targetProjects.length} projects`);
+  }, [projects, invalidateAssetsCache]);
+
+  const getBulkAssetSummary = useCallback(() => {
+    return projects.reduce((summary, project) => {
+      const assets = assetsByProject[project.id];
+      if (assets?.asset_summary) {
+        summary.total_videos += assets.asset_summary.total_videos;
+        summary.total_audio += assets.asset_summary.total_audio;
+        summary.total_lipsync_videos += assets.asset_summary.total_lipsync_videos;
+        summary.total_images += assets.asset_summary.total_images;
+      }
+      return summary;
+    }, {
+      total_videos: 0,
+      total_audio: 0,
+      total_lipsync_videos: 0,
+      total_images: 0
+    });
+  }, [projects, assetsByProject]);
+
+  return {
+    bulkRefreshAssets,
+    bulkInvalidateCache,
+    getBulkAssetSummary
   };
 }
 
 // Legacy hook for backward compatibility - deprecated, use useWorkspaceProjects instead
 export function useProjectsLegacy(workspaceId?: string, autoFetch: boolean = false) {
+  
   const {
     projectsByWorkspace,
     loading,
