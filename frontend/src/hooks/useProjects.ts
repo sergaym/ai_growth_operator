@@ -96,6 +96,78 @@ export function useProjectDetails(workspaceId?: string, projectId?: string) {
   };
 }
 
+// For components that need workspace-level project statistics
+export function useWorkspaceStats(workspaceId?: string) {
+  const { 
+    statsByWorkspace, 
+    getWorkspaceStats, 
+    loading, 
+    error 
+  } = useProjectsContext();
+
+  const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
+
+  return {
+    stats,
+    loading,
+    error,
+    getWorkspaceStats: () => workspaceId ? getWorkspaceStats(workspaceId) : Promise.resolve(null),
+  };
+}
+
+// Legacy hook for backward compatibility - deprecated, use useWorkspaceProjects instead
+export function useProjectsLegacy(workspaceId?: string, autoFetch: boolean = false) {
+  const {
+    projectsByWorkspace,
+    loading,
+    error,
+    fetchProjects,
+    createProject: contextCreateProject,
+    getProject,
+    updateProject: contextUpdateProject,
+    deleteProject: contextDeleteProject,
+    getProjectAssets,
+    getWorkspaceStats,
+    statsByWorkspace,
+    clearError,
+  } = useProjectsContext();
+
+  // Auto-fetch projects for this workspace if requested
+  React.useEffect(() => {
+    if (autoFetch && workspaceId) {
+      fetchProjects(workspaceId);
+    }
+  }, [autoFetch, workspaceId, fetchProjects]);
+
+  // Get projects for the current workspace
+  const projects = workspaceId ? (projectsByWorkspace[workspaceId] || []) : [];
+  const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
+
+  // Wrapper functions that include workspaceId
+  const createProject = async (request: any) => {
+    if (!workspaceId) return null;
+    return contextCreateProject(workspaceId, request);
+  };
+
+  const updateProject = async (projectId: string, request: any) => {
+    if (!workspaceId) return null;
+    return contextUpdateProject(workspaceId, projectId, request);
+  };
+
+  const deleteProject = async (projectId: string) => {
+    if (!workspaceId) return false;
+    return contextDeleteProject(workspaceId, projectId);
+  };
+
+  const listProjects = () => {
+    if (!workspaceId) return Promise.resolve(null);
+    return fetchProjects(workspaceId);
+  };
+
+  const refreshProjects = () => {
+    if (!workspaceId) return Promise.resolve([]);
+    return fetchProjects(workspaceId);
+  };
 
   return {
     // State
