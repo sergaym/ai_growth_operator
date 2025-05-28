@@ -223,18 +223,45 @@ export default function ProjectPage() {
     }
   };
 
+  // Navigation handlers
   const handleBackToWorkspace = () => {
-    router.push(`/playground/${stringWorkspaceId}`);
+    router.push(`/playground/${workspaceId}`);
+  };
+
+  // Delete handlers
+  const openDeleteDialog = () => {
+    setDeleteDialog({ open: true, isDeleting: false });
+  };
+
+  const closeDeleteDialog = () => {
+    setDeleteDialog({ open: false, isDeleting: false });
   };
 
   const handleDeleteProject = async () => {
-    if (!project) return;
+    if (!projectWithAssets.project) return;
     
-    if (confirm(`Are you sure you want to delete "${project.name}"? This action cannot be undone.`)) {
-      const success = await deleteProject(project.id);
+    setDeleteDialog(prev => ({ ...prev, isDeleting: true }));
+
+    try {
+      const success = await deleteProject(projectWithAssets.project.id);
       if (success) {
-        router.push(`/playground/${stringWorkspaceId}`);
+        toast({
+          title: "Project Deleted",
+          description: `"${projectWithAssets.project.name}" has been deleted successfully.`,
+        });
+        router.push(`/playground/${workspaceId}`);
+      } else {
+        throw new Error('Delete operation failed');
       }
+    } catch (error) {
+      console.error('Error deleting project:', error);
+      toast({
+        title: "Delete Failed",
+        description: "Failed to delete project. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setDeleteDialog(prev => ({ ...prev, isDeleting: false }));
     }
   };
 
