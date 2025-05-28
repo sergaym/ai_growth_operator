@@ -147,21 +147,21 @@ async def get_project(
         raise HTTPException(status_code=500, detail=f"Failed to get project: {str(e)}")
 
 
-@router.put(
+@router.patch(
     "/{workspace_id}/projects/{project_id}",
     response_model=ProjectResponse,
     tags=["Projects"],
-    summary="Update project",
-    description="Update project information including name, description, status, and metadata."
+    summary="Update project details",
+    description="Partially update project information including name, description, status, and metadata."
 )
-async def update_project(
+async def update_project_details(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     request: ProjectUpdateRequest = ...,
     db: Session = Depends(get_db),
     current_user: User = Depends(get_current_user)
 ):
-    """Update a project."""
+    """Update project details using PATCH semantics for partial updates."""
     _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
