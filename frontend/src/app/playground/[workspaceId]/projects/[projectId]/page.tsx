@@ -1,18 +1,21 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { useParams, useRouter } from "next/navigation";
-import { useWorkspaces } from "@/hooks/useWorkspace";
-import { useProjects, type Project } from "@/hooks/useProjects";
+import { useWorkspaces } from '@/hooks/useWorkspace';
+import { useWorkspaceProjects, useProjectDetails, type Project } from '@/hooks/useProjects';
 import { useVideoGeneration } from "@/hooks/useVideoGeneration";
 import { useAuth } from "@/hooks/useAuth";
 import PlaygroundLayout from "@/components/playground/Layout";
 import { VideoPreview } from "@/components/chat/VideoPreview";
 import { GestureChat } from "@/components/chat/GestureChat";
 import { Button } from "@/components/ui/button";
+import { DeleteDialog } from "@/components/ui/delete-dialog";
+import { useToast } from "@/components/ui/use-toast";
 import { 
   Settings,
-  MoreHorizontal 
+  MoreHorizontal,
+  ArrowLeft
 } from "lucide-react";
 import {
   DropdownMenu,
