@@ -172,20 +172,33 @@ export default function ProjectPage() {
     progress, 
     currentStep, 
     result, 
-    error, 
+    error: videoError, 
     cancel, 
     reset 
   } = useVideoGeneration();
 
-  // Handle video generation request from GestureChat
-  const handleGenerateVideo = async (text: string, actorId: string, actorVideoUrl: string, language: string) => {
+  // Enhanced video generation handler
+  const handleGenerateVideo = async (
+    text: string, 
+    actorId: string, 
+    actorVideoUrl: string, 
+    language: string
+  ) => {
     if (!user?.isAuthenticated || !user?.user) {
-      alert('Please log in to generate videos');
+      toast({
+        title: "Authentication Required",
+        description: "Please log in to generate videos.",
+        variant: "destructive",
+      });
       return;
     }
 
     if (!actorId || !actorVideoUrl) {
-      alert('Please select a valid actor');
+      toast({
+        title: "Invalid Actor",
+        description: "Please select a valid actor.",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -196,12 +209,17 @@ export default function ProjectPage() {
         actor_video_url: actorVideoUrl,
         language: language,
         voice_preset: 'professional_male',
-        project_id: stringProjectId,
+        project_id: projectId,
         user_id: String(user.user.id),
-        workspace_id: stringWorkspaceId,
+        workspace_id: workspaceId,
       });
     } catch (error) {
       console.error('Failed to start video generation:', error);
+      toast({
+        title: "Generation Failed",
+        description: "Failed to start video generation. Please try again.",
+        variant: "destructive",
+      });
     }
   };
 
