@@ -75,12 +75,48 @@ export function useWorkspaceProjects(workspaceId?: string): UseWorkspaceProjects
     }
   }, [workspaceId, fetchProjects, loading]);
 
-  // Get projects for the current workspace
-  const projects = workspaceId ? (projectsByWorkspace[workspaceId] || []) : [];
-  const stats = workspaceId ? statsByWorkspace[workspaceId] : null;
-  const hasFetchedWorkspace = workspaceId ? fetchedWorkspaces.has(workspaceId) : false;
+  // Memoize computed values for performance
+  const projects = useMemo(() => {
+    return workspaceId ? (projectsByWorkspace[workspaceId] || []) : [];
+  }, [projectsByWorkspace, workspaceId]);
 
-  return {
+  const stats = useMemo(() => {
+    return workspaceId ? statsByWorkspace[workspaceId] || null : null;
+  }, [statsByWorkspace, workspaceId]);
+
+  const hasFetchedWorkspace = useMemo(() => {
+    return workspaceId ? fetchedWorkspaces.has(workspaceId) : false;
+  }, [fetchedWorkspaces, workspaceId]);
+
+  // Memoize functions to prevent re-renders
+  const memoizedFetchProjects = useCallback(() => {
+    return workspaceId ? fetchProjects(workspaceId) : Promise.resolve([]);
+  }, [workspaceId, fetchProjects]);
+
+  const memoizedRefreshProjects = useCallback(() => {
+    return workspaceId ? refreshProjects(workspaceId) : Promise.resolve([]);
+  }, [workspaceId, refreshProjects]);
+
+  const memoizedCreateProject = useCallback((request: ProjectCreateRequest) => {
+    return workspaceId ? createProject(workspaceId, request) : Promise.resolve(null);
+  }, [workspaceId, createProject]);
+
+  const memoizedDeleteProject = useCallback((projectId: string) => {
+    return workspaceId ? deleteProject(workspaceId, projectId) : Promise.resolve(false);
+  }, [workspaceId, deleteProject]);
+
+  return useMemo(() => ({
+    projects,
+    stats,
+    loading,
+    error,
+    hasFetchedWorkspace,
+    fetchProjects: memoizedFetchProjects,
+    refreshProjects: memoizedRefreshProjects,
+    createProject: memoizedCreateProject,
+    deleteProject: memoizedDeleteProject,
+    clearError,
+  }), [
     projects,
     stats,
     loading,
