@@ -119,3 +119,29 @@ export function WorkspaceProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated]);
 
+  // Get specific workspace details
+  const getWorkspaceDetails = useCallback(async (workspaceId: string): Promise<WorkspaceWithSubscription | null> => {
+    if (!workspaceId || !user.isAuthenticated) {
+      return null;
+    }
+
+    try {
+      setWorkspaceLoading(true);
+      setWorkspaceError(null);
+
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}`;
+      const data = await apiClient<WorkspaceWithSubscription>(url);
+      
+      setCurrentWorkspace(data);
+      return data;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace details';
+      setWorkspaceError(errorMessage);
+      console.error('Error fetching workspace details:', err);
+      return null;
+    } finally {
+      setWorkspaceLoading(false);
+    }
+  }, [user.isAuthenticated]);
+
+  // Update workspace name
