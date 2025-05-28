@@ -48,22 +48,28 @@ export default function ProjectPage() {
     getProject, 
     getProjectAssets, 
     updateProject,
-    deleteProject,
-    createProject,
-    loading: projectsLoading,
-    error: projectsError 
-  } = useProjects(stringWorkspaceId);
-  
-  const [project, setProject] = useState<Project | null>(null);
-  const [assets, setAssets] = useState<any>(null);
-  const [loading, setLoading] = useState(true);
-  const [isCreatingProject, setIsCreatingProject] = useState(false);
+    loading: projectDetailsLoading,
+    error: projectDetailsError 
+  } = useProjectDetails(workspaceId, projectId);
 
-  const currentWorkspace = workspaces.find(ws => ws.id === stringWorkspaceId);
+  // Delete dialog state
+  const [deleteDialog, setDeleteDialog] = useState({
+    open: false,
+    isDeleting: false,
+  });
 
-  const workspace = currentWorkspace 
-    ? { id: currentWorkspace.id, name: currentWorkspace.name }
-    : { id: stringWorkspaceId, name: "Workspace" };
+  // Project state management
+  const [projectWithAssets, setProjectWithAssets] = useState<{
+    project: Project | null;
+    assets: any;
+    loading: boolean;
+    initialized: boolean;
+  }>({
+    project: null,
+    assets: null,
+    loading: true,
+    initialized: false
+  });
 
   // Generate a unique project name based on timestamp
   const generateProjectName = () => {
