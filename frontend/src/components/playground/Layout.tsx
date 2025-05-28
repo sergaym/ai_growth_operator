@@ -17,7 +17,6 @@ import {
 import { Button } from "@/components/ui/button"
 import { Badge } from "@/components/ui/badge"
 import { ArrowLeft } from "lucide-react"
-import { useWorkspaces } from '@/hooks/useWorkspace';
 import { useParams, useRouter } from 'next/navigation';
 import { Toaster } from 'sonner';
 
@@ -43,10 +42,11 @@ interface PlaygroundLayoutProps {
 
 export default function PlaygroundLayout({ 
   title, 
-  description,
+  description, 
   subtitle,
   error, 
   children,
+  currentWorkspace,
   showBackButton = false,
   backUrl,
   onBack,
@@ -58,8 +58,6 @@ export default function PlaygroundLayout({
   const params = useParams();
   const router = useRouter();
   const currentWorkspaceId = params.workspaceId as string | null;
-  const { workspaces, loading: workspaceLoading, error: workspaceError } = useWorkspaces();
-  const currentWorkspace = workspaces.find(ws => ws.id == currentWorkspaceId);
 
   const handleBack = () => {
     if (onBack) {
@@ -93,12 +91,6 @@ export default function PlaygroundLayout({
       <AppSidebar className="hidden lg:flex" />
       <SidebarInset className="bg-background">
         <Toaster richColors position="top-right" />
-        {/* Subtle top loading bar - visible only during loading */}
-        {workspaceLoading && (
-          <div className="fixed top-0 left-0 w-full h-0.5 z-50">
-            <div className="h-full bg-gradient-to-r from-blue-500 via-purple-500 to-blue-500 animate-shimmer"></div>
-          </div>
-        )}
         
         <header className="flex h-14 lg:h-[60px] items-center gap-4 border-b bg-background px-6">
           <SidebarTrigger />
@@ -114,11 +106,7 @@ export default function PlaygroundLayout({
                   <BreadcrumbSeparator />
                   <BreadcrumbItem>
                     <BreadcrumbLink href={`/playground/${currentWorkspaceId}`}>
-                      {workspaceLoading ? (
-                        <span className="w-24 h-5 bg-gray-200 rounded animate-pulse inline-block" />
-                      ) : (
-                        currentWorkspace?.name || 'Workspace'
-                      )}
+                      {currentWorkspace?.name || 'Loading...'}
                     </BreadcrumbLink>
                   </BreadcrumbItem>
                 </>
@@ -143,13 +131,6 @@ export default function PlaygroundLayout({
 
         <div className="flex-1 overflow-auto">
           <div className="container max-w-5xl mx-auto p-6">
-            {workspaceError && (
-              <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
-                <p className="font-medium text-sm">Error: {workspaceError}</p>
-                <p className="text-sm mt-1">Please select a valid workspace from the sidebar.</p>
-              </div>
-            )}
-            
             {error && (
               <div className="mb-6 p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive">
                 <p className="font-medium text-sm">Error: {error}</p>
@@ -176,7 +157,7 @@ export default function PlaygroundLayout({
                     
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-3 mb-2 flex-wrap">
-                        <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
+                <h1 className="text-3xl font-semibold tracking-tight">{title}</h1>
                         {status && getStatusBadge(status)}
                       </div>
                       
@@ -184,9 +165,9 @@ export default function PlaygroundLayout({
                         <p className="text-muted-foreground text-sm mb-2">{subtitle}</p>
                       )}
                       
-                      {description && (
+                {description && (
                         <p className="text-muted-foreground">{description}</p>
-                      )}
+                )}
                     </div>
                   </div>
                   
