@@ -35,121 +35,26 @@ export default function ProjectPage() {
   const { user } = useAuth();
   const { workspaces, loading: workspacesLoading } = useWorkspaces();
   
-  // Get workspace projects (this will auto-fetch and cache projects)
+  // Get project details with auto-fetch
   const { 
-    projects, 
-    loading: projectsLoading, 
-    error: projectsError,
-    deleteProject 
-  } = useWorkspaceProjects(workspaceId);
-
-  // Get project-specific utilities for detailed operations
-  const { 
-    getProject, 
-    getProjectAssets, 
+    project,
+    loading: projectLoading, 
+    error: projectError,
+    assets,
+    hasFetched,
+    refreshProject,
     updateProject,
-    loading: projectDetailsLoading,
-    error: projectDetailsError 
+    clearError
   } = useProjectDetails(workspaceId, projectId);
+
+  // Get workspace projects for delete functionality
+  const { deleteProject } = useWorkspaceProjects(workspaceId);
 
   // Delete dialog state
   const [deleteDialog, setDeleteDialog] = useState({
     open: false,
     isDeleting: false,
   });
-
-  // Project state management
-  const [projectWithAssets, setProjectWithAssets] = useState<{
-    project: Project | null;
-    assets: any;
-    loading: boolean;
-    initialized: boolean;
-  }>({
-    project: null,
-    assets: null,
-    loading: true,
-    initialized: false
-  });
-
-  // Get cached project from workspace projects
-  const cachedProject = useMemo(() => {
-    return projects.find(p => p.id === projectId) || null;
-  }, [projects, projectId]);
-
-  // Determine if we should fetch detailed project data
-  const shouldFetchDetails = useMemo(() => {
-    // If we have a cached project, we don't need to fetch details initially
-    if (cachedProject) return false;
-    
-    // If projects are still loading, wait
-    if (projectsLoading) return false;
-    
-    // If projects loaded but no cached project found, try detailed fetch
-    return true;
-  }, [cachedProject, projectsLoading]);
-
-  // Initialize project state when cached project is available
-  useEffect(() => {
-    if (cachedProject && !projectWithAssets.initialized) {
-      setProjectWithAssets({
-        project: cachedProject,
-        assets: null,
-        loading: false,
-        initialized: true
-      });
-    }
-  }, [cachedProject, projectWithAssets.initialized]);
-
-  // Fetch detailed project data when needed
-  useEffect(() => {
-    if (!workspaceId || !projectId || !shouldFetchDetails || projectWithAssets.initialized) {
-      return;
-    }
-
-    const fetchProjectDetails = async () => {
-      setProjectWithAssets(prev => ({ ...prev, loading: true }));
-      
-      try {
-        const [projectData, assetsData] = await Promise.all([
-          getProject(true), // Include assets in project fetch
-          getProjectAssets()
-        ]);
-
-        if (projectData) {
-          setProjectWithAssets({
-            project: projectData,
-            assets: assetsData,
-            loading: false,
-            initialized: true
-          });
-        } else {
-          // Project doesn't exist
-          setProjectWithAssets({
-            project: null,
-            assets: null,
-            loading: false,
-            initialized: true
-          });
-        }
-      } catch (error) {
-        console.error('Error fetching project details:', error);
-        setProjectWithAssets({
-          project: null,
-          assets: null,
-          loading: false,
-          initialized: true
-        });
-        
-        toast({
-          title: "Error",
-          description: "Failed to load project details. Please try again.",
-          variant: "destructive",
-        });
-      }
-    };
-
-    fetchProjectDetails();
-  }, [workspaceId, projectId, shouldFetchDetails, projectWithAssets.initialized, getProject, getProjectAssets, toast]);
 
   // Workspace resolution
   const currentWorkspace = useMemo(() => {
@@ -159,11 +64,9 @@ export default function ProjectPage() {
       : { id: workspaceId, name: "Workspace" };
   }, [workspaces, workspaceId]);
 
-  // Consolidated loading state
-  const isLoading = workspacesLoading || projectsLoading || projectWithAssets.loading;
-  
-  // Consolidated error state
-  const error = projectsError || projectDetailsError;
+  // Consolidated loading and error states
+  const isLoading = workspacesLoading || projectLoading || !hasFetched;
+  const error = projectError;
 
   // Video generation state
   const { 
