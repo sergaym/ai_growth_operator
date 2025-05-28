@@ -271,10 +271,11 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
 
     // Don't fetch if already loading or already fetched
-    if (loading || fetchedWorkspaces.has(workspaceId)) {
+    if (loadingStates.fetching[workspaceId] || fetchedWorkspaces.has(workspaceId)) {
       return projectsByWorkspace[workspaceId] || [];
     }
 
+    updateLoadingState('fetching', workspaceId, true);
     setLoading(true);
     setError(null);
     
@@ -293,14 +294,14 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       
       return projects;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch projects';
-      setError(errorMessage);
-      console.error('Error fetching projects:', err);
+      const error = handleApiError(err, `fetching projects for workspace ${workspaceId}`);
+      setError(error);
       return [];
     } finally {
       setLoading(false);
+      updateLoadingState('fetching', workspaceId, false);
     }
-  }, [user.isAuthenticated, loading, fetchedWorkspaces, projectsByWorkspace]);
+  }, [user.isAuthenticated, loadingStates.fetching, fetchedWorkspaces, projectsByWorkspace, updateLoadingState, handleApiError]);
 
   // Refresh projects for a workspace (force refetch)
   const refreshProjects = useCallback(async (workspaceId: string): Promise<Project[]> => {
@@ -325,7 +326,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
       return null;
     }
 
-    setLoading(true);
+    updateLoadingState('creating', workspaceId, true);
     setError(null);
 
     try {
@@ -343,18 +344,25 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
 
       return project;
     } catch (err) {
-      const errorMessage = err instanceof Error ? err.message : 'Failed to create project';
-      setError(errorMessage);
-      console.error('Error creating project:', err);
+      const error = handleApiError(err, `creating project in workspace ${workspaceId}`);
+      setError(error);
+      console.error('Error creating project:', error);
       return null;
     } finally {
-      setLoading(false);
+      updateLoadingState('creating', workspaceId, false);
     }
-  }, [user.isAuthenticated]);
+  }, [user.isAuthenticated, updateLoadingState, handleApiError]);
 
   // Get a specific project
   const getProject = useCallback(async (workspaceId: string, projectId: string, includeAssets?: boolean): Promise<Project | null> => {
+    // Wait for authentication to be fully initialized before checking
+    if (loading || (!user.isAuthenticated && !user.user)) {
+      console.log('getProject: Waiting for auth initialization...', { loading, isAuthenticated: user.isAuthenticated, hasUser: !!user.user });
+      return null;
+    }
+    
     if (!user.isAuthenticated || !workspaceId || !projectId) {
+      console.log('getProject: Authentication or params missing', { isAuthenticated: user.isAuthenticated, workspaceId, projectId });
       return null;
     }
 
