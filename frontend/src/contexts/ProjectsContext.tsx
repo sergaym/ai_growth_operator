@@ -282,3 +282,62 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     }
   }, [user.isAuthenticated]);
 
+  // Get workspace stats
+  const getWorkspaceStats = useCallback(async (workspaceId: string): Promise<ProjectStats | null> => {
+    if (!user.isAuthenticated || !workspaceId) {
+      return null;
+    }
+
+    try {
+      const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/stats`;
+      const stats = await apiClient<ProjectStats>(url);
+      
+      setStatsByWorkspace(prev => ({
+        ...prev,
+        [workspaceId]: stats
+      }));
+      
+      return stats;
+    } catch (err) {
+      const errorMessage = err instanceof Error ? err.message : 'Failed to fetch workspace stats';
+      setError(errorMessage);
+      console.error('Error fetching workspace stats:', err);
+      return null;
+    }
+  }, [user.isAuthenticated]);
+
+  const clearError = useCallback(() => {
+    setError(null);
+  }, []);
+
+  const value: ProjectsContextType = {
+    projectsByWorkspace,
+    statsByWorkspace,
+    fetchedWorkspaces,
+    loading,
+    error,
+    fetchProjects,
+    refreshProjects,
+    createProject,
+    getProject,
+    updateProject,
+    deleteProject,
+    getProjectAssets,
+    getWorkspaceStats,
+    clearError,
+  };
+
+  return (
+    <ProjectsContext.Provider value={value}>
+      {children}
+    </ProjectsContext.Provider>
+  );
+}
+
+export function useProjectsContext() {
+  const context = useContext(ProjectsContext);
+  if (context === undefined) {
+    throw new Error('useProjectsContext must be used within a ProjectsProvider');
+  }
+  return context;
+} 
