@@ -291,7 +291,7 @@ export function ProjectsProvider({ children }: { children: ReactNode }) {
     try {
       const url = `${process.env.NEXT_PUBLIC_API_URL}/api/v1/workspaces/${workspaceId}/projects/${projectId}`;
       const updatedProject = await apiClient<Project>(url, {
-        method: 'PUT',
+        method: 'PATCH',
         body: JSON.stringify(request),
       });
 
