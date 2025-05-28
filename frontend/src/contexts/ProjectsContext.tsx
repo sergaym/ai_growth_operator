@@ -61,3 +61,26 @@ export interface ProjectStats {
   completed_projects: number;
   total_assets: number;
 }
+
+interface ProjectsContextType {
+  // State
+  projectsByWorkspace: { [workspaceId: string]: Project[] };
+  statsByWorkspace: { [workspaceId: string]: ProjectStats };
+  fetchedWorkspaces: Set<string>;
+  loading: boolean;
+  error: string | null;
+  
+  // Actions
+  fetchProjects: (workspaceId: string) => Promise<Project[]>;
+  refreshProjects: (workspaceId: string) => Promise<Project[]>;
+  createProject: (workspaceId: string, request: ProjectCreateRequest) => Promise<Project | null>;
+  getProject: (workspaceId: string, projectId: string, includeAssets?: boolean) => Promise<Project | null>;
+  updateProject: (workspaceId: string, projectId: string, request: ProjectUpdateRequest) => Promise<Project | null>;
+  deleteProject: (workspaceId: string, projectId: string) => Promise<boolean>;
+  getProjectAssets: (workspaceId: string, projectId: string, assetType?: string) => Promise<ProjectAssetsResponse | null>;
+  getWorkspaceStats: (workspaceId: string) => Promise<ProjectStats | null>;
+  clearError: () => void;
+}
+
+const ProjectsContext = createContext<ProjectsContextType | undefined>(undefined);
+
