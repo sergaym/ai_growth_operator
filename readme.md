@@ -39,7 +39,7 @@ The **AI Growth Operator** is a sophisticated AI agent that automates and optimi
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd ai-ugc
+   cd ai_growth_operator
    ```
 
 2. Set up the backend (see Backend API section below)
@@ -207,7 +207,7 @@ backend/
 1. Clone the repository:
    ```
    git clone <repository-url>
-   cd ai-ugc
+   cd ai_growth_operator
    ```
 
 2. Set up the Python virtual environment:
