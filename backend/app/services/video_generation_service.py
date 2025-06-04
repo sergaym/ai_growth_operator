@@ -163,7 +163,7 @@ class VideoGenerationWorkflowService:
                 raise e
             
             # Complete the workflow
-            final_result = self._build_final_result(request, audio_result, lipsync_result)
+            final_result = self._build_final_result(job_id, request, audio_result, lipsync_result)
             
             self._update_job_status(job_id, {
                 "status": WorkflowStatus.COMPLETED,
@@ -265,10 +265,15 @@ class VideoGenerationWorkflowService:
             self.job_store[job_id].update(updates)
             self.job_store[job_id]["updated_at"] = time.time()
     
-    def _build_final_result(self, request: VideoGenerationWorkflowRequest, 
-                          audio_result: Dict[str, Any], lipsync_result: Dict[str, Any]) -> Dict[str, Any]:
+    def _build_final_result(
+        self,
+        job_id: str,
+        request: VideoGenerationWorkflowRequest,
+        audio_result: Dict[str, Any],
+        lipsync_result: Dict[str, Any],
+    ) -> Dict[str, Any]:
         """Build the final workflow result."""
-        job = self.job_store.get(request.__dict__.get("job_id", ""))
+        job = self.job_store.get(job_id)
         
         # Enhanced blob_url extraction with explicit logging
         logger.info(f"Building final result. Lipsync result keys: {list(lipsync_result.keys())}")
