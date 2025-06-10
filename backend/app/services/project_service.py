@@ -337,7 +337,7 @@ class ProjectService:
         project_id: str,
         workspace_id: str,
         asset_type: Optional[str] = None,
-        db: Session = None
+        db: AsyncSession = None
     ) -> ProjectAssetsResponse:
         """
         Get all assets for a project.
@@ -345,7 +345,7 @@ class ProjectService:
         Args:
             project_id: Project ID
             workspace_id: Workspace ID
-            asset_type: Filter by asset type (video, audio, lipsync_video)
+            asset_type: Filter by asset type
             db: Database session
             
         Returns:
@@ -353,31 +353,40 @@ class ProjectService:
         """
         try:
             if db is None:
-                db = next(get_db())
+                raise ValueError("Database session is required")
             
             # Verify project exists and belongs to workspace
-            project = db.query(Project).filter(
-                and_(
-                    Project.id == project_id,
-                    Project.workspace_id == workspace_id
+            project_result = await db.execute(
+                select(Project).where(
+                    and_(
+                        Project.id == project_id,
+                        Project.workspace_id == workspace_id
+                    )
                 )
-            ).first()
+            )
+            project = project_result.scalar_one_or_none()
             
             if not project:
                 raise ValueError(f"Project {project_id} not found in workspace {workspace_id}")
             
             assets = []
             
-            # Collect all asset types
-            asset_queries = [
-                (db.query(Video).filter(Video.project_id == project_id), "video"),
-                (db.query(Audio).filter(Audio.project_id == project_id), "audio"),
-                (db.query(LipsyncVideo).filter(LipsyncVideo.project_id == project_id), "lipsync_video"),
+            # Collect all asset types using async patterns
+            asset_types_data = [
+                (Video, "video"),
+                (Audio, "audio"),
+                (LipsyncVideo, "lipsync_video"),
             ]
             
-            for query, asset_type_name in asset_queries:
+            for model_class, asset_type_name in asset_types_data:
                 if asset_type is None or asset_type == asset_type_name:
-                    for asset in query.all():
+                    # Execute async query for this asset type
+                    asset_result = await db.execute(
+                        select(model_class).where(model_class.project_id == project_id)
+                    )
+                    assets_of_type = asset_result.scalars().all()
+                    
+                    for asset in assets_of_type:
                         # Enhanced URL prioritization logic for consistent blob storage URLs
                         optimized_file_url = self._get_optimized_asset_url(asset, asset_type_name)
                         optimized_thumbnail_url = self._get_optimized_thumbnail_url(asset, asset_type_name)
@@ -401,6 +410,7 @@ class ProjectService:
             asset_summary = await self._get_project_asset_summary(project_id, db)
             
             return ProjectAssetsResponse(
+                project_id=project_id,
                 assets=assets,
                 total=len(assets),
                 asset_summary=asset_summary
