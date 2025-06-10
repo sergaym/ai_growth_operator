@@ -10,7 +10,7 @@ from app.core.security import create_access_token, create_refresh_token, decode_
 router = APIRouter()
 
 @router.post('/signup', response_model=TokenResponse)
-def signup(user_in: UserCreate, db: Session = Depends(get_db)):
+async def signup(user_in: UserCreate, db: Session = Depends(get_db)):
     user = UserService.get_user_by_email(db, user_in.email)
     if user:
         raise HTTPException(status_code=400, detail='Email already registered')
@@ -43,7 +43,7 @@ async def signin(response: Response, form_data: OAuth2PasswordRequestForm = Depe
     return {"user": user, "access_token": access_token, "refresh_token": refresh_token}
 
 @router.post('/refresh', response_model=TokenResponse)
-def refresh_token_endpoint(refresh_token: str, db: Session = Depends(get_db)):
+async def refresh_token_endpoint(refresh_token: str, db: Session = Depends(get_db)):
     # decode_token returns a tuple (payload, error_type)
     payload, error = decode_token(refresh_token)
     
@@ -70,6 +70,6 @@ def refresh_token_endpoint(refresh_token: str, db: Session = Depends(get_db)):
     return {"user": user, "access_token": access_token, "refresh_token": new_refresh_token}
 
 @router.get('/me', response_model=UserOut)
-def get_me(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
+async def get_me(current_user=Depends(get_current_user), db: Session = Depends(get_db)):
     current_user.workspaces = UserService.get_user_workspaces(db, current_user.id)
     return current_user
