@@ -278,7 +278,7 @@ async def get_workspace_project_stats(
     current_user: User = Depends(get_current_user)
 ):
     """Get project statistics for a workspace."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         stats = await project_service.get_workspace_stats(
@@ -289,4 +289,4 @@ async def get_workspace_project_stats(
         
     except Exception as e:
         logger.error(f"Error getting workspace stats for {workspace_id}: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Failed to get workspace stats: {str(e)}") 
+        raise HTTPException(status_code=500, detail=f"Failed to get workspace stats: {str(e)}")
