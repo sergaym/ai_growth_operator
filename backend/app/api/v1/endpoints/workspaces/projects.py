@@ -7,7 +7,7 @@ asset management, and project statistics.
 
 from typing import Optional
 from fastapi import APIRouter, HTTPException, Depends, Query, Path
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
 import logging
 
 from app.api.v1.schemas import (
@@ -20,7 +20,7 @@ from app.api.v1.schemas import (
 )
 from app.services.project_service import project_service
 from app.services.workspace_service import WorkspaceService
-from app.db.database import get_db
+from app.db.database import get_async_db
 from app.core.security import get_current_user
 from app.models import User
 
@@ -28,9 +28,10 @@ router = APIRouter()
 logger = logging.getLogger(__name__)
 
 
-def _check_workspace_access(db: Session, user_id: str, workspace_id: str):
+async def _check_workspace_access(db: AsyncSession, user_id: str, workspace_id: str):
     """Helper function to check workspace access."""
-    if not WorkspaceService.user_has_access(db, user_id, workspace_id):
+    has_access = await WorkspaceService.user_has_access(db, user_id, workspace_id)
+    if not has_access:
         raise HTTPException(status_code=403, detail="Not authorized to access this workspace")
 
 
@@ -48,11 +49,11 @@ def _check_workspace_access(db: Session, user_id: str, workspace_id: str):
 async def create_project(
     workspace_id: str = Path(..., description="Workspace ID to create project in"),
     request: ProjectCreateRequest = ...,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Create a new project in the specified workspace."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         project = await project_service.create_project(
@@ -84,11 +85,11 @@ async def list_projects(
     status: Optional[str] = Query(None, description="Filter by project status"),
     search: Optional[str] = Query(None, description="Search in project name and description"),
     include_assets: bool = Query(False, description="Include asset summaries for each project"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """List projects in a workspace with pagination and filtering."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         projects = await project_service.list_projects(
@@ -118,11 +119,11 @@ async def get_project(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     include_assets: bool = Query(False, description="Include asset summary"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get a project by ID."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         project = await project_service.get_project(
@@ -158,11 +159,11 @@ async def update_project_details(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
     request: ProjectUpdateRequest = ...,
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Update project details using PATCH semantics for partial updates."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         project = await project_service.update_project(
@@ -196,11 +197,11 @@ async def update_project_details(
 async def delete_project(
     workspace_id: str = Path(..., description="Workspace ID"),
     project_id: str = Path(..., description="Project ID"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Delete a project."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         success = await project_service.delete_project(
@@ -242,11 +243,11 @@ async def get_project_assets(
         None, 
         description="Filter by asset type (video, audio, lipsync_video)"
     ),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get all assets for a project."""
-    _check_workspace_access(db, current_user.id, workspace_id)
+    await _check_workspace_access(db, current_user.id, workspace_id)
     
     try:
         assets = await project_service.get_project_assets(
@@ -273,7 +274,7 @@ async def get_project_assets(
 )
 async def get_workspace_project_stats(
     workspace_id: str = Path(..., description="Workspace ID"),
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     current_user: User = Depends(get_current_user)
 ):
     """Get project statistics for a workspace."""
