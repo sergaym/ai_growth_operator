@@ -1,8 +1,16 @@
 """
 Database and storage module.
+Provides async-only database access patterns for high performance.
 """
 
-from app.db.database import get_db, save_to_db, update_db_object, Base
+from app.db.database import (
+    # Async database functions
+    get_db, get_async_db, get_session, save_to_db, update_db_object, Base,
+    # Health checks and monitoring
+    check_database_health, get_engine_info,
+    # Engine management
+    close_database_engine
+)
 from app.db.blob_storage import (
     upload_file, 
     download_file, 
@@ -25,11 +33,20 @@ from app.db.repositories import (
 # Models are now imported directly from app.models
 
 __all__ = [
-    # Database core
+    # Async database core
     "get_db",
-    "save_to_db",
+    "get_async_db",
+    "get_session",
+    "save_to_db", 
     "update_db_object",
     "Base",
+    
+    # Health checks and monitoring
+    "check_database_health",
+    "get_engine_info",
+    
+    # Engine management
+    "close_database_engine",
     
     # Blob storage
     "upload_file",
@@ -40,10 +57,7 @@ __all__ = [
     "get_asset_path",
     "AssetType",
     
-    # Blob storage types
-    "AssetType",
-    
-    # Repositories
+    # Legacy repositories
     "image_repository",
     "video_repository",
     "audio_repository",
