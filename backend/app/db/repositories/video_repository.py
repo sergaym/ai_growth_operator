@@ -3,13 +3,14 @@ Repository for Video model operations.
 """
 
 from typing import Dict, List, Optional, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import desc, asc, select, func
 
 
 class VideoRepository:
     """Repository for Video model operations."""
     
-    def create(self, data: Dict[str, Any], db: Session) -> Any:
+    async def create(self, data: Dict[str, Any], db: AsyncSession) -> Any:
         """
         Create a new video record in the database.
         
@@ -25,11 +26,11 @@ class VideoRepository:
         
         db_video = Video(**data)
         db.add(db_video)
-        db.commit()
-        db.refresh(db_video)
+        await db.commit()
+        await db.refresh(db_video)
         return db_video
     
-    def get_by_id(self, video_id: str, db: Session) -> Optional[Any]:
+    async def get_by_id(self, video_id: str, db: AsyncSession) -> Optional[Any]:
         """
         Get a video by ID.
         
@@ -43,11 +44,12 @@ class VideoRepository:
         # Import here to avoid circular import
         from app.models import Video
         
-        return db.query(Video).filter(Video.id == video_id).first()
+        result = await db.execute(select(Video).where(Video.id == video_id))
+        return result.scalar_one_or_none()
         
-    def get_all(
+    async def get_all(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         skip: int = 0, 
         limit: int = 100, 
         user_id: Optional[str] = None,
@@ -74,18 +76,17 @@ class VideoRepository:
         """
         # Import here to avoid circular import
         from app.models import Video
-        from sqlalchemy import desc, asc
         
         # Start with base query
-        query = db.query(Video)
+        query = select(Video)
         
         # Apply filters if provided
         if user_id:
-            query = query.filter(Video.user_id == user_id)
+            query = query.where(Video.user_id == user_id)
         if workspace_id:
-            query = query.filter(Video.workspace_id == workspace_id)
+            query = query.where(Video.workspace_id == workspace_id)
         if status:
-            query = query.filter(Video.status == status)
+            query = query.where(Video.status == status)
         
         # Apply sorting
         if hasattr(Video, sort_by):
@@ -95,11 +96,12 @@ class VideoRepository:
         # Apply pagination
         query = query.offset(skip).limit(limit)
         
-        return query.all()
+        result = await db.execute(query)
+        return result.scalars().all()
         
-    def count(
+    async def count(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         user_id: Optional[str] = None,
         workspace_id: Optional[str] = None,
         status: Optional[str] = None
@@ -120,17 +122,18 @@ class VideoRepository:
         from app.models import Video
         
         # Start with base query
-        query = db.query(Video)
+        query = select(func.count(Video.id))
         
         # Apply filters if provided
         if user_id:
-            query = query.filter(Video.user_id == user_id)
+            query = query.where(Video.user_id == user_id)
         if workspace_id:
-            query = query.filter(Video.workspace_id == workspace_id)
+            query = query.where(Video.workspace_id == workspace_id)
         if status:
-            query = query.filter(Video.status == status)
+            query = query.where(Video.status == status)
         
-        return query.count()
+        result = await db.execute(query)
+        return result.scalar()
 
 
 # Create an instance of the repository
