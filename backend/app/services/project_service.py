@@ -543,7 +543,7 @@ class ProjectService:
     
     def _get_optimized_asset_url(self, asset, asset_type: str) -> Optional[str]:
         """
-        Get the optimized URL for an asset based on CDN configuration.
+        Get the optimized URL for an asset based on available storage URLs.
         
         Args:
             asset: Asset object (Video, Audio, or LipsyncVideo)
@@ -553,18 +553,24 @@ class ProjectService:
             Optimized asset URL or None
         """
         try:
-            # Check for CDN URL first
-            if hasattr(asset, 'cdn_url') and asset.cdn_url:
-                return asset.cdn_url
+            # Priority order: blob_url -> file_url -> local_url -> file_path
             
-            # Fall back to S3 URL if available
-            if hasattr(asset, 's3_url') and asset.s3_url:
-                return asset.s3_url
+            # First priority: blob_url (Vercel Blob Storage)
+            if hasattr(asset, 'blob_url') and asset.blob_url:
+                return asset.blob_url
             
-            # Fall back to local file URL
-            if hasattr(asset, 'local_file_path') and asset.local_file_path:
+            # Second priority: file_url (external URL)
+            if hasattr(asset, 'file_url') and asset.file_url:
+                return asset.file_url
+            
+            # Third priority: local_url (local file served via API)
+            if hasattr(asset, 'local_url') and asset.local_url:
+                return asset.local_url
+            
+            # Fourth priority: file_path (construct URL from file path)
+            if hasattr(asset, 'file_path') and asset.file_path:
                 # In production, this should be served through a proper file server
-                return f"/files/{asset_type}/{asset.id}"
+                return f"/api/v1/assets/{asset_type}/{asset.id}/file"
             
             return None
             
@@ -584,22 +590,20 @@ class ProjectService:
             Optimized thumbnail URL or None
         """
         try:
-            # Check for CDN thumbnail URL first
-            if hasattr(asset, 'thumbnail_cdn_url') and asset.thumbnail_cdn_url:
-                return asset.thumbnail_cdn_url
-            
-            # Fall back to S3 thumbnail URL
-            if hasattr(asset, 'thumbnail_s3_url') and asset.thumbnail_s3_url:
-                return asset.thumbnail_s3_url
-            
-            # Fall back to generated thumbnail URL
-            if hasattr(asset, 'thumbnail_url') and asset.thumbnail_url:
-                return asset.thumbnail_url
+            # For videos, check for preview_image_url (from Video model)
+            if asset_type in ["video", "lipsync_video"] and hasattr(asset, 'preview_image_url') and asset.preview_image_url:
+                return asset.preview_image_url
             
             # For audio files, return a default audio icon
             if asset_type == "audio":
                 return "/static/icons/audio-file.png"
             
+            # For lipsync videos, try to get thumbnail from the source video
+            if asset_type == "lipsync_video" and hasattr(asset, 'video') and asset.video:
+                if hasattr(asset.video, 'preview_image_url') and asset.video.preview_image_url:
+                    return asset.video.preview_image_url
+            
+            # Default: no thumbnail available
             return None
             
         except Exception as e:
@@ -622,21 +626,26 @@ class ProjectService:
             Project asset summary
         """
         try:
-            # Get counts
+            self.logger.info(f"Getting asset summary for project {project_id}")
+            
+            # Get counts with debugging
             video_count_result = await db.execute(
                 select(func.count(Video.id)).where(Video.project_id == project_id)
             )
-            total_videos = video_count_result.scalar()
+            total_videos = video_count_result.scalar() or 0
+            self.logger.debug(f"Found {total_videos} videos for project {project_id}")
             
             audio_count_result = await db.execute(
                 select(func.count(Audio.id)).where(Audio.project_id == project_id)
             )
-            total_audio = audio_count_result.scalar()
+            total_audio = audio_count_result.scalar() or 0
+            self.logger.debug(f"Found {total_audio} audio files for project {project_id}")
             
             lipsync_count_result = await db.execute(
                 select(func.count(LipsyncVideo.id)).where(LipsyncVideo.project_id == project_id)
             )
-            total_lipsync_videos = lipsync_count_result.scalar()
+            total_lipsync_videos = lipsync_count_result.scalar() or 0
+            self.logger.debug(f"Found {total_lipsync_videos} lipsync videos for project {project_id}")
             
             # Get latest activity timestamps
             latest_activity = None
@@ -662,8 +671,11 @@ class ProjectService:
             if latest_lipsync and (not latest_activity or latest_lipsync > latest_activity):
                 latest_activity = latest_lipsync
             
+            total_assets = total_videos + total_audio + total_lipsync_videos
+            self.logger.info(f"Asset summary for project {project_id}: {total_assets} total assets ({total_videos} videos, {total_audio} audio, {total_lipsync_videos} lipsync)")
+            
             return ProjectAssetSummary(
-                total_assets=total_videos + total_audio + total_lipsync_videos,
+                total_assets=total_assets,
                 video_count=total_videos,
                 audio_count=total_audio,
                 lipsync_video_count=total_lipsync_videos,
