@@ -25,7 +25,7 @@ python-jose[cryptography]==3.3.0   # for JWT token handling
 
 # Database
 sqlalchemy==2.0.34
-psycopg2-binary==2.9.9      # PostgreSQL driver
+asyncpg==0.29.0             # PostgreSQL async driver (async-only architecture)
 alembic==1.13.1             # migrations
 
 # Observability & Logging
