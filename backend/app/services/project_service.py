@@ -6,10 +6,10 @@ Handles CRUD operations, asset management, and statistics.
 import logging
 from typing import List, Optional, Dict, Any, Tuple
 from datetime import datetime, timedelta
-from sqlalchemy.orm import Session, joinedload
-from sqlalchemy import desc, func, and_, or_
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy.orm import selectinload
+from sqlalchemy import desc, func, and_, or_, select
 
-from app.db.database import get_db
 from app.models import Project, Workspace, User, Video, Audio, LipsyncVideo
 from app.api.v1.schemas import (
     ProjectCreateRequest,
@@ -37,7 +37,7 @@ class ProjectService:
         workspace_id: str,
         user_id: str, 
         request: ProjectCreateRequest,
-        db: Session
+        db: AsyncSession
     ) -> ProjectResponse:
         """
         Create a new project in the workspace.
@@ -55,13 +55,19 @@ class ProjectService:
             ValueError: If workspace doesn't exist or user doesn't have access
         """
         try:
-            # Verify workspace exists and user has access
-            workspace = db.query(Workspace).filter(Workspace.id == workspace_id).first()
+            # Verify workspace exists
+            workspace_result = await db.execute(
+                select(Workspace).where(Workspace.id == workspace_id)
+            )
+            workspace = workspace_result.scalar_one_or_none()
             if not workspace:
                 raise ValueError(f"Workspace {workspace_id} not found")
             
-            # Verify user exists and has access to workspace
-            user = db.query(User).filter(User.id == user_id).first()
+            # Verify user exists
+            user_result = await db.execute(
+                select(User).where(User.id == user_id)
+            )
+            user = user_result.scalar_one_or_none()
             if not user:
                 raise ValueError(f"User {user_id} not found")
             
@@ -77,15 +83,15 @@ class ProjectService:
             )
             
             db.add(project)
-            db.commit()
-            db.refresh(project)
+            await db.commit()
+            await db.refresh(project)
             
             self.logger.info(f"Created project {project.id} in workspace {workspace_id}")
             
             return ProjectResponse.from_orm(project)
             
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             self.logger.error(f"Error creating project: {str(e)}")
             raise
     
@@ -94,7 +100,7 @@ class ProjectService:
         project_id: str, 
         workspace_id: str,
         include_assets: bool = False,
-        db: Session = None
+        db: AsyncSession = None
     ) -> Optional[ProjectResponse]:
         """
         Get a project by ID within a workspace.
@@ -110,16 +116,18 @@ class ProjectService:
         """
         try:
             if db is None:
-                db = next(get_db())
+                raise ValueError("Database session is required")
             
-            query = db.query(Project).filter(
-                and_(
-                    Project.id == project_id,
-                    Project.workspace_id == workspace_id
+            result = await db.execute(
+                select(Project).where(
+                    and_(
+                        Project.id == project_id,
+                        Project.workspace_id == workspace_id
+                    )
                 )
             )
             
-            project = query.first()
+            project = result.scalar_one_or_none()
             if not project:
                 return None
             
@@ -143,7 +151,7 @@ class ProjectService:
         status_filter: Optional[str] = None,
         search_query: Optional[str] = None,
         include_assets: bool = False,
-        db: Session = None
+        db: AsyncSession = None
     ) -> ProjectListResponse:
         """
         List projects in a workspace with pagination and filtering.
@@ -162,18 +170,18 @@ class ProjectService:
         """
         try:
             if db is None:
-                db = next(get_db())
+                raise ValueError("Database session is required")
             
-            # Build query
-            query = db.query(Project).filter(Project.workspace_id == workspace_id)
+            # Build base query
+            query = select(Project).where(Project.workspace_id == workspace_id)
             
             # Apply filters
             if status_filter:
-                query = query.filter(Project.status == status_filter)
+                query = query.where(Project.status == status_filter)
             
             if search_query:
                 search_pattern = f"%{search_query}%"
-                query = query.filter(
+                query = query.where(
                     or_(
                         Project.name.ilike(search_pattern),
                         Project.description.ilike(search_pattern)
@@ -181,11 +189,18 @@ class ProjectService:
                 )
             
             # Get total count
-            total = query.count()
+            count_query = select(func.count()).select_from(
+                query.subquery()
+            )
+            total_result = await db.execute(count_query)
+            total = total_result.scalar()
             
             # Apply pagination and ordering
             offset = (page - 1) * per_page
-            projects = query.order_by(desc(Project.last_activity_at)).offset(offset).limit(per_page).all()
+            projects_query = query.order_by(desc(Project.last_activity_at)).offset(offset).limit(per_page)
+            
+            result = await db.execute(projects_query)
+            projects = result.scalars().all()
             
             # Convert to response objects
             project_responses = []
@@ -198,7 +213,9 @@ class ProjectService:
                 
                 project_responses.append(project_response)
             
-            total_pages = (total + per_page - 1) // per_page
+            # Calculate pagination
+            import math
+            total_pages = math.ceil(total / per_page) if total > 0 else 1
             
             return ProjectListResponse(
                 projects=project_responses,
@@ -217,10 +234,10 @@ class ProjectService:
         project_id: str,
         workspace_id: str,
         request: ProjectUpdateRequest,
-        db: Session
+        db: AsyncSession
     ) -> Optional[ProjectResponse]:
         """
-        Update a project.
+        Update a project's information.
         
         Args:
             project_id: Project ID
@@ -232,39 +249,43 @@ class ProjectService:
             Updated project response or None if not found
         """
         try:
-            project = db.query(Project).filter(
-                and_(
-                    Project.id == project_id,
-                    Project.workspace_id == workspace_id
+            result = await db.execute(
+                select(Project).where(
+                    and_(
+                        Project.id == project_id,
+                        Project.workspace_id == workspace_id
+                    )
                 )
-            ).first()
+            )
+            project = result.scalar_one_or_none()
             
             if not project:
                 return None
             
-            # Update fields
+            # Update fields that are provided
             if request.name is not None:
                 project.name = request.name
             if request.description is not None:
                 project.description = request.description
             if request.status is not None:
-                project.status = request.status.value
+                project.status = request.status
             if request.thumbnail_url is not None:
                 project.thumbnail_url = request.thumbnail_url
             if request.metadata is not None:
                 project.metadata_json = request.metadata
             
-            project.update_activity()
+            # Update last activity
+            project.last_activity_at = datetime.utcnow()
             
-            db.commit()
-            db.refresh(project)
+            await db.commit()
+            await db.refresh(project)
             
             self.logger.info(f"Updated project {project_id}")
             
             return ProjectResponse.from_orm(project)
             
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             self.logger.error(f"Error updating project {project_id}: {str(e)}")
             raise
     
@@ -272,10 +293,10 @@ class ProjectService:
         self,
         project_id: str,
         workspace_id: str,
-        db: Session
+        db: AsyncSession
     ) -> bool:
         """
-        Delete a project and optionally its assets.
+        Delete a project from the workspace.
         
         Args:
             project_id: Project ID
@@ -286,26 +307,28 @@ class ProjectService:
             True if deleted, False if not found
         """
         try:
-            project = db.query(Project).filter(
-                and_(
-                    Project.id == project_id,
-                    Project.workspace_id == workspace_id
+            result = await db.execute(
+                select(Project).where(
+                    and_(
+                        Project.id == project_id,
+                        Project.workspace_id == workspace_id
+                    )
                 )
-            ).first()
+            )
+            project = result.scalar_one_or_none()
             
             if not project:
                 return False
             
-            # Note: We're not deleting associated assets by default
-            # This could be a soft delete or provide option to cascade
-            db.delete(project)
-            db.commit()
+            await db.delete(project)
+            await db.commit()
             
             self.logger.info(f"Deleted project {project_id}")
+            
             return True
             
         except Exception as e:
-            db.rollback()
+            await db.rollback()
             self.logger.error(f"Error deleting project {project_id}: {str(e)}")
             raise
     
