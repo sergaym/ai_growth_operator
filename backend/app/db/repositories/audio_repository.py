@@ -3,13 +3,14 @@ Repository for Audio model operations.
 """
 
 from typing import Dict, List, Optional, Any
-from sqlalchemy.orm import Session
+from sqlalchemy.ext.asyncio import AsyncSession
+from sqlalchemy import desc, asc, select, func
 
 
 class AudioRepository:
     """Repository for Audio model operations."""
     
-    def create(self, data: Dict[str, Any], db: Session) -> Any:
+    async def create(self, data: Dict[str, Any], db: AsyncSession) -> Any:
         """
         Create a new audio record in the database.
         
@@ -25,11 +26,11 @@ class AudioRepository:
         
         db_audio = Audio(**data)
         db.add(db_audio)
-        db.commit()
-        db.refresh(db_audio)
+        await db.commit()
+        await db.refresh(db_audio)
         return db_audio
     
-    def get_by_id(self, audio_id: str, db: Session) -> Optional[Any]:
+    async def get_by_id(self, audio_id: str, db: AsyncSession) -> Optional[Any]:
         """
         Get an audio by ID.
         
@@ -43,11 +44,12 @@ class AudioRepository:
         # Import here to avoid circular import
         from app.models import Audio
         
-        return db.query(Audio).filter(Audio.id == audio_id).first()
+        result = await db.execute(select(Audio).where(Audio.id == audio_id))
+        return result.scalar_one_or_none()
         
-    def get_all(
+    async def get_all(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         skip: int = 0, 
         limit: int = 100, 
         user_id: Optional[str] = None,
@@ -57,7 +59,7 @@ class AudioRepository:
         sort_order: str = "desc"
     ) -> List[Any]:
         """
-        Get all audio records with optional filtering and pagination.
+        Get all audio with optional filtering and pagination.
         
         Args:
             db: Database session
@@ -74,18 +76,17 @@ class AudioRepository:
         """
         # Import here to avoid circular import
         from app.models import Audio
-        from sqlalchemy import desc, asc
         
         # Start with base query
-        query = db.query(Audio)
+        query = select(Audio)
         
         # Apply filters if provided
         if user_id:
-            query = query.filter(Audio.user_id == user_id)
+            query = query.where(Audio.user_id == user_id)
         if workspace_id:
-            query = query.filter(Audio.workspace_id == workspace_id)
+            query = query.where(Audio.workspace_id == workspace_id)
         if status:
-            query = query.filter(Audio.status == status)
+            query = query.where(Audio.status == status)
         
         # Apply sorting
         if hasattr(Audio, sort_by):
@@ -95,17 +96,18 @@ class AudioRepository:
         # Apply pagination
         query = query.offset(skip).limit(limit)
         
-        return query.all()
+        result = await db.execute(query)
+        return result.scalars().all()
         
-    def count(
+    async def count(
         self, 
-        db: Session, 
+        db: AsyncSession, 
         user_id: Optional[str] = None,
         workspace_id: Optional[str] = None,
         status: Optional[str] = None
     ) -> int:
         """
-        Count audio records with optional filtering.
+        Count audio with optional filtering.
         
         Args:
             db: Database session
@@ -114,23 +116,24 @@ class AudioRepository:
             status: Filter by status
             
         Returns:
-            Total count of audio records matching the filters
+            Total count of audio matching the filters
         """
         # Import here to avoid circular import
         from app.models import Audio
         
         # Start with base query
-        query = db.query(Audio)
+        query = select(func.count(Audio.id))
         
         # Apply filters if provided
         if user_id:
-            query = query.filter(Audio.user_id == user_id)
+            query = query.where(Audio.user_id == user_id)
         if workspace_id:
-            query = query.filter(Audio.workspace_id == workspace_id)
+            query = query.where(Audio.workspace_id == workspace_id)
         if status:
-            query = query.filter(Audio.status == status)
+            query = query.where(Audio.status == status)
         
-        return query.count()
+        result = await db.execute(query)
+        return result.scalar()
 
 
 # Create an instance of the repository

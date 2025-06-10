@@ -6,7 +6,7 @@ from fastapi import Depends, HTTPException, status
 from fastapi.security import OAuth2PasswordBearer
 from app.db.database import get_db
 from app.models import User
-from sqlalchemy.orm import Session, joinedload
+from sqlalchemy.ext.asyncio import AsyncSession
 from app.core.config import settings
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
@@ -43,7 +43,7 @@ def decode_token(token: str):
     except JWTError:
         return None, "invalid"
 
-def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(get_db)) -> User:
+async def get_current_user(token: str = Depends(oauth2_scheme), db: AsyncSession = Depends(get_db)) -> User:
     payload, error = decode_token(token)
     if error == "expired":
         raise HTTPException(
@@ -57,8 +57,9 @@ def get_current_user(token: str = Depends(oauth2_scheme), db: Session = Depends(
             detail="Could not validate credentials",
             headers={"WWW-Authenticate": "Bearer"},
         )
-    # Get user with their workspaces
-    user = db.query(User).options(joinedload(User.workspaces)).filter(User.email == payload["sub"]).first()
+    # Get user with workspaces using UserService
+    from app.services.user_service import UserService
+    user = await UserService.get_user_by_email(db, payload["sub"], load_workspaces=True)
     if user is None:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,

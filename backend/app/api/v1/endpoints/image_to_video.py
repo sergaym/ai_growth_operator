@@ -22,8 +22,9 @@ from app.api.v1.schemas.image_to_video_schemas import (
     VideoListResponse
 )
 from app.services.image_to_video_service import image_to_video_service
-from app.db import get_db, video_repository
-from sqlalchemy.orm import Session
+from app.db.database import get_async_db
+from app.db.repositories.video_repository import video_repository
+from sqlalchemy.ext.asyncio import AsyncSession
 
 router = APIRouter()
 
@@ -341,7 +342,7 @@ async def get_video_file(filename: str):
 
 @router.get("/videos", response_model=VideoListResponse, summary="List all generated videos")
 async def list_videos(
-    db: Session = Depends(get_db),
+    db: AsyncSession = Depends(get_async_db),
     skip: int = Query(0, description="Number of videos to skip"),
     limit: int = Query(50, ge=1, le=100, description="Maximum number of videos to return"),
     user_id: Optional[str] = Query(None, description="Filter by user ID"),
@@ -369,7 +370,7 @@ async def list_videos(
         List of videos matching the criteria
     """
     # Get videos from repository
-    videos = video_repository.get_all(
+    videos = await video_repository.get_all(
         db=db,
         skip=skip,
         limit=limit,
@@ -381,7 +382,7 @@ async def list_videos(
     )
     
     # Get total count for pagination info
-    total = video_repository.count(
+    total = await video_repository.count(
         db=db,
         user_id=user_id,
         workspace_id=workspace_id,
@@ -414,7 +415,7 @@ async def list_videos(
 @router.get("/videos/{video_id}", response_model=VideoResponse, summary="Get video by ID")
 async def get_video(
     video_id: str = Path(..., description="ID of the video to retrieve"),
-    db: Session = Depends(get_db)
+    db: AsyncSession = Depends(get_async_db)
 ):
     """
     Get detailed information about a specific video by its ID.
@@ -425,7 +426,7 @@ async def get_video(
     Returns:
         Detailed video information
     """
-    video = video_repository.get_by_id(video_id, db)
+    video = await video_repository.get_by_id(video_id, db)
     if not video:
         raise HTTPException(status_code=404, detail="Video not found")
     

@@ -7,7 +7,7 @@ This module exports repositories that handle CRUD operations for database models
 from .image_repository import ImageRepository, image_repository
 from .video_repository import VideoRepository, video_repository
 from .audio_repository import AudioRepository, audio_repository
-from .lipsync_repository import LipsyncVideoRepository, lipsync_repository
+from .lipsync_repository import LipsyncRepository, lipsync_repository
 from .legacy_repository import (
     create_heygen_avatar_video,
     update_heygen_avatar_video,
@@ -20,7 +20,7 @@ __all__ = [
     "ImageRepository",
     "VideoRepository",
     "AudioRepository", 
-    "LipsyncVideoRepository",
+    "LipsyncRepository",
     
     # Repository instances
     "image_repository",

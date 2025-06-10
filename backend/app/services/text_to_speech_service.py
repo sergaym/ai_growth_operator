@@ -19,7 +19,7 @@ from dotenv import load_dotenv
 from app.core.config import settings
 
 # Import database components
-from app.db import get_db, audio_repository
+from app.db import get_async_db, audio_repository
 from app.db.blob_storage import upload_file, AssetType
 
 # Load environment variables
@@ -328,8 +328,6 @@ class TextToSpeechService:
                                 blob_url = blob_result.get("url")
                                 if blob_url:
                                     print(f"Successfully uploaded audio to blob storage: {blob_url}")
-                                    # Add blob URL to the response
-                                    result["blob_url"] = blob_url
                             else:
                                 print(f"Warning: Audio file is empty, skipping blob upload")
                     except Exception as e:
@@ -364,7 +362,8 @@ class TextToSpeechService:
                 "request_id": request_id
             }
             
-            if blob_url:
+            # Add blob URL if it was set during upload
+            if 'blob_url' in locals() and blob_url:
                 result["blob_url"] = blob_url
             
             # Save to database
@@ -404,8 +403,9 @@ class TextToSpeechService:
                     db_data["project_id"] = project_id
                 
                 # Get a database session and save the audio
-                db = next(get_db())
-                db_audio = audio_repository.create(db_data, db)
+                async for db in get_async_db():
+                    db_audio = await audio_repository.create(db_data, db)
+                    break
                 
                 if db_audio:
                     result["db_id"] = db_audio.id
@@ -466,8 +466,9 @@ class TextToSpeechService:
                     error_db_data["project_id"] = project_id
                 
                 # Get a database session and save the error
-                db = next(get_db())
-                db_audio = audio_repository.create(error_db_data, db)
+                async for db in get_async_db():
+                    db_audio = await audio_repository.create(error_db_data, db)
+                    break
                 
                 if db_audio:
                     error_result["db_id"] = db_audio.id
