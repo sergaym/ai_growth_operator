@@ -41,11 +41,11 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
             
             <div className="p-4 space-y-4">
               <Link
-                href="/login?callbackUrl=/become-actor"
+                href="/signup"
                 onClick={onClose}
                 className="w-full px-4 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white flex items-center justify-center"
               >
-                Become Our Actor
+                Create Account
               </Link>
               <Link
                 href="/login?callbackUrl=/playground"
@@ -93,11 +93,11 @@ export function Header() {
 
           {/* Desktop Navigation Buttons */}
           <div className="hidden md:flex items-center gap-4">
-            <Link href="/login?callbackUrl=/become-actor" className="w-auto">
+            <Link href="/signup" className="w-auto">
               <Button 
                 className="px-6 py-3 rounded-xl border border-white/10 hover:bg-white/[0.1] transition-all text-base font-medium text-white"
               >
-                Become Our Actor
+                Create Account
               </Button>
             </Link>
             <Link href="/login?callbackUrl=/playground" className="w-auto">
