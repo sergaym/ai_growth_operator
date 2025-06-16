@@ -52,7 +52,7 @@ function MobileMenu({ isOpen, onClose }: { isOpen: boolean; onClose: () => void 
                 onClick={onClose}
                 className="w-full px-4 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all text-base font-medium text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px] flex items-center justify-center"
               >
-                Start Playing
+                Sign In
               </Link>
             </div>
           </motion.div>
@@ -104,7 +104,7 @@ export function Header() {
               <Button 
                 className="px-6 py-3 rounded-xl bg-gradient-to-r from-blue-500 to-purple-500 hover:from-blue-600 hover:to-purple-600 transition-all text-base font-medium text-white shadow-lg shadow-blue-500/20 hover:shadow-blue-500/30 hover:translate-y-[-2px]"
               >
-                Start Playing
+                Sign In
               </Button>
             </Link>
           </div>
