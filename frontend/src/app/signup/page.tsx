@@ -2,6 +2,7 @@
 import React, { useState, useEffect, Suspense } from 'react';
 import { useSearchParams, useRouter } from 'next/navigation';
 import { motion, AnimatePresence } from 'framer-motion';
+import Link from 'next/link';
 import { Logo } from "@/components/ui/Logo";
 import { PageBackground } from "@/components/ui/PageBackground";
 import { SignupStepProfile } from "@/components/signup/SignupStepProfile";
@@ -123,7 +124,9 @@ function SignupPageContent() {
       <div className="container max-w-6xl mx-auto px-4 py-8 relative z-10">
         {/* Header */}
         <div className="text-center mb-12">
-          <Logo size="md" showText={true} />
+          <Link href="/" className="inline-block hover:opacity-80 transition-opacity">
+            <Logo size="md" showText={true} />
+          </Link>
           
           <motion.div 
             initial={{ opacity: 0, y: 20 }}
